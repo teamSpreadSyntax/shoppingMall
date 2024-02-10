@@ -3,7 +3,6 @@ package home.project.service;
 import home.project.domain.Member;
 import home.project.repository.MemberRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public class MemberServiceImpl implements MemberService{
@@ -12,15 +11,14 @@ public class MemberServiceImpl implements MemberService{
     public  MemberServiceImpl(MemberRepository memberRepository){
         this.memberRepository = memberRepository;
     }
-    public void join(Member member) {
+
+    public void validateDuplicateMember (Optional < Member > name) {
+        memberRepository.findByName(name).ifPresent(m -> {
+            throw new IllegalStateException("이미 존재하는 회원입니다.");
+        });
+    }
+    public void join (Member member){
         memberRepository.save(member);
     }
 
-    public Optional<Member> findById(Long memberId) {
-        return memberRepository.findById(memberId);
-    }
-
-    public List<Member> findAll() {
-        return memberRepository.findAll();
-    }
 }

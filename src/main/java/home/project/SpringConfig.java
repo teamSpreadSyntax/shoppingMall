@@ -1,6 +1,9 @@
 package home.project;
 
+import home.project.repository.AdminRepository;
 import home.project.repository.MemberRepository;
+import home.project.service.AdminService;
+import home.project.service.AdminServiceImpl;
 import home.project.service.MemberService;
 import home.project.service.MemberServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +15,22 @@ import org.springframework.context.annotation.Configuration;
 public class SpringConfig {
 
     private final MemberRepository memberRepository;
+    private final AdminRepository adminRepository;
+
     @Autowired
-    public SpringConfig(MemberRepository memberRepository ) {//인젝션 받으면 SpringDataJpa가 구현체를 만들어놓은것이 등록이 됨
+    public SpringConfig(MemberRepository memberRepository, AdminRepository adminRepository) {
         this.memberRepository = memberRepository;
-
+        this.adminRepository = adminRepository;
     }
-
 
     @Bean
     public MemberService memberService(){
-        return new MemberServiceImpl(/*memberRepository()*/memberRepository);
+        return new MemberServiceImpl(memberRepository);
+    }
+
+    @Bean
+    public AdminService adminService(){
+        return new AdminServiceImpl(adminRepository);
     }
 
 }

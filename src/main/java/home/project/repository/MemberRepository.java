@@ -2,6 +2,8 @@ package home.project.repository;
 import home.project.domain.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+import java.util.Optional;
 
+public interface MemberRepository extends JpaRepository<Member, Long> {
+    public Optional<Member> findByName(Optional<Member> name);
 }
