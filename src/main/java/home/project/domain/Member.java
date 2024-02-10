@@ -2,6 +2,7 @@ package home.project.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.sql.Date;
@@ -10,6 +11,7 @@ import java.sql.Date;
 @Table(name = "member")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Member {
     @Id
     private Long id;
