@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    public Optional<Member> findByName(Optional<String> name);
+    public Optional<Member> findByName(Optional<String> names);
 
 }
 //JPA 메서드 쿼리 생성 방식: Spring Data JPA는 메서드 이름과 반환 타입을 기반으로 자동으로 JPQL 쿼리를 생성합니다. findByName 메서드의 반환 타입이 Optional<String>인 경우 JPA는 String 값만 반환하는 쿼리를 생성하려 합니다. 하지만, MemberRepository는 Member 엔티티를 관리하는 Repository이므로 JPQL 쿼리는 Member 엔티티를 반환해야 합니다. 이 불일치로 인해 오류가 발생합니다.
