@@ -2,13 +2,15 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.repository.MemberRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-
+@Service
 public class MemberServiceImpl implements MemberService{
     private final MemberRepository memberRepository;
-
+@Autowired
     public  MemberServiceImpl(MemberRepository memberRepository){
         this.memberRepository = memberRepository;
     }
