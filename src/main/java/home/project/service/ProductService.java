@@ -6,7 +6,7 @@ import home.project.domain.Product;
 import java.util.List;
 
 public interface ProductService {
-    List<Product> findProductRecom(Product product);
+    List<Product> findProductRecom();
 
     void join(Product product);
     void validateDuplicateProduct(Product product);

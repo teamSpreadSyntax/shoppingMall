@@ -1,6 +1,5 @@
 package home.project.controller;
 
-import home.project.domain.Member;
 import home.project.domain.Product;
 import home.project.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +15,10 @@ public class ProductController {
     public ProductController(ProductService productService){        this.productService=productService;    }
 
     @PostMapping("productRecom")
-    public List<Product> productRecom(@RequestBody Product product){
-        productService.findProductRecom(product);
-        return List.of(product);
+    public List<Product> productRecom(){
+        List<Product> product;
+        product = productService.findProductRecom();
+        return product;
     }
 
     @PostMapping("createProduct")

@@ -16,8 +16,8 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository){        this.productRepository=productRepository;    }
 
-    public List<Product> findProductRecom(Product product){
-        return productRepository.findTop5BySelledcountOrderBySelledcountDesc(product);
+    public List<Product> findProductRecom(){
+        return productRepository.findTop5ByOrderBySelledcountDesc();
     }
     public void join (Product product){
         validateDuplicateProduct(product);

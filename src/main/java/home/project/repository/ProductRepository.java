@@ -9,6 +9,6 @@ import java.util.Optional;
 
 public interface ProductRepository  extends JpaRepository<Product, Long> {
 
-    public List<Product> findTop5BySelledcountOrderBySelledcountDesc(Product product);
+    public List<Product> findTop5ByOrderBySelledcountDesc();
     public Optional<Product> findByName(Optional<String> product);
 }
