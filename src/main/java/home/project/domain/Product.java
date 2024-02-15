@@ -21,4 +21,7 @@ public class Product {
     @Column(name = "selledcount")
     private Long selledcount= 0L;
 
+    @Column(name = "name")
+    private String name= "";
+
 }
