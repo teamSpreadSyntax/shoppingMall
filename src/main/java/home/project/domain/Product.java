@@ -4,11 +4,11 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.awt.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "product",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"phone"})})
+@Table(name = "product")
 @Getter
 @Setter
 public class Product {
@@ -22,6 +22,8 @@ public class Product {
     private Long selledcount= 0L;
 
     @Column(name = "name")
-    private String name= "";
+    private String name;
 
+    @Column(name = "image")
+    private String image;
 }

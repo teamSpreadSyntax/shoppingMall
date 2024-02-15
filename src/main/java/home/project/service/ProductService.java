@@ -7,8 +7,10 @@ import java.util.List;
 
 public interface ProductService {
     List<Product> findProductRecom();
+    List<String> brandList();
 
     void join(Product product);
     void validateDuplicateProduct(Product product);
+    void emptyProduct (Product product);
     void productConfirm(Product product);
 }

@@ -17,7 +17,10 @@ public class AdminServiceImpl implements AdminService {
         this.adminRepository = adminRepository;
     }
 
-    public Optional<Member> findById(Long memberId) { return adminRepository.findById(memberId); }
+    public Optional<Member> findById(Long memberId) {
+        Member member = adminRepository.findById(memberId).orElseThrow(() -> { throw new IllegalStateException(memberId+"로 가입된 회원이 없습니다."); });
+        return Optional.ofNullable(member);
+    }
 
     public List<Member> findAll() {
         return adminRepository.findAll();

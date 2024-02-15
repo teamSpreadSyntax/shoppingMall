@@ -26,7 +26,7 @@ public class Member {
     private Date birth;
 
     @Column(name = "age")
-    private Integer age;
+    private Integer age=0;
 
     @Column(name = "address_num")
     private String address_num="";

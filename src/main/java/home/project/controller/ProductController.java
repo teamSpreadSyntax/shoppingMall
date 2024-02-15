@@ -21,6 +21,11 @@ public class ProductController {
         return product;
     }
 
+    @PostMapping("brandList")
+    public List<String> brandList(){
+        return productService.brandList();
+    }
+
     @PostMapping("createProduct")
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         productService.join(product);
