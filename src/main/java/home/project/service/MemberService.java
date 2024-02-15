@@ -6,8 +6,8 @@ import java.util.Optional;
 
 
 public interface MemberService {
-    void join(Member member);
-   void validateDuplicateMember(Optional<String> name);
+   void join(Member member);
+   void validateDuplicateMember(Member member);
    void joinConfirm(Member member);
 
 }

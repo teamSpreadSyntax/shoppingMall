@@ -16,13 +16,12 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public void join (Member member){
-        validateDuplicateMember(Optional.ofNullable(member.getName()));
-        joinConfirm(member);;
+        validateDuplicateMember(member);
+        joinConfirm(member);
     }
-    public void validateDuplicateMember (Optional < String > name) {
-        memberRepository.findByName(name).ifPresent(m -> {
-            throw new IllegalStateException("이미 존재하는 회원입니다.");
-        });
+    public void validateDuplicateMember (Member member) {
+        memberRepository.findById(member.getId()).ifPresent(m -> { throw new IllegalStateException("이미 존재하는 회원입니다."); });
+        memberRepository.findByPhone(Optional.ofNullable(member.getPhone())).ifPresent(m -> { throw new IllegalStateException("이미 존재하는 번호입니다."); });
     }
     public void joinConfirm (Member member){
         memberRepository.save(member);

@@ -23,7 +23,7 @@ public class AdminController {
     }
 
     @GetMapping("findMember")
-    public  ResponseEntity<Optional<Member>> findMember(@RequestParam("memberId") Long memberId){
+    public ResponseEntity<Optional<Member>> findMember(@RequestParam("memberId") Long memberId){
         Optional<Member> member =  adminService.findById(memberId);
         return ResponseEntity.ok(member);
     }
