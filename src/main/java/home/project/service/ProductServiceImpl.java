@@ -18,7 +18,7 @@ public class ProductServiceImpl implements ProductService {
         this.productRepository=productRepository;
     }
 
-    public List<Product> findProductRecom(){
+    public List<String> findProductRecom(){
         return productRepository.findTop5ByOrderBySelledcountDesc();
     }
 

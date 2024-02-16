@@ -19,7 +19,7 @@ public class Product {
     private String brand;
 
     @Column(name = "selledcount")
-    private Long selledcount= 0L;
+    private Long selledcount=0L;
 
     @Column(name = "name")
     private String name;

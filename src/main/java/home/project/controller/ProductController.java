@@ -15,8 +15,8 @@ public class ProductController {
     public ProductController(ProductService productService){        this.productService=productService;    }
 
     @PostMapping("productRecom")
-    public List<Product> productRecom(){
-        List<Product> product;
+    public List<String> productRecom(){
+        List<String> product;
         product = productService.findProductRecom();
         return product;
     }

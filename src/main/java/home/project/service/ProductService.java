@@ -6,7 +6,7 @@ import home.project.domain.Product;
 import java.util.List;
 
 public interface ProductService {
-    List<Product> findProductRecom();
+    List<String> findProductRecom();
     List<String> brandList();
 
     void join(Product product);
