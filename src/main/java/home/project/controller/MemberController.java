@@ -22,6 +22,11 @@ public class MemberController {
         return ResponseEntity.ok(member);
     }
 
+    @PostMapping("login")
+    public ResponseEntity<Member> login(@RequestBody Member member) {
+        memberService.login(member);
+        return ResponseEntity.ok(member);
+    }
 
 
 }

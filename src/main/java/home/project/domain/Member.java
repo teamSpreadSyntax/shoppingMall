@@ -1,8 +1,12 @@
 package home.project.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
+//import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import java.util.Date;
 
@@ -14,15 +18,27 @@ import java.util.Date;
 @Setter
 public class Member {
     @Id
+    @NotNull
     private Long id;
 
-    @Column(name = "name")
+    @NotEmpty
+    @Column(name="password", nullable = false)//, columnDefinition = ("VARCHAR(255)"))
+    private String password;
+//    @PrePersist
+//    public void prePersist(){
+//        String salt = BCrypt.gensalt();
+//        String hashedPassword=BCrypt.hashpw(password, salt);
+//        this.password=hashedPassword;
+//    }
+    @NotEmpty
+    @Column(name = "name", nullable = false)
     private String name;
 
     @Column(name = "sex")
     private String sex="";
 
-    @Column(name = "birth")
+    @NotNull
+    @Column(name = "birth", nullable = false)
     private Date birth;
 
     @Column(name = "age")
@@ -40,7 +56,8 @@ public class Member {
     @Column(name = "address_name")
     private String address_name="";
 
-    @Column(name = "phone", unique = true)
+    @NotEmpty
+    @Column(name = "phone", unique = true, nullable = false)
     private String phone;
 
     @Column(name = "mileage")
