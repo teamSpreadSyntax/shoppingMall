@@ -5,11 +5,13 @@ import home.project.domain.Product;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
 
@@ -30,16 +32,39 @@ public class ProductServiceImpl implements ProductService {
         validateDuplicateProduct(product);
         productConfirm(product);
     }
+
+    public void update (Product product){
+        Product exsitsProduct = productRepository.findById(product.getProduct_id())
+                .orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        exsitsProduct.setBrand(product.getBrand());
+        exsitsProduct.setName(product.getName());
+//        productRepository.save(exsitsProduct);
+    }
+    public void delete (Product product){
+        if(product.getProduct_id() == null) {
+//
+        }
+
+        productRepository.deleteById(product.getProduct_id());
+    }
+
     public void validateDuplicateProduct (Product product) {
         productRepository.findById(product.getProduct_id()).ifPresent(m -> { throw new IllegalStateException("이미 존재하는 상품(상품ID 중복)입니다."); });
-
     }
 
     public void emptyProduct (Product product) {
-        productRepository.findById(product.getProduct_id()).orElseThrow(() -> { throw new IllegalStateException("상품ID를 입력해주세요."); });
-        productRepository.findByBrand(Optional.ofNullable(product.getBrand())).orElseThrow(() -> { throw new IllegalStateException("상품의 브랜드를 입력해주세요."); });
-        productRepository.findByName(Optional.ofNullable(product.getName())).orElseThrow(() -> { throw new IllegalStateException("상품의 이름을 입력해주세요."); });
-        productRepository.findByImage(Optional.ofNullable(product.getImage())).orElseThrow(() -> { throw new IllegalStateException("이미지를 입력해주세요."); });
+        if(product.getProduct_id() == null) {
+            throw new IllegalStateException("상품ID를 입력해주세요.");
+        }
+        if(product.getBrand() == null || product.getBrand().isBlank()) {
+            throw new IllegalStateException("상품의 브랜드를 입력해주세요.");
+        }
+        if(product.getName() == null || product.getName().isBlank()) {
+            throw new IllegalStateException("상품의 이름 입력해주세요.");
+        }
+        if(product.getImage() == null || product.getImage().isBlank()) {
+            throw new IllegalStateException("상품의 이미지를 입력해주세요.");
+        }
 
     }
 

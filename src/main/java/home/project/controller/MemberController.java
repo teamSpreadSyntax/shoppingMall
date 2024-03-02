@@ -27,10 +27,10 @@ public class MemberController {
 
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
     @PostMapping("join")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
-            @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = LoginResponse.class)))
-    })
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
+//            @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = LoginResponse.class)))
+//    })
     public ResponseEntity<Member> createMember(@RequestBody Member member) {
         memberService.join(member);
         return ResponseEntity.ok(member);
