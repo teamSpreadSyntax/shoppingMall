@@ -23,19 +23,13 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PostMapping("productRecom")
-    public List<String> productRecom() {
-        List<String> product;
-        product = productService.findProductRecom();
-        return product;
-    }
 
     @PostMapping("brandList")
     public List<String> brandList() {
         return productService.brandList();
     }
 
-    @PostMapping("product")
+    @PostMapping("CreateProduct")
     public ResponseEntity<?> createProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
@@ -44,12 +38,11 @@ public class ProductController {
             }
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
         }
-
         productService.join(product);
         return ResponseEntity.ok(product);
     }
 
-    @PutMapping("product")
+    @PutMapping("ProductUpdate")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
@@ -58,12 +51,11 @@ public class ProductController {
             }
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
         }
-
         productService.update(product);
         return ResponseEntity.ok(product);
     }
 
-    @DeleteMapping("product")
+    @DeleteMapping("ProductDelete")//상품삭제
     public ResponseEntity<?> deleteProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         productService.delete(product);
         return ResponseEntity.ok(product);

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.ErrorResponse;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.apache.logging.log4j.ThreadContext.isEmpty;
@@ -47,5 +48,14 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public void login(Member member){};
+
+    public Optional<Member> findById(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> { throw new IllegalStateException(memberId+"로 가입된 회원이 없습니다."); });
+        return Optional.ofNullable(member);
+    }
+
+    public List<Member> findAll() {
+        return memberRepository.findAll();
+    }
 
 }

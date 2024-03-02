@@ -34,11 +34,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void update (Product product){
-        Product exsitsProduct = productRepository.findById(product.getProduct_id())
-                .orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        Product exsitsProduct = productRepository.findById(product.getProduct_id()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
         exsitsProduct.setBrand(product.getBrand());
         exsitsProduct.setName(product.getName());
-//        productRepository.save(exsitsProduct);
+        exsitsProduct.setSelledcount(product.getSelledcount());
+        exsitsProduct.setImage(product.getImage());
+        productRepository.save(exsitsProduct);
     }
     public void delete (Product product){
         if(product.getProduct_id() == null) {
