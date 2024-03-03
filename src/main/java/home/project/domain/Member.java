@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
+//import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
 //import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import java.util.Date;

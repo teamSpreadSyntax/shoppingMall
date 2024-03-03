@@ -29,7 +29,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void join (Product product){
-        validateDuplicateProduct(product);
+//        validateDuplicateProduct(product);
         productConfirm(product);
     }
 
@@ -49,25 +49,25 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(product.getProduct_id());
     }
 
-    public void validateDuplicateProduct (Product product) {
-        productRepository.findById(product.getProduct_id()).ifPresent(m -> { throw new IllegalStateException("이미 존재하는 상품(상품ID 중복)입니다."); });
-    }
+//    public void validateDuplicateProduct (Product product) {
+//        productRepository.findById(product.getProduct_id()).ifPresent(m -> { throw new IllegalStateException("이미 존재하는 상품(상품ID 중복)입니다."); });
+//    }
 
-    public void emptyProduct (Product product) {
-        if(product.getProduct_id() == null) {
-            throw new IllegalStateException("상품ID를 입력해주세요.");
-        }
-        if(product.getBrand() == null || product.getBrand().isBlank()) {
-            throw new IllegalStateException("상품의 브랜드를 입력해주세요.");
-        }
-        if(product.getName() == null || product.getName().isBlank()) {
-            throw new IllegalStateException("상품의 이름 입력해주세요.");
-        }
-        if(product.getImage() == null || product.getImage().isBlank()) {
-            throw new IllegalStateException("상품의 이미지를 입력해주세요.");
-        }
-
-    }
+//    public void emptyProduct (Product product) {
+//        if(product.getProduct_id() == null) {
+//            throw new IllegalStateException("상품ID를 입력해주세요.");
+//        }
+//        if(product.getBrand() == null || product.getBrand().isBlank()) {
+//            throw new IllegalStateException("상품의 브랜드를 입력해주세요.");
+//        }
+//        if(product.getName() == null || product.getName().isBlank()) {
+//            throw new IllegalStateException("상품의 이름 입력해주세요.");
+//        }
+//        if(product.getImage() == null || product.getImage().isBlank()) {
+//            throw new IllegalStateException("상품의 이미지를 입력해주세요.");
+//        }
+//
+//    }
 
     public void productConfirm (Product product){
         productRepository.save(product);

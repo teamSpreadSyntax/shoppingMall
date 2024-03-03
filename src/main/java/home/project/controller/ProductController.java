@@ -4,11 +4,13 @@ import home.project.domain.Product;
 import home.project.service.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.HashMap;
 import java.util.List;
@@ -37,9 +39,12 @@ public class ProductController {
                 errorMap.put(error.getField(), error.getDefaultMessage());
             }
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
+        }try {
+            productService.join(product);
+            return ResponseEntity.ok(product);
+        }catch (DataIntegrityViolationException e){
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        productService.join(product);
-        return ResponseEntity.ok(product);
     }
 
     @PutMapping("ProductUpdate")
