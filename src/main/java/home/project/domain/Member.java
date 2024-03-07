@@ -13,22 +13,21 @@ import java.util.Date;
 
 
 @Entity
-@Table(name = "member",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"phone", "email"})})
+@Table(name = "member", uniqueConstraints = {@UniqueConstraint(columnNames = {"phone", "email"})})
 @Getter
 @Setter
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long member_id;
+    private Long memberid;
 
     @NotEmpty(message = "이메일을 입력해주세요")
     @Email(message = "이메일 형식이 올바르지 않습니다")
-    @Column(name = "email", nullable = false)
+    @Column(name = "email")
     private String email;
 
     @NotEmpty(message = "비밀번호를 입력해주세요")
-    @Column(name="password", nullable = false)//, columnDefinition = ("VARCHAR(255)"))
+    @Column(name="password")//, columnDefinition = ("VARCHAR(255)"))
     private String password;
 //    @PrePersist
 //    public void prePersist(){
@@ -40,39 +39,8 @@ public class Member {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "sex")
-    private String sex="";
-
-    @NotNull(message = "생일을 입력해주세요")
-    @Column(name = "birth")
-    private Date birth;
-
-    @Column(name = "age")
-    private Integer age=0;
-
-    @Column(name = "address_num")
-    private String address_num="";
-
-    @Column(name = "address")
-    private String address="";
-
-    @Column(name = "address_detail")
-    private String address_detail="";
-
-    @Column(name = "address_name")
-    private String address_name="";
-
     @NotEmpty(message = "전화번호를 입력해주세요")
-    @Column(name = "phone", unique = true)
+    @Column(name = "phone")
     private String phone;
-
-    @Column(name = "mileage")
-    private Integer mileage=0;
-
-    @Column(name = "coupon")
-    private String coupon="";
-
-    @Column(name = "total")
-    private String total="";
 
 }

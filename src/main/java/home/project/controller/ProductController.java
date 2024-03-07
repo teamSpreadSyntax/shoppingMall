@@ -29,12 +29,6 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
-    @PostMapping("brandList")
-    public List<String> brandList() {
-        return productService.brandList();
-    }
-
     @Operation(summary = "상품삽입 메서드", description = "상품삽입 메서드입니다.")
     @PostMapping("CreateProduct")
     public ResponseEntity<?> createProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
@@ -54,7 +48,7 @@ public class ProductController {
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateProduct")
-    public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
+    public ResponseEntity<?> updateProduct(@RequestParam("productId") @RequestBody @Valid Product product, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -67,9 +61,15 @@ public class ProductController {
     }
 
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
-    @DeleteMapping("DeleteProduct")//상품삭제
-    public ResponseEntity<?> deleteProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
+    @DeleteMapping("DeleteProduct")
+    public ResponseEntity<?> deleteProduct(@RequestParam("productId") Product product) {
         productService.deleteByProductId(product);
         return ResponseEntity.ok(product);
+    }
+
+    @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
+    @GetMapping("brandList")
+    public List<String> brandList() {
+        return productService.brandList();
     }
 }

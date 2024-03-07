@@ -36,4 +36,8 @@ public class MemberServiceImpl implements MemberService{
         return memberRepository.findAll();
     }
 
+    public void deleteMember(Member member){
+        memberRepository.deleteById(member.getMemberid());
+    }
+
 }

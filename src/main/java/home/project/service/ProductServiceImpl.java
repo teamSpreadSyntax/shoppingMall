@@ -38,6 +38,7 @@ public class ProductServiceImpl implements ProductService {
         Product exsitsProduct = productRepository.findById(product.getProductid()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
         productRepository.deleteById(product.getProductid());
         System.out.println("삭제가 완료되었습니다");
+
     }
 
 
