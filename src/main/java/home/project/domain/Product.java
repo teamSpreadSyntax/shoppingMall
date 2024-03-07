@@ -13,8 +13,8 @@ import lombok.Setter;
 @Setter
 public class Product {
     @Id
-    @NotNull(message = "상품ID를 입력해주세요.")
-    private Long product_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long productid;
 
     @Column(name = "brand")
     @NotBlank(message = "상품의 브랜드를 입력해주세요.")
@@ -25,7 +25,6 @@ public class Product {
 
     @Column(name = "name")
     @NotBlank(message = "상품명을 입력해주세요.")
-
     private String name;
 
     @Column(name = "image")

@@ -2,6 +2,8 @@ package home.project.controller;
 
 import home.project.domain.Product;
 import home.project.service.ProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -16,6 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "상품", description = "상품관련 API 입니다")
+@RequestMapping(path = "/api/product")
 @RestController
 public class ProductController {
     private final ProductService productService;
@@ -25,12 +29,13 @@ public class ProductController {
         this.productService = productService;
     }
 
-
+    @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
     @PostMapping("brandList")
     public List<String> brandList() {
         return productService.brandList();
     }
 
+    @Operation(summary = "상품삽입 메서드", description = "상품삽입 메서드입니다.")
     @PostMapping("CreateProduct")
     public ResponseEntity<?> createProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -47,7 +52,8 @@ public class ProductController {
         }
     }
 
-    @PutMapping("ProductUpdate")
+    @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
+    @PutMapping("UpdateProduct")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
@@ -60,9 +66,10 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
-    @DeleteMapping("ProductDelete")//상품삭제
+    @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
+    @DeleteMapping("DeleteProduct")//상품삭제
     public ResponseEntity<?> deleteProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
-        productService.delete(product);
+        productService.deleteByProductId(product);
         return ResponseEntity.ok(product);
     }
 }

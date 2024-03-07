@@ -20,14 +20,14 @@ import java.util.Date;
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long member_id;
 
-    @NotEmpty
+    @NotEmpty(message = "이메일을 입력해주세요")
     @Email(message = "이메일 형식이 올바르지 않습니다")
     @Column(name = "email", nullable = false)
     private String email;
 
-    @NotEmpty
+    @NotEmpty(message = "비밀번호를 입력해주세요")
     @Column(name="password", nullable = false)//, columnDefinition = ("VARCHAR(255)"))
     private String password;
 //    @PrePersist
@@ -36,15 +36,15 @@ public class Member {
 //        String hashedPassword=BCrypt.hashpw(password, salt);
 //        this.password=hashedPassword;
 //    }
-    @NotEmpty
-    @Column(name = "name", nullable = false)
+    @NotEmpty(message = "회원 이름을 입력해주세요")
+    @Column(name = "name")
     private String name;
 
     @Column(name = "sex")
     private String sex="";
 
-    @NotNull
-    @Column(name = "birth", nullable = false)
+    @NotNull(message = "생일을 입력해주세요")
+    @Column(name = "birth")
     private Date birth;
 
     @Column(name = "age")
@@ -62,8 +62,8 @@ public class Member {
     @Column(name = "address_name")
     private String address_name="";
 
-    @NotEmpty
-    @Column(name = "phone", unique = true, nullable = false)
+    @NotEmpty(message = "전화번호를 입력해주세요")
+    @Column(name = "phone", unique = true)
     private String phone;
 
     @Column(name = "mileage")

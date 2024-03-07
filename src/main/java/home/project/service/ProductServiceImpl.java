@@ -27,19 +27,17 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
     }
     public void update (Product product){
-        Product exsitsProduct = productRepository.findById(product.getProduct_id()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        Product exsitsProduct = productRepository.findById(product.getProductid()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
         exsitsProduct.setBrand(product.getBrand());
         exsitsProduct.setName(product.getName());
         exsitsProduct.setSelledcount(product.getSelledcount());
         exsitsProduct.setImage(product.getImage());
         productRepository.save(exsitsProduct);
     }
-    public void delete (Product product){
-        if(product.getProduct_id() == null) {
-//
-        }
-
-        productRepository.deleteById(product.getProduct_id());
+    public void deleteByProductId (Product product){
+        Product exsitsProduct = productRepository.findById(product.getProductid()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        productRepository.deleteById(product.getProductid());
+        System.out.println("삭제가 완료되었습니다");
     }
 
 
