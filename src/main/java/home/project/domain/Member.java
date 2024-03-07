@@ -1,6 +1,7 @@
 package home.project.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -13,13 +14,18 @@ import java.util.Date;
 
 @Entity
 @Table(name = "member",
-        uniqueConstraints = {@UniqueConstraint(columnNames = {"phone"})})
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"phone", "email"})})
 @Getter
 @Setter
 public class Member {
     @Id
-    @NotNull
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotEmpty
+    @Email(message = "이메일 형식이 올바르지 않습니다")
+    @Column(name = "email", nullable = false)
+    private String email;
 
     @NotEmpty
     @Column(name="password", nullable = false)//, columnDefinition = ("VARCHAR(255)"))
