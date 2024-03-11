@@ -31,7 +31,7 @@ public class ProductController {
 
     @Operation(summary = "상품삽입 메서드", description = "상품삽입 메서드입니다.")
     @PostMapping("CreateProduct")
-    public ResponseEntity<?> createProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
+    public ResponseEntity<?> createProduct(@RequestBody @Valid  Product product, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -48,7 +48,7 @@ public class ProductController {
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateProduct")
-    public ResponseEntity<?> updateProduct(@RequestParam("productId") @RequestBody @Valid Product product, BindingResult bindingResult) {
+    public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
