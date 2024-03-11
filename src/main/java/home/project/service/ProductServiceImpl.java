@@ -37,6 +37,11 @@ public class ProductServiceImpl implements ProductService {
         return Optional.ofNullable(product);
     }
 
+    public Optional<Product> DetailProduct (Product product){
+        Product existProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        return Optional.ofNullable(existProduct);
+    }
+
     public void update (Product product){
         Product exsitsProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
         exsitsProduct.setBrand(product.getBrand());

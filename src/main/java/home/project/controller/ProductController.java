@@ -87,6 +87,13 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
+    @Operation(summary = "상품상세 메서드", description = "상품상세 메서드입니다.")
+    @PutMapping("DetailProduct")
+    public ResponseEntity<Optional<Product>> DetailProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
+        Optional<Product> productdetail = productService.DetailProduct(product);
+        return ResponseEntity.ok(productdetail);
+    }
+
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
     @DeleteMapping("DeleteProduct")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Product product) {

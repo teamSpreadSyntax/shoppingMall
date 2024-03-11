@@ -12,6 +12,7 @@ public interface ProductService {
     void join(Product product);
     List<Product> findAll();
     Optional<Product> findByname(String name);
+    Optional<Product> DetailProduct(Product product);
     Optional<List<Product>> findByCategory(String category);
     void update(Product product);
     void deleteById(Product product);
