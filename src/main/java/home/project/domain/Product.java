@@ -3,6 +3,7 @@ package home.project.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,7 +32,7 @@ public class Product {
     private String category;
 
     @Column(name = "stock")
-    @NotBlank(message = "현재재고를 입력해주세요.")
+    @NotNull(message = "현재재고를 입력해주세요.")
     private Long stock;
 
     @Column(name = "image")
