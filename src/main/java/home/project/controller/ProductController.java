@@ -88,17 +88,17 @@ public class ProductController {
     }
 
     @Operation(summary = "상품상세 메서드", description = "상품상세 메서드입니다.")
-    @PutMapping("DetailProduct")
-    public ResponseEntity<Optional<Product>> DetailProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
-        Optional<Product> productdetail = productService.DetailProduct(product);
+    @GetMapping("DetailProduct")
+    public ResponseEntity<Optional<Product>> DetailProduct(@RequestParam("productId") Long productid) {
+        Optional<Product> productdetail = productService.DetailProduct(productid);
         return ResponseEntity.ok(productdetail);
     }
 
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
     @DeleteMapping("DeleteProduct")
-    public ResponseEntity<?> deleteProduct(@RequestParam("productId") Product product) {
-        productService.deleteById(product);
-        return ResponseEntity.ok(product);
+    public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productid) {
+        productService.deleteById(productid);
+        return ResponseEntity.ok(productid);
     }
 
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")

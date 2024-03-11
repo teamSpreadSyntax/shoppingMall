@@ -37,8 +37,8 @@ public class ProductServiceImpl implements ProductService {
         return Optional.ofNullable(product);
     }
 
-    public Optional<Product> DetailProduct (Product product){
-        Product existProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+    public Optional<Product> DetailProduct (Long productid){
+        Product existProduct = productRepository.findById(productid).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
         return Optional.ofNullable(existProduct);
     }
 
@@ -53,9 +53,9 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(exsitsProduct);
     }
 
-    public void deleteById (Product product){
-        productRepository.findById(product.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
-        productRepository.deleteById(product.getId());
+    public void deleteById (Long productid){
+        productRepository.findById(productid).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        productRepository.deleteById(productid);
         System.out.println("삭제가 완료되었습니다");
     }
 
