@@ -48,19 +48,30 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
+    @GetMapping("FindAllProduct")
+    public ResponseEntity<List<Product>> findAllProduct() {
+        List<Product> productList = productService.findAll();
+        return ResponseEntity.ok(productList);
+    }
+
     @Operation(summary = "상품명으로상품조회 메서드", description = "상품명으로상품조회 메서드입니다.")
     @GetMapping("FindByName")
-    public ResponseEntity<Optional<Product>> findMember(@RequestParam("ProductName") String name) {
+    public ResponseEntity<Optional<Product>> findProductByName(@RequestParam("ProductName") String name) {
         Optional<Product> product = productService.findByname(name);
         return ResponseEntity.ok(product);
     }
 
-    @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
-    @GetMapping("FindAllProduct")
-    public ResponseEntity<List<Product>> findAllMember() {
-        List<Product> productList = productService.findAll();
-        return ResponseEntity.ok(productList);
+    @Operation(summary = "카테고리별상품조회 메서드", description = "카테고리별상품조회 메서드입니다.")
+    @GetMapping("FindByCategory")
+    public ResponseEntity<Optional<List<Product>>> findProductByCategory(@RequestParam("category") String category) {
+        Optional<List<Product>> product = productService.findByCategory(category);
+        return ResponseEntity.ok(product);
     }
+//            0101(상의반팔)
+//            0102(상의긴팔)
+//            0201(바지긴바지)
+//            0202(바지반바지)
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateProduct")

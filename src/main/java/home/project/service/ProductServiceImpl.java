@@ -23,13 +23,18 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
     }
 
+    public List<Product> findAll() {
+        return productRepository.findAll();
+    }
+
     public Optional<Product> findByname(String name) {
         Product product = productRepository.findByname(name).orElseThrow(() -> { throw new IllegalStateException(name+"으로 가입된 회원이 없습니다."); });
         return Optional.ofNullable(product);
     }
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
+    public Optional<List<Product>> findByCategory(String category) {
+        List<Product> product = productRepository.findByCategory(category).orElseThrow(() -> { throw new IllegalStateException(category+"카테고리에 상품이 없습니다."); });
+        return Optional.ofNullable(product);
     }
 
     public void update (Product product){

@@ -2,10 +2,10 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Product;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-
 
 public interface MemberService {
    void login(Member member);
