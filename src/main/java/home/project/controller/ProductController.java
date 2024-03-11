@@ -1,5 +1,6 @@
 package home.project.controller;
 
+
 import home.project.domain.Product;
 import home.project.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Tag(name = "상품", description = "상품관련 API 입니다")
 @RequestMapping(path = "/api/product")
@@ -29,7 +31,7 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @Operation(summary = "상품삽입 메서드", description = "상품삽입 메서드입니다.")
+    @Operation(summary = "상품추가 메서드", description = "상품추가 메서드입니다.")
     @PostMapping("CreateProduct")
     public ResponseEntity<?> createProduct(@RequestBody @Valid  Product product, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -44,6 +46,20 @@ public class ProductController {
         }catch (DataIntegrityViolationException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Operation(summary = "상품명으로상품조회 메서드", description = "상품명으로상품조회 메서드입니다.")
+    @GetMapping("FindByName")
+    public ResponseEntity<Optional<Product>> findMember(@RequestParam("ProductName") String name) {
+        Optional<Product> product = productService.findByname(name);
+        return ResponseEntity.ok(product);
+    }
+
+    @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
+    @GetMapping("FindAllProduct")
+    public ResponseEntity<List<Product>> findAllMember() {
+        List<Product> productList = productService.findAll();
+        return ResponseEntity.ok(productList);
     }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
@@ -63,7 +79,7 @@ public class ProductController {
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
     @DeleteMapping("DeleteProduct")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Product product) {
-        productService.deleteByProductId(product);
+        productService.deleteById(product);
         return ResponseEntity.ok(product);
     }
 

@@ -1,17 +1,14 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.Product;
 import home.project.repository.MemberRepository;
 //import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.ErrorResponse;
 
 import java.util.List;
 import java.util.Optional;
-
-import static org.apache.logging.log4j.ThreadContext.isEmpty;
 
 @Service
 public class MemberServiceImpl implements MemberService{
@@ -21,14 +18,14 @@ public class MemberServiceImpl implements MemberService{
         this.memberRepository = memberRepository;
     }
 
+    public void login(Member member){}
+
     public void join (Member member){
         memberRepository.save(member);
     }
 
-    public void login(Member member){};
-
-    public Optional<Member> findById(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> { throw new IllegalStateException(memberId+"로 가입된 회원이 없습니다."); });
+    public Optional<Member> findByEmail(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalStateException(email+"로 가입된 회원이 없습니다."); });
         return Optional.ofNullable(member);
     }
 
@@ -36,8 +33,19 @@ public class MemberServiceImpl implements MemberService{
         return memberRepository.findAll();
     }
 
+    public void update (Member member){
+        Member exsitsMember = memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+        exsitsMember.setPassword(member.getPassword());
+        exsitsMember.setName(member.getName());
+        exsitsMember.setEmail(member.getEmail());
+        exsitsMember.setPhone(member.getPhone());
+        memberRepository.save(exsitsMember);
+    }
+
     public void deleteMember(Member member){
-        memberRepository.deleteById(member.getMemberid());
+        memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        memberRepository.deleteById(member.getId());
+        System.out.println("삭제가 완료되었습니다");
     }
 
 }

@@ -2,6 +2,7 @@ package home.project.controller;
 
 
 import home.project.domain.Member;
+import home.project.domain.Product;
 import home.project.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +31,13 @@ public class MemberController {
         this.memberService = memberService;
     }
 
+    @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
+    @PostMapping("Login")
+    public ResponseEntity<Member> login(@RequestBody Member member) {
+        memberService.login(member);
+        return ResponseEntity.ok(member);
+    }
+
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
 //    @ApiResponses(value = {
@@ -52,17 +60,10 @@ public class MemberController {
         }
     }
 
-    @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
-    @PostMapping("Login")
-    public ResponseEntity<Member> login(@RequestBody Member member) {
-        memberService.login(member);
-        return ResponseEntity.ok(member);
-    }
-
-    @Operation(summary = "id로회원조회 메서드", description = "id로회원조회 메서드입니다.")
-    @GetMapping("FindMember")
-    public ResponseEntity<Optional<Member>> findMember(@RequestParam("memberId") Long memberId) {
-        Optional<Member> member = memberService.findById(memberId);
+    @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
+    @GetMapping("FindByEmail")
+    public ResponseEntity<Optional<Member>> findMember(@RequestParam("MemberEmail") String email) {
+        Optional<Member> member = memberService.findByEmail(email);
         return ResponseEntity.ok(member);
     }
 
@@ -71,6 +72,20 @@ public class MemberController {
     public ResponseEntity<List<Member>> findAllMember() {
         List<Member> memberList = memberService.findAll();
         return ResponseEntity.ok(memberList);
+    }
+
+    @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
+    @PutMapping("UpdateMember")
+    public ResponseEntity<?> updateProduct(@RequestBody @Valid Member member, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errorMap = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                errorMap.put(error.getField(), error.getDefaultMessage());
+            }
+            return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
+        }
+        memberService.update(member);
+        return ResponseEntity.ok(member);
     }
 
     @Operation(summary = "멤버 삭제 메서드", description = "멤버를 삭제하는 메서드입니다.")

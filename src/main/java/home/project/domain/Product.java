@@ -3,7 +3,6 @@ package home.project.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +13,7 @@ import lombok.Setter;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productid;
+    private Long id;
 
     @Column(name = "brand")
     @NotBlank(message = "상품의 브랜드를 입력해주세요.")

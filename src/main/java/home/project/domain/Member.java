@@ -3,13 +3,10 @@ package home.project.domain;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 //import org.hibernate.type.descriptor.jdbc.VarcharJdbcType;
 //import org.springframework.security.crypto.bcrypt.BCrypt;
-
-import java.util.Date;
 
 
 @Entity
@@ -19,7 +16,7 @@ import java.util.Date;
 public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long memberid;
+    private Long id;
 
     @NotEmpty(message = "이메일을 입력해주세요")
     @Email(message = "이메일 형식이 올바르지 않습니다")
