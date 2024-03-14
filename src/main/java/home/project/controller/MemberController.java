@@ -1,8 +1,10 @@
 package home.project.controller;
 
 
+import home.project.domain.LoginDto;
 import home.project.domain.Member;
 import home.project.domain.Product;
+import home.project.domain.TokenDto;
 import home.project.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,12 +34,24 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
-    @PostMapping("Login")
-    public ResponseEntity<Member> login(@RequestBody Member member) {
-        memberService.login(member);
-        return ResponseEntity.ok(member);
-    }
+//    @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
+//    @PostMapping("Login")
+//    public ResponseEntity<?> login(@RequestBody @Valid LoginDto loginDto, BindingResult bindingResult) {
+//        if (bindingResult.hasErrors()) {
+//            Map<String, String> errorMap = new HashMap<>();
+//            for (FieldError error : bindingResult.getFieldErrors()) {
+//                errorMap.put(error.getField(), error.getDefaultMessage());
+//            }
+//            return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
+//        }
+//        try {
+//            memberService.login(loginDto);
+//            return ResponseEntity.ok(loginDto);
+//        } catch (DataIntegrityViolationException e) {
+//            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+//        }
+//
+//    }
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
