@@ -8,9 +8,12 @@ import home.project.domain.TokenDto;
 import home.project.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+//import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.PathItem;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -24,7 +27,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "회원", description = "회원관련 API 입니다")
-@RequestMapping(path = "/api/member")
+//@RequestMapping(path = "/api/member")
+@RequestMapping(method = RequestMethod.POST,path = "/api/member")
 @RestController
 public class MemberController {
     private final MemberService memberService;

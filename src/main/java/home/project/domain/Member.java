@@ -34,9 +34,9 @@ public class Member {
     @JsonIgnore
     private String password;
 
-    public UsernamePasswordAuthenticationToken toAuthentication() {
-        return new UsernamePasswordAuthenticationToken(email, password);
-    }
+//    public UsernamePasswordAuthenticationToken toAuthentication() {
+//        return new UsernamePasswordAuthenticationToken(email, password);
+//    }
 
     @NotEmpty(message = "회원 이름을 입력해주세요")
     @Column(name = "name")
