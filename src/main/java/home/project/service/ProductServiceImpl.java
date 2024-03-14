@@ -31,6 +31,10 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findByname(name).orElseThrow(() -> { throw new IllegalStateException(name+"으로 가입된 회원이 없습니다."); });
         return Optional.ofNullable(product);
     }
+    public Optional<List<Product>> findByBrand(String brand){
+        List<Product> product = productRepository.findByBrand(brand).orElseThrow(() -> { throw new IllegalStateException(brand+"브랜드가 없습니다."); });
+        return Optional.ofNullable(product);
+    }
 
     public Optional<List<Product>> findByCategory(String category) {
         List<Product> product = productRepository.findByCategory(category).orElseThrow(() -> { throw new IllegalStateException(category+"카테고리에 상품이 없습니다."); });
@@ -63,4 +67,23 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAllByOrderByBrandAsc();
     }
 
+    public Product increaseStock(Long productId , Long stock) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+        Long currentStock = product.getStock();
+        Long newStock = currentStock + stock;
+        product.setStock(newStock);
+        Long allCount = product.getSelledcount();
+        product.setSelledcount(allCount + (currentStock - newStock));
+        return productRepository.save(product);
+
+    }
+    public Product decreaseStock(Long productId , Long stock) {
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+        Long currentStock = product.getStock();
+        Long newStock = Math.max(currentStock - stock, 0);
+        product.setStock(newStock);
+        Long allCount = product.getSelledcount();
+        product.setSelledcount(allCount + (currentStock - newStock));
+        return productRepository.save(product);
+    }
 }

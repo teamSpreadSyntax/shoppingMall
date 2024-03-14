@@ -62,6 +62,13 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
+    @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
+    @GetMapping("FindByBrand")
+    public ResponseEntity<Optional<List<Product>>> findProductByBrand(@RequestParam("brand") String brand) {
+        Optional<List<Product>> product = productService.findByBrand(brand);
+        return ResponseEntity.ok(product);
+    }
+
     @Operation(summary = "카테고리별상품조회 메서드", description = "카테고리별상품조회 메서드입니다.")
     @GetMapping("FindByCategory")
     public ResponseEntity<Optional<List<Product>>> findProductByCategory(@RequestParam("category") String category) {
@@ -105,5 +112,21 @@ public class ProductController {
     @GetMapping("brandList")
     public List<String> brandList() {
         return productService.brandList();
+    }
+
+    @Operation(summary = "재고수량 증가 메서드", description = "재고수량 증가 메서드 입니다.")
+    @PutMapping ("IncreaseStock")
+    public ResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId,
+                                                 @RequestParam("stock") Long stock){
+        Product increaseProduct = productService.increaseStock(productId,stock);
+        return ResponseEntity.ok(increaseProduct);
+    }
+
+    @Operation(summary = "재고수량 감소 메서드", description = "재고수량 감소 메서드 입니다.")
+    @PutMapping("DecreaseStock")
+    public ResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId,
+                                                 @RequestParam("stock") Long stock){
+        Product decreaseProduct = productService.decreaseStock(productId,stock);
+        return ResponseEntity.ok(decreaseProduct);
     }
 }
