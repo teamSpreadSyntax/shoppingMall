@@ -16,6 +16,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
@@ -28,7 +29,7 @@ import java.util.Optional;
 
 @Tag(name = "회원", description = "회원관련 API 입니다")
 //@RequestMapping(path = "/api/member")
-@RequestMapping(method = RequestMethod.POST,path = "/api/member")
+@RequestMapping(path = "/api/member")
 @RestController
 public class MemberController {
     private final MemberService memberService;
@@ -59,6 +60,7 @@ public class MemberController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
 //    @ApiResponses(value = {
 //            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
 //            @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = LoginResponse.class)))

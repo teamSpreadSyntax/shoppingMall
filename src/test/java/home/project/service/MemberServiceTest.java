@@ -28,7 +28,6 @@ class MemberServiceTest {
         // when
         memberService.join(member);
 
-
         // then
         Member findMember = memberService.findByEmail(member.getEmail()).get();
         Assertions.assertThat(member).isEqualTo(findMember);
