@@ -12,9 +12,14 @@ public interface ProductService {
     void join(Product product);
     List<Product> findAll();
     Optional<Product> findByname(String name);
+    Optional<List<Product>> findByBrand(String brand);
     Optional<Product> DetailProduct(Long productid);
     Optional<List<Product>> findByCategory(String category);
     void update(Product product);
     void deleteById(Long productid);
     List<String> brandList();
+    Product increaseStock(Long productId, Long stock);
+
+    Product decreaseStock(Long productId, Long stock);
+
 }
