@@ -1,15 +1,23 @@
 package home.project;
 
 
-import org.springdoc.core.GroupedOpenApi;
+import io.swagger.v3.oas.models.OpenAPI;
+//import org.springdoc.core.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import io.swagger.v3.oas.models.info.Info;
 
 @Configuration
 @EnableWebSecurity
@@ -25,23 +33,45 @@ public class OpenApiConfig {
                 )
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/swagger-ui/**" ).permitAll()
-                        .requestMatchers("/api/member/FindByEmail", "/api/loginToken/login").permitAll()
-                        .anyRequest().authenticated())
+                        .requestMatchers("/api/member/**").hasAnyRole("user","center","admin")
+//                        .requestMatchers("/api/member/FindByEmail").permitAll()
+                        .anyRequest().permitAll())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
                         .permitAll());
 
         return http.build();
     }
-
     @Bean
-    public GroupedOpenApi publicApi() {
-        return GroupedOpenApi.builder()
-                .group("예제 게시판 Swagger")
-                .pathsToMatch("/swagger-ui/**")  // Swagger UI 경로 변경
-                .build();
+    public OpenAPI customOpenAPI() {
+//        return new OpenAPI().info(new org.springdoc.core.models.info.Info()
+        return new OpenAPI().info(new Info()
+                .title("예제 게시판 Swagger")
+                .version("1.0.0")
+                .description("API 문서입니다."));
     }
+//    @Bean
+//    public GroupedOpenApi publicApi() {
+//        return GroupedOpenApi.builder()
+//                .group("예제 게시판 Swagger")
+//                .pathsToMatch("/swagger-ui/**")  // Swagger UI 경로 변경
+//                .build();
 }
+
+//    @Bean
+//    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService)  throws Exception {
+//        // provider 설정
+//        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+//        provider.setPasswordEncoder(passwordEncoder);
+//        provider.setUserDetailsService(userDetailsService);  // SecurityUserService 주입
+//
+//        return new ProviderManager(provider);
+//    }
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+
 
 //    @Bean
 //    public WebSecurityCustomizer webSecurityCustomizer() {
