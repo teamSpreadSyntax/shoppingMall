@@ -65,7 +65,7 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public void deleteMember(Member member){
-        memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
         memberRepository.deleteById(member.getId());
         System.out.println("삭제가 완료되었습니다");
     }
