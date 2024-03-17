@@ -60,7 +60,6 @@ public class MemberController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
-    @PreAuthorize("hasAuthority('ROLE_USER')")
 //    @ApiResponses(value = {
 //            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = LoginResponse.class))),
 //            @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = LoginResponse.class)))

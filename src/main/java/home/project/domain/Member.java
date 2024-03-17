@@ -31,7 +31,7 @@ public class Member {
 
     @NotEmpty(message = "비밀번호를 입력해주세요")
     @Column(name="password")//, columnDefinition = ("VARCHAR(255)"))
-    @JsonIgnore
+//    @JsonIgnore
     private String password;
 
 //    public UsernamePasswordAuthenticationToken toAuthentication() {

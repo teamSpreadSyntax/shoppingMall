@@ -33,8 +33,8 @@ public class OpenApiConfig {
                 )
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/swagger-ui/**" ).permitAll()
-                        .requestMatchers("/api/member/**").hasAnyRole("user","center","admin")
-//                        .requestMatchers("/api/member/FindByEmail").permitAll()
+                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
+                        .requestMatchers("/api/product/**").permitAll()
                         .anyRequest().permitAll())
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")

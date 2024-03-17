@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public interface MemberService {
 //   ResponseEntity<?> login(LoginDto loginDto);
+
+//   void login(LoginDto loginDto);
    void join(Member member);
 
    Optional<Member> findByEmail(String email);

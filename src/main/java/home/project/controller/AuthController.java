@@ -53,12 +53,12 @@ public class AuthController {
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
         }
         try {
-//            memberService.login(loginDto);
 //            return ResponseEntity.ok(loginDto);
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
             String token = tokenProvider.createToken(authentication);
             TokenDto tokenDto = new TokenDto();
             tokenDto.setInfo(token);
+//            memberService.login(loginDto);
             return ResponseEntity.ok(tokenDto);
         } catch (DataIntegrityViolationException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
