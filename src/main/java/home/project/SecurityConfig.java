@@ -1,7 +1,7 @@
 package home.project;
 
-import home.project.domain.LoginDto;
-import home.project.service.JwtTokenProvider;
+//import home.project.domain.LoginDto;
+//import home.project.service.JwtTokenProvider;
 import home.project.service.MemberServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
