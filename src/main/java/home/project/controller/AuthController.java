@@ -1,9 +1,10 @@
 package home.project.controller;
 
-import home.project.domain.LoginDto;
+import home.project.domain.Member;
 import home.project.domain.TokenDto;
 import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
+import home.project.service.UserDetailsServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,6 +28,7 @@ import jakarta.validation.Valid;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Tag(name = "로그인", description = "로그인 토큰관련 API 입니다")
 @RequestMapping(path = "/api/loginToken")
@@ -33,18 +37,22 @@ public class AuthController {
 
     private AuthenticationManager authenticationManager;
     private JwtTokenProvider tokenProvider;
-    private MemberService memberService;
+    private UserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private  final MemberService memberService;
 
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, MemberService memberService) {
+    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserDetailsService userDetailsService,  PasswordEncoder passwordEncoder, MemberService memberService) {
         this.authenticationManager = authenticationManager;
         this.tokenProvider = tokenProvider;
+        this.userDetailsService = userDetailsService;
+        this.passwordEncoder = passwordEncoder;
         this.memberService = memberService;
     }
 
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid LoginDto loginDto, BindingResult bindingResult) {
+    public ResponseEntity<?> login(@RequestBody @Valid home.project.domain.UserDetails userDetailss, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -53,12 +61,19 @@ public class AuthController {
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
         }
         try {
-//            return ResponseEntity.ok(loginDto);
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
+             userDetailsService.loadUserByUsername(userDetailss.getEmail());
+             Optional<Member> member = memberService.findByEmail(userDetailss.getEmail());
+            if (!passwordEncoder.matches(userDetailss.getPassword(), member.get().getPassword())) {throw new DataIntegrityViolationException("비밀번호를 확인해주세요");}
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailss.getEmail(), userDetailss.getPassword()));
             String token = tokenProvider.createToken(authentication);
             TokenDto tokenDto = new TokenDto();
             tokenDto.setInfo(token);
-//            memberService.login(loginDto);
+            tokenDto.setAccessToken(token);
+            tokenDto.setRefreshToken(token);
+            tokenDto.setAccessTokenExpireln(Long.valueOf(token));
+            tokenDto.setGrantType(token);
+            tokenDto.setRefreshTokenExpiresin(Long.valueOf(token));
+            tokenDto.setAuthority(token);
             return ResponseEntity.ok(tokenDto);
         } catch (DataIntegrityViolationException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

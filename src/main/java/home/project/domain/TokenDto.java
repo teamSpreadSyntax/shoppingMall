@@ -15,6 +15,5 @@ public class TokenDto {
     private Long refreshTokenExpiresin;
     private String authority;
     private String info;
-    public void setInfo(String info) { this.info = info;}
 }
 
