@@ -24,24 +24,7 @@ import io.swagger.v3.oas.models.info.Info;
 public class OpenApiConfig {
 
 
-    @Bean
-    protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
-                .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/swagger-ui/**" ).permitAll()
-                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
-                        .requestMatchers("/api/product/**").permitAll()
-                        .anyRequest().permitAll())
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .permitAll());
 
-        return http.build();
-    }
     @Bean
     public OpenAPI customOpenAPI() {
 //        return new OpenAPI().info(new org.springdoc.core.models.info.Info()
