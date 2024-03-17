@@ -29,7 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email){
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalStateException(email+"로 가입된 회원이 없습니다."); });
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("user"));
+//        authorities.add(new SimpleGrantedAuthority("user"));
 
         return new org.springframework.security.core.userdetails.User(
                 member.getEmail(), passwordEncoder.encode(member.getPassword()), authorities);
