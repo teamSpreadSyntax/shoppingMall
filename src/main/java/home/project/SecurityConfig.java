@@ -43,14 +43,15 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/swagger-ui/**" ).permitAll()
-                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
-                        .requestMatchers("/api/product/**").hasRole("USER")
-                        .anyRequest().permitAll())
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .permitAll());
+                .authorizeHttpRequests(requests -> requests.anyRequest().permitAll());
+
+//                        .requestMatchers("/swagger-ui/**" ).permitAll()
+//                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
+//                        .requestMatchers("/api/product/**").hasRole("USER")
+//                        .anyRequest().permitAll())
+//                .formLogin(formLogin -> formLogin
+//                        .loginPage("/login")
+//                        .permitAll());
 
         return http.build();
     }
