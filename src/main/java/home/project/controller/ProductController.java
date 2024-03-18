@@ -122,6 +122,14 @@ public class ProductController {
         return ResponseEntity.ok(increaseProduct);
     }
 
+    @Operation(summary = "판매취소(재고수량 증가 메서드)", description = "판매취소(재고수량 증가 메서드 입니다.)")
+    @PutMapping ("selledCancle")
+    public ResponseEntity<Product> selledCancle(@RequestParam("productId") Long productId,
+                                                @RequestParam("stock") Long stock){
+        Product increaseProduct = productService.selledCancle(productId,stock);
+        return ResponseEntity.ok(increaseProduct);
+    }
+
     @Operation(summary = "재고수량 감소 메서드", description = "재고수량 감소 메서드 입니다.")
     @PutMapping("DecreaseStock")
     public ResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId,

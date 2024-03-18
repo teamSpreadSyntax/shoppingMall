@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Transactional
 class MemberServiceTest {
     @LocalServerPort
     int port;
+
 
     @Autowired MemberService memberService;
     @Autowired MemberRepository memberRepository;
@@ -33,8 +33,9 @@ class MemberServiceTest {
     public void clearData(){
         memberRepository.deleteAll();
     }
-    @Test
+
     @DisplayName("회원가입테스트 케이스")
+    @Test
     void 회원가입() {
         // given
         Member member = new Member();
@@ -108,7 +109,7 @@ class MemberServiceTest {
 
     }
 
-    @DisplayName("")
+    @DisplayName("이메일을 확인하여 계정 삭제")
     @Test
     void deleteMember() {
         // Given (데이터 준비)

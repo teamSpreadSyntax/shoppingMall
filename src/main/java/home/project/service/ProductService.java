@@ -20,6 +20,8 @@ public interface ProductService {
     List<String> brandList();
     Product increaseStock(Long productId, Long stock);
 
+    Product selledCancle(Long productId, Long stock);
+
     Product decreaseStock(Long productId, Long stock);
 
 }
