@@ -5,12 +5,12 @@ import java.util.List;
 public class CustomListResponseBody<T> {
     public List listMember;
 
-    public String succesResponsMessege;
+    public String ResponsMessege;
 
 
-    public CustomListResponseBody(List listMember, String succesResponsMessege) {
+    public CustomListResponseBody(List listMember, String ResponsMessege) {
         this.listMember = listMember;
-        this.succesResponsMessege = succesResponsMessege;
+        this.ResponsMessege = ResponsMessege;
     }
 
 }

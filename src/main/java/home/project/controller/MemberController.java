@@ -35,6 +35,12 @@ import java.util.Optional;
 @Tag(name = "회원", description = "회원관련 API 입니다")
 //@RequestMapping(path = "/api/member")
 @RequestMapping(path = "/api/member")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "403", description = "접근이 금지되었습니다.", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = Member.class)))
+})
 @RestController
 public class MemberController {
     private final MemberService memberService;
@@ -65,12 +71,6 @@ public class MemberController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Member.class))),
-            @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = Member.class))),
-            @ApiResponse(responseCode = "403", description = "접근이 금지되었습니다.", content = @Content(schema = @Schema(implementation = Member.class))),
-            @ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = Member.class)))
-    })
     public ResponseEntity<?> createMember(@RequestBody @Valid Member member, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
@@ -81,9 +81,13 @@ public class MemberController {
         }
         try {
             memberService.join(member);
-            return ResponseEntity.ok(member);
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("email", member.getEmail()+"로 가입되었습니다");
+            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("중복된 값이 입력되었습니다. 이메일 또는 전화번호로 이미 가입되어있습니다", e.getMessage()+"--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
+            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -95,7 +99,7 @@ public class MemberController {
         }
         try {
             Optional<Member> memberOptional = memberService.findByEmail(email);
-            String successMessage = email+"로 회원 조회 성공";
+            String successMessage = email+"로 가입된 회원정보입니다";
             CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
             return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
@@ -109,7 +113,7 @@ public class MemberController {
     public CustomListResponseEntity<List<Member>> findAllMember() {
             try {
                 List<Member> memberList = memberService.findAll();
-                String successMessage = "전체회원 조회 성공";
+                String successMessage = "전체회원 입니다";
                 CustomListResponseBody<List<Member>> responseBody = new CustomListResponseBody<>(memberList, successMessage);
                 return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
             } catch (DataIntegrityViolationException e) {
@@ -121,7 +125,7 @@ public class MemberController {
 
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateMember")
-    public ResponseEntity<?> updateProduct(@RequestBody @Valid Member member, BindingResult bindingResult) {
+    public ResponseEntity<?> updateMember(@RequestBody @Valid Member member, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -129,16 +133,32 @@ public class MemberController {
             }
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
         }
-        memberService.update(member);
-        return ResponseEntity.ok(member);
+        try {
+            Optional<Member> memberOptional = memberService.update(member);
+            String successMessage = "정보가 수정되었습니다";
+            CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
+            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            CustomOptionalResponseBody<Optional<Member>> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed");
+            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
     }
+
+
 
     @Operation(summary = "멤버 삭제 메서드", description = "멤버를 삭제하는 메서드입니다.")
     @DeleteMapping("DeleteMember") // 멤버 삭제
-    public ResponseEntity<?> deleteMember(@RequestParam("memberid") Member member) {
-        memberService.deleteMember(member);
-        return ResponseEntity.ok(member);
-
+    public ResponseEntity<?> deleteMember(@RequestParam("memberEmail") String email) {
+        try {
+            memberService.deleteMember(email);
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("이용해주셔서 감사합니다", email+"님의 계정이 삭제되었습니다");
+            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put(email+"로 가입되어있는 계정이 없습니다", e.getMessage());
+            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @ExceptionHandler(IllegalStateException.class)

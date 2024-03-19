@@ -20,6 +20,6 @@ public interface MemberService {
 
    Optional<Member> findByEmail(String email);
    List<Member> findAll();
-   void update(Member member);
-   void deleteMember(Member member);
+   Optional<Member> update(Member member);
+   void deleteMember(String email);
 }

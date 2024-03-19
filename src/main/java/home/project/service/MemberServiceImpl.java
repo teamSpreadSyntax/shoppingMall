@@ -55,19 +55,20 @@ public class MemberServiceImpl implements MemberService{
         return memberRepository.findAll();
     }
 
-    public void update (Member member){
-        Member exsitsMember = memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+    public Optional<Member> update (Member member){
+        Member exsitsMember = memberRepository.findByEmail(member.getEmail()).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
         exsitsMember.setPassword(member.getPassword());
         exsitsMember.setName(member.getName());
         exsitsMember.setEmail(member.getEmail());
         exsitsMember.setPhone(member.getPhone());
         memberRepository.save(exsitsMember);
+        Optional<Member> newMember = memberRepository.findById(exsitsMember.getId());
+        return newMember;
     }
 
-    public void deleteMember(Member member){
-        memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
-        memberRepository.deleteById(member.getId());
-        System.out.println("삭제가 완료되었습니다");
+    public void deleteMember(String email){
+        memberRepository.findByEmail(email).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+        memberRepository.deleteByEmail(email);
     }
 
 }

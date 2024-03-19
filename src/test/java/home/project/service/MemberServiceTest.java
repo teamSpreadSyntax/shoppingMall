@@ -122,8 +122,7 @@ class MemberServiceTest {
         memberService.join(member1);
 
 // When (실행)
-        Member findMember = memberService.findByEmail(member1.getEmail()).get();
-        memberService.deleteMember(findMember);
+        memberService.deleteMember(member1.getEmail());
 
 // Then (결과 검증)
         assertThrows(IllegalStateException.class, () -> {memberService.findByEmail
