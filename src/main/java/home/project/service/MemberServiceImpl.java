@@ -20,26 +20,7 @@ public class MemberServiceImpl implements MemberService{
     public  MemberServiceImpl(MemberRepository memberRepository,PasswordEncoder passwordEncoder/*, AuthenticationManagerBuilder authenticationManagerBuilder, OAuth2ResourceServerProperties.Jwt jwt*/){
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
-//        this.authenticationManagerBuilder = authenticationManagerBuilder;
-//        this.jwt = jwt;
     }
-
-//    public ResponseEntity<?> login(LoginDto loginDto){
-////        Optional<Member> member = memberRepository.findByEmail(loginDto.getEmail());
-////        if(member.orElse(null) == null || !passwordEncoder.matches(loginDto.getPassword(), member.get().getPassword())){
-////            return response.fail("ID 또는 패스워드를 확인하세요" , HttpStatus.BAD_REQUEST);
-////        }
-////        UsernamePasswordAuthenticationToken authenticationToken = loginDto.toAuthentication();
-////        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-////        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
-////        redisTemplate.opsForValue().set("RT:" + authentication.getName(), tokenDto.getRefreshToken(), tokenDto.getRefreshTokenExpiresIn(), TimeUnit.MILLISECONDS);
-////        if (member.get().getAuthority() == Authority.ROLE_USER) {
-////            tokenDto.setInfo(member.get().getNickname());
-////        } else {
-////            tokenDto.setInfo(member.get().getStores().get(0).getName());
-////        }
-////        return response.success(tokenDto, "로그인에 성공했습니다.", HttpStatus.OK);
-//    }
 
     public void join (Member member){
         member.setPassword(passwordEncoder.encode(member.getPassword()));
