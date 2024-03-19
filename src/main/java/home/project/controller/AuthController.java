@@ -53,14 +53,15 @@ public class AuthController {
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid home.project.domain.UserDetails userDetailss, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
+        if (bindingResult.hasErrors()) {//유효성 검사 단계
+            // BindingResult : 요청 데이터를 바이딩할때 발생한 에러나 검증 실패정보를 저장하고 처리하는 역할
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMap.put(error.getField(), error.getDefaultMessage());
             }
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
         }
-        try {
+        try {//로그인 로직 수행
              userDetailsService.loadUserByUsername(userDetailss.getEmail());
              Optional<Member> member = memberService.findByEmail(userDetailss.getEmail());
             if (!passwordEncoder.matches(userDetailss.getPassword(), member.get().getPassword())) {throw new DataIntegrityViolationException("비밀번호를 확인해주세요");}
