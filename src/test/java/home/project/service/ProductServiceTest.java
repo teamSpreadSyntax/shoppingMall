@@ -51,6 +51,7 @@ class ProductServiceTest {
 
     }
 
+    @DisplayName("모든 제품 찾기")
     @Test
     void findAll() {
         //given
@@ -76,6 +77,7 @@ class ProductServiceTest {
 
     }
 
+    @DisplayName("이름으로 찾기")
     @Test
     void findByname() {
         //given
@@ -92,6 +94,7 @@ class ProductServiceTest {
         Assertions.assertThat(product1.getName()).isEqualTo(findByName.getName());
     }
 
+    @DisplayName("브랜드명으로 찾기")
     @Test
     void findByBrand() {
         //given
@@ -116,6 +119,7 @@ class ProductServiceTest {
         Assertions.assertThat(findByBrand.size()).isEqualTo(2);
     }
 
+    @DisplayName("카테고리별로 찾기")
     @Test
     void findByCategory() {
         //given
@@ -140,6 +144,7 @@ class ProductServiceTest {
         Assertions.assertThat(findByCategory.size()).isEqualTo(2);
     }
 
+    @DisplayName("제품을 누르면 상세 페이지로 가는 테스트")
     @Test
     void detailProduct() {
         //given
@@ -156,6 +161,7 @@ class ProductServiceTest {
         Assertions.assertThat(detailProduct).isEqualTo(product1);
     }
 
+    @DisplayName("제품정보 업데이트 테스트")
     @Test
     void update() {
         //given
@@ -175,6 +181,7 @@ class ProductServiceTest {
 
     }
 
+    @DisplayName("아이디로 삭제하기")
     @Test
     void deleteById() {
         //given
@@ -193,6 +200,7 @@ class ProductServiceTest {
                 (product1.getName()).orElseThrow(() -> new IllegalStateException("존재하지 않는 제품입니다."));});
     }
 
+    @DisplayName("모든 브랜드 리스트 찾기")
     @Test
     void brandList() {
         //given
@@ -226,6 +234,7 @@ class ProductServiceTest {
         assertTrue(productList.contains("뉴발란스")); // 리스트에 "뉴발란스" 브랜드가 포함되어 있는지 확인
     }
 
+    @DisplayName("수량 증가 및 판매량 카운트 그대로")
     @Test
     void increaseStock() {
         //given
@@ -244,7 +253,58 @@ class ProductServiceTest {
         Assertions.assertThat(update.getSelledcount()).isEqualTo(50L);
     }
 
+    @DisplayName("수량 감소 및 판매량 카운트 그대로")
     @Test
     void decreaseStock() {
+        //given
+        Product product1 = new Product();
+        product1.setBrand("나이키");
+        product1.setCategory("바지");
+        product1.setImage("123.img");
+        product1.setName("나이키 플러워");
+        product1.setStock(10L);
+        product1.setSelledcount(50L);
+        productService.join(product1);
+        //when
+        Product update = productService.decreaseStock(product1.getId(),10L);
+        //then
+        Assertions.assertThat(update.getStock()).isEqualTo(0L);
+        Assertions.assertThat(update.getSelledcount()).isEqualTo(50L);
+    }
+    @DisplayName("판매 취소가 되면 판매량 카운트 감소")
+    @Test
+    void selledCancle() {
+        //given
+        Product product1 = new Product();
+        product1.setBrand("나이키");
+        product1.setCategory("바지");
+        product1.setImage("123.img");
+        product1.setName("나이키 플러워");
+        product1.setStock(10L);
+        product1.setSelledcount(100L);
+        productService.join(product1);
+        //when
+        Product update = productService.selledCancle(product1.getId(),10L);
+        //then
+        Assertions.assertThat(update.getStock()).isEqualTo(20L);
+        Assertions.assertThat(update.getSelledcount()).isEqualTo(90L);
+    }
+    @DisplayName("제품이 판매가 되면 판매량 카운트 증가")
+    @Test
+    void selledProduct() {
+        //given
+        Product product1 = new Product();
+        product1.setBrand("나이키");
+        product1.setCategory("바지");
+        product1.setImage("123.img");
+        product1.setName("나이키 플러워");
+        product1.setStock(10L);
+        product1.setSelledcount(50L);
+        productService.join(product1);
+        //when
+        Product update = productService.selledProduct(product1.getId(),10L);
+        //then
+        Assertions.assertThat(update.getStock()).isEqualTo(0L);
+        Assertions.assertThat(update.getSelledcount()).isEqualTo(60L);
     }
 }

@@ -137,4 +137,12 @@ public class ProductController {
         Product decreaseProduct = productService.decreaseStock(productId,stock);
         return ResponseEntity.ok(decreaseProduct);
     }
+
+    @Operation(summary = "판매완료(재고수량 감소 메서드)", description = "판매완료(재고수량 감소 메서드 입니다.)")
+    @PutMapping("SelledProduct")
+    public ResponseEntity<Product> selledProduct(@RequestParam("productId") Long productId,
+                                                 @RequestParam("stock") Long stock){
+        Product decreaseProduct = productService.selledProduct(productId,stock);
+        return ResponseEntity.ok(decreaseProduct);
+    }
 }

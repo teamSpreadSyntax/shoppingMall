@@ -24,4 +24,6 @@ public interface ProductService {
 
     Product decreaseStock(Long productId, Long stock);
 
+    Product selledProduct(Long productId, Long stock);
+
 }
