@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 //import io.swagger.v3.oas.models.PathItem;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -87,7 +89,10 @@ public class MemberController {
 
     @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
     @GetMapping("FindByEmail")
-    public CustomOptionalResponseEntity<Optional<Member>> findMember(@RequestParam("MemberEmail") String email) {
+    public CustomOptionalResponseEntity<Optional<Member>> findMember(@RequestParam("MemberEmail") @Valid String email) {
+        if (email == null || email.isEmpty()) {
+            throw new IllegalStateException("이메일이 입력되지 않았습니다.");
+        }
         try {
             Optional<Member> memberOptional = memberService.findByEmail(email);
             String successMessage = email+"로 회원 조회 성공";
@@ -112,7 +117,6 @@ public class MemberController {
                 return new CustomListResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
             }
         }
-
 
 
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
