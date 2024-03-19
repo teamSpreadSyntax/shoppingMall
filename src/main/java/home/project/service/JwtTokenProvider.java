@@ -20,16 +20,18 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
-@Slf4j
-@Service
+@Slf4j//로깅하기 위한 어노테이션
+@Service//스프링 빈으로 등록하기 위한것
 public class JwtTokenProvider {
-    private final Key key;
+    private final Key key; // JWT 토큰을 암호화/복호화하는데 샤용되는 비밀키
     private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 1000;
     private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
+    //각각의 액세스 토큰과 리프레시토큰의 유효기간을 밀리초 단위로 정의한것.
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+        //secretKey를 Base64로 디코딩하여 만듬.
     }
 
     // 유저 정보를 가지고 AccessToken, RefreshToken 을 생성하는 메서드
