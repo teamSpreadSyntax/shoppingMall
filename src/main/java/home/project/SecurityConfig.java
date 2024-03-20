@@ -44,15 +44,27 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/**").permitAll()
-                        .requestMatchers("/swagger-ui/**" ).permitAll()
-                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
-                        .requestMatchers("/api/product/**").hasRole("USER")
-                        .anyRequest().permitAll()
-                        )
-                        .formLogin(formLogin -> formLogin
+                        .requestMatchers("/login", "/logout").permitAll()
+                        .anyRequest().hasRole("ADMIN")
+                )
+                .formLogin(formLogin -> formLogin
                         .loginPage("/login")
                         .permitAll());
+
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .sessionManagement(sessionManagement ->
+//                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                )
+//                .authorizeHttpRequests(requests -> requests
+//                        .requestMatchers("/**").permitAll()
+//                        .requestMatchers("/swagger-ui/**" ).permitAll()
+//                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
+//                        .requestMatchers("/api/product/**").hasRole("USER")
+//                        .anyRequest().permitAll()
+//                        )
+//                        .formLogin(formLogin -> formLogin
+//                        .loginPage("/login")
+//                        .permitAll());
 
         return http.build();
     }
