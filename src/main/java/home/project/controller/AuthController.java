@@ -67,14 +67,6 @@ public class AuthController {
             if (!passwordEncoder.matches(userDetailss.getPassword(), member.get().getPassword())) {throw new DataIntegrityViolationException("비밀번호를 확인해주세요");}
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailss.getEmail(), userDetailss.getPassword()));
             TokenDto tokenDto = tokenProvider.generateToken(authentication);
-//            TokenDto tokenDto = new TokenDto();
-//            tokenDto.setAccessToken(token);
-//            tokenDto.setRefreshToken(token);
-//            tokenDto.setGrantType(token);
-//            tokenDto.setInfo(token);
-//            tokenDto.setAccessTokenExpireln(Long.valueOf(token));
-//            tokenDto.setRefreshTokenExpiresin(Long.valueOf(token));
-//            tokenDto.setAuthority(token);
             return ResponseEntity.ok(tokenDto);
         } catch (DataIntegrityViolationException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

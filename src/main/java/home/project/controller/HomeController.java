@@ -11,6 +11,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "최영원 바보"; // 뷰 이름을 반환합니다. 이 경우 "index.html"로 연결됩니다.
+        return "재고관리 프로그램"; // 뷰 이름을 반환합니다. 이 경우 "index.html"로 연결됩니다.
     }
 }
