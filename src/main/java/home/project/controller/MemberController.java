@@ -23,7 +23,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -35,7 +34,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "회원", description = "회원관련 API 입니다")
-@Transactional
 //@RequestMapping(path = "/api/member")
 @RequestMapping(path = "/api/member")
 @ApiResponses(value = {
