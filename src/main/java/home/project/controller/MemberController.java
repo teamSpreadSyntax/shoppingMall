@@ -23,6 +23,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -147,7 +148,7 @@ public class MemberController {
     }
 
 
-
+    @Transactional
     @Operation(summary = "멤버 삭제 메서드", description = "멤버를 삭제하는 메서드입니다.")
     @DeleteMapping("DeleteMember") // 멤버 삭제
     public ResponseEntity<?> deleteMember(@RequestParam("memberEmail") String email) {
