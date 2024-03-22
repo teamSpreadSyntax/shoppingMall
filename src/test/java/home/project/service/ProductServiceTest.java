@@ -194,7 +194,7 @@ class ProductServiceTest {
         productService.join(product1);
         //when
         Product findProduct = productService.findByName(product1.getName()).get();
-        productService.deleteById(findProduct.getId());
+        productService.deleteByName(findProduct.getName());
         //then
         assertThrows(IllegalStateException.class, () -> {productService.findByName
                 (product1.getName()).orElseThrow(() -> new IllegalStateException("존재하지 않는 제품입니다."));});
