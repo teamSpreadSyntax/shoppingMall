@@ -46,7 +46,7 @@ class ProductServiceTest {
         //when
         productService.join(product1);
         //then
-        Product product2 = productService.findByname(product1.getName()).get();
+        Product product2 = productService.findByName(product1.getName()).get();
         Assertions.assertThat(product1.getName()).isEqualTo(product2.getName());
 
     }
@@ -89,7 +89,7 @@ class ProductServiceTest {
         product1.setStock(4545L);
         productService.join(product1);
         //when
-        Product findByName = productService.findByname(product1.getName()).get();
+        Product findByName = productService.findByName(product1.getName()).get();
         //then
         Assertions.assertThat(product1.getName()).isEqualTo(findByName.getName());
     }
@@ -156,7 +156,7 @@ class ProductServiceTest {
         product1.setStock(10L);
         productService.join(product1);
         //when
-        Product detailProduct = productService.DetailProduct(product1.getId()).get();
+        Product detailProduct = productService.findByName(product1.getName()).get();
         //then
         Assertions.assertThat(detailProduct).isEqualTo(product1);
     }
@@ -176,7 +176,7 @@ class ProductServiceTest {
         product1.setCategory("카고바지");
         productService.update(product1);
         //then
-        Product productUpdate = productService.findByname(product1.getName()).get();
+        Product productUpdate = productService.findByName(product1.getName()).get();
         Assertions.assertThat(productUpdate.getName()).isEqualTo(product1.getName());
 
     }
@@ -193,10 +193,10 @@ class ProductServiceTest {
         product1.setStock(10L);
         productService.join(product1);
         //when
-        Product findProduct = productService.findByname(product1.getName()).get();
+        Product findProduct = productService.findByName(product1.getName()).get();
         productService.deleteById(findProduct.getId());
         //then
-        assertThrows(IllegalStateException.class, () -> {productService.findByname
+        assertThrows(IllegalStateException.class, () -> {productService.findByName
                 (product1.getName()).orElseThrow(() -> new IllegalStateException("존재하지 않는 제품입니다."));});
     }
 

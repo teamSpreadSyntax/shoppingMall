@@ -15,7 +15,10 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
 //    List<String> findTop5ByOrderBySelledcountDesc();
     @Query("SELECT p.brand FROM Product p ORDER BY p.brand ASC")
     List<String> findAllByOrderByBrandAsc();
-    Optional<Product> findByname(String productname);
+    Optional<Product> findByName(String productName);
+
+    void deleteByName(String productName);
+
     @Query("SELECT p FROM Product p WHERE p.category LIKE CONCAT(:category, '%')")
     Optional<List<Product>> findByCategory(@Param("category")String category);
     @Query("SELECT p FROM Product p WHERE p.brand LIKE CONCAT(:brand,'%') ")

@@ -1,8 +1,6 @@
 package home.project.service;
 
-import home.project.domain.Member;
 import home.project.domain.Product;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,12 +9,12 @@ import java.util.Optional;
 public interface ProductService {
     void join(Product product);
     List<Product> findAll();
-    Optional<Product> findByname(String name);
+    Optional<Product> findByName(String name);
     Optional<List<Product>> findByBrand(String brand);
-    Optional<Product> DetailProduct(Long productid);
+//    Optional<Product> DetailProduct(Long productid);
     Optional<List<Product>> findByCategory(String category);
-    void update(Product product);
-    void deleteById(Long productid);
+    Optional<Product> update(Product product);
+    void deleteByName(String productName);
     List<String> brandList();
     Product increaseStock(Long productId, Long stock);
 

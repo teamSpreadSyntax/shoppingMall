@@ -1,5 +1,6 @@
 package home.project.service;
 
+import home.project.domain.Member;
 import home.project.domain.Product;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,8 +28,8 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAll();
     }
 
-    public Optional<Product> findByname(String name) {
-        Product product = productRepository.findByname(name).orElseThrow(() -> { throw new IllegalStateException(name+"으로 가입된 회원이 없습니다."); });
+    public Optional<Product> findByName(String name) {
+        Product product = productRepository.findByName(name).orElseThrow(() -> { throw new IllegalStateException(name+"으로 가입된 회원이 없습니다."); });
         return Optional.ofNullable(product);
     }
     public Optional<List<Product>> findByBrand(String brand){
@@ -41,12 +42,12 @@ public class ProductServiceImpl implements ProductService {
         return Optional.ofNullable(product);
     }
 
-    public Optional<Product> DetailProduct (Long productid){
-        Product existProduct = productRepository.findById(productid).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
-        return Optional.ofNullable(existProduct);
-    }
+//    public Optional<Product> DetailProduct (Long productid){
+//        Product existProduct = productRepository.findById(productid).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+//        return Optional.ofNullable(existProduct);
+//    }
 
-    public void update (Product product){
+    public Optional<Product> update (Product product){
         Product exsitsProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
         exsitsProduct.setBrand(product.getBrand());
         exsitsProduct.setName(product.getName());
@@ -55,11 +56,13 @@ public class ProductServiceImpl implements ProductService {
         exsitsProduct.setStock(product.getStock());
         exsitsProduct.setCategory(product.getCategory());
         productRepository.save(exsitsProduct);
+        Optional<Product> newProduct = productRepository.findById(exsitsProduct.getId());
+        return newProduct;
     }
 
-    public void deleteById (Long productid){
-        productRepository.findById(productid).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
-        productRepository.deleteById(productid);
+    public void deleteByName (String productName){
+        productRepository.findByName(productName).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        productRepository.deleteByName(productName);
         System.out.println("삭제가 완료되었습니다");
     }
 
