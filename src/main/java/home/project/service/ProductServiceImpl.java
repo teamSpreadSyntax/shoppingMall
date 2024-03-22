@@ -29,16 +29,16 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Optional<Product> findByName(String name) {
-        Product product = productRepository.findByName(name).orElseThrow(() -> { throw new IllegalStateException(name+"으로 가입된 회원이 없습니다."); });
+        Product product = productRepository.findByName(name).orElseThrow(() -> { throw new IllegalArgumentException(name+"으로 등록된 상품이 없습니다."); });
         return Optional.ofNullable(product);
     }
     public Optional<List<Product>> findByBrand(String brand){
-        List<Product> product = productRepository.findByBrand(brand).orElseThrow(() -> { throw new IllegalStateException(brand+"브랜드가 없습니다."); });
+        List<Product> product = productRepository.findByBrand(brand).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(brand+"브랜드를 찾을수 없습니다."); });
         return Optional.ofNullable(product);
     }
 
     public Optional<List<Product>> findByCategory(String category) {
-        List<Product> product = productRepository.findByCategory(category).orElseThrow(() -> { throw new IllegalStateException(category+"카테고리에 상품이 없습니다."); });
+        List<Product> product = productRepository.findByCategory(category).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(category+"카테고리에 상품이 없습니다."); });
         return Optional.ofNullable(product);
     }
 
@@ -48,7 +48,7 @@ public class ProductServiceImpl implements ProductService {
 //    }
 
     public Optional<Product> update (Product product){
-        Product exsitsProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        Product exsitsProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
         exsitsProduct.setBrand(product.getBrand());
         exsitsProduct.setName(product.getName());
         exsitsProduct.setSelledcount(product.getSelledcount());
@@ -61,9 +61,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void deleteByName (String productName){
-        productRepository.findByName(productName).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
+        productRepository.findByName(productName).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
         productRepository.deleteByName(productName);
-        System.out.println("삭제가 완료되었습니다");
     }
 
     public List<String> brandList(){
@@ -76,7 +75,6 @@ public class ProductServiceImpl implements ProductService {
         Long newStock = currentStock + stock;
         product.setStock(newStock);
         return productRepository.save(product);
-
     }
 
     public Product selledCancle(Long productId , Long stock) {

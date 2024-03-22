@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -113,7 +114,7 @@ public class ProductController {
     public CustomOptionalProductResponseEntity<Optional<List<Product>>> findProductByCategory(@RequestParam("category") String category) {
         try {
             Optional<List<Product>> productCategory = productService.findByCategory(category);
-            String successMessage = category+"에 해당하는 입니다";
+            String successMessage = category+"에 해당하는 상품입니다";
             CustomOptionalProductResponseBody<Optional<List<Product>>> responseBody = new CustomOptionalProductResponseBody<>(productCategory, successMessage);
             return new CustomOptionalProductResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
@@ -149,7 +150,17 @@ public class ProductController {
 
     @Operation(summary = "상품상세 메서드", description = "상품상세 메서드입니다.")
     @GetMapping("DetailProduct")
-    public CustomOptionalProductResponseEntity<Optional<Product>> DetailProduct(@RequestParam("productId") String productName) {
+    public CustomOptionalProductResponseEntity<Optional<Product>> DetailProduct(@RequestParam("productName") String productName) {
+//        switch (productName){
+//            case "하의": productName = "10";
+//                break;
+//            case "상의": productName = "20";
+//                break;
+//            case "바지": productName = "1010";
+//                break;
+//            case "티셔츠": productName = "2010";
+//                break;
+//        }
         try {
             Optional<Product> productOptional = productService.findByName(productName);
             String successMessage = productName+"로 등록된 상품 정보입니다";
@@ -161,6 +172,7 @@ public class ProductController {
         }
     }
 
+    @Transactional
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
     @DeleteMapping("DeleteProduct")
     public ResponseEntity<?> deleteProduct(@RequestParam("productName") String productName) {
@@ -192,33 +204,66 @@ public class ProductController {
 
     @Operation(summary = "재고수량 증가 메서드", description = "재고수량 증가 메서드 입니다.")
     @PutMapping ("IncreaseStock")
-    public ResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId,
-                                                 @RequestParam("stock") Long stock){
-        Product increaseProduct = productService.increaseStock(productId,stock);
-        return ResponseEntity.ok(increaseProduct);
+    public CustomOptionalProductResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
+        try {
+            Product increaseProduct = productService.increaseStock(productId,stock);
+            String successMessage = increaseProduct.getName()+"상품이"+stock+"개 증가하여"+increaseProduct.getStock()+"개가 되었습니다";
+            CustomOptionalProductResponseBody<Product> responseBody = new CustomOptionalProductResponseBody<>(Optional.ofNullable(increaseProduct), successMessage);
+            return new CustomOptionalProductResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            CustomOptionalProductResponseBody<Product> errorBody = new CustomOptionalProductResponseBody<>(null, "Validation failed");
+            return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Operation(summary = "판매취소(재고수량 증가 메서드)", description = "판매취소(재고수량 증가 메서드 입니다.)")
     @PutMapping ("selledCancle")
-    public ResponseEntity<Product> selledCancle(@RequestParam("productId") Long productId,
-                                                @RequestParam("stock") Long stock){
-        Product increaseProduct = productService.selledCancle(productId,stock);
-        return ResponseEntity.ok(increaseProduct);
+    public CustomOptionalProductResponseEntity<Product> selledCancle(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
+        try {
+            Product increaseProduct = productService.selledCancle(productId,stock);
+            String successMessage = increaseProduct.getName()+"상품이"+stock+"개 판매취소되어"+increaseProduct.getStock()+"개가 되었습니다";
+            CustomOptionalProductResponseBody<Product> responseBody = new CustomOptionalProductResponseBody<>(Optional.ofNullable(increaseProduct), successMessage);
+            return new CustomOptionalProductResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            CustomOptionalProductResponseBody<Product> errorBody = new CustomOptionalProductResponseBody<>(null, "Validation failed");
+            return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     @Operation(summary = "재고수량 감소 메서드", description = "재고수량 감소 메서드 입니다.")
     @PutMapping("DecreaseStock")
-    public ResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId,
-                                                 @RequestParam("stock") Long stock){
-        Product decreaseProduct = productService.decreaseStock(productId,stock);
-        return ResponseEntity.ok(decreaseProduct);
+    public CustomOptionalProductResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
+        try {
+            Product decreaseProduct = productService.decreaseStock(productId,stock);
+            String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 감소하여"+decreaseProduct.getStock()+"개가 되었습니다";
+            CustomOptionalProductResponseBody<Product> responseBody = new CustomOptionalProductResponseBody<>(Optional.ofNullable(decreaseProduct), successMessage);
+            return new CustomOptionalProductResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            CustomOptionalProductResponseBody<Product> errorBody = new CustomOptionalProductResponseBody<>(null, "Validation failed");
+            return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Operation(summary = "판매완료(재고수량 감소 메서드)", description = "판매완료(재고수량 감소 메서드 입니다.)")
     @PutMapping("SelledProduct")
-    public ResponseEntity<Product> selledProduct(@RequestParam("productId") Long productId,
-                                                 @RequestParam("stock") Long stock){
-        Product decreaseProduct = productService.selledProduct(productId,stock);
-        return ResponseEntity.ok(decreaseProduct);
+    public CustomOptionalProductResponseEntity<Product> selledProduct(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
+        try {
+            Product decreaseProduct = productService.selledProduct(productId,stock);
+            String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 판매되어"+decreaseProduct.getStock()+"개가 되었습니다";
+            CustomOptionalProductResponseBody<Product> responseBody = new CustomOptionalProductResponseBody<>(Optional.ofNullable(decreaseProduct), successMessage);
+            return new CustomOptionalProductResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            CustomOptionalProductResponseBody<Product> errorBody = new CustomOptionalProductResponseBody<>(null, "Validation failed");
+            return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("errorMessage", e.getMessage());
+        return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
     }
 }

@@ -28,7 +28,7 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public Optional<Member> findByEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalStateException(email+"로 가입된 회원이 없습니다."); });
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalArgumentException(email+"로 가입된 회원이 없습니다."); });
         return Optional.ofNullable(member);
     }
 
@@ -37,7 +37,7 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public Optional<Member> update (Member member){
-        Member exsitsMember = memberRepository.findByEmail(member.getEmail()).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+        Member exsitsMember = memberRepository.findByEmail(member.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         exsitsMember.setPassword(member.getPassword());
         exsitsMember.setName(member.getName());
         exsitsMember.setEmail(member.getEmail());
@@ -48,7 +48,7 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public void deleteMember(String email){
-        memberRepository.findByEmail(email).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));
+        memberRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
         memberRepository.deleteByEmail(email);
     }
 
