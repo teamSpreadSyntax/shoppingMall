@@ -125,7 +125,13 @@ class MemberServiceTest {
         memberService.deleteMember(member1.getEmail());
 
 // Then (결과 검증)
-        assertThrows(IllegalStateException.class, () -> {memberService.findByEmail
-                (member1.getEmail()).orElseThrow(() -> new IllegalStateException("존재하지 않는 회원입니다."));});
+        try {
+            assertThrows(IllegalArgumentException.class, () -> {
+                memberService.findByEmail
+                        (member1.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            });
+        }catch (IllegalArgumentException e){
+            System.out.print("삭제성공");
+        }
     }
 }

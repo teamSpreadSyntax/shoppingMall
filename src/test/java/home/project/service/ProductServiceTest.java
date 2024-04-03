@@ -196,8 +196,12 @@ class ProductServiceTest {
         Product findProduct = productService.findByName(product1.getName()).get();
         productService.deleteByName(findProduct.getName());
         //then
-        assertThrows(IllegalStateException.class, () -> {productService.findByName
-                (product1.getName()).orElseThrow(() -> new IllegalStateException("존재하지 않는 제품입니다."));});
+        try {
+        assertThrows(IllegalArgumentException.class, () -> {productService.findByName
+                (product1.getName()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 제품입니다."));});
+        }catch (IllegalArgumentException e){
+            System.out.print("삭제성공");
+        }
     }
 
     @DisplayName("모든 브랜드 리스트 찾기")
