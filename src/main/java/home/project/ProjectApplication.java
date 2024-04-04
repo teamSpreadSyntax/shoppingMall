@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
-@Import(CorsConfig.class)
+/*@Import(CorsConfig.class)*/
 @SpringBootApplication
 public class ProjectApplication {
 
