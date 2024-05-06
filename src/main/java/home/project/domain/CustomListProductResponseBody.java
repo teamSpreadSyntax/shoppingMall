@@ -3,13 +3,13 @@ package home.project.domain;
 import java.util.List;
 
 public class CustomListProductResponseBody<T> {
-    public List listProduct;
+    public List result;
 
     public String ResponsMessege;
 
 
-    public CustomListProductResponseBody(List listProduct, String ResponsMessege) {
-        this.listProduct = listProduct;
+    public CustomListProductResponseBody(List result, String ResponsMessege) {
+        this.result = result;
         this.ResponsMessege = ResponsMessege;
     }
 

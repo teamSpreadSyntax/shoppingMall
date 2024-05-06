@@ -5,6 +5,7 @@ import home.project.service.MemberService;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,8 @@ public class Member {
     private Long id;
 
     @NotEmpty(message = "이메일을 입력해주세요")
-    @Email(message = "이메일 형식이 올바르지 않습니다")
+//    @Email(message = "이메일 형식이 올바르지 않습니다")
+    @Pattern(regexp="^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$", message="이메일 형식이 올바르지 않습니다")
     @Column(name = "email")
     private String email;
 
@@ -45,5 +47,4 @@ public class Member {
     @NotEmpty(message = "전화번호를 입력해주세요")
     @Column(name = "phone")
     private String phone;
-
 }

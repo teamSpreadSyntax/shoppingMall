@@ -3,12 +3,12 @@ package home.project.domain;
 import java.util.Optional;
 
 public class CustomOptionalMemberResponseBody<T> {
-    public Optional OptionalMember;
+    public Optional result;
 
     public String ResponsMessege;
 
-    public CustomOptionalMemberResponseBody(Optional OptionalMember, String ResponsMessege) {
-        this.OptionalMember = OptionalMember;
+    public CustomOptionalMemberResponseBody(Optional result, String ResponsMessege) {
+        this.result = result;
         this.ResponsMessege = ResponsMessege;
     }
 

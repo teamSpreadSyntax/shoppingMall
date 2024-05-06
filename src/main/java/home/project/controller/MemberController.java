@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Tag(name = "회원", description = "회원관련 API 입니다")
 //@RequestMapping(path = "/api/member")
@@ -69,7 +70,7 @@ public class MemberController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
-    public ResponseEntity<?> createMember(@RequestBody @Valid Member member, BindingResult bindingResult) {
+    public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -78,6 +79,11 @@ public class MemberController {
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
         }
         try {
+            Member member = new Member();
+            member.setEmail(memberDTO.getEmail());
+            member.setPassword(memberDTO.getPassword());
+            member.setName(memberDTO.getName());
+            member.setPhone(memberDTO.getPhone());
             memberService.join(member);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("회원가입완료", member.getEmail()+"로 가입되었습니다");
@@ -108,14 +114,17 @@ public class MemberController {
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
-    public CustomListMemberResponseEntity<List<Member>> findAllMember() {
+    public CustomListMemberResponseEntity<List<MemberDTOWithoutPw>> findAllMember() {
             try {
                 List<Member> memberList = memberService.findAll();
+                List<MemberDTOWithoutPw> memberDtoList = memberList.stream()
+                        .map(m -> new MemberDTOWithoutPw(m.getId(), m.getEmail(), m.getName(), m.getPhone()))
+                        .collect(Collectors.toList());
                 String successMessage = "전체회원 입니다";
-                CustomListMemberResponseBody<List<Member>> responseBody = new CustomListMemberResponseBody<>(memberList, successMessage);
+                CustomListMemberResponseBody<List<MemberDTOWithoutPw>> responseBody = new CustomListMemberResponseBody<>(memberDtoList, successMessage);
                 return new CustomListMemberResponseEntity<>(responseBody, HttpStatus.OK);
             } catch (DataIntegrityViolationException e) {
-                CustomListMemberResponseBody<List<Member>> errorBody = new CustomListMemberResponseBody<>(null, "Validation failed");
+                CustomListMemberResponseBody<List<MemberDTOWithoutPw>> errorBody = new CustomListMemberResponseBody<>(null, "Validation failed");
                 return new CustomListMemberResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
             }
         }
