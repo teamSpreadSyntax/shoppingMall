@@ -2,6 +2,7 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Product;
+import home.project.domain.searchDTO;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,81 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findByName(name).orElseThrow(() -> { throw new IllegalArgumentException(name+"으로 등록된 상품이 없습니다."); });
         return Optional.ofNullable(product);
     }
+
+    public Optional<List<Product>> search(String contents) {
+        String category = "";
+
+    if (contents.contains("셔츠")) {
+        if (contents.contains("티")) {
+            if (contents.contains("반팔")) {
+                category = "010101";
+            } else if (contents.contains("긴팔")) {
+                category = "010102";
+            } else {
+                category = "0101";
+            }
+        } else if (contents.contains("블라우스")) {
+            if (contents.contains("반팔")) {
+                category = "010201";
+            } else if (contents.contains("긴팔")) {
+                category = "010202";
+            }else{
+                category = "0102";
+            }
+        } else if (contents.contains("와이셔츠")) {
+            if (contents.contains("반팔")) {
+                category = "010201";
+            } else if (contents.contains("긴팔")) {
+                category = "010202";
+            }else{
+                category = "0102";
+            }
+        } else if (contents.contains("반팔")) {
+            category = "010201";
+        } else if (contents.contains("긴팔")) {
+            category = "010202";
+        } else {
+            category = "0102";
+        }
+    } else if (contents.contains("니트")) {
+        if (contents.contains("반팔")) {
+            category = "010301";
+        } else if (contents.contains("긴팔")) {
+            category = "010302";
+        }else{
+            category = "0103";
+        }
+    } else if (contents.contains("바지")) {
+        if (contents.contains("면")) {
+            category = "0201";
+        } else if (contents.contains("청")) {
+            category = "0203";
+        } else {
+            category = "02";
+            }
+        }
+    List<Product> product = productRepository.search(contents,category).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(contents+"상품을 찾을수 없습니다."); });
+    return Optional.ofNullable(product);
+    }
+
+//    public Optional<List<Product>> search(String contents) {
+//        String category = "";
+//
+//        switch(contents) {
+//            case "%셔츠%":
+//                category = searchDTO.handleShirts(contents);
+//                break;
+//            case "%니트%":
+//                category = searchDTO.handleKnit(contents);
+//                break;
+//            case "%바지%":
+//                category = searchDTO.handlePants(contents);
+//                break;
+//        }
+//        List<Product> product = productRepository.search(contents,category).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(contents+"상품을 찾을수 없습니다."); });
+//        return Optional.ofNullable(product);
+//    }
+
     public Optional<List<Product>> findByBrand(String brand){
         List<Product> product = productRepository.findByBrand(brand).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(brand+"브랜드를 찾을수 없습니다."); });
         return Optional.ofNullable(product);

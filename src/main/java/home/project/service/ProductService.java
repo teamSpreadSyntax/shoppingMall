@@ -10,6 +10,7 @@ public interface ProductService {
     void join(Product product);
     List<Product> findAll();
     Optional<Product> findByName(String name);
+    Optional<List<Product>> search(String contents);
     Optional<List<Product>> findByBrand(String brand);
 //    Optional<Product> DetailProduct(Long productid);
     Optional<List<Product>> findByCategory(String category);

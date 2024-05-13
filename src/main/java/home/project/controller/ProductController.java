@@ -94,6 +94,21 @@ public class ProductController {
         }
     }
 
+    @Operation(summary = "검색", description = "단순검색 메서드입니다")
+    @GetMapping("search")
+    public CustomOptionalProductResponseEntity<Optional<List<Product>>> search(@RequestParam("contents") String contents) {
+        try {
+            Optional<List<Product>> product = productService.search(contents);
+            String successMessage = contents+"에 해당하는 상품 입니다";
+            CustomOptionalProductResponseBody<Optional<List<Product>>> responseBody = new CustomOptionalProductResponseBody<>(product, successMessage);
+            return new CustomOptionalProductResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            CustomOptionalProductResponseBody<Optional<List<Product>>> errorBody = new CustomOptionalProductResponseBody<>(null, "Validation failed");
+            return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
+
+    }
+
     @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
     @GetMapping("FindByBrand")
     public CustomOptionalProductResponseEntity<Optional<List<Product>>> findProductByBrand(@RequestParam("brand") String brand) {
