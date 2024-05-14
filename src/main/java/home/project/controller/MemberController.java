@@ -19,6 +19,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -95,6 +97,23 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "ID로 회원조회 메서드", description = "ID로 회원조회 메서드입니다.")
+    @GetMapping("findMemberById")
+    public CustomOptionalMemberResponseEntity<Optional<Member>> findMemberById(@RequestParam("MemberId") Long ID) {
+        if (ID == null) {
+            throw new IllegalStateException("이메일이 입력되지 않았습니다.");
+        }
+        try {
+            Optional<Member> memberOptional = memberService.findById(ID);
+            String successMessage = ID+"로 가입된 회원정보입니다";
+            CustomOptionalMemberResponseBody<Optional<Member>> responseBody = new CustomOptionalMemberResponseBody<>(memberOptional, successMessage);
+            return new CustomOptionalMemberResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            CustomOptionalMemberResponseBody<Optional<Member>> errorBody = new CustomOptionalMemberResponseBody<>(null, "Validation failed");
+            return new CustomOptionalMemberResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
     @GetMapping("FindByEmail")
     public CustomOptionalMemberResponseEntity<Optional<Member>> findMember(@RequestParam("MemberEmail") @Valid String email) {
@@ -114,17 +133,16 @@ public class MemberController {
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
-    public CustomListMemberResponseEntity<List<MemberDTOWithoutPw>> findAllMember() {
-            try {
-                List<Member> memberList = memberService.findAll();
-                List<MemberDTOWithoutPw> memberDtoList = memberList.stream()
-                        .map(m -> new MemberDTOWithoutPw(m.getId(), m.getEmail(), m.getName(), m.getPhone()))
-                        .collect(Collectors.toList());
-                String successMessage = "전체회원 입니다";
-                CustomListMemberResponseBody<List<MemberDTOWithoutPw>> responseBody = new CustomListMemberResponseBody<>(memberDtoList, successMessage);
-                return new CustomListMemberResponseEntity<>(responseBody, HttpStatus.OK);
+    public CustomListMemberResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(Pageable pageable) {
+        try {
+            Page<Member> memberPage = memberService.findAll(pageable);
+            Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
+                    new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+            String successMessage = "전체 회원입니다";
+            CustomListMemberResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListMemberResponseBody<>(memberDtoPage.getContent(), successMessage);
+            return new CustomListMemberResponseEntity<>(responseBody, HttpStatus.OK);
             } catch (DataIntegrityViolationException e) {
-                CustomListMemberResponseBody<List<MemberDTOWithoutPw>> errorBody = new CustomListMemberResponseBody<>(null, "Validation failed");
+            CustomListMemberResponseBody<Page<MemberDTOWithoutPw>> errorBody = new CustomListMemberResponseBody<>(null, "Validation failed");
                 return new CustomListMemberResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
             }
         }

@@ -1,5 +1,6 @@
 package home.project.service;
 
+import home.project.domain.Member;
 import home.project.domain.Product;
 
 import java.util.List;
@@ -10,6 +11,7 @@ public interface ProductService {
     void join(Product product);
     List<Product> findAll();
     Optional<Product> findByName(String name);
+    Optional<Product> findById(Long ID);
     Optional<List<Product>> search(String contents);
     Optional<List<Product>> findByBrand(String brand);
 //    Optional<Product> DetailProduct(Long productid);

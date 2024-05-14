@@ -34,6 +34,12 @@ public class ProductServiceImpl implements ProductService {
         return Optional.ofNullable(product);
     }
 
+    public Optional<Product> findById(Long ID) {
+        Product product = productRepository.findById(ID).orElseThrow(() -> { throw new IllegalArgumentException(ID+"로 설정된 상품이 없습니다."); });
+        return Optional.ofNullable(product);
+    }
+
+
     public Optional<List<Product>> search(String contents) {
         String category = "";
 

@@ -17,6 +17,8 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
     List<String> findAllByOrderByBrandAsc();
     Optional<Product> findByName(String productName);
 
+    Optional<Product> findById(Long ID);
+
     void deleteByName(String productName);
 
     @Query("SELECT DISTINCT p FROM Product p WHERE p.name LIKE %:contents% OR p.brand LIKE %:contents% OR p.category LIKE %:category%")

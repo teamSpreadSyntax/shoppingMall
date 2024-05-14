@@ -6,6 +6,8 @@ import home.project.domain.MemberDTOWithoutPw;
 import home.project.repository.MemberRepository;
 //import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,13 +31,18 @@ public class MemberServiceImpl implements MemberService{
         memberRepository.save(member);
     }
 
+    public Optional<Member> findById(Long ID) {
+        Member member = memberRepository.findById(ID).orElseThrow(() -> { throw new IllegalArgumentException(ID+"로 등록된 회원이 없습니다."); });
+        return Optional.ofNullable(member);
+    }
+
     public Optional<Member> findByEmail(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalArgumentException(email+"로 가입된 회원이 없습니다."); });
         return Optional.ofNullable(member);
     }
 
-    public List<Member> findAll() {
-        return memberRepository.findAll();
+    public Page<Member> findAll(Pageable pageable) {
+        return memberRepository.findAll(pageable);
     }
 
     public Optional<Member> update (Member member){

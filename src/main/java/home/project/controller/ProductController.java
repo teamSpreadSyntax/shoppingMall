@@ -106,7 +106,20 @@ public class ProductController {
             CustomOptionalProductResponseBody<Optional<List<Product>>> errorBody = new CustomOptionalProductResponseBody<>(null, "Validation failed");
             return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
+    }
 
+    @Operation(summary = "ID로 상품조회 메서드", description = "ID로 상품조회 메서드입니다")
+    @GetMapping("FindProductById")
+    public CustomOptionalProductResponseEntity<Optional<Product>> findProductById(@RequestParam("ID") Long ID) {
+        try {
+            Optional<Product> product = productService.findById(ID);
+            String successMessage = ID+"에 해당하는 상품 입니다";
+            CustomOptionalProductResponseBody<Optional<Product>> responseBody = new CustomOptionalProductResponseBody<>(product, successMessage);
+            return new CustomOptionalProductResponseEntity<>(responseBody, HttpStatus.OK);
+        } catch (DataIntegrityViolationException e) {
+            CustomOptionalProductResponseBody<Optional<Product>> errorBody = new CustomOptionalProductResponseBody<>(null, "Validation failed");
+            return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
@@ -121,7 +134,6 @@ public class ProductController {
             CustomOptionalProductResponseBody<Optional<List<Product>>> errorBody = new CustomOptionalProductResponseBody<>(null, "Validation failed");
             return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @Operation(summary = "카테고리로 상품조회 메서드", description = "카테고리로 상품조회 메서드입니다.")
@@ -137,10 +149,6 @@ public class ProductController {
             return new CustomOptionalProductResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
     }
-//            0101(상의반팔)
-//            0102(상의긴팔)
-//            0201(바지긴바지)
-//            0202(바지반바지)
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateProduct")

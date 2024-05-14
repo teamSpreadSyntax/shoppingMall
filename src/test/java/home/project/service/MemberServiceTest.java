@@ -13,6 +13,9 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -84,10 +87,10 @@ class MemberServiceTest {
         member2.setName("Kang");
         member2.setPhone("010-0001-0002");
         memberService.join(member2);
-        //when
-        List<Member> member = memberService.findAll();
+        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
+        Page<Member> memberPage = memberService.findAll(pageable);
         //then
-        Assertions.assertThat(member.size()).isEqualTo(2);
+        Assertions.assertThat(memberPage.getTotalElements()).isEqualTo(2);
 
     }
     @DisplayName("이름을 변경하여 이메일로 같은지 확인")
