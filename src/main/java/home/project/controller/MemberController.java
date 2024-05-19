@@ -28,10 +28,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Tag(name = "회원", description = "회원관련 API 입니다")
 //@RequestMapping(path = "/api/member")
@@ -99,39 +97,39 @@ public class MemberController {
 
     @Operation(summary = "ID로 회원조회 메서드", description = "ID로 회원조회 메서드입니다.")
     @GetMapping("findMemberById")
-    public CustomOptionalMemberResponseEntity<Optional<Member>> findMemberById(@RequestParam("MemberId") Long ID) {
+    public CustomOptionalResponseEntity<Optional<Member>> findMemberById(@RequestParam("MemberId") Long ID) {
         if (ID == null) {
             throw new IllegalStateException("이메일이 입력되지 않았습니다.");
         }
         Optional<Member> memberOptional = memberService.findById(ID);
         String successMessage = ID + "로 가입된 회원정보입니다";
-        CustomOptionalMemberResponseBody<Optional<Member>> responseBody = new CustomOptionalMemberResponseBody<>(memberOptional, successMessage);
-        return new CustomOptionalMemberResponseEntity<>(responseBody, HttpStatus.OK);
+        CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
 
     @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
     @GetMapping("FindByEmail")
-    public CustomOptionalMemberResponseEntity<Optional<Member>> findMember(@RequestParam("MemberEmail") @Valid String email) {
+    public CustomOptionalResponseEntity<Optional<Member>> findMember(@RequestParam("MemberEmail") @Valid String email) {
         if (email == null || email.isEmpty()) {
             throw new IllegalStateException("이메일이 입력되지 않았습니다.");
         }
         Optional<Member> memberOptional = memberService.findByEmail(email);
         String successMessage = email + "로 가입된 회원정보입니다";
-        CustomOptionalMemberResponseBody<Optional<Member>> responseBody = new CustomOptionalMemberResponseBody<>(memberOptional, successMessage);
-        return new CustomOptionalMemberResponseEntity<>(responseBody, HttpStatus.OK);
+        CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
-    public CustomListMemberResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(Pageable pageable) {
+    public CustomListResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(Pageable pageable) {
         Page<Member> memberPage = memberService.findAll(pageable);
         Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
                 new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
         String successMessage = "전체 회원입니다";
-        CustomListMemberResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListMemberResponseBody<>(memberDtoPage.getContent(), successMessage);
-        return new CustomListMemberResponseEntity<>(responseBody, HttpStatus.OK);
+        CustomListResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListResponseBody<>(memberDtoPage.getContent(), successMessage);
+        return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
 
@@ -149,11 +147,11 @@ public class MemberController {
         try {
             Optional<Member> memberOptional = memberService.update(member);
             String successMessage = "정보가 수정되었습니다";
-            CustomOptionalMemberResponseBody<Optional<Member>> responseBody = new CustomOptionalMemberResponseBody<>(memberOptional, successMessage);
-            return new CustomOptionalMemberResponseEntity<>(responseBody, HttpStatus.OK);
+            CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
+            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
-            CustomOptionalMemberResponseBody<Optional<Member>> errorBody = new CustomOptionalMemberResponseBody<>(null, "Validation failed");
-            return new CustomOptionalMemberResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+            CustomOptionalResponseBody<Optional<Member>> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed");
+            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
     }
 
