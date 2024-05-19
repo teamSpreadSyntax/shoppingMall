@@ -22,7 +22,7 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
 
     void deleteByName(String productName);
 
-    @Query("SELECT DISTINCT p FROM Product p WHERE p.name LIKE %:contents% OR p.brand LIKE %:contents% OR p.category LIKE :category%")
+    @Query("SELECT DISTINCT p FROM Product p WHERE p.name LIKE %:contents% OR p.brand LIKE %:contents% OR p.category LIKE %:category%")
     Optional<List<Product>> search(@Param("contents")String contents, @Param("category")String category, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.category LIKE CONCAT(:category, '%')")
