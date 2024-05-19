@@ -11,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -71,9 +74,10 @@ class ProductServiceTest {
         product2.setStock(45L);
         productService.join(product2);
         //when
-        List<Product> product = productService.findAll();
+        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
+        Page<Product> product = productService.findAll(pageable);
         //then
-        Assertions.assertThat(product.size()).isEqualTo(2);
+        Assertions.assertThat(product.getTotalElements()).isEqualTo(2);
 
     }
 

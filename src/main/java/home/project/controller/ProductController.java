@@ -68,10 +68,10 @@ public class ProductController {
 
     @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
     @GetMapping("FindAllProduct")
-    public CustomListProductResponseEntity<List<Product>> findAllProduct() {
-            List<Product> productList = productService.findAll();
+    public CustomListProductResponseEntity<Page<Product>> findAllProduct(@PageableDefault(page = 1, size = 5, sort = "id,asc") Pageable pageable) {
+            Page<Product> productList = productService.findAll(pageable);
             String successMessage = "전체상품 입니다";
-            CustomListProductResponseBody<List<Product>> responseBody = new CustomListProductResponseBody<>(productList, successMessage);
+            CustomListProductResponseBody<Page<Product>> responseBody = new CustomListProductResponseBody<>(productList.getContent(), successMessage);
             return new CustomListProductResponseEntity<>(responseBody, HttpStatus.OK);
     }
 

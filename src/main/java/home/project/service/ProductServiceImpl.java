@@ -29,8 +29,8 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
     }
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
+    public Page<Product> findAll(Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 
     public Optional<Product> findByName(String name) {
