@@ -103,16 +103,12 @@ public class MemberController {
         if (ID == null) {
             throw new IllegalStateException("이메일이 입력되지 않았습니다.");
         }
-        try {
-            Optional<Member> memberOptional = memberService.findById(ID);
-            String successMessage = ID+"로 가입된 회원정보입니다";
-            CustomOptionalMemberResponseBody<Optional<Member>> responseBody = new CustomOptionalMemberResponseBody<>(memberOptional, successMessage);
-            return new CustomOptionalMemberResponseEntity<>(responseBody, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            CustomOptionalMemberResponseBody<Optional<Member>> errorBody = new CustomOptionalMemberResponseBody<>(null, "Validation failed");
-            return new CustomOptionalMemberResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
+        Optional<Member> memberOptional = memberService.findById(ID);
+        String successMessage = ID + "로 가입된 회원정보입니다";
+        CustomOptionalMemberResponseBody<Optional<Member>> responseBody = new CustomOptionalMemberResponseBody<>(memberOptional, successMessage);
+        return new CustomOptionalMemberResponseEntity<>(responseBody, HttpStatus.OK);
     }
+
 
     @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
     @GetMapping("FindByEmail")
@@ -120,32 +116,24 @@ public class MemberController {
         if (email == null || email.isEmpty()) {
             throw new IllegalStateException("이메일이 입력되지 않았습니다.");
         }
-        try {
-            Optional<Member> memberOptional = memberService.findByEmail(email);
-            String successMessage = email+"로 가입된 회원정보입니다";
-            CustomOptionalMemberResponseBody<Optional<Member>> responseBody = new CustomOptionalMemberResponseBody<>(memberOptional, successMessage);
-            return new CustomOptionalMemberResponseEntity<>(responseBody, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            CustomOptionalMemberResponseBody<Optional<Member>> errorBody = new CustomOptionalMemberResponseBody<>(null, "Validation failed");
-            return new CustomOptionalMemberResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
+        Optional<Member> memberOptional = memberService.findByEmail(email);
+        String successMessage = email + "로 가입된 회원정보입니다";
+        CustomOptionalMemberResponseBody<Optional<Member>> responseBody = new CustomOptionalMemberResponseBody<>(memberOptional, successMessage);
+        return new CustomOptionalMemberResponseEntity<>(responseBody, HttpStatus.OK);
     }
+
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
     public CustomListMemberResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(Pageable pageable) {
-        try {
-            Page<Member> memberPage = memberService.findAll(pageable);
-            Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
-                    new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
-            String successMessage = "전체 회원입니다";
-            CustomListMemberResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListMemberResponseBody<>(memberDtoPage.getContent(), successMessage);
-            return new CustomListMemberResponseEntity<>(responseBody, HttpStatus.OK);
-            } catch (DataIntegrityViolationException e) {
-            CustomListMemberResponseBody<Page<MemberDTOWithoutPw>> errorBody = new CustomListMemberResponseBody<>(null, "Validation failed");
-                return new CustomListMemberResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-            }
-        }
+        Page<Member> memberPage = memberService.findAll(pageable);
+        Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
+                new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+        String successMessage = "전체 회원입니다";
+        CustomListMemberResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListMemberResponseBody<>(memberDtoPage.getContent(), successMessage);
+        return new CustomListMemberResponseEntity<>(responseBody, HttpStatus.OK);
+    }
+
 
 
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
