@@ -5,9 +5,13 @@ import home.project.domain.Product;
 import home.project.domain.searchDTO;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,7 +44,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    public Optional<List<Product>> search(String contents) {
+    public Optional<Page<Product>> search(String contents, Pageable pageable) {
         String category = "";
 
     if (contents.contains("셔츠")) {
@@ -92,8 +96,8 @@ public class ProductServiceImpl implements ProductService {
             category = "02";
             }
         }
-    List<Product> product = productRepository.search(contents,category).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(contents+"상품을 찾을수 없습니다."); });
-    return Optional.ofNullable(product);
+    List<Product> product = productRepository.search(contents,category,pageable).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(contents+"상품을 찾을수 없습니다."); });
+        return Optional.of(new PageImpl<>(product, pageable, product.size()));
     }
 
 //    public Optional<List<Product>> search(String contents) {

@@ -2,6 +2,8 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Product;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +14,7 @@ public interface ProductService {
     List<Product> findAll();
     Optional<Product> findByName(String name);
     Optional<Product> findById(Long ID);
-    Optional<List<Product>> search(String contents);
+    Optional<Page<Product>> search(String contents, Pageable pageable);
     Optional<List<Product>> findByBrand(String brand);
 //    Optional<Product> DetailProduct(Long productid);
     Optional<List<Product>> findByCategory(String category);

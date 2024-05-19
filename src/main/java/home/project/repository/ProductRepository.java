@@ -2,6 +2,7 @@ package home.project.repository;
 
 import home.project.domain.Member;
 import home.project.domain.Product;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,7 +23,7 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
     void deleteByName(String productName);
 
     @Query("SELECT DISTINCT p FROM Product p WHERE p.name LIKE %:contents% OR p.brand LIKE %:contents% OR p.category LIKE %:category%")
-    Optional<List<Product>> search(@Param("contents")String contents, @Param("category")String category);
+    Optional<List<Product>> search(@Param("contents")String contents, @Param("category")String category, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.category LIKE CONCAT(:category, '%')")
     Optional<List<Product>> findByCategory(@Param("category")String category);
