@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -119,10 +120,13 @@ class ProductServiceTest {
         product2.setStock(20L);
         productService.join(product2);
         //when
-        List<Product> findByBrand = productService.findByBrand("나이키").get();
+        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
+        Page<Product> findByBrand = productService.findByBrand("나이키", pageable).get();
         //then
-        Assertions.assertThat(findByBrand.size()).isEqualTo(2);
+        Assertions.assertThat(findByBrand.getTotalElements()).isEqualTo(2);
     }
+
+
 
     @DisplayName("카테고리별로 찾기")
     @Test
@@ -144,9 +148,10 @@ class ProductServiceTest {
         product2.setStock(20L);
         productService.join(product2);
         //when
-        List<Product> findByCategory = productService.findByCategory("바지").get();
+        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
+        Page<Product> findByCategory = productService.findByCategory("바지", pageable).get();
         //then
-        Assertions.assertThat(findByCategory.size()).isEqualTo(2);
+        Assertions.assertThat(findByCategory.getTotalElements()).isEqualTo(2);
     }
 
     @DisplayName("제품을 누르면 상세 페이지로 가는 테스트")

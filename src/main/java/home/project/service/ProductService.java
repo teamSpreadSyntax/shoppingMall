@@ -16,9 +16,9 @@ public interface ProductService {
     Optional<Product> findByName(String name);
     Optional<Product> findById(Long ID);
     Optional<Page<Product>> search(String contents, Pageable pageable);
-    Optional<List<Product>> findByBrand(String brand);
+    Optional<Page<Product>> findByBrand(String brand, Pageable pageable);
 //    Optional<Product> DetailProduct(Long productid);
-    Optional<List<Product>> findByCategory(String category);
+    Optional<Page<Product>> findByCategory(String category, Pageable pageable);
     Optional<Product> update(Product product);
     void deleteByName(String productName);
     List<ProductDTOWithBrandId> brandList();

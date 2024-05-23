@@ -28,8 +28,8 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
     Optional<List<Product>> search(@Param("contents")String contents, @Param("category")String category, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.category LIKE CONCAT(:category, '%')")
-    Optional<List<Product>> findByCategory(@Param("category")String category);
+    Optional<List<Product>> findByCategory(@Param("category")String category, Pageable pageable);
 
     @Query("SELECT p FROM Product p WHERE p.brand = :brand")
-    Optional<List<Product>> findByBrand(@Param("brand")String brand);
+    Optional<List<Product>> findByBrand(@Param("brand")String brand, Pageable pageable);
 }
