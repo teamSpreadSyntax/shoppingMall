@@ -190,10 +190,10 @@ public class ProductController {
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
     @GetMapping("brandList")
     public CustomListResponseEntity<Page<Product>> brandList(@PageableDefault(page = 1, size = 4, sort = "id,asc") Pageable pageable) {
-            Page<Product> brandListPage = productService.brandList(pageable);
-            String successMessage = "전체 브랜드 입니다";
-            CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(brandListPage.getContent(), successMessage);
-            return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
+        Page<Product> brandListPage = productService.brandList(pageable);
+        String successMessage = "전체 브랜드 입니다";
+        CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(brandListPage.getContent(), successMessage);
+        return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "재고수량 증가 메서드", description = "재고수량 증가 메서드 입니다.")
