@@ -1,8 +1,8 @@
 package home.project.repository;
 
-import home.project.domain.Member;
 import home.project.domain.Product;
 import home.project.domain.ProductDTOWithBrandId;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,8 +15,8 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
 
 //    @Query("SELECT p.name, p.brand, p.image FROM Product p ORDER BY p.selledcount DESC")
 //    List<String> findTop5ByOrderBySelledcountDesc();
-    @Query("SELECT new home.project.domain.ProductDTOWithBrandId(p.brand, p.id) FROM Product p ORDER BY p.brand ASC")
-    List<ProductDTOWithBrandId> findAllByOrderByBrandAsc();
+@Query("SELECT DISTINCT new home.project.domain.ProductDTOWithBrandId(p.brand, MAX(p.id)) FROM Product p GROUP BY p.brand ORDER BY p.brand ASC")
+    Page<ProductDTOWithBrandId> findAllByOrderByBrandAsc(Pageable pageable);
 
     Optional<Product> findByName(String productName);
 

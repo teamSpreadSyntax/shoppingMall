@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -235,12 +236,16 @@ class ProductServiceTest {
         product3.setStock(30L);
         productService.join(product3);
         //when
-        List<ProductDTOWithBrandId> productList = productService.brandList();
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<ProductDTOWithBrandId> productList = productService.brandList(pageable);
         //then
-        Assertions.assertThat(productList.size()).isEqualTo(3);
-        assertTrue(productList.contains("나이키")); // 리스트에 "나이키" 브랜드가 포함되어 있는지 확인
-        assertTrue(productList.contains("아디다스")); // 리스트에 "아디다스" 브랜드가 포함되어 있는지 확인
-        assertTrue(productList.contains("뉴발란스")); // 리스트에 "뉴발란스" 브랜드가 포함되어 있는지 확인
+        Assertions.assertThat(productList.getTotalElements()).isEqualTo(3);
+        List<String> brands = productList.stream()
+                .map(ProductDTOWithBrandId::getBrand)
+                .collect(Collectors.toList());
+        assertTrue(brands.contains("나이키")); // 리스트에 "나이키" 브랜드가 포함되어 있는지 확인
+        assertTrue(brands.contains("아디다스")); // 리스트에 "아디다스" 브랜드가 포함되어 있는지 확인
+        assertTrue(brands.contains("뉴발란스")); // 리스트에 "뉴발란스" 브랜드가 포함되어 있는지 확인
     }
 
     @DisplayName("수량 증가 및 판매량 카운트 그대로")

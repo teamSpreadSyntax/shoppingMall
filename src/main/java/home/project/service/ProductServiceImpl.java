@@ -152,8 +152,8 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteByName(productName);
     }
 
-    public List<ProductDTOWithBrandId> brandList(){
-        List<ProductDTOWithBrandId> brandList = productRepository.findAllByOrderByBrandAsc();
+    public Page<ProductDTOWithBrandId> brandList(Pageable pageable){
+        Page<ProductDTOWithBrandId> brandList = productRepository.findAllByOrderByBrandAsc(pageable);
         return brandList;
     }
 

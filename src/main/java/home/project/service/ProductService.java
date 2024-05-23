@@ -21,7 +21,7 @@ public interface ProductService {
     Optional<List<Product>> findByCategory(String category);
     Optional<Product> update(Product product);
     void deleteByName(String productName);
-    List<ProductDTOWithBrandId> brandList();
+    Page<ProductDTOWithBrandId> brandList(Pageable pageable);
     Product increaseStock(Long productId, Long stock);
 
     Product selledCancle(Long productId, Long stock);
