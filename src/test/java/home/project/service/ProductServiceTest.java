@@ -249,7 +249,7 @@ class ProductServiceTest {
 
         List<String> brands = productList.stream()
                 .map(Product::getBrand)
-                .collect(Collectors.toList());
+                .toList();
 
         assertTrue(brands.contains("나이키")); // 리스트에 "나이키" 브랜드가 포함되어 있는지 확인
         assertTrue(brands.contains("아디다스")); // 리스트에 "아디다스" 브랜드가 포함되어 있는지 확인
