@@ -1,7 +1,6 @@
 package home.project.service;
 
 import home.project.domain.Product;
-import home.project.domain.ProductDTOWithBrandId;
 import home.project.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;

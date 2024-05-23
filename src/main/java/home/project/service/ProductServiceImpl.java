@@ -1,9 +1,6 @@
 package home.project.service;
 
-import home.project.domain.Member;
 import home.project.domain.Product;
-import home.project.domain.ProductDTOWithBrandId;
-import home.project.domain.searchDTO;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -152,8 +148,8 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteByName(productName);
     }
 
-    public Page<ProductDTOWithBrandId> brandList(Pageable pageable){
-        Page<ProductDTOWithBrandId> brandList = productRepository.findAllByOrderByBrandAsc(pageable);
+    public Page<Product> brandList(Pageable pageable){
+        Page<Product> brandList = productRepository.findAllByOrderByBrandAsc(pageable);
         return brandList;
     }
 
