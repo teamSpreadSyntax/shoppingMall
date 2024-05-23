@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Product;
+import home.project.domain.ProductDTOWithBrandId;
 import home.project.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
@@ -11,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -71,9 +75,10 @@ class ProductServiceTest {
         product2.setStock(45L);
         productService.join(product2);
         //when
-        List<Product> product = productService.findAll();
+        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
+        Page<Product> product = productService.findAll(pageable);
         //then
-        Assertions.assertThat(product.size()).isEqualTo(2);
+        Assertions.assertThat(product.getTotalElements()).isEqualTo(2);
 
     }
 
@@ -230,7 +235,7 @@ class ProductServiceTest {
         product3.setStock(30L);
         productService.join(product3);
         //when
-        List<String> productList = productService.brandList();
+        List<ProductDTOWithBrandId> productList = productService.brandList();
         //then
         Assertions.assertThat(productList.size()).isEqualTo(3);
         assertTrue(productList.contains("나이키")); // 리스트에 "나이키" 브랜드가 포함되어 있는지 확인

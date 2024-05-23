@@ -47,7 +47,7 @@ public class ProductController {
 
     @Operation(summary = "상품추가 메서드", description = "상품추가 메서드입니다.")
     @PostMapping("CreateProduct")
-    public ResponseEntity<?> createProduct(@RequestBody @Valid  Product product, BindingResult bindingResult) {
+    public ResponseEntity<?> createProduct(@RequestBody @Valid  ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -55,6 +55,13 @@ public class ProductController {
             }
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
         }try {
+            Product product = new Product();
+            product.setBrand(productDTOWithoutId.getBrand());
+            product.setCategory(productDTOWithoutId.getCategory());
+            product.setSelledcount(productDTOWithoutId.getSelledcount());
+            product.setName(productDTOWithoutId.getName());
+            product.setStock(productDTOWithoutId.getStock());
+            product.setImage(productDTOWithoutId.getImage());
             productService.join(product);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("상품등록완료", product.getName()+"가 등록되었습니다");
@@ -68,10 +75,10 @@ public class ProductController {
 
     @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
     @GetMapping("FindAllProduct")
-    public CustomListResponseEntity<List<Product>> findAllProduct() {
-            List<Product> productList = productService.findAll();
+    public CustomListResponseEntity<Page<Product>> findAllProduct(@PageableDefault(page = 1, size = 5, sort = "id,asc") Pageable pageable) {
+            Page<Product> productList = productService.findAll(pageable);
             String successMessage = "전체상품 입니다";
-            CustomListResponseBody<List<Product>> responseBody = new CustomListResponseBody<>(productList, successMessage);
+            CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(productList.getContent(), successMessage);
             return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
@@ -182,10 +189,10 @@ public class ProductController {
 
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
     @GetMapping("brandList")
-    public CustomListResponseEntity<List<String>> brandList() {
-            List<String> brandList = productService.brandList();
+    public CustomListResponseEntity<List<ProductDTOWithBrandId>> brandList() {
+            List<ProductDTOWithBrandId> brandList = productService.brandList();
             String successMessage = "전체 브랜드 입니다";
-            CustomListResponseBody<List<String>> responseBody = new CustomListResponseBody<>(brandList, successMessage);
+            CustomListResponseBody<List<ProductDTOWithBrandId>> responseBody = new CustomListResponseBody<>(brandList, successMessage);
             return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
     }
 

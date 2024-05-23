@@ -7,8 +7,10 @@ public class CustomListResponseBody<T> {
 
     public String ResponseMessage;
 
+
     public CustomListResponseBody(List result, String ResponseMessage) {
         this.result = result;
         this.ResponseMessage = ResponseMessage;
     }
+
 }

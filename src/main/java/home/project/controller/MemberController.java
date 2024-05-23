@@ -21,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -28,8 +29,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Tag(name = "회원", description = "회원관련 API 입니다")
 //@RequestMapping(path = "/api/member")
@@ -95,43 +98,43 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
+    @GetMapping("FindByEmail")
+    public CustomOptionalResponseEntity<Optional<Member>> findMemberByEmail(@RequestParam("MemberEmail") @Valid String email) {
+        if (email == null || email.isEmpty()) {
+            throw new IllegalStateException("이메일이 입력되지 않았습니다.");
+        }
+        if (!email.matches("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$")) {
+            throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
+        }
+            Optional<Member> memberOptional = memberService.findByEmail(email);
+            String successMessage = email+"로 가입된 회원정보입니다";
+            CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
+            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+    }
+
     @Operation(summary = "ID로 회원조회 메서드", description = "ID로 회원조회 메서드입니다.")
     @GetMapping("findMemberById")
     public CustomOptionalResponseEntity<Optional<Member>> findMemberById(@RequestParam("MemberId") Long ID) {
         if (ID == null) {
             throw new IllegalStateException("이메일이 입력되지 않았습니다.");
         }
-        Optional<Member> memberOptional = memberService.findById(ID);
-        String successMessage = ID + "로 가입된 회원정보입니다";
-        CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            Optional<Member> memberOptional = memberService.findById(ID);
+            String successMessage = ID+"로 가입된 회원정보입니다";
+            CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
+            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
-
-
-    @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
-    @GetMapping("FindByEmail")
-    public CustomOptionalResponseEntity<Optional<Member>> findMember(@RequestParam("MemberEmail") @Valid String email) {
-        if (email == null || email.isEmpty()) {
-            throw new IllegalStateException("이메일이 입력되지 않았습니다.");
-        }
-        Optional<Member> memberOptional = memberService.findByEmail(email);
-        String successMessage = email + "로 가입된 회원정보입니다";
-        CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
-    }
-
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
-    public CustomListResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(Pageable pageable) {
-        Page<Member> memberPage = memberService.findAll(pageable);
-        Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
-                new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
-        String successMessage = "전체 회원입니다";
-        CustomListResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListResponseBody<>(memberDtoPage.getContent(), successMessage);
-        return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
-    }
-
+    public CustomListResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(@PageableDefault(page = 1, size = 5, sort = "id,asc") Pageable pageable) {
+            Page<Member> memberPage = memberService.findAll(pageable);
+            Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
+                    new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+            String successMessage = "전체 회원입니다";
+            CustomListResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListResponseBody<>(memberDtoPage.getContent(), successMessage);
+            return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
+        }
 
 
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")

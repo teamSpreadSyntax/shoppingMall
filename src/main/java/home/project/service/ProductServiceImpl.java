@@ -2,6 +2,7 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Product;
+import home.project.domain.ProductDTOWithBrandId;
 import home.project.domain.searchDTO;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +30,8 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
     }
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
+    public Page<Product> findAll(Pageable pageable) {
+        return productRepository.findAll(pageable);
     }
 
     public Optional<Product> findByName(String name) {
@@ -151,8 +152,9 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteByName(productName);
     }
 
-    public List<String> brandList(){
-        return productRepository.findAllByOrderByBrandAsc();
+    public List<ProductDTOWithBrandId> brandList(){
+        List<ProductDTOWithBrandId> brandList = productRepository.findAllByOrderByBrandAsc();
+        return brandList;
     }
 
     public Product increaseStock(Long productId , Long stock) {
