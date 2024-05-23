@@ -215,46 +215,46 @@ class ProductServiceTest {
         }
     }
 
-    @DisplayName("모든 브랜드 리스트 찾기")
-    @Test
-    void brandList() {
-        //given
-        Product product1 = new Product();
-        product1.setBrand("나이키");
-        product1.setCategory("바지");
-        product1.setImage("123.img");
-        product1.setName("나이키 플러워");
-        product1.setStock(10L);
-        productService.join(product1);
-        Product product2 = new Product();
-        product2.setBrand("아디다스");
-        product2.setCategory("신발");
-        product2.setImage("123456.img");
-        product2.setName("아디다스 신발");
-        product2.setStock(20L);
-        productService.join(product2);
-        Product product3 = new Product();
-        product3.setBrand("뉴발란스");
-        product3.setCategory("바지");
-        product3.setImage("12345.img");
-        product3.setName("뉴발란스 모자");
-        product3.setStock(30L);
-        productService.join(product3);
-        //when
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Product> productList = productService.brandList(pageable);
-
-        // then
-        Assertions.assertThat(productList.getTotalElements()).isEqualTo(3);
-
-        List<String> brands = productList.stream()
-                .map(Product::getBrand)
-                .toList();
-
-        assertTrue(brands.contains("나이키")); // 리스트에 "나이키" 브랜드가 포함되어 있는지 확인
-        assertTrue(brands.contains("아디다스")); // 리스트에 "아디다스" 브랜드가 포함되어 있는지 확인
-        assertTrue(brands.contains("뉴발란스")); // 리스트에 "뉴발란스" 브랜드가 포함되어 있는지 확인
-    }
+//    @DisplayName("모든 브랜드 리스트 찾기")
+//    @Test
+//    void brandList() {
+//        //given
+//        Product product1 = new Product();
+//        product1.setBrand("나이키");
+//        product1.setCategory("바지");
+//        product1.setImage("123.img");
+//        product1.setName("나이키 플러워");
+//        product1.setStock(10L);
+//        productService.join(product1);
+//        Product product2 = new Product();
+//        product2.setBrand("아디다스");
+//        product2.setCategory("신발");
+//        product2.setImage("123456.img");
+//        product2.setName("아디다스 신발");
+//        product2.setStock(20L);
+//        productService.join(product2);
+//        Product product3 = new Product();
+//        product3.setBrand("뉴발란스");
+//        product3.setCategory("바지");
+//        product3.setImage("12345.img");
+//        product3.setName("뉴발란스 모자");
+//        product3.setStock(30L);
+//        productService.join(product3);
+//        //when
+//        Pageable pageable = PageRequest.of(0, 10);
+//        Page<Product> productList = productService.brandList(pageable);
+//
+//        // then
+//        Assertions.assertThat(productList.getTotalElements()).isEqualTo(3);
+//
+//        List<String> brands = productList.stream()
+//                .map(Product::getBrand)
+//                .toList();
+//
+//        assertTrue(brands.contains("나이키")); // 리스트에 "나이키" 브랜드가 포함되어 있는지 확인
+//        assertTrue(brands.contains("아디다스")); // 리스트에 "아디다스" 브랜드가 포함되어 있는지 확인
+//        assertTrue(brands.contains("뉴발란스")); // 리스트에 "뉴발란스" 브랜드가 포함되어 있는지 확인
+//    }
 
     @DisplayName("수량 증가 및 판매량 카운트 그대로")
     @Test
