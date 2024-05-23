@@ -114,20 +114,20 @@ public class ProductController {
 
     @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
     @GetMapping("FindByBrand")
-    public CustomOptionalResponseEntity<Optional<List<Product>>> findProductByBrand(@RequestParam("brand") String brand) {
-            Optional<List<Product>> product = productService.findByBrand(brand);
-            String successMessage = brand+"에 해당하는 상품 입니다";
-            CustomOptionalResponseBody<Optional<List<Product>>> responseBody = new CustomOptionalResponseBody<>(product, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+    public CustomOptionalResponseEntity<Optional<Page<Product>>> findProductByBrand(@RequestParam("brand") String brand, Pageable pageable) {
+        Optional<Page<Product>> product = productService.findByBrand(brand, pageable);
+        String successMessage = brand+"에 해당하는 상품 입니다";
+        CustomOptionalResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalResponseBody<>(product, successMessage);
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "카테고리로 상품조회 메서드", description = "카테고리로 상품조회 메서드입니다.")
     @GetMapping("FindByCategory")
-    public CustomOptionalResponseEntity<Optional<List<Product>>> findProductByCategory(@RequestParam("category") String category) {
-            Optional<List<Product>> productCategory = productService.findByCategory(category);
-            String successMessage = category+"에 해당하는 상품입니다";
-            CustomOptionalResponseBody<Optional<List<Product>>> responseBody = new CustomOptionalResponseBody<>(productCategory, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+    public CustomOptionalResponseEntity<Optional<Page<Product>>> findProductByCategory(@RequestParam("category") String category, Pageable pageable) {
+        Optional<Page<Product>> product = productService.findByCategory(category, pageable);
+        String successMessage = category+"에 해당하는 상품입니다";
+        CustomOptionalResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalResponseBody<>(product, successMessage);
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")

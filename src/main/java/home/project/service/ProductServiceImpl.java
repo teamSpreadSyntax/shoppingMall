@@ -115,14 +115,14 @@ public class ProductServiceImpl implements ProductService {
 //        return Optional.ofNullable(product);
 //    }
 
-    public Optional<List<Product>> findByBrand(String brand){
-        List<Product> product = productRepository.findByBrand(brand).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(brand+"브랜드를 찾을수 없습니다."); });
-        return Optional.ofNullable(product);
+    public Optional<Page<Product>> findByBrand(String brand, Pageable pageable){
+        List<Product> product = productRepository.findByBrand(brand, pageable).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(brand+"브랜드를 찾을수 없습니다."); });
+        return Optional.of(new PageImpl<>(product, pageable, product.size()));
     }
 
-    public Optional<List<Product>> findByCategory(String category) {
-        List<Product> product = productRepository.findByCategory(category).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(category+"카테고리에 상품이 없습니다."); });
-        return Optional.ofNullable(product);
+    public Optional<Page<Product>> findByCategory(String category, Pageable pageable) {
+        List<Product> product = productRepository.findByCategory(category, pageable).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(category+"카테고리에 상품이 없습니다."); });
+        return Optional.of(new PageImpl<>(product, pageable, product.size()));
     }
 
 //    public Optional<Product> DetailProduct (Long productid){
