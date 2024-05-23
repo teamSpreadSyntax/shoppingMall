@@ -2,6 +2,7 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Product;
+import home.project.domain.ProductDTOWithBrandId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -20,7 +21,7 @@ public interface ProductService {
     Optional<List<Product>> findByCategory(String category);
     Optional<Product> update(Product product);
     void deleteByName(String productName);
-    List<String> brandList();
+    List<ProductDTOWithBrandId> brandList();
     Product increaseStock(Long productId, Long stock);
 
     Product selledCancle(Long productId, Long stock);

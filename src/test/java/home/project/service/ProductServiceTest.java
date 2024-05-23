@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Product;
+import home.project.domain.ProductDTOWithBrandId;
 import home.project.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
@@ -234,7 +235,7 @@ class ProductServiceTest {
         product3.setStock(30L);
         productService.join(product3);
         //when
-        List<String> productList = productService.brandList();
+        List<ProductDTOWithBrandId> productList = productService.brandList();
         //then
         Assertions.assertThat(productList.size()).isEqualTo(3);
         assertTrue(productList.contains("나이키")); // 리스트에 "나이키" 브랜드가 포함되어 있는지 확인
