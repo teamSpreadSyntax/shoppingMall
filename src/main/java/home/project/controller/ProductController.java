@@ -11,11 +11,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -75,7 +78,11 @@ public class ProductController {
 
     @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
     @GetMapping("FindAllProduct")
-    public CustomListResponseEntity<Page<Product>> findAllProduct(@PageableDefault(page = 1, size = 5, sort = "id,asc") Pageable pageable) {
+    public CustomListResponseEntity<Page<Product>> findAllProduct(
+            @PageableDefault(page = 0, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
             Page<Product> productList = productService.findAll(pageable);
             String successMessage = "전체상품 입니다";
             long total = productList.getTotalElements();
@@ -97,11 +104,15 @@ public class ProductController {
 
     @Operation(summary = "검색", description = "단순검색 메서드입니다")
     @GetMapping("search")
-    public CustomOptionalResponseEntity<Optional<Page<Product>>> search(@RequestParam("contents") String contents, @PageableDefault(page = 1, size = 5, sort = "id,asc") Pageable pageable) {
+    public CustomOptionalPageResponseEntity<Optional<Page<Product>>> search(@RequestParam("contents") String contents, @PageableDefault(page = 0, size = 5)
+    @SortDefault.SortDefaults({
+            @SortDefault(sort = "name", direction = Sort.Direction.ASC)
+    }) @ParameterObject Pageable pageable) {
             Optional<Page<Product>> product = productService.search(contents, pageable);
             String successMessage = contents+"에 해당하는 상품 입니다";
-            CustomOptionalResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalResponseBody<>(product, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            long total = product.get().getTotalElements();
+        CustomOptionalPageResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalPageResponseBody<>(product, successMessage, total);
+            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "ID로 상품조회 메서드", description = "ID로 상품조회 메서드입니다")
@@ -115,20 +126,28 @@ public class ProductController {
 
     @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
     @GetMapping("FindByBrand")
-    public CustomOptionalResponseEntity<Optional<Page<Product>>> findProductByBrand(@RequestParam("brand") String brand, Pageable pageable) {
+    public CustomOptionalPageResponseEntity<Optional<Page<Product>>> findProductByBrand(@RequestParam("brand") String brand, @PageableDefault(page = 0, size = 5)
+    @SortDefault.SortDefaults({
+            @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+    }) @ParameterObject Pageable pageable) {
         Optional<Page<Product>> product = productService.findByBrand(brand, pageable);
         String successMessage = brand+"에 해당하는 상품 입니다";
-        CustomOptionalResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalResponseBody<>(product, successMessage);
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        long total = product.get().getTotalElements();
+        CustomOptionalPageResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalPageResponseBody<>(product, successMessage, total);
+        return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "카테고리로 상품조회 메서드", description = "카테고리로 상품조회 메서드입니다.")
     @GetMapping("FindByCategory")
-    public CustomOptionalResponseEntity<Optional<Page<Product>>> findProductByCategory(@RequestParam("category") String category, Pageable pageable) {
+    public CustomOptionalPageResponseEntity<Optional<Page<Product>>> findProductByCategory(@RequestParam("category") String category, @PageableDefault(page = 0, size = 5)
+    @SortDefault.SortDefaults({
+            @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+    }) @ParameterObject Pageable pageable) {
         Optional<Page<Product>> product = productService.findByCategory(category, pageable);
         String successMessage = category+"에 해당하는 상품입니다";
-        CustomOptionalResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalResponseBody<>(product, successMessage);
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        long total = product.get().getTotalElements();
+        CustomOptionalPageResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalPageResponseBody<>(product, successMessage, total);
+        return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
@@ -190,7 +209,11 @@ public class ProductController {
 
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
     @GetMapping("brandList")
-    public CustomListResponseEntity<Page<Product>> brandList(@PageableDefault(page = 1, size = 4, sort = "id,asc") Pageable pageable) {
+    public CustomListResponseEntity<Page<Product>> brandList(
+            @PageableDefault(page = 0, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
         Page<Product> brandListPage = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다";
         long total = brandListPage.getTotalElements();

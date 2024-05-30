@@ -16,12 +16,15 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 //import io.swagger.v3.oas.models.PathItem;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -43,6 +46,7 @@ import java.util.stream.Collectors;
         @ApiResponse(responseCode = "403", description = "접근이 금지되었습니다.", content = @Content(schema = @Schema(implementation = Member.class))),
         @ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = Member.class)))
 })
+
 @RestController
 public class MemberController {
     private final MemberService memberService;
@@ -127,7 +131,11 @@ public class MemberController {
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
-    public CustomListResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(@PageableDefault(page = 1, size = 5, sort = "id,asc") Pageable pageable) {
+    public CustomListResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(
+            @PageableDefault(page = 0, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "id", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
             Page<Member> memberPage = memberService.findAll(pageable);
             Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
                     new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
