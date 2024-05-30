@@ -2,15 +2,17 @@ package home.project.domain;
 
 import java.util.Optional;
 
-public class CustomOptionalResponseBody<T> {
+public class CustomOptionalPageResponseBody<T> {
     public Optional result;
 
     public String ResponseMessage;
 
+    public long total;
 
-    public CustomOptionalResponseBody(Optional result, String ResponseMessage) {
+    public CustomOptionalPageResponseBody(Optional result, String ResponseMessage, long total) {
         this.result = result;
         this.ResponseMessage = ResponseMessage;
+        this.total = total;
     }
 
 }
