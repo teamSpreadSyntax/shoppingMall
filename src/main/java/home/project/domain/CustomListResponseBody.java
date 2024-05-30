@@ -7,10 +7,12 @@ public class CustomListResponseBody<T> {
 
     public String ResponseMessage;
 
+    public long total;
 
-    public CustomListResponseBody(List result, String ResponseMessage) {
+    public CustomListResponseBody(List result, String ResponseMessage,long total) {
         this.result = result;
         this.ResponseMessage = ResponseMessage;
+        this.total = total;
     }
 
 }

@@ -132,10 +132,10 @@ public class MemberController {
             Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
                     new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
             String successMessage = "전체 회원입니다";
-            CustomListResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListResponseBody<>(memberDtoPage.getContent(), successMessage);
+            long total = memberPage.getTotalElements();
+            CustomListResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListResponseBody<>(memberDtoPage.getContent(), successMessage, total);
             return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
         }
-
 
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateMember")

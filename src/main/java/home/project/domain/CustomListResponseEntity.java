@@ -15,7 +15,7 @@ public class CustomListResponseEntity<T> extends ResponseEntity<CustomListRespon
         super(body, new HttpHeaders(), status);
     }
 
-    public CustomListResponseEntity(List<T> listData, String message, HttpStatus status) {
-        super(new CustomListResponseBody<>(listData, message), new HttpHeaders(), status);
+    public CustomListResponseEntity(List<T> listData, String message, HttpStatus status,long total) {
+        super(new CustomListResponseBody<>(listData, message,total), new HttpHeaders(), status);
     }
 }

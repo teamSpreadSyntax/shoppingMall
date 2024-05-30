@@ -78,7 +78,8 @@ public class ProductController {
     public CustomListResponseEntity<Page<Product>> findAllProduct(@PageableDefault(page = 1, size = 5, sort = "id,asc") Pageable pageable) {
             Page<Product> productList = productService.findAll(pageable);
             String successMessage = "전체상품 입니다";
-            CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(productList.getContent(), successMessage);
+            long total = productList.getTotalElements();
+            CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(productList.getContent(), successMessage, total);
             return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
@@ -192,7 +193,8 @@ public class ProductController {
     public CustomListResponseEntity<Page<Product>> brandList(@PageableDefault(page = 1, size = 4, sort = "id,asc") Pageable pageable) {
         Page<Product> brandListPage = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다";
-        CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(brandListPage.getContent(), successMessage);
+        long total = brandListPage.getTotalElements();
+        CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(brandListPage.getContent(), successMessage, total);
         return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
