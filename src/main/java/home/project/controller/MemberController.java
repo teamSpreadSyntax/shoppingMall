@@ -131,19 +131,22 @@ public class MemberController {
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
-    public CustomListResponseEntity<Page<MemberDTOWithoutPw>> findAllMember(
+    public CustomListResponseEntity<MemberDTOWithoutPw> findAllMember(
             @PageableDefault(page = 0, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-            Page<Member> memberPage = memberService.findAll(pageable);
-            Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
-                    new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
-            String successMessage = "전체 회원입니다";
-            long total = memberPage.getTotalElements();
-            CustomListResponseBody<Page<MemberDTOWithoutPw>> responseBody = new CustomListResponseBody<>(memberDtoPage.getContent(), successMessage, total);
-            return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
-        }
+
+        Page<Member> memberPage = memberService.findAll(pageable);
+        Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
+                new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+
+        String successMessage = "전체 회원입니다";
+        long totalCount = memberPage.getTotalElements();
+        int page = memberPage.getNumber();
+
+        return new CustomListResponseEntity<>(memberDtoPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
 
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateMember")

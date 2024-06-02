@@ -1,13 +1,15 @@
 package home.project.domain;
 
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 
-public class CustomListResponseBody<T> {
+public class CustomPageResponseBody<T> {
     public Result<T> result;
     public String message;
     public int status;
 
-    public CustomListResponseBody(Result<T> result, String message, int status) {
+    public CustomPageResponseBody(Result<T> result, String message, int status) {
         this.result = result;
         this.message = message;
         this.status = status;

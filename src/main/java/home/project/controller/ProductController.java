@@ -50,14 +50,15 @@ public class ProductController {
 
     @Operation(summary = "상품추가 메서드", description = "상품추가 메서드입니다.")
     @PostMapping("CreateProduct")
-    public ResponseEntity<?> createProduct(@RequestBody @Valid  ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
+    public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMap.put(error.getField(), error.getDefaultMessage());
             }
             return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
-        }try {
+        }
+        try {
             Product product = new Product();
             product.setBrand(productDTOWithoutId.getBrand());
             product.setCategory(productDTOWithoutId.getCategory());
@@ -67,27 +68,33 @@ public class ProductController {
             product.setImage(productDTOWithoutId.getImage());
             productService.join(product);
             Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("상품등록완료", product.getName()+"가 등록되었습니다");
+            responseMap.put("상품등록완료", product.getName() + "가 등록되었습니다");
             return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
-        }catch (DataIntegrityViolationException e){
+        } catch (DataIntegrityViolationException e) {
             Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("중복된 값이 입력되었습니다. 해당 상품은 이미 등록되어있습니다", e.getMessage()+"--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
+            responseMap.put("중복된 값이 입력되었습니다. 해당 상품은 이미 등록되어있습니다", e.getMessage() + "--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
             return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
     @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
     @GetMapping("FindAllProduct")
-    public CustomListResponseEntity<Page<Product>> findAllProduct(
+    public CustomPageResponseEntity<Product> findAllProduct(
             @PageableDefault(page = 0, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-            Page<Product> productList = productService.findAll(pageable);
-            String successMessage = "전체상품 입니다";
-            long total = productList.getTotalElements();
-            CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(productList.getContent(), successMessage, total);
-            return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
+
+        Page<Product> productList = productService.findAll(pageable);
+        String successMessage = "전체상품 입니다";
+        long totalCount = productList.getTotalElements();
+        int page = productList.getNumber();
+
+        CustomPageResponseBody.Result<Product> result = new CustomPageResponseBody.Result<>(
+                totalCount, page, productList.getContent());
+        CustomPageResponseBody<Product> responseBody = new CustomPageResponseBody<>(result, successMessage, HttpStatus.OK.value());
+
+        return new CustomPageResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "상품명으로 상품조회 메서드", description = "상품명으로 상품조회 메서드입니다.")
@@ -104,15 +111,31 @@ public class ProductController {
 
     @Operation(summary = "검색", description = "단순검색 메서드입니다")
     @GetMapping("search")
-    public CustomOptionalPageResponseEntity<Optional<Page<Product>>> search(@RequestParam("contents") String contents, @PageableDefault(page = 0, size = 5)
-    @SortDefault.SortDefaults({
-            @SortDefault(sort = "name", direction = Sort.Direction.ASC)
-    }) @ParameterObject Pageable pageable) {
-            Optional<Page<Product>> product = productService.search(contents, pageable);
-            String successMessage = contents+"에 해당하는 상품 입니다";
-            long total = product.get().getTotalElements();
-        CustomOptionalPageResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalPageResponseBody<>(product, successMessage, total);
+    public CustomOptionalPageResponseEntity<Product> search(
+            @RequestParam("contents") String contents,
+            @PageableDefault(page = 0, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "name", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+
+        Optional<Page<Product>> productOptional = productService.search(contents, pageable);
+        String successMessage = contents + "에 해당하는 상품 입니다";
+
+        if (productOptional.isPresent()) {
+            Page<Product> productPage = productOptional.get();
+            long total = productPage.getTotalElements();
+            int page = productPage.getNumber();
+
+            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(total, page, Optional.of(productPage.getContent()));
+            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, successMessage, HttpStatus.OK.value());
+
             return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
+        } else {
+            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(0, 0, Optional.empty());
+            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
+
+            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
+        }
     }
 
     @Operation(summary = "ID로 상품조회 메서드", description = "ID로 상품조회 메서드입니다")
@@ -126,28 +149,64 @@ public class ProductController {
 
     @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
     @GetMapping("FindByBrand")
-    public CustomOptionalPageResponseEntity<Optional<Page<Product>>> findProductByBrand(@RequestParam("brand") String brand, @PageableDefault(page = 0, size = 5)
-    @SortDefault.SortDefaults({
-            @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
-    }) @ParameterObject Pageable pageable) {
-        Optional<Page<Product>> product = productService.findByBrand(brand, pageable);
-        String successMessage = brand+"에 해당하는 상품 입니다";
-        long total = product.get().getTotalElements();
-        CustomOptionalPageResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalPageResponseBody<>(product, successMessage, total);
-        return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
+    public CustomOptionalPageResponseEntity<Product> findProductByBrand(
+            @RequestParam("brand") String brand,
+            @PageableDefault(page = 0, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+
+        Optional<Page<Product>> productOptional = productService.findByBrand(brand, pageable);
+        String successMessage = brand + "에 해당하는 상품 입니다";
+
+        if (productOptional.isPresent()) {
+            Page<Product> productPage = productOptional.get();
+            long total = productPage.getTotalElements();
+            int page = productPage.getNumber();
+
+            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
+                    total, page, Optional.ofNullable(productPage.getContent()));
+            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, successMessage, HttpStatus.OK.value());
+
+            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
+        } else {
+            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
+                    0, 0, Optional.empty());
+            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
+
+            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
+        }
     }
 
     @Operation(summary = "카테고리로 상품조회 메서드", description = "카테고리로 상품조회 메서드입니다.")
     @GetMapping("FindByCategory")
-    public CustomOptionalPageResponseEntity<Optional<Page<Product>>> findProductByCategory(@RequestParam("category") String category, @PageableDefault(page = 0, size = 5)
-    @SortDefault.SortDefaults({
-            @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
-    }) @ParameterObject Pageable pageable) {
-        Optional<Page<Product>> product = productService.findByCategory(category, pageable);
-        String successMessage = category+"에 해당하는 상품입니다";
-        long total = product.get().getTotalElements();
-        CustomOptionalPageResponseBody<Optional<Page<Product>>> responseBody = new CustomOptionalPageResponseBody<>(product, successMessage, total);
-        return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
+    public CustomOptionalPageResponseEntity<Product> findProductByCategory(
+            @RequestParam("category") String category,
+            @PageableDefault(page = 0, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+
+        Optional<Page<Product>> productOptional = productService.findByCategory(category, pageable);
+        String successMessage = category + "에 해당하는 상품입니다";
+
+        if (productOptional.isPresent()) {
+            Page<Product> productPage = productOptional.get();
+            long total = productPage.getTotalElements();
+            int page = productPage.getNumber();
+
+            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
+                    total, page, Optional.ofNullable(productPage.getContent()));
+            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, successMessage, HttpStatus.OK.value());
+
+            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
+        } else {
+            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
+                    0, 0, Optional.empty());
+            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
+
+            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
+        }
     }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
@@ -209,15 +268,21 @@ public class ProductController {
 
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
     @GetMapping("brandList")
-    public CustomListResponseEntity<Page<Product>> brandList(
+    public CustomListResponseEntity<Product> brandList(
             @PageableDefault(page = 0, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
+
         Page<Product> brandListPage = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다";
         long total = brandListPage.getTotalElements();
-        CustomListResponseBody<Page<Product>> responseBody = new CustomListResponseBody<>(brandListPage.getContent(), successMessage, total);
+        int page = brandListPage.getNumber();
+
+        CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(
+                total, page, brandListPage.getContent());
+        CustomListResponseBody<Product> responseBody = new CustomListResponseBody<>(result, successMessage, HttpStatus.OK.value());
+
         return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
