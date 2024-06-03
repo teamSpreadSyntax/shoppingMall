@@ -56,7 +56,7 @@ public class ProductController {
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMap.put(error.getField(), error.getDefaultMessage());
             }
-            return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
         }
         try {
             Product product = new Product();
@@ -69,17 +69,17 @@ public class ProductController {
             productService.join(product);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("상품등록완료", product.getName() + "가 등록되었습니다");
-            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+            return new ResponseEntity<>(responseMap, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("중복된 값이 입력되었습니다. 해당 상품은 이미 등록되어있습니다", e.getMessage() + "--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
-            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
     @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
     @GetMapping("FindAllProduct")
-    public CustomPageResponseEntity<Product> findAllProduct(
+    public CustomListResponseEntity<Product> findAllProduct(
             @PageableDefault(page = 0, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
@@ -90,7 +90,7 @@ public class ProductController {
         long totalCount = productList.getTotalElements();
         int page = productList.getNumber();
 
-        return new CustomPageResponseEntity<>(productList.getContent(),successMessage, HttpStatus.OK, totalCount, page);
+        return new CustomListResponseEntity<>(productList.getContent(),successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "상품명으로 상품조회 메서드", description = "상품명으로 상품조회 메서드입니다.")
@@ -99,10 +99,11 @@ public class ProductController {
         if (productName == null || productName.isEmpty()) {
             throw new IllegalStateException("상품명이 입력되지 않았습니다.");
         }
-            Optional<Product> productOptional = productService.findByName(productName);
-            String successMessage = productName +"로 등록된 상품정보입니다";
-            CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(productOptional, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+
+        Optional<Product> productOptional = productService.findByName(productName);
+        String successMessage = productName + "로 등록된 상품정보입니다";
+
+        return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "검색", description = "단순검색 메서드입니다")
@@ -119,18 +120,17 @@ public class ProductController {
 
         if (productOptional.isPresent()) {
             Page<Product> productPage = productOptional.get();
-            long total = productPage.getTotalElements();
+            long totalCount = productPage.getTotalElements();
             int page = productPage.getNumber();
 
-            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(total, page, Optional.of(productPage.getContent()));
-            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, successMessage, HttpStatus.OK.value());
+            return new CustomOptionalPageResponseEntity<>(Optional.of(productPage.getContent()), successMessage, HttpStatus.OK, totalCount, page);
 
-            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
         } else {
-            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(0, 0, Optional.empty());
-            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
-
-            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
+            return new CustomOptionalPageResponseEntity<>(
+                    new CustomOptionalPageResponseBody<>(
+                            new CustomOptionalPageResponseBody.Result<>(0, 0, Optional.empty()),
+                            "No products found", HttpStatus.NO_CONTENT.value()),
+                    HttpStatus.NO_CONTENT);
         }
     }
 
@@ -139,8 +139,7 @@ public class ProductController {
     public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("ID") Long ID) {
             Optional<Product> product = productService.findById(ID);
             String successMessage = ID+"에 해당하는 상품 입니다";
-            CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(product, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(product), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
@@ -157,14 +156,10 @@ public class ProductController {
 
         if (productOptional.isPresent()) {
             Page<Product> productPage = productOptional.get();
-            long total = productPage.getTotalElements();
+            long totalCount = productPage.getTotalElements();
             int page = productPage.getNumber();
 
-            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
-                    total, page, Optional.ofNullable(productPage.getContent()));
-            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, successMessage, HttpStatus.OK.value());
-
-            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalPageResponseEntity<>(Optional.of(productPage.getContent()), successMessage, HttpStatus.OK, totalCount, page);
         } else {
             CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
                     0, 0, Optional.empty());
@@ -188,14 +183,10 @@ public class ProductController {
 
         if (productOptional.isPresent()) {
             Page<Product> productPage = productOptional.get();
-            long total = productPage.getTotalElements();
+            long totalCount = productPage.getTotalElements();
             int page = productPage.getNumber();
 
-            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
-                    total, page, Optional.ofNullable(productPage.getContent()));
-            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, successMessage, HttpStatus.OK.value());
-
-            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalPageResponseEntity<>(Optional.of(productPage.getContent()), successMessage, HttpStatus.OK, totalCount, page);
         } else {
             CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
                     0, 0, Optional.empty());
@@ -213,13 +204,12 @@ public class ProductController {
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMap.put(error.getField(), error.getDefaultMessage());
             }
-            return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
         }
         try {
             Optional<Product> productOptional = productService.update(product);
             String successMessage = "상품정보가 수정되었습니다";
-            CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(productOptional, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed");
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
@@ -242,8 +232,7 @@ public class ProductController {
 
             Optional<Product> productOptional = productService.findByName(productName);
             String successMessage = productName+"로 등록된 상품 정보입니다";
-            CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(productOptional, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
     }
 
     @Transactional
@@ -254,11 +243,11 @@ public class ProductController {
             productService.deleteByName(productName);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("상품삭제 완료", productName+"가 삭제되었습니다");
-            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+            return new ResponseEntity<>(responseMap, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put(productName+"로 등록되어있는 상품이 없습니다", e.getMessage());
-            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -272,14 +261,10 @@ public class ProductController {
 
         Page<Product> brandListPage = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다";
-        long total = brandListPage.getTotalElements();
+        long totalCount = brandListPage.getTotalElements();
         int page = brandListPage.getNumber();
 
-        CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(
-                total, page, brandListPage.getContent());
-        CustomListResponseBody<Product> responseBody = new CustomListResponseBody<>(result, successMessage, HttpStatus.OK.value());
-
-        return new CustomListResponseEntity<>(responseBody, HttpStatus.OK);
+        return new CustomListResponseEntity<>(brandListPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "재고수량 증가 메서드", description = "재고수량 증가 메서드 입니다.")
@@ -288,8 +273,7 @@ public class ProductController {
         try {
             Product increaseProduct = productService.increaseStock(productId,stock);
             String successMessage = increaseProduct.getName()+"상품이"+stock+"개 증가하여"+increaseProduct.getStock()+"개가 되었습니다";
-            CustomOptionalResponseBody<Product> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(increaseProduct), successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct),successMessage, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed");
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
@@ -302,8 +286,7 @@ public class ProductController {
         try {
             Product increaseProduct = productService.selledCancle(productId,stock);
             String successMessage = increaseProduct.getName()+"상품이"+stock+"개 판매취소되어"+increaseProduct.getStock()+"개가 되었습니다";
-            CustomOptionalResponseBody<Product> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(increaseProduct), successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct),successMessage, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed");
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
@@ -317,8 +300,7 @@ public class ProductController {
         try {
             Product decreaseProduct = productService.decreaseStock(productId,stock);
             String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 감소하여"+decreaseProduct.getStock()+"개가 되었습니다";
-            CustomOptionalResponseBody<Product> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(decreaseProduct), successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed");
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
@@ -331,13 +313,11 @@ public class ProductController {
         try {
             Product decreaseProduct = productService.selledProduct(productId,stock);
             String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 판매되어"+decreaseProduct.getStock()+"개가 되었습니다";
-            CustomOptionalResponseBody<Product> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(decreaseProduct), successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed");
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
-
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

@@ -16,7 +16,7 @@ public class CustomOptionalResponseEntity<T> extends ResponseEntity<CustomOption
         super(body, new HttpHeaders(), status);
     }
 
-    public CustomOptionalResponseEntity(Optional<T> OptionalData, String message, HttpStatus status) {
-        super(new CustomOptionalResponseBody<>(OptionalData, message), new HttpHeaders(), status);
+    public CustomOptionalResponseEntity(Optional<T> OptionalData, String responseMessage, HttpStatus status) {
+        super(new CustomOptionalResponseBody<>(OptionalData, responseMessage), new HttpHeaders(), status);
     }
 }

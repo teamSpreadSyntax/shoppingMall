@@ -83,7 +83,7 @@ public class MemberController {
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMap.put(error.getField(), error.getDefaultMessage());
             }
-            return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
         }
         try {
             Member member = new Member();
@@ -94,11 +94,11 @@ public class MemberController {
             memberService.join(member);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("회원가입완료", member.getEmail()+"로 가입되었습니다");
-            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+            return new ResponseEntity<>(responseMap, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("중복된 값이 입력되었습니다. 이메일 또는 전화번호로 이미 가입되어있습니다", e.getMessage()+"--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
-            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -113,8 +113,7 @@ public class MemberController {
         }
             Optional<Member> memberOptional = memberService.findByEmail(email);
             String successMessage = email+"로 가입된 회원정보입니다";
-            CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "ID로 회원조회 메서드", description = "ID로 회원조회 메서드입니다.")
@@ -125,8 +124,7 @@ public class MemberController {
         }
             Optional<Member> memberOptional = memberService.findById(ID);
             String successMessage = ID+"로 가입된 회원정보입니다";
-            CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
@@ -154,13 +152,12 @@ public class MemberController {
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMap.put(error.getField(), error.getDefaultMessage());
             }
-            return new ResponseEntity<Map<String, String>>(errorMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
         }
         try {
             Optional<Member> memberOptional = memberService.update(member);
             String successMessage = "정보가 수정되었습니다";
-            CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(memberOptional, successMessage);
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             CustomOptionalResponseBody<Optional<Member>> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed");
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
@@ -176,11 +173,11 @@ public class MemberController {
             memberService.deleteMember(email);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("이용해주셔서 감사합니다", email+"님의 계정이 삭제되었습니다");
-            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.OK);
+            return new ResponseEntity<>(responseMap, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put(email+"로 가입되어있는 계정이 없습니다", e.getMessage());
-            return new ResponseEntity<Map<String, String>>(responseMap, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }
 
