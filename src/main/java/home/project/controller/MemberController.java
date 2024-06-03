@@ -136,11 +136,9 @@ public class MemberController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-
         Page<Member> memberPage = memberService.findAll(pageable);
         Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
                 new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
-
         String successMessage = "전체 회원입니다";
         long totalCount = memberPage.getTotalElements();
         int page = memberPage.getNumber();
