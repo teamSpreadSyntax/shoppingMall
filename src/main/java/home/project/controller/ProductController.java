@@ -90,10 +90,7 @@ public class ProductController {
         long totalCount = productList.getTotalElements();
         int page = productList.getNumber();
 
-        CustomPageResponseBody.Result<Product> result = new CustomPageResponseBody.Result<>(totalCount, page, productList.getContent());
-        CustomPageResponseBody<Product> responseBody = new CustomPageResponseBody<>(result, successMessage, HttpStatus.OK.value());
-
-        return new CustomPageResponseEntity<>(responseBody, HttpStatus.OK);
+        return new CustomPageResponseEntity<>(productList.getContent(),successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "상품명으로 상품조회 메서드", description = "상품명으로 상품조회 메서드입니다.")
