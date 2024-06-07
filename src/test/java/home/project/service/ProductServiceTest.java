@@ -205,7 +205,7 @@ class ProductServiceTest {
         productService.join(product1);
         //when
         Product findProduct = productService.findByName(product1.getName()).get();
-        productService.deleteByName(findProduct.getName());
+        productService.deleteById(findProduct.getId());
         //then
         try {
         assertThrows(IllegalArgumentException.class, () -> {productService.findByName
