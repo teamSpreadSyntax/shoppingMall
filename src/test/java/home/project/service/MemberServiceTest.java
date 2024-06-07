@@ -125,7 +125,7 @@ class MemberServiceTest {
         memberService.join(member1);
 
 // When (실행)
-        memberService.deleteMember(member1.getEmail());
+        memberService.deleteMember(member1.getId());
 
 // Then (결과 검증)
         try {

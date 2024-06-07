@@ -168,15 +168,15 @@ public class MemberController {
     @Transactional
     @Operation(summary = "멤버 삭제 메서드", description = "멤버를 삭제하는 메서드입니다.")
     @DeleteMapping("DeleteMember") // 멤버 삭제
-    public ResponseEntity<?> deleteMember(@RequestParam("memberEmail") String email) {
+    public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
         try {
-            memberService.deleteMember(email);
+            memberService.deleteMember(memberId);
             Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("이용해주셔서 감사합니다", email+"님의 계정이 삭제되었습니다");
+            responseMap.put("이용해주셔서 감사합니다", memberId+"님의 계정이 삭제되었습니다");
             return new ResponseEntity<>(responseMap, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             Map<String, String> responseMap = new HashMap<>();
-            responseMap.put(email+"로 가입되어있는 계정이 없습니다", e.getMessage());
+            responseMap.put(memberId+"로 가입되어있는 계정이 없습니다", e.getMessage());
             return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }

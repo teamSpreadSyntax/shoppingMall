@@ -34,7 +34,8 @@ public class SecurityConfig{
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://projectkkk.vercel.app"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173","https://localhost:5173", "https://projectkkk.vercel.app"));
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -67,6 +68,7 @@ public class SecurityConfig{
                         .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
                         .requestMatchers("/api/product/**").permitAll()//hasRole("USER")
                         .requestMatchers("http://localhost:5173/**").permitAll()
+                        .requestMatchers("https://localhost:5173/**").permitAll()
                         .requestMatchers("https://localhost:443/**").permitAll()
                         .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
                         .anyRequest().permitAll()

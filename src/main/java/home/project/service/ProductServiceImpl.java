@@ -143,9 +143,9 @@ public class ProductServiceImpl implements ProductService {
         return newProduct;
     }
 
-    public void deleteByName (String productName){
-        productRepository.findByName(productName).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
-        productRepository.deleteByName(productName);
+    public void deleteById (Long productId){
+        productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+        productRepository.deleteById(productId);
     }
 
     public Page<Product> brandList(Pageable pageable){

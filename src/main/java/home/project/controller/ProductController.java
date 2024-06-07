@@ -77,7 +77,7 @@ public class ProductController {
         }
     }
 
-    @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
+    /*@Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
     @GetMapping("FindAllProduct")
     public CustomListResponseEntity<Product> findAllProduct(
             @PageableDefault(page = 0, size = 5)
@@ -104,6 +104,35 @@ public class ProductController {
         String successMessage = productName + "로 등록된 상품정보입니다";
 
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
+    }*/
+    @Operation(summary = "상품 조회 메서드", description = "상품명으로 상품을 조회하거나, 검색어가 없으면 전체 상품을 조회합니다.")
+    @GetMapping("/FindProduct")
+    public ResponseEntity<?> findProduct(
+            @RequestParam(value = "productName", required = false) String productName,
+            @PageableDefault(page = 0, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+
+        if (productName == null || productName.isEmpty()) {
+            Page<Product> productList = productService.findAll(pageable);
+            String successMessage = "전체상품 입니다";
+            long totalCount = productList.getTotalElements();
+            int page = productList.getNumber();
+
+            return new ResponseEntity<>(
+                    new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page),
+                    HttpStatus.OK
+            );
+        } else {
+            Optional<Product> productOptional = productService.findByName(productName);
+            String successMessage = productName + "로 등록된 상품정보입니다";
+
+            return new ResponseEntity<>(
+                    new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK),
+                    HttpStatus.OK
+            );
+        }
     }
 
     @Operation(summary = "검색", description = "단순검색 메서드입니다")
@@ -218,7 +247,7 @@ public class ProductController {
 
     @Operation(summary = "상품상세 메서드", description = "상품상세 메서드입니다.")
     @GetMapping("DetailProduct")
-    public CustomOptionalResponseEntity<Optional<Product>> DetailProduct(@RequestParam("productName") String productName) {
+    public CustomOptionalResponseEntity<Optional<Product>> DetailProduct(@RequestParam("productId") Long productId) {
 //        switch (productName){
 //            case "하의": productName = "10";
 //                break;
@@ -230,23 +259,23 @@ public class ProductController {
 //                break;
 //        }
 
-            Optional<Product> productOptional = productService.findByName(productName);
-            String successMessage = productName+"로 등록된 상품 정보입니다";
+            Optional<Product> productOptional = productService.findById(productId);
+            String successMessage = productId+"로 등록된 상품 정보입니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
     }
 
     @Transactional
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
     @DeleteMapping("DeleteProduct")
-    public ResponseEntity<?> deleteProduct(@RequestParam("productName") String productName) {
+    public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
         try {
-            productService.deleteByName(productName);
+            productService.deleteById(productId);
             Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("상품삭제 완료", productName+"가 삭제되었습니다");
+            responseMap.put("상품삭제 완료", productId+"가 삭제되었습니다");
             return new ResponseEntity<>(responseMap, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
             Map<String, String> responseMap = new HashMap<>();
-            responseMap.put(productName+"로 등록되어있는 상품이 없습니다", e.getMessage());
+            responseMap.put(productId+"로 등록되어있는 상품이 없습니다", e.getMessage());
             return new ResponseEntity<>(responseMap, HttpStatus.BAD_REQUEST);
         }
     }

@@ -56,9 +56,9 @@ public class MemberServiceImpl implements MemberService{
         return newMember;
     }
 
-    public void deleteMember(String email){
-        memberRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-        memberRepository.deleteByEmail(email);
+    public void deleteMember(Long memberId){
+        memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        memberRepository.deleteById(memberId);
     }
 
 }
