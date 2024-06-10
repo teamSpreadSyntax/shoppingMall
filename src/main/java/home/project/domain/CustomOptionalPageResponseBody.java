@@ -5,12 +5,12 @@ import java.util.Optional;
 
 public class CustomOptionalPageResponseBody<T> {
     public Result<T> result;
-    public String message;
+    public String responseMessage;
     public int status;
 
-    public CustomOptionalPageResponseBody(Result<T> result, String message, int status) {
+    public CustomOptionalPageResponseBody(Result<T> result, String responseMessage, int status) {
         this.result = result;
-        this.message = message;
+        this.responseMessage = responseMessage;
         this.status = status;
     }
 
