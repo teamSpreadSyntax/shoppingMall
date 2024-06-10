@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Table(name = "member", uniqueConstraints = {@UniqueConstraint(columnNames = {"phone", "email"})})
+
 @Getter
 @Setter
 public class Member {

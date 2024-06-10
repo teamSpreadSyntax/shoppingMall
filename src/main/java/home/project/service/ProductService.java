@@ -13,7 +13,7 @@ public interface ProductService {
     Page<Product> findAll(Pageable pageable);
     Optional<Product> findByName(String name);
     Optional<Product> findById(Long ID);
-    Optional<Page<Product>> search(String contents, Pageable pageable);
+    Page<Product> search(String contents, Pageable pageable);
     Optional<Page<Product>> findByBrand(String brand, Pageable pageable);
 //    Optional<Product> DetailProduct(Long productid);
     Optional<Page<Product>> findByCategory(String category, Pageable pageable);
@@ -21,7 +21,6 @@ public interface ProductService {
     void deleteById(Long productId);
     Page<Product> brandList(Pageable pageable);
     Product increaseStock(Long productId, Long stock);
-
     Product selledCancle(Long productId, Long stock);
 
     Product decreaseStock(Long productId, Long stock);

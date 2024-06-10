@@ -41,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
-    public Optional<Page<Product>> search(String contents, Pageable pageable) {
+    public Page<Product> search(String contents, Pageable pageable) {
         String category = "";
 
     if (contents.contains("셔츠")) {
@@ -93,8 +93,11 @@ public class ProductServiceImpl implements ProductService {
             category = "02";
             }
         }
-    List<Product> product = productRepository.search(contents,category,pageable).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(contents+"상품을 찾을수 없습니다."); });
-        return Optional.of(new PageImpl<>(product, pageable, product.size()));
+    if (category.isEmpty()) {
+        throw new IllegalArgumentException(contents + "에 해당하는 상품을 찾을수 없습니다.");
+       }
+    List<Product> product = productRepository.search(contents, category, pageable);
+        return new PageImpl<>(product, pageable, product.size());
     }
 
 //    public Optional<List<Product>> search(String contents) {
