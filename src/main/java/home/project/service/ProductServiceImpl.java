@@ -118,15 +118,20 @@ public class ProductServiceImpl implements ProductService {
 //        return Optional.ofNullable(product);
 //    }
 
-    public Optional<Page<Product>> findByBrand(String brand, Pageable pageable){
-        List<Product> product = productRepository.findByBrand(brand, pageable).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(brand+"브랜드를 찾을수 없습니다."); });
-        return Optional.of(new PageImpl<>(product, pageable, product.size()));
+    public Optional<Page<Product>> findByBrand(String brand, Pageable pageable) {
+        Page<Product> product = productRepository.findByBrand(brand, pageable)
+                .filter(products -> !products.isEmpty())
+                .orElseThrow(() -> new IllegalArgumentException(brand + " 브랜드를 찾을 수 없습니다."));
+        return Optional.of(new PageImpl<>(product.getContent(), pageable, product.getTotalElements()));
     }
 
     public Optional<Page<Product>> findByCategory(String category, Pageable pageable) {
-        List<Product> product = productRepository.findByCategory(category, pageable).filter(prducts -> !prducts.isEmpty()).orElseThrow(() -> { throw new IllegalArgumentException(category+"카테고리에 상품이 없습니다."); });
-        return Optional.of(new PageImpl<>(product, pageable, product.size()));
+        Page<Product> product = productRepository.findByCategory(category, pageable)
+                .filter(products -> !products.isEmpty())
+                .orElseThrow(() -> new IllegalArgumentException(category + " 카테고리에 상품이 없습니다."));
+        return Optional.of(new PageImpl<>(product.getContent(), pageable, product.getTotalElements()));
     }
+
 
 //    public Optional<Product> DetailProduct (Long productid){
 //        Product existProduct = productRepository.findById(productid).orElseThrow(() -> new IllegalStateException("존재하지 않는 상품입니다."));
