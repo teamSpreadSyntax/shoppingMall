@@ -187,13 +187,24 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
-    public Product selledProduct(Long productId , Long stock) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+    public Product selledProduct(Long productId, Long stock) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
         Long currentStock = product.getStock();
-        Long newStock = Math.max(currentStock - stock, 0);
+
+        if (currentStock == 0) {
+            throw new IllegalArgumentException("재고가 없어 상품을 판매할 수 없습니다.");
+        }
+        if (currentStock <= 0 || stock > currentStock) {
+            throw new IllegalArgumentException("재고가 부족합니다.");
+        }
+
+        Long newStock = currentStock - stock;
         product.setStock(newStock);
-        Long allCount = product.getSelledcount();
-        product.setSelledcount(allCount + (currentStock - newStock));
+
+        Long soldCount = product.getSelledcount();
+        product.setSelledcount(soldCount + stock);
+
         return productRepository.save(product);
+        }
     }
-}

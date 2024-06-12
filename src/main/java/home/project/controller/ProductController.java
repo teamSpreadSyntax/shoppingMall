@@ -334,7 +334,7 @@ public class ProductController {
             String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 판매되어"+decreaseProduct.getStock()+"개가 되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
         } catch (DataIntegrityViolationException e) {
-            CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed",  HttpStatus.NO_CONTENT.value());
+            CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, e.getMessage(),  HttpStatus.NO_CONTENT.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
     }

@@ -74,8 +74,7 @@ public class MemberController {
 //        }
 //
 //    }
-
-    @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
+@Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -84,26 +83,22 @@ public class MemberController {
                 responseMap.put(error.getField(), error.getDefaultMessage());
             }
             CustomOptionalResponseBody<Optional<Member>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
-            return new  CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
-        try {
-            Member member = new Member();
-            member.setEmail(memberDTO.getEmail());
-            member.setPassword(memberDTO.getPassword());
-            member.setName(memberDTO.getName());
-            member.setPhone(memberDTO.getPhone());
-            memberService.join(member);
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("회원가입완료", member.getEmail()+"로 가입되었습니다");
-            CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원가입 성공", HttpStatus.OK.value());
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("중복된 값이 입력되었습니다. 이메일 또는 전화번호로 이미 가입되어있습니다", e.getMessage()+"--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
-            CustomOptionalResponseBody<Optional<Member>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "이메일 또는 전화번호 중복", HttpStatus.CONFLICT.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
+
+        Member member = new Member();
+        member.setEmail(memberDTO.getEmail());
+        member.setPassword(memberDTO.getPassword());
+        member.setName(memberDTO.getName());
+        member.setPhone(memberDTO.getPhone());
+        memberService.join(member);
+
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("회원가입완료", member.getEmail()+"로 가입되었습니다");
+        CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK.value());
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
+
 
     @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
     @GetMapping("FindByEmail")

@@ -6,6 +6,7 @@ import home.project.domain.MemberDTOWithoutPw;
 import home.project.repository.MemberRepository;
 //import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +28,15 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public void join (Member member){
+        boolean emailExists = memberRepository.existsByEmail(member.getEmail());
+        boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
+        if (emailExists && phoneExists) {
+            throw new DataIntegrityViolationException("이메일과 휴대폰번호가 모두 중복됩니다.");
+        } else if (emailExists) {
+            throw new DataIntegrityViolationException("이메일이 중복됩니다.");
+        } else if (phoneExists) {
+            throw new DataIntegrityViolationException("휴대폰번호가 중복됩니다.");
+        }
         member.setPassword(passwordEncoder.encode(member.getPassword()));
         memberRepository.save(member);
     }
