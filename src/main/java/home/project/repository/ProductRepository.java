@@ -33,4 +33,6 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE p.brand = :brand")
     Optional<Page<Product>> findByBrand(@Param("brand")String brand, Pageable pageable);
+
+    Page<Product> findByNameContaining(String name, Pageable pageable);
 }

@@ -30,10 +30,11 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.findAll(pageable);
     }
 
-    public Optional<Product> findByName(String name) {
-        Product product = productRepository.findByName(name).orElseThrow(() -> { throw new IllegalArgumentException(name+"으로 등록된 상품이 없습니다."); });
-        return Optional.ofNullable(product);
+    public Page<Product> findProductsByName(String name, Pageable pageable) {
+        return productRepository.findByNameContaining(name, pageable);
     }
+
+
 
     public Optional<Product> findById(Long ID) {
         Product product = productRepository.findById(ID).orElseThrow(() -> { throw new IllegalArgumentException(ID+"로 설정된 상품이 없습니다."); });
@@ -169,13 +170,15 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
-    public Product selledCancle(Long productId , Long stock) {
+    public Product selledCancle(Long productId, Long stock) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
         Long currentStock = product.getStock();
         Long newStock = Math.max(currentStock + stock, 0);
+        Long diffStock = newStock - currentStock;
         product.setStock(newStock);
-        Long allCount = product.getSelledcount();
-        product.setSelledcount(allCount + (currentStock - newStock));
+        Long currentSelledCount = product.getSelledcount();
+        Long newSelledCount = Math.max(currentSelledCount - diffStock, 0);
+        product.setSelledcount(newSelledCount);
         return productRepository.save(product);
     }
 

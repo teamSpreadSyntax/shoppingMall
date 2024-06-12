@@ -120,9 +120,11 @@ public class ProductController {
             int page = productList.getNumber();
             return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
         } else {
-            Optional<Product> productOptional = productService.findByName(productName);
+            Page<Product> productList = productService.findProductsByName(productName, pageable);
             String successMessage = productName + "로 등록된 상품정보입니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
+            long totalCount = productList.getTotalElements();
+            int page = productList.getNumber();
+            return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
         }
     }
 

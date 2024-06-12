@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface ProductService {
     void join(Product product);
     Page<Product> findAll(Pageable pageable);
-    Optional<Product> findByName(String name);
+    Page<Product> findProductsByName(String name, Pageable pageable);
     Optional<Product> findById(Long ID);
     Page<Product> search(String contents, Pageable pageable);
     Optional<Page<Product>> findByBrand(String brand, Pageable pageable);

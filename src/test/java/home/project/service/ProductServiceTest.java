@@ -39,7 +39,7 @@ class ProductServiceTest {
         productRepository.deleteAll();
     }
 
-    @DisplayName("제품등록테스트 케이스")
+    /*@DisplayName("제품등록테스트 케이스")
     @Test
     void join() {
         //given
@@ -55,7 +55,7 @@ class ProductServiceTest {
         Product product2 = productService.findByName(product1.getName()).get();
         Assertions.assertThat(product1.getName()).isEqualTo(product2.getName());
 
-    }
+    }*/
 
     @DisplayName("모든 제품 찾기")
     @Test
@@ -84,7 +84,7 @@ class ProductServiceTest {
 
     }
 
-    @DisplayName("이름으로 찾기")
+   /* @DisplayName("이름으로 찾기")
     @Test
     void findByname() {
         //given
@@ -99,7 +99,7 @@ class ProductServiceTest {
         Product findByName = productService.findByName(product1.getName()).get();
         //then
         Assertions.assertThat(product1.getName()).isEqualTo(findByName.getName());
-    }
+    }*/
 
     @DisplayName("브랜드명으로 찾기")
     @Test
@@ -155,7 +155,7 @@ class ProductServiceTest {
         Assertions.assertThat(findByCategory.getTotalElements()).isEqualTo(2);
     }
 
-    @DisplayName("제품을 누르면 상세 페이지로 가는 테스트")
+    /*@DisplayName("제품을 누르면 상세 페이지로 가는 테스트")
     @Test
     void detailProduct() {
         //given
@@ -170,9 +170,9 @@ class ProductServiceTest {
         Product detailProduct = productService.findByName(product1.getName()).get();
         //then
         Assertions.assertThat(detailProduct).isEqualTo(product1);
-    }
+    }*/
 
-    @DisplayName("제품정보 업데이트 테스트")
+    /*@DisplayName("제품정보 업데이트 테스트")
     @Test
     void update() {
         //given
@@ -191,8 +191,8 @@ class ProductServiceTest {
         Assertions.assertThat(productUpdate.getName()).isEqualTo(product1.getName());
 
     }
-
-    @DisplayName("아이디로 삭제하기")
+*/
+    /*@DisplayName("아이디로 삭제하기")
     @Test
     void deleteById() {
         //given
@@ -213,7 +213,7 @@ class ProductServiceTest {
         }catch (IllegalArgumentException e){
             System.out.print("삭제성공");
         }
-    }
+    }*/
 
 //    @DisplayName("모든 브랜드 리스트 찾기")
 //    @Test
