@@ -6,6 +6,7 @@ package home.project.controller;
 
 import home.project.domain.*;
 //import home.project.domain.TokenDto;
+import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +28,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -50,10 +52,12 @@ import java.util.stream.Collectors;
 @RestController
 public class MemberController {
     private final MemberService memberService;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public MemberController(MemberService memberService) {
+    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider) {
         this.memberService = memberService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
 //    @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
@@ -93,10 +97,15 @@ public class MemberController {
         member.setPhone(memberDTO.getPhone());
         memberService.join(member);
 
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("회원가입완료", member.getEmail()+"로 가입되었습니다");
-        CustomOptionalResponseBody<Optional<Member>> responseBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK.value());
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        // 회원가입 후 토큰 생성
+        TokenDto tokenDto = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(member.getEmail(), member.getPassword()));
+
+    Map<String, String> responseMap = new HashMap<>();
+    responseMap.put("accessToken", tokenDto.getAccessToken());
+    responseMap.put("refreshToken", tokenDto.getRefreshToken());
+    responseMap.put("message", "회원가입이 성공적으로 완료되었습니다.");
+    CustomOptionalResponseBody<Optional<Map<String, String>>> responseBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK.value());
+    return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
 
