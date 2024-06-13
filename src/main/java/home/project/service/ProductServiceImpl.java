@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Product;
+import home.project.exceptions.OutOfStockException;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -119,18 +120,25 @@ public class ProductServiceImpl implements ProductService {
 //        return Optional.ofNullable(product);
 //    }
 
-    public Optional<Page<Product>> findByBrand(String brand, Pageable pageable) {
-        Page<Product> product = productRepository.findByBrand(brand, pageable)
-                .filter(products -> !products.isEmpty())
-                .orElseThrow(() -> new IllegalArgumentException(brand + " 브랜드를 찾을 수 없습니다."));
-        return Optional.of(new PageImpl<>(product.getContent(), pageable, product.getTotalElements()));
+    public Page<Product> findByBrand(String brand, Pageable pageable) {
+        Page<Product> productPage = productRepository.findByBrand(brand, pageable);
+
+        if (productPage.isEmpty()) {
+            throw new IllegalArgumentException(brand + " 브랜드를 찾을 수 없습니다.");
+        }
+
+        Page<Product> product = productRepository.findByBrand(brand, pageable);
+        return new PageImpl<>(product.getContent(), pageable, product.getTotalElements());
     }
 
-    public Optional<Page<Product>> findByCategory(String category, Pageable pageable) {
-        Page<Product> product = productRepository.findByCategory(category, pageable)
-                .filter(products -> !products.isEmpty())
-                .orElseThrow(() -> new IllegalArgumentException(category + " 카테고리에 상품이 없습니다."));
-        return Optional.of(new PageImpl<>(product.getContent(), pageable, product.getTotalElements()));
+
+    public Page<Product> findByCategory(String category, Pageable pageable) {
+        Page<Product> productPage = productRepository.findByCategory(category, pageable);
+
+        if (productPage.isEmpty()) {
+            throw new IllegalArgumentException(category + " 카테고리에 상품이 없습니다.");
+        }
+        return productPage;
     }
 
 

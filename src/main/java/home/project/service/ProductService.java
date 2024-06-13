@@ -14,9 +14,9 @@ public interface ProductService {
     Page<Product> findProductsByName(String name, Pageable pageable);
     Optional<Product> findById(Long ID);
     Page<Product> search(String contents, Pageable pageable);
-    Optional<Page<Product>> findByBrand(String brand, Pageable pageable);
+    Page<Product> findByBrand(String brand, Pageable pageable);
 //    Optional<Product> DetailProduct(Long productid);
-    Optional<Page<Product>> findByCategory(String category, Pageable pageable);
+    Page<Product> findByCategory(String category, Pageable pageable);
     Optional<Product> update(Product product);
     void deleteById(Long productId);
     Page<Product> brandList(Pageable pageable);

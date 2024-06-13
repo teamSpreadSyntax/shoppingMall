@@ -2,6 +2,8 @@ package home.project.controller;
 
 
 import home.project.domain.*;
+import home.project.exceptions.OutOfStockException;
+import home.project.exceptions.PageNotFoundException;
 import home.project.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.*;
+
+import static java.util.Optional.empty;
 
 @Tag(name = "상품", description = "상품관련 API 입니다")
 @RequestMapping(path = "/api/product")
@@ -115,12 +119,18 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
         if (productName == null || productName.isEmpty()) {
             Page<Product> productList = productService.findAll(pageable);
+            if (pageable.getPageNumber() >= productList.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
             String successMessage = "전체상품 입니다";
             long totalCount = productList.getTotalElements();
             int page = productList.getNumber();
             return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
         } else {
             Page<Product> productList = productService.findProductsByName(productName, pageable);
+            if (pageable.getPageNumber() >= productList.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
             String successMessage = productName + "로 등록된 상품정보입니다";
             long totalCount = productList.getTotalElements();
             int page = productList.getNumber();
@@ -137,6 +147,9 @@ public class ProductController {
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         Page<Product> productList = productService.search(contents, pageable);
+        if (pageable.getPageNumber() >= productList.getTotalPages()) {
+            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+        }
         String successMessage = contents + "에 해당하는 상품 입니다";
         if (productList.isEmpty()) {
             CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(0, 0, null);
@@ -162,53 +175,59 @@ public class ProductController {
 
     @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
     @GetMapping("FindByBrand")
-    public CustomOptionalPageResponseEntity<Product> findProductByBrand(
+    public CustomListResponseEntity<Product> findProductByBrand(
             @RequestParam("brand") String brand,
             @PageableDefault(page = 0, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
 
-        Optional<Page<Product>> productOptional = productService.findByBrand(brand, pageable);
-        String successMessage = brand + "에 해당하는 상품 입니다";
+        try {
+            Page<Product> productPage = productService.findByBrand(brand, pageable);
+            if (pageable.getPageNumber() >= productPage.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
+            String successMessage = brand + "에 해당하는 상품 입니다";
 
-        if (productOptional.isPresent()) {
-            Page<Product> productPage = productOptional.get();
             long totalCount = productPage.getTotalElements();
             int page = productPage.getNumber();
 
-            return new CustomOptionalPageResponseEntity<>(Optional.of(productPage.getContent()), successMessage, HttpStatus.OK, totalCount, page);
-        } else {
-            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
-                    0, 0, Optional.empty());
-            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
+            return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        } catch (PageNotFoundException e) {
+            CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(
+                    0, 0, Collections.emptyList());
+            CustomListResponseBody<Product> responseBody = new CustomListResponseBody<>(result, e.getMessage(), HttpStatus.BAD_REQUEST.value());
 
-            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
+            return new CustomListResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
         }
     }
 
     @Operation(summary = "카테고리로 상품조회 메서드", description = "카테고리로 상품조회 메서드입니다.")
     @GetMapping("FindByCategory")
-    public CustomOptionalPageResponseEntity<Product> findProductByCategory(
+    public CustomListResponseEntity<Product> findProductByCategory(
             @RequestParam("category") String category,
             @PageableDefault(page = 0, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        Optional<Page<Product>> productOptional = productService.findByCategory(category, pageable);
-        String successMessage = category + "에 해당하는 상품입니다";
-        if (productOptional.isPresent()) {
-            Page<Product> productPage = productOptional.get();
+
+        try {
+            Page<Product> productPage = productService.findByCategory(category, pageable);
+            if (pageable.getPageNumber() >= productPage.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
+            String successMessage = category + "에 해당하는 상품입니다";
+
             long totalCount = productPage.getTotalElements();
             int page = productPage.getNumber();
 
-            return new CustomOptionalPageResponseEntity<>(Optional.of(productPage.getContent()), successMessage, HttpStatus.OK, totalCount, page);
-        } else {
-            CustomOptionalPageResponseBody.Result<Product> result = new CustomOptionalPageResponseBody.Result<>(
-                    0, 0, Optional.empty());
-            CustomOptionalPageResponseBody<Product> responseBody = new CustomOptionalPageResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
+            return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        } catch (IllegalArgumentException e) {
+            CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(
+                    0, 0, Collections.emptyList());
+            CustomListResponseBody<Product> responseBody = new CustomListResponseBody<>(result, e.getMessage(), HttpStatus.BAD_REQUEST.value());
 
-            return new CustomOptionalPageResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
+            return new CustomListResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -281,6 +300,9 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
 
         Page<Product> brandListPage = productService.brandList(pageable);
+        if (pageable.getPageNumber() >= brandListPage.getTotalPages()) {
+            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+        }
         String successMessage = "전체 브랜드 입니다";
         long totalCount = brandListPage.getTotalElements();
         int page = brandListPage.getNumber();
@@ -335,17 +357,17 @@ public class ProductController {
             Product decreaseProduct = productService.selledProduct(productId,stock);
             String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 판매되어"+decreaseProduct.getStock()+"개가 되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
+        } catch (IllegalArgumentException e) {
             CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, e.getMessage(),  HttpStatus.NO_CONTENT.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    /*@ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("errorMessage", e.getMessage());
         CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "해당상품이 존재하지 않습니다.", HttpStatus.CONFLICT.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-    }
+    }*/
 }
