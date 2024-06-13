@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
@@ -17,7 +18,13 @@ import java.util.Optional;
 @ControllerAdvice
 
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-
+    @ExceptionHandler(PageNotFoundException.class)
+    public ResponseEntity<?> handlePageNotFoundException(PageNotFoundException e) {
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", e.getMessage());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "해당 페이지가 존재하지 않습니다", HttpStatus.BAD_REQUEST.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+    }
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> responseMap = new HashMap<>();
@@ -48,13 +55,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), ex.getMessage(), HttpStatus.BAD_REQUEST.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
-    @ExceptionHandler(PageNotFoundException.class)
-    public ResponseEntity<?> handlePageNotFoundException(PageNotFoundException ex) {
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
-    }
+
 }
 
 

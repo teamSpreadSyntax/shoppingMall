@@ -2,6 +2,7 @@ package home.project.service;
 
 import home.project.domain.Product;
 import home.project.exceptions.OutOfStockException;
+import home.project.exceptions.PageNotFoundException;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -122,13 +123,10 @@ public class ProductServiceImpl implements ProductService {
 
     public Page<Product> findByBrand(String brand, Pageable pageable) {
         Page<Product> productPage = productRepository.findByBrand(brand, pageable);
-
-        if (productPage.isEmpty()) {
+        if (productPage.getSize()==0||productPage.getTotalElements()==0) {
             throw new IllegalArgumentException(brand + " 브랜드를 찾을 수 없습니다.");
         }
-
-        Page<Product> product = productRepository.findByBrand(brand, pageable);
-        return new PageImpl<>(product.getContent(), pageable, product.getTotalElements());
+        return productPage;
     }
 
 
