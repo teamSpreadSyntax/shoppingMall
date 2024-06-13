@@ -200,4 +200,11 @@ public class MemberController {
         CustomOptionalResponseBody<Optional<Member>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "해당회원이 존재하지 않습니다.", HttpStatus.CONFLICT.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<?> DataIntegrityViolationException(DataIntegrityViolationException e) {
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("errorMessage", e.getMessage());
+        CustomOptionalResponseBody<Optional<Member>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "중복이 있습니다", HttpStatus.CONFLICT.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+    }
 }

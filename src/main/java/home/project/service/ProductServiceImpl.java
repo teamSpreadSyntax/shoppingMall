@@ -97,8 +97,8 @@ public class ProductServiceImpl implements ProductService {
     if (category.isEmpty()) {
         throw new IllegalArgumentException(contents + "에 해당하는 상품을 찾을수 없습니다.");
        }
-    List<Product> product = productRepository.search(contents, category, pageable);
-        return new PageImpl<>(product, pageable, product.size());
+    Page<Product> product = productRepository.search(contents, category, pageable);
+        return new PageImpl<>(product.getContent(), pageable, product.getTotalElements());
     }
 
 //    public Optional<List<Product>> search(String contents) {
