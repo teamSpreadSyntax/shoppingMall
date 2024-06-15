@@ -7,6 +7,7 @@ package home.project.controller;
 import home.project.domain.*;
 //import home.project.domain.TokenDto;
 import home.project.exceptions.JwtAuthenticationException;
+import home.project.exceptions.PageNotFoundException;
 import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -161,6 +162,32 @@ public class MemberController {
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(e.getMessage()), errorMessage, HttpStatus.BAD_REQUEST);
         }
     }
+
+    @Operation(summary = "회원 통합 조회 메서드", description = "이름, 이메일, 전화번호 및 일반 검색어로 회원을 조회합니다. 모든 조건을 만족하는 회원을 조회합니다. 검색어가 없으면 전체 회원을 조회합니다.")
+    @GetMapping("/searchMembers")
+    public ResponseEntity<?> searchMembers(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "query", required = false) String query,
+            @PageableDefault(page = 1, size = 10)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "name", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+
+        Page<Member> memberPage = memberService.findMembers(name, email, phone, query, pageable);
+        String successMessage = "검색 결과입니다";
+
+        if (pageable.getPageNumber() >= memberPage.getTotalPages()) {
+            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+        }
+
+        long totalCount = memberPage.getTotalElements();
+        int page = memberPage.getNumber();
+
+        return new CustomListResponseEntity<>(memberPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
 
 
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
