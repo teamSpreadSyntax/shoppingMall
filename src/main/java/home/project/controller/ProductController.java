@@ -128,27 +128,38 @@ public class ProductController {
         }
     }
 
-    @Operation(summary = "검색", description = "단순검색 메서드입니다")
+    @Operation(summary = "검색", description = "단순검색 메서드입니다. 값을 입력하지 않으면 전체 상품이 조회됩니다.")
     @GetMapping("search")
     public CustomListResponseEntity<Product> search(
-            @RequestParam("contents") String contents,
+            @RequestParam(value="contents", required = false) String contents,
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        Page<Product> productList = productService.search(contents, pageable);
-        if (pageable.getPageNumber() >= productList.getTotalPages()) {
-            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-        }
-        String successMessage = contents + "에 해당하는 상품 입니다";
-        if (productList.isEmpty()) {
-            CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(0, 0, null);
-            CustomListResponseBody<Product> responseBody = new CustomListResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
-            return new CustomListResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
-        } else {
+        if (contents == null || contents.isEmpty()) {
+            Page<Product> productList = productService.findAll(pageable);
+            if (pageable.getPageNumber() >= productList.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
+            String successMessage = "전체상품 입니다";
             long totalCount = productList.getTotalElements();
             int page = productList.getNumber();
             return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        } else {
+            Page<Product> productList = productService.search(contents, pageable);
+            if (pageable.getPageNumber() >= productList.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
+            String successMessage = contents + "에 해당하는 상품 입니다";
+            if (productList.isEmpty()) {
+                CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(0, 0, null);
+                CustomListResponseBody<Product> responseBody = new CustomListResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
+                return new CustomListResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
+            } else {
+                long totalCount = productList.getTotalElements();
+                int page = productList.getNumber();
+                return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+            }
         }
     }
 
