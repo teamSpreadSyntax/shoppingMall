@@ -35,4 +35,17 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
     Page<Product> findByBrand(@Param("brand")String brand, Pageable pageable);
 
     Page<Product> findByNameContaining(String name, Pageable pageable);
+    @Query("SELECT p FROM Product p WHERE " +
+            "(:brand IS NULL OR :brand = '' OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :brand, '%'))) AND " +
+            "(:category IS NULL OR :category = '' OR LOWER(p.category) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
+            "(:productName IS NULL OR :productName = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :productName, '%'))) AND " +
+            "(:query IS NULL OR :query = '' OR " +
+            "(LOWER(p.brand) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(p.category) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+            "LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))))")
+    Page<Product> findProducts(@Param("brand") String brand,
+                               @Param("category") String category,
+                               @Param("productName") String productName,
+                               @Param("query") String query,
+                               Pageable pageable);
 }

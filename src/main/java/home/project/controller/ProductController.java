@@ -162,6 +162,30 @@ public class ProductController {
             }
         }
     }
+    @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
+    @GetMapping("/searchProducts")
+    public ResponseEntity<?> searchProducts(
+            @RequestParam(value = "brand", required = false) String brand,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "productName", required = false) String productName,
+            @RequestParam(value = "query", required = false) String query,
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+
+        Page<Product> productPage = productService.findProducts(brand, category, productName, query, pageable);
+        String successMessage = "검색 결과입니다";
+
+        if (pageable.getPageNumber() >= productPage.getTotalPages()) {
+            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+        }
+
+        long totalCount = productPage.getTotalElements();
+        int page = productPage.getNumber();
+
+        return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
 
     @Operation(summary = "ID로 상품조회 메서드", description = "ID로 상품조회 메서드입니다")
     @GetMapping("FindProductById")

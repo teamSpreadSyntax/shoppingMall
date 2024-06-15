@@ -41,6 +41,14 @@ public class ProductServiceImpl implements ProductService {
         return Optional.ofNullable(product);
     }
 
+    public Page<Product> findProducts(String brand, String category, String productName, String query, Pageable pageable) {
+        Page<Product> productPage = productRepository.findProducts(brand ,category, productName, query, pageable);
+        if (productPage.getSize()==0||productPage.getTotalElements()==0) {
+            throw new IllegalArgumentException("해당하는 제품을 찾을 수 없습니다.");
+        }
+        return productRepository.findProducts(brand, category, productName, query, pageable);
+
+    }
 
     public Page<Product> search(String contents, Pageable pageable) {
         String category = "";

@@ -19,6 +19,7 @@ public interface ProductService {
     Page<Product> findByCategory(String category, Pageable pageable);
     Optional<Product> update(Product product);
     void deleteById(Long productId);
+    Page<Product> findProducts(String brand, String category, String productName, String query, Pageable pageable);
     Page<Product> brandList(Pageable pageable);
     Product increaseStock(Long productId, Long stock);
     Product selledCancle(Long productId, Long stock);
