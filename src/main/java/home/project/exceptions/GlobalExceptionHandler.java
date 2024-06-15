@@ -23,14 +23,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("errorMessage", e.getMessage());
         CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "해당 페이지가 존재하지 않습니다", HttpStatus.BAD_REQUEST.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "해당상품이 존재하지 않습니다.", HttpStatus.CONFLICT.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "검색내용이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

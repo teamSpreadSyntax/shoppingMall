@@ -3,6 +3,7 @@ package home.project.service;
 import home.project.domain.Product;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -198,10 +199,10 @@ public class ProductServiceImpl implements ProductService {
         Long currentStock = product.getStock();
 
         if (currentStock == 0) {
-            throw new IllegalArgumentException("재고가 없어 상품을 판매할 수 없습니다.");
+            throw new DataIntegrityViolationException("재고가 없어 상품을 판매할 수 없습니다.");
         }
         if (currentStock <= 0 || stock > currentStock) {
-            throw new IllegalArgumentException("재고가 부족합니다.");
+            throw new DataIntegrityViolationException("재고가 부족합니다.");
         }
 
         Long newStock = currentStock - stock;

@@ -340,12 +340,4 @@ public class ProductController {
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
     }
-
-    @ExceptionHandler(PageNotFoundException.class)
-    public ResponseEntity<?> handlePageNotFoundException(PageNotFoundException e) {
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "해당 페이지가 존재하지 않습니다", HttpStatus.BAD_REQUEST.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
-    }
 }
