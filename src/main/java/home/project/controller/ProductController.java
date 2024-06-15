@@ -203,25 +203,14 @@ public class ProductController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-
-        try {
             Page<Product> productPage = productService.findByCategory(category, pageable);
-            if (pageable.getPageNumber() >= productPage.getTotalPages()) {
+            if (productPage.getTotalPages() < pageable.getPageNumber()) {
                 throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
             }
             String successMessage = category + "에 해당하는 상품입니다";
-
             long totalCount = productPage.getTotalElements();
             int page = productPage.getNumber();
-
             return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-        } catch (IllegalArgumentException e) {
-            CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(
-                    0, 0, Collections.emptyList());
-            CustomListResponseBody<Product> responseBody = new CustomListResponseBody<>(result, e.getMessage(), HttpStatus.BAD_REQUEST.value());
-
-            return new CustomListResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-        }
     }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")

@@ -132,8 +132,7 @@ public class ProductServiceImpl implements ProductService {
 
     public Page<Product> findByCategory(String category, Pageable pageable) {
         Page<Product> productPage = productRepository.findByCategory(category, pageable);
-
-        if (productPage.isEmpty()) {
+        if (productPage.getSize()==0||productPage.getTotalElements()==0) {
             throw new IllegalArgumentException(category + " 카테고리에 상품이 없습니다.");
         }
         return productPage;
