@@ -56,11 +56,20 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public Optional<Member> update (Member member){
-        Member exsitsMember = memberRepository.findByEmail(member.getEmail()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-        exsitsMember.setPassword(member.getPassword());
+        Member exsitsMember = memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        boolean emailExists = memberRepository.existsByEmail(member.getEmail());
+        boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
+        if (emailExists && phoneExists) {
+            throw new DataIntegrityViolationException("이메일과 휴대폰번호가 모두 중복됩니다.");
+        } else if (emailExists) {
+            throw new DataIntegrityViolationException("이메일이 중복됩니다.");
+        } else if (phoneExists) {
+            throw new DataIntegrityViolationException("휴대폰번호가 중복됩니다.");
+        }
         exsitsMember.setName(member.getName());
         exsitsMember.setEmail(member.getEmail());
         exsitsMember.setPhone(member.getPhone());
+        exsitsMember.setPassword(passwordEncoder.encode(member.getPassword()));
         memberRepository.save(exsitsMember);
         Optional<Member> newMember = memberRepository.findById(exsitsMember.getId());
         return newMember;

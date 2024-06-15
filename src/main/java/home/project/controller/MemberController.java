@@ -162,16 +162,9 @@ public class MemberController {
             CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
-        try {
             Optional<Member> memberOptional = memberService.update(member);
             String successMessage = "정보가 수정되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("중복된 값이 입력되었습니다. 해당 이메일 또는 전화번호는 이미 등록되어있습니다", e.getMessage() + "--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
-            CustomOptionalResponseBody<Optional<Member>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "이메일 또는 전화번호 중복", HttpStatus.CONFLICT.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
     }
 
 

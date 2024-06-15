@@ -57,7 +57,6 @@ public class ProductController {
             CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
-        try {
             Product product = new Product();
             product.setBrand(productDTOWithoutId.getBrand());
             product.setCategory(productDTOWithoutId.getCategory());
@@ -70,12 +69,6 @@ public class ProductController {
             responseMap.put("상품등록완료", product.getName() + "가 등록되었습니다");
             CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품등록 성공", HttpStatus.OK.value());
             return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("중복된 값이 입력되었습니다. 해당 상품은 이미 등록되어있습니다", e.getMessage() + "--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
-            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품명 중복", HttpStatus.CONFLICT.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
     }
 
     /*@Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
@@ -220,16 +213,10 @@ public class ProductController {
             CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
-        try {
             Optional<Product> productOptional = productService.update(product);
             String successMessage = "상품정보가 수정되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("중복된 값이 입력되었습니다. 해당 상품은 이미 등록되어있습니다", e.getMessage() + "--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
-            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품명 중복", HttpStatus.CONFLICT.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
+
     }
 
     @Operation(summary = "상품상세 메서드", description = "상품상세 메서드입니다.")
