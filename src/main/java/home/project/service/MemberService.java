@@ -16,6 +16,7 @@ public interface MemberService {
 
 //   void login(LoginDto loginDto);
    void join(Member member);
+   void logout(Long id);
    Optional<Member> findById(Long id);
    Optional<Member> findByEmail(String email);
    Page<Member> findAll(Pageable pageable);

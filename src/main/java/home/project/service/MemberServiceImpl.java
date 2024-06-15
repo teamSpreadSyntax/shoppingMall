@@ -41,6 +41,8 @@ public class MemberServiceImpl implements MemberService{
         memberRepository.save(member);
     }
 
+    public void logout(Long id){};
+
     public Optional<Member> findById(Long id) {
         Member member = memberRepository.findById(id).orElseThrow(() -> { throw new IllegalArgumentException(id+"로 등록된 회원이 없습니다."); });
         return Optional.ofNullable(member);

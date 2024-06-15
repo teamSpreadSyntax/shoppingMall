@@ -197,4 +197,6 @@ public class MemberController {
             return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
         }
     }
+
+
 }

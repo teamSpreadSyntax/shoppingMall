@@ -19,10 +19,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
@@ -39,7 +36,7 @@ public class AuthController {
     private JwtTokenProvider tokenProvider;
     private UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
-    private  final MemberService memberService;
+    private final MemberService memberService;
 
     @Autowired
     public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserDetailsService userDetailsService,  PasswordEncoder passwordEncoder, MemberService memberService) {
@@ -78,6 +75,19 @@ public class AuthController {
 
         }
     }
+
+    @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestParam("memberId") Long id) {
+
+            Optional<Member> member = memberService.findById(id);
+            memberService.logout(id);
+            String successMessage = member.get().getEmail() + "님 로그아웃에 성공하였습니다";
+
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(member.get().getEmail()), successMessage, HttpStatus.OK);
+
+    }
+
 }
 
 
