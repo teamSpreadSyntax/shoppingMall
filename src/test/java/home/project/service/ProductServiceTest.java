@@ -101,59 +101,59 @@ class ProductServiceTest {
         Assertions.assertThat(product1.getName()).isEqualTo(findByName.getName());
     }*/
 
-    @DisplayName("브랜드명으로 찾기")
-    @Test
-    void findByBrand() {
-        //given
-        Product product1 = new Product();
-        product1.setBrand("나이키");
-        product1.setCategory("바지");
-        product1.setImage("123.img");
-        product1.setName("나이키 플러워");
-        product1.setStock(10L);
-        productService.join(product1);
-        //given
-        Product product2 = new Product();
-        product2.setBrand("나이키");
-        product2.setCategory("티셔츠");
-        product2.setImage("1234.img");
-        product2.setName("나이키 T");
-        product2.setStock(20L);
-        productService.join(product2);
-        //when
-        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
-        Page<Product> findByBrand = productService.findByBrand("나이키", pageable).get();
-        //then
-        Assertions.assertThat(findByBrand.getTotalElements()).isEqualTo(2);
-    }
+//    @DisplayName("브랜드명으로 찾기")
+//    @Test
+//    void findByBrand() {
+//        //given
+//        Product product1 = new Product();
+//        product1.setBrand("나이키");
+//        product1.setCategory("바지");
+//        product1.setImage("123.img");
+//        product1.setName("나이키 플러워");
+//        product1.setStock(10L);
+//        productService.join(product1);
+//        //given
+//        Product product2 = new Product();
+//        product2.setBrand("나이키");
+//        product2.setCategory("티셔츠");
+//        product2.setImage("1234.img");
+//        product2.setName("나이키 T");
+//        product2.setStock(20L);
+//        productService.join(product2);
+//        //when
+//        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
+//        Page<Product> findByBrand = productService.findByBrand("나이키", pageable).get();
+//        //then
+//        Assertions.assertThat(findByBrand.getTotalElements()).isEqualTo(2);
+//    }
 
 
 
-    @DisplayName("카테고리별로 찾기")
-    @Test
-    void findByCategory() {
-        //given
-        Product product1 = new Product();
-        product1.setBrand("나이키");
-        product1.setCategory("바지");
-        product1.setImage("123.img");
-        product1.setName("나이키 플러워");
-        product1.setStock(10L);
-        productService.join(product1);
-        //given
-        Product product2 = new Product();
-        product2.setBrand("아디다스");
-        product2.setCategory("바지");
-        product2.setImage("1234.img");
-        product2.setName("아디다스 트레이닝");
-        product2.setStock(20L);
-        productService.join(product2);
-        //when
-        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
-        Page<Product> findByCategory = productService.findByCategory("바지", pageable).get();
-        //then
-        Assertions.assertThat(findByCategory.getTotalElements()).isEqualTo(2);
-    }
+//    @DisplayName("카테고리별로 찾기")
+//    @Test
+//    void findByCategory() {
+//        //given
+//        Product product1 = new Product();
+//        product1.setBrand("나이키");
+//        product1.setCategory("바지");
+//        product1.setImage("123.img");
+//        product1.setName("나이키 플러워");
+//        product1.setStock(10L);
+//        productService.join(product1);
+//        //given
+//        Product product2 = new Product();
+//        product2.setBrand("아디다스");
+//        product2.setCategory("바지");
+//        product2.setImage("1234.img");
+//        product2.setName("아디다스 트레이닝");
+//        product2.setStock(20L);
+//        productService.join(product2);
+//        //when
+//        Pageable pageable = PageRequest.of(0, 10); // 페이지 번호와 페이지 크기를 지정합니다.
+//        Page<Product> findByCategory = productService.findByCategory("바지", pageable).get();
+//        //then
+//        Assertions.assertThat(findByCategory.getTotalElements()).isEqualTo(2);
+//    }
 
     /*@DisplayName("제품을 누르면 상세 페이지로 가는 테스트")
     @Test

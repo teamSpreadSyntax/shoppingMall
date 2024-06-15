@@ -183,7 +183,7 @@ public class ProductController {
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
             Page<Product> productPage = productService.findByBrand(brand, pageable);
-            if (productPage.getTotalPages() < pageable.getPageNumber()) {
+            if (productPage.getTotalPages() < pageable.getPageNumber() || productPage.getTotalPages() == pageable.getPageNumber()) {
                 throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
             }
             String successMessage = brand + "에 해당하는 상품 입니다";
@@ -204,7 +204,7 @@ public class ProductController {
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
             Page<Product> productPage = productService.findByCategory(category, pageable);
-            if (productPage.getTotalPages() < pageable.getPageNumber()) {
+            if (productPage.getTotalPages() < pageable.getPageNumber() || productPage.getTotalPages() == pageable.getPageNumber()) {
                 throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
             }
             String successMessage = category + "에 해당하는 상품입니다";
