@@ -1,6 +1,7 @@
 package home.project.domain;
 
 
+import home.project.exceptions.JwtAuthenticationException;
 import home.project.service.JwtTokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

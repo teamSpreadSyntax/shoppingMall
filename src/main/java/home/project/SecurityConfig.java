@@ -2,7 +2,12 @@ package home.project;
 
 //import home.project.domain.LoginDto;
 //import home.project.service.JwtTokenProvider;
+import home.project.domain.JwtAuthenticationFilter;
+import home.project.service.JwtAuthenticationEntryPoint;
+import home.project.service.JwtTokenProvider;
 import home.project.service.MemberServiceImpl;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,7 +31,26 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
+)
 public class SecurityConfig{
+
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
+
+    // JwtAuthenticationEntryPoint 추가
+    @Bean
+    public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
+        return new JwtAuthenticationEntryPoint();
+    }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -71,12 +95,14 @@ public class SecurityConfig{
                         .requestMatchers("https://localhost:5173/**").permitAll()
                         .requestMatchers("https://localhost:443/**").permitAll()
                         .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
+//                        .requestMatchers("/api/member/FindAllMember").authenticated()
                         .anyRequest().permitAll()
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
-                        .permitAll());
-
+                        .permitAll())
+                        .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint()))
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 //                .csrf(AbstractHttpConfigurer::disable)
 //                .sessionManagement(sessionManagement ->
 //                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -94,5 +120,6 @@ public class SecurityConfig{
 
         return http.build();
     }
+
 
 }

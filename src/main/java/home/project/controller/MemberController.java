@@ -6,6 +6,7 @@ package home.project.controller;
 
 import home.project.domain.*;
 //import home.project.domain.TokenDto;
+import home.project.exceptions.JwtAuthenticationException;
 import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 //import io.swagger.v3.oas.models.PathItem;
 import jakarta.transaction.Transactional;
@@ -28,6 +30,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -60,7 +64,7 @@ public class MemberController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-//    @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
+    //    @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
 //    @PostMapping("Login")
 //    public ResponseEntity<?> login(@RequestBody @Valid LoginDto loginDto, BindingResult bindingResult) {
 //        if (bindingResult.hasErrors()) {
@@ -78,7 +82,7 @@ public class MemberController {
 //        }
 //
 //    }
-@Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
+    @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -100,15 +104,16 @@ public class MemberController {
         // 회원가입 후 토큰 생성
         TokenDto tokenDto = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(member.getEmail(), member.getPassword()));
 
-    Map<String, String> responseMap = new HashMap<>();
-    responseMap.put("accessToken", tokenDto.getAccessToken());
-    responseMap.put("refreshToken", tokenDto.getRefreshToken());
-    responseMap.put("message", "회원가입이 성공적으로 완료되었습니다.");
-    CustomOptionalResponseBody<Optional<Map<String, String>>> responseBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK.value());
-    return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("accessToken", tokenDto.getAccessToken());
+        responseMap.put("refreshToken", tokenDto.getRefreshToken());
+        responseMap.put("message", "회원가입이 성공적으로 완료되었습니다.");
+        CustomOptionalResponseBody<Optional<Map<String, String>>> responseBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK.value());
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
-
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
     @GetMapping("FindByEmail")
     public CustomOptionalResponseEntity<Optional<Member>> findMemberByEmail(@RequestParam("MemberEmail") @Valid String email) {
@@ -118,9 +123,9 @@ public class MemberController {
         if (!email.matches("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$")) {
             throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
         }
-            Optional<Member> memberOptional = memberService.findByEmail(email);
-            String successMessage = email+"로 가입된 회원정보입니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
+        Optional<Member> memberOptional = memberService.findByEmail(email);
+        String successMessage = email + "로 가입된 회원정보입니다";
+        return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "ID로 회원조회 메서드", description = "ID로 회원조회 메서드입니다.")
@@ -129,27 +134,34 @@ public class MemberController {
         if (id == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
-            Optional<Member> memberOptional = memberService.findById(id);
-            String successMessage = id+"으로 가입된 회원정보입니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
+        Optional<Member> memberOptional = memberService.findById(id);
+        String successMessage = id + "으로 가입된 회원정보입니다";
+        return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
-    public CustomListResponseEntity<MemberDTOWithoutPw> findAllMember(
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> findAllMember(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        Page<Member> memberPage = memberService.findAll(pageable);
-        Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
-                new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
-        String successMessage = "전체 회원입니다";
-        long totalCount = memberPage.getTotalElements();
-        int page = memberPage.getNumber();
-
-        return new CustomListResponseEntity<>(memberDtoPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        try {
+            Page<Member> memberPage = memberService.findAll(pageable);
+            Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
+                    new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+            String successMessage = "전체 회원입니다";
+            long totalCount = memberPage.getTotalElements();
+            int page = memberPage.getNumber();
+            return new CustomListResponseEntity<>(memberDtoPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        } catch (AccessDeniedException e) {
+            String errorMessage = "에 해당하는 상품 입니다";
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(e.getMessage()), errorMessage, HttpStatus.BAD_REQUEST);
+        }
     }
+
 
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateMember")

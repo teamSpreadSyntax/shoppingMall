@@ -6,7 +6,9 @@ import home.project.domain.Product;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -47,6 +49,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "아이디가 존재하지 않습니다", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", ex.getMessage());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "인증되지 않은 사용자입니다", HttpStatus.UNAUTHORIZED.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(JwtAuthenticationException.class)
+    public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException ex) {
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", ex.getMessage());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "인증되지 않은 사용자입니다", HttpStatus.UNAUTHORIZED.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
         Map<String, String> responseMap = new HashMap<>();
