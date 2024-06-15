@@ -137,7 +137,7 @@ public class MemberController {
     @Operation(summary = "전체회원조회 메서드", description = "전체회원조회 메서드입니다.")
     @GetMapping("FindAllMember")
     public CustomListResponseEntity<MemberDTOWithoutPw> findAllMember(
-            @PageableDefault(page = 0, size = 5)
+            @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {

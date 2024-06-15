@@ -103,7 +103,7 @@ public class ProductController {
     @GetMapping("/FindProduct")
     public ResponseEntity<?> findProduct(
             @RequestParam(value = "productName", required = false) String productName,
-            @PageableDefault(page = 0, size = 5)
+            @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
@@ -132,7 +132,7 @@ public class ProductController {
     @GetMapping("search")
     public CustomListResponseEntity<Product> search(
             @RequestParam("contents") String contents,
-            @PageableDefault(page = 0, size = 5)
+            @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
@@ -167,7 +167,7 @@ public class ProductController {
     @GetMapping("FindByBrand")
     public CustomListResponseEntity<Product> findProductByBrand(
             @RequestParam("brand") String brand,
-            @PageableDefault(page = 0, size = 5)
+            @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
@@ -188,7 +188,7 @@ public class ProductController {
     @GetMapping("FindByCategory")
     public CustomListResponseEntity<Product> findProductByCategory(
             @RequestParam("category") String category,
-            @PageableDefault(page = 0, size = 5)
+            @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
@@ -259,7 +259,7 @@ public class ProductController {
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
     @GetMapping("brandList")
     public CustomListResponseEntity<Product> brandList(
-            @PageableDefault(page = 0, size = 5)
+            @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
