@@ -22,4 +22,5 @@ public interface MemberService {
    Page<Member> findAll(Pageable pageable);
    Optional<Member> update(Member member);
    void deleteMember(Long memberId);
+   Page<Member> findMembers(String name, String email, String phone,String query,Pageable pageable);
 }

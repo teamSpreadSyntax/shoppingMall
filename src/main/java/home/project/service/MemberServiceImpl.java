@@ -3,6 +3,7 @@ package home.project.service;
 import home.project.domain.Member;
 import home.project.domain.MemberDTOWithoutId;
 import home.project.domain.MemberDTOWithoutPw;
+import home.project.domain.Product;
 import home.project.repository.MemberRepository;
 //import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,14 @@ public class MemberServiceImpl implements MemberService{
 
     public Page<Member> findAll(Pageable pageable) {
         return memberRepository.findAll(pageable);
+    }
+    public Page<Member> findMembers(String name, String email, String phone,String query, Pageable pageable) {
+        Page<Member> memberPage = memberRepository.findMembers(name, email, phone, query, pageable);
+        if (memberPage.getSize()==0||memberPage.getTotalElements()==0) {
+            throw new IllegalArgumentException("해당하는 회원을 찾을 수 없습니다.");
+        }
+        return memberRepository.findMembers(name, email, phone, query, pageable);
+
     }
 
     public Optional<Member> update (Member member){
