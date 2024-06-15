@@ -125,12 +125,12 @@ public class MemberController {
 
     @Operation(summary = "ID로 회원조회 메서드", description = "ID로 회원조회 메서드입니다.")
     @GetMapping("findMemberById")
-    public CustomOptionalResponseEntity<Optional<Member>> findMemberById(@RequestParam("MemberId") Long ID) {
-        if (ID == null) {
+    public CustomOptionalResponseEntity<Optional<Member>> findMemberById(@RequestParam("MemberId") Long id) {
+        if (id == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
-            Optional<Member> memberOptional = memberService.findById(ID);
-            String successMessage = ID+"으로 가입된 회원정보입니다";
+            Optional<Member> memberOptional = memberService.findById(id);
+            String successMessage = id+"으로 가입된 회원정보입니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 

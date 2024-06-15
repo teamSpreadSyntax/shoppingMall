@@ -2,7 +2,6 @@ package home.project.controller;
 
 
 import home.project.domain.*;
-import home.project.exceptions.OutOfStockException;
 import home.project.exceptions.PageNotFoundException;
 import home.project.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import org.hibernate.boot.model.naming.IllegalIdentifierException;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -30,8 +28,6 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.*;
-
-import static java.util.Optional.empty;
 
 @Tag(name = "상품", description = "상품관련 API 입니다")
 @RequestMapping(path = "/api/product")

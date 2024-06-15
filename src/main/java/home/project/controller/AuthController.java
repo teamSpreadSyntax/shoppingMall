@@ -1,7 +1,6 @@
 package home.project.controller;
 
-import home.project.domain.Member;
-import home.project.domain.TokenDto;
+import home.project.domain.*;
 import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import home.project.service.UserDetailsServiceImpl;
@@ -16,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -59,7 +59,8 @@ public class AuthController {
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMap.put(error.getField(), error.getDefaultMessage());
             }
-            return new ResponseEntity<>(errorMap, HttpStatus.BAD_REQUEST);
+            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(errorMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
+            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
         try {//로그인 로직 수행
              userDetailsService.loadUserByUsername(userDetailss.getEmail());
@@ -67,9 +68,14 @@ public class AuthController {
             if (!passwordEncoder.matches(userDetailss.getPassword(), member.get().getPassword())) {throw new DataIntegrityViolationException("비밀번호를 확인해주세요");}
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailss.getEmail(), userDetailss.getPassword()));
             TokenDto tokenDto = tokenProvider.generateToken(authentication);
-            return ResponseEntity.ok(tokenDto);
-        } catch (DataIntegrityViolationException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            String successMessage = member.get().getEmail() + "로 로그인에 성공하였습니다";
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(tokenDto), successMessage, HttpStatus.OK);
+        } catch (UsernameNotFoundException e) {
+//            Map<String, String> responseMap = new HashMap<>();
+//            responseMap.put("이게뭐지", e.getMessage() + "--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
+            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(e.getMessage()), "아이디가 없습니다", HttpStatus.UNAUTHORIZED.value());
+            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
+
         }
     }
 }

@@ -6,9 +6,9 @@ import home.project.domain.Product;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
@@ -40,7 +40,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "데이터 무결성 위반 오류입니다.", HttpStatus.CONFLICT.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.CONFLICT);
     }
-
+    @ExceptionHandler(UsernameNotFound.class)
+    public ResponseEntity<?> handleUsernameNotFoundException(UsernameNotFoundException ex) {
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", ex.getMessage());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "아이디가 존재하지 않습니다", HttpStatus.UNAUTHORIZED.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
+    }
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
         Map<String, String> responseMap = new HashMap<>();
@@ -48,13 +54,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "서버 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    @ExceptionHandler(OutOfStockException.class)
-    public ResponseEntity<?> handleOutOfStockException(OutOfStockException ex) {
-        Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), ex.getMessage(), HttpStatus.BAD_REQUEST.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-    }
+
+
 
 }
 

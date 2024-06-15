@@ -8,7 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "product", uniqueConstraints = {@UniqueConstraint(columnNames = {"name"})})
+@Table(name = "product")
 @Getter
 @Setter
 public class Product {
