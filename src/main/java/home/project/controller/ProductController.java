@@ -16,6 +16,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -175,6 +176,7 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
 
         Page<Product> productPage = productService.findProducts(brand, category, productName, query, pageable);
+        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         String successMessage = "검색 결과입니다";
 
         if (pageable.getPageNumber() >= productPage.getTotalPages()) {
