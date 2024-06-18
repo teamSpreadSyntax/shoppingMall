@@ -23,6 +23,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void join (Product product){
+
         productRepository.save(product);
     }
 
@@ -153,7 +154,7 @@ public class ProductServiceImpl implements ProductService {
         exsitsProduct.setStock(product.getStock());
         exsitsProduct.setCategory(product.getCategory());
         Long currentStock = product.getStock();
-        if (currentStock <= 0 || exsitsProduct.getStock() > currentStock){throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");}
+        if (currentStock < 0 || exsitsProduct.getStock() > currentStock){throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");}
         productRepository.save(exsitsProduct);
 
         Optional<Product> newProduct = productRepository.findById(exsitsProduct.getId());
@@ -171,6 +172,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Product increaseStock(Long productId , Long stock) {
+        if (stock < 0) {
+            throw new DataIntegrityViolationException("재고 수량은 음수일 수 없습니다.");
+        }
         Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
         Long currentStock = product.getStock();
         Long newStock = currentStock + stock;
@@ -180,6 +184,9 @@ public class ProductServiceImpl implements ProductService {
 
     public Product selledCancle(Long productId, Long stock) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+        if (stock < 0) {
+            throw new DataIntegrityViolationException("재고 수량은 음수일 수 없습니다.");
+        }
         Long currentStock = product.getStock();
         Long newStock = Math.max(currentStock + stock, 0);
         Long diffStock = newStock - currentStock;
