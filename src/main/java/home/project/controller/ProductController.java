@@ -66,6 +66,9 @@ public class ProductController {
             product.setStock(productDTOWithoutId.getStock());
             product.setImage(productDTOWithoutId.getImage());
             productService.join(product);
+            Long currentStock = productDTOWithoutId.getStock();
+             if (currentStock < 0){
+            throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");}
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("상품등록완료", product.getName() + "가 등록되었습니다");
             CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품등록 성공", HttpStatus.OK.value());
