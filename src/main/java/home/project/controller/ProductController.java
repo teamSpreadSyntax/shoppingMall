@@ -279,18 +279,11 @@ public class ProductController {
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
     @DeleteMapping("DeleteProduct")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
-        try {
             productService.deleteById(productId);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("상품삭제 완료", productId+"가 삭제되었습니다");
             CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap),"상품삭제 성공", HttpStatus.OK.value());
             return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put(productId+"로 등록되어있는 상품이 없습니다", e.getMessage());
-            CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap),"상품삭제 실패", HttpStatus.BAD_REQUEST.value());
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.BAD_REQUEST);
-        }
     }
 
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
@@ -302,9 +295,7 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
 
         Page<Product> brandListPage = productService.brandList(pageable);
-        if (pageable.getPageNumber() >= brandListPage.getTotalPages() || pageable.getPageNumber() < 0) {
-            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-        }
+        if (pageable.getPageNumber() >= brandListPage.getTotalPages() || pageable.getPageNumber() < 0) {throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");}
         String successMessage = "전체 브랜드 입니다";
         long totalCount = brandListPage.getTotalElements();
         int page = brandListPage.getNumber();
@@ -315,53 +306,33 @@ public class ProductController {
     @Operation(summary = "재고수량 증가 메서드", description = "재고수량 증가 메서드 입니다.")
     @PutMapping ("IncreaseStock")
     public CustomOptionalResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
-        try {
             Product increaseProduct = productService.increaseStock(productId,stock);
             String successMessage = increaseProduct.getName()+"상품이"+stock+"개 증가하여"+increaseProduct.getStock()+"개가 되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct),successMessage, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed", HttpStatus.NO_CONTENT.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
     }
 
     @Operation(summary = "판매취소(재고수량 증가 메서드)", description = "판매취소(재고수량 증가 메서드 입니다.)")
     @PutMapping ("selledCancle")
     public CustomOptionalResponseEntity<Product> selledCancle(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
-        try {
             Product increaseProduct = productService.selledCancle(productId,stock);
             String successMessage = increaseProduct.getName()+"상품이"+stock+"개 판매취소되어"+increaseProduct.getStock()+"개가 되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct),successMessage, HttpStatus.OK);
-        } catch (DataIntegrityViolationException e) {
-            CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed",  HttpStatus.NO_CONTENT.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
 
     }
 
     @Operation(summary = "재고수량 감소 메서드", description = "재고수량 감소 메서드 입니다.")
     @PutMapping("DecreaseStock")
     public CustomOptionalResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
-        try {
             Product decreaseProduct = productService.decreaseStock(productId,stock);
             String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 감소하여"+decreaseProduct.getStock()+"개가 되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, "Validation failed",  HttpStatus.NO_CONTENT.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
     }
 
     @Operation(summary = "판매완료(재고수량 감소 메서드)", description = "판매완료(재고수량 감소 메서드 입니다.)")
     @PutMapping("SelledProduct")
     public CustomOptionalResponseEntity<Product> selledProduct(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
-        try {
             Product decreaseProduct = productService.selledProduct(productId,stock);
             String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 판매되어"+decreaseProduct.getStock()+"개가 되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            CustomOptionalResponseBody<Product> errorBody = new CustomOptionalResponseBody<>(null, e.getMessage(),  HttpStatus.NO_CONTENT.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
     }
 }
