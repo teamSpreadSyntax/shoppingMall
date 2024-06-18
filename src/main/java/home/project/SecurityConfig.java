@@ -89,13 +89,13 @@ public class SecurityConfig{
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/home/**").permitAll()
                         .requestMatchers("/swagger-ui/**" ).permitAll()
-                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
+//                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
+                        .requestMatchers("/api/member/FindAllMember").authenticated()
                         .requestMatchers("/api/product/**").permitAll()//hasRole("USER")
                         .requestMatchers("http://localhost:5173/**").permitAll()
                         .requestMatchers("https://localhost:5173/**").permitAll()
                         .requestMatchers("https://localhost:443/**").permitAll()
                         .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
-                        .requestMatchers("/api/member/FindAllMember").authenticated()
                         .anyRequest().permitAll()
                 )
                 .formLogin(formLogin -> formLogin
