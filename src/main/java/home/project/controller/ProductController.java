@@ -178,8 +178,8 @@ public class ProductController {
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
 
-        Page<Product> productPage = productService.findProducts(brand, category, productName, query, pageable);
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+        Page<Product> productPage = productService.findProducts(brand, category, productName, query, pageable);
         String successMessage = "검색 결과입니다";
 
         if (pageable.getPageNumber() >= productPage.getTotalPages()) {
