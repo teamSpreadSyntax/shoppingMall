@@ -178,9 +178,9 @@ public class MemberController {
         Page<Member> memberPage = memberService.findMembers(name, email, phone, query, pageable);
         String successMessage = "검색 결과입니다";
 
-        if (pageable.getPageNumber() >= memberPage.getTotalPages()) {
-            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-        }
+//        if (pageable.getPageNumber() >= memberPage.getTotalPages()) {
+//            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+//        }
 
         long totalCount = memberPage.getTotalElements();
         int page = memberPage.getNumber();
