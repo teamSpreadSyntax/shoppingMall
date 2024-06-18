@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Check;
 
 @Entity
 @Table(name = "product")
@@ -30,7 +31,8 @@ public class Product {
     @Column(name = "category")
     @NotBlank(message = "상품카테고리를 입력해주세요.")
     private String category;
-
+    
+    @Check(name = "stock", constraints = "stock >= 0")
     @Column(name = "stock")
     @NotNull(message = "현재재고를 입력해주세요.")
     private Long stock;

@@ -110,18 +110,18 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
         if (productName == null || productName.isEmpty()) {
             Page<Product> productList = productService.findAll(pageable);
-//            if (pageable.getPageNumber() >= productList.getTotalPages()) {
-//                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-//            }
+            if (pageable.getPageNumber() >= productList.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
             String successMessage = "전체상품 입니다";
             long totalCount = productList.getTotalElements();
             int page = productList.getNumber();
             return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
         } else {
             Page<Product> productList = productService.findProductsByName(productName, pageable);
-//            if (pageable.getPageNumber() >= productList.getTotalPages()) {
-//                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-//            }
+            if (pageable.getPageNumber() >= productList.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
             String successMessage = productName + "로 등록된 상품정보입니다";
             long totalCount = productList.getTotalElements();
             int page = productList.getNumber();
@@ -139,18 +139,18 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
         if (contents == null || contents.isEmpty()) {
             Page<Product> productList = productService.findAll(pageable);
-//            if (pageable.getPageNumber() >= productList.getTotalPages()) {
-//                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-//            }
+            if (pageable.getPageNumber() >= productList.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
             String successMessage = "전체상품 입니다";
             long totalCount = productList.getTotalElements();
             int page = productList.getNumber();
             return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
         } else {
             Page<Product> productList = productService.search(contents, pageable);
-//            if (pageable.getPageNumber() >= productList.getTotalPages()) {
-//                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-//            }
+            if (pageable.getPageNumber() >= productList.getTotalPages()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
             String successMessage = contents + "에 해당하는 상품 입니다";
             if (productList.isEmpty()) {
                 CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(0, 0, null);
@@ -176,12 +176,12 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
 
         Page<Product> productPage = productService.findProducts(brand, category, productName, query, pageable);
-        pageable = PageRequest.of(pageable.getPageNumber()- 1, pageable.getPageSize());
+        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         String successMessage = "검색 결과입니다";
 
-//        if (pageable.getPageNumber() >= productPage.getTotalPages()) {
-//            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-//        }
+        if (pageable.getPageNumber() >= productPage.getTotalPages()) {
+            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+        }
 
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
@@ -209,9 +209,9 @@ public class ProductController {
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
             Page<Product> productPage = productService.findByBrand(brand, pageable);
-//            if (productPage.getTotalPages() < pageable.getPageNumber() || productPage.getTotalPages() == pageable.getPageNumber()) {
-//                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-//            }
+            if (productPage.getTotalPages() < pageable.getPageNumber() || productPage.getTotalPages() == pageable.getPageNumber()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
             String successMessage = brand + "에 해당하는 상품 입니다";
             long totalCount = productPage.getTotalElements();
             int page = productPage.getNumber();
@@ -230,9 +230,9 @@ public class ProductController {
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
             Page<Product> productPage = productService.findByCategory(category, pageable);
-//            if (productPage.getTotalPages() < pageable.getPageNumber() || productPage.getTotalPages() == pageable.getPageNumber()) {
-//                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-//            }
+            if (productPage.getTotalPages() < pageable.getPageNumber() || productPage.getTotalPages() == pageable.getPageNumber()) {
+                throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+            }
             String successMessage = category + "에 해당하는 상품입니다";
             long totalCount = productPage.getTotalElements();
             int page = productPage.getNumber();
@@ -302,9 +302,9 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
 
         Page<Product> brandListPage = productService.brandList(pageable);
-//        if (pageable.getPageNumber() >= brandListPage.getTotalPages() || pageable.getPageNumber() < 0) {
-//            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
-//        }
+        if (pageable.getPageNumber() >= brandListPage.getTotalPages() || pageable.getPageNumber() < 0) {
+            throw new PageNotFoundException("요청한 페이지가 존재하지 않습니다.");
+        }
         String successMessage = "전체 브랜드 입니다";
         long totalCount = brandListPage.getTotalElements();
         int page = brandListPage.getNumber();
