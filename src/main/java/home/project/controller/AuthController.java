@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -62,7 +63,7 @@ public class AuthController {
         try {//로그인 로직 수행
              userDetailsService.loadUserByUsername(userDetailss.getEmail());
              Optional<Member> member = memberService.findByEmail(userDetailss.getEmail());
-            if (!passwordEncoder.matches(userDetailss.getPassword(), member.get().getPassword())) {throw new DataIntegrityViolationException("비밀번호를 확인해주세요");}
+            if (!passwordEncoder.matches(userDetailss.getPassword(), member.get().getPassword())) {throw new BadCredentialsException("비밀번호를 확인해주세요");}
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailss.getEmail(), userDetailss.getPassword()));
             TokenDto tokenDto = tokenProvider.generateToken(authentication);
             String successMessage = member.get().getEmail() + "로 로그인에 성공하였습니다";
