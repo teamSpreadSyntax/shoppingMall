@@ -33,6 +33,7 @@ public class OpenApiConfig {
                 .version("1.0.0")
                 .description("API 문서입니다."));
     }
+
 //    @Bean
 //    public GroupedOpenApi publicApi() {
 //        return GroupedOpenApi.builder()
