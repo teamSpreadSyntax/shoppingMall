@@ -113,21 +113,21 @@ public class MemberController {
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("isAuthenticated()")
-    @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
-    @GetMapping("FindByEmail")
-    public CustomOptionalResponseEntity<Optional<Member>> findMemberByEmail(@RequestParam("MemberEmail") @Valid String email) {
-        if (email == null || email.isEmpty()) {
-            throw new IllegalStateException("이메일이 입력되지 않았습니다.");
-        }
-        if (!email.matches("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$")) {
-            throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
-        }
-        Optional<Member> memberOptional = memberService.findByEmail(email);
-        String successMessage = email + "로 가입된 회원정보입니다";
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
-    }
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("isAuthenticated()")
+//    @Operation(summary = "이메일로회원조회 메서드", description = "이메일로회원조회 메서드입니다.")
+//    @GetMapping("FindByEmail")
+//    public CustomOptionalResponseEntity<Optional<Member>> findMemberByEmail(@RequestParam("MemberEmail") @Valid String email) {
+//        if (email == null || email.isEmpty()) {
+//            throw new IllegalStateException("이메일이 입력되지 않았습니다.");
+//        }
+//        if (!email.matches("^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$")) {
+//            throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
+//        }
+//        Optional<Member> memberOptional = memberService.findByEmail(email);
+//        String successMessage = email + "로 가입된 회원정보입니다";
+//        return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
+//    }
 
     @Operation(summary = "ID로 회원조회 메서드", description = "ID로 회원조회 메서드입니다.")
     @GetMapping("findMemberById")
