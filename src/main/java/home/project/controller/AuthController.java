@@ -70,7 +70,6 @@ public class AuthController {
         } catch (UsernameNotFoundException e) {
             CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(e.getMessage()), "아이디가 없습니다", HttpStatus.UNAUTHORIZED.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
-
         }
     }
 

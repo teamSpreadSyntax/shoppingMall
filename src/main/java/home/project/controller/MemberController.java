@@ -102,8 +102,7 @@ public class MemberController {
         try {
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
-            Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
-                    new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+            Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
             String successMessage = "전체 회원입니다";
             long totalCount = memberPage.getTotalElements();
             int page = memberPage.getNumber();
@@ -133,8 +132,6 @@ public class MemberController {
         return new CustomListResponseEntity<>(memberPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-
-
     @Operation(summary = "회원정보업데이트(수정) 메서드", description = "회원정보업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateMember")
     public ResponseEntity<?> updateMember(@RequestBody @Valid Member member, BindingResult bindingResult) {
@@ -151,7 +148,6 @@ public class MemberController {
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
-
     @Transactional
     @Operation(summary = "멤버 삭제 메서드", description = "멤버를 삭제하는 메서드입니다.")
     @DeleteMapping("DeleteMember") // 멤버 삭제
@@ -162,6 +158,5 @@ public class MemberController {
             CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap),"회원삭제 성공", HttpStatus.OK.value());
             return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
-
 
 }

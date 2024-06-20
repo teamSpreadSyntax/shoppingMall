@@ -39,9 +39,7 @@ public class SecurityConfig{
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider) { this.jwtTokenProvider = jwtTokenProvider;  }
 
     @Bean
     public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
@@ -66,13 +64,14 @@ public class SecurityConfig{
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(userDetailsService);
-
         return new ProviderManager(provider);
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -106,6 +105,5 @@ public class SecurityConfig{
                 );
         return http.build();
     }
-
 
 }

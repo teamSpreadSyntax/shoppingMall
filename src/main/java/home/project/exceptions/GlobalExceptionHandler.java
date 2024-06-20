@@ -27,6 +27,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "해당 페이지가 존재하지 않습니다", HttpStatus.BAD_REQUEST.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> responseMap = new HashMap<>();
@@ -42,6 +43,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "데이터 무결성 위반 오류입니다.", HttpStatus.CONFLICT.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.CONFLICT);
     }
+
     @ExceptionHandler(UsernameNotFound.class)
     public ResponseEntity<?> handleUsernameNotFoundException(UsernameNotFoundException ex) {
         Map<String, Object> responseBody = new HashMap<>();
