@@ -120,13 +120,13 @@ public class MemberController {
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "phone", required = false) String phone,
-            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "content", required = false) String content,
             @PageableDefault(page = 1, size = 10)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
-        Page<Member> memberPage = memberService.findMembers(name, email, phone, query, pageable);
+        Page<Member> memberPage = memberService.findMembers(name, email, phone, content, pageable);
         String successMessage = "검색 결과입니다";
         long totalCount = memberPage.getTotalElements();
         int page = memberPage.getNumber();
@@ -156,7 +156,6 @@ public class MemberController {
     @Operation(summary = "멤버 삭제 메서드", description = "멤버를 삭제하는 메서드입니다.")
     @DeleteMapping("DeleteMember") // 멤버 삭제
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
-
             memberService.deleteMember(memberId);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("이용해주셔서 감사합니다", memberId+"님의 계정이 삭제되었습니다");

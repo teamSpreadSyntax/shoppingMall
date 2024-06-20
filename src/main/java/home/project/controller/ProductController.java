@@ -80,13 +80,13 @@ public class ProductController {
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "productName", required = false) String productName,
-            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "content", required = false) String content,
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
-        Page<Product> productPage = productService.findProducts(brand, category, productName, query, pageable);
+        Page<Product> productPage = productService.findProducts(brand, category, productName, content, pageable);
         String successMessage = "검색 결과입니다";
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
@@ -97,9 +97,9 @@ public class ProductController {
     @GetMapping("FindProductById")
     public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("ID") Long ID) {
         if (ID == null) { throw new IllegalStateException("id가 입력되지 않았습니다.");  }
-            Optional<Product> product = productService.findById(ID);
+            Optional<Product> productOptional = productService.findById(ID);
             String successMessage = ID+"에 해당하는 상품 입니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(product), successMessage, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")

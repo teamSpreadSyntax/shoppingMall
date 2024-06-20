@@ -39,13 +39,13 @@ public interface ProductRepository  extends JpaRepository<Product, Long> {
             "(:brand IS NULL OR :brand = '' OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :brand, '%'))) AND " +
             "(:category IS NULL OR :category = '' OR LOWER(p.category) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
             "(:productName IS NULL OR :productName = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :productName, '%'))) AND " +
-            "(:query IS NULL OR :query = '' OR " +
-            "(LOWER(p.brand) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(p.category) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%'))))")
+            "(:content IS NULL OR :content = '' OR " +
+            "(LOWER(p.brand) LIKE LOWER(CONCAT('%', :content, '%')) OR " +
+            "LOWER(p.category) LIKE LOWER(CONCAT('%', :content, '%')) OR " +
+            "LOWER(p.name) LIKE LOWER(CONCAT('%', :content, '%'))))")
     Page<Product> findProducts(@Param("brand") String brand,
                                @Param("category") String category,
                                @Param("productName") String productName,
-                               @Param("query") String query,
+                               @Param("content") String query,
                                Pageable pageable);
 }

@@ -23,13 +23,13 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "(:name IS NULL OR :name = '' OR LOWER(m.name) LIKE LOWER(CONCAT('%', :name, '%'))) AND " +
             "(:email IS NULL OR :email = '' OR LOWER(m.email) LIKE LOWER(CONCAT('%', :email, '%'))) AND " +
             "(:phone IS NULL OR :phone = '' OR LOWER(m.phone) LIKE LOWER(CONCAT('%', :phone, '%'))) AND " +
-            "(:query IS NULL OR :query = '' OR " +
-            "(LOWER(m.name) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(m.email) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
-            "LOWER(m.phone) LIKE LOWER(CONCAT('%', :query, '%'))))")
+            "(:content IS NULL OR :content = '' OR " +
+            "(LOWER(m.name) LIKE LOWER(CONCAT('%', :content, '%')) OR " +
+            "LOWER(m.email) LIKE LOWER(CONCAT('%', :content, '%')) OR " +
+            "LOWER(m.phone) LIKE LOWER(CONCAT('%', :content, '%'))))")
     Page<Member> findMembers(@Param("name") String name,
                              @Param("email") String email,
                              @Param("phone") String phone,
-                             @Param("query") String query,
+                             @Param("content") String content,
                              Pageable pageable);
 }
