@@ -51,8 +51,7 @@ public class AuthController {
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid home.project.domain.UserDetails userDetailss, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {//유효성 검사 단계
-            // BindingResult : 요청 데이터를 바이딩할때 발생한 에러나 검증 실패정보를 저장하고 처리하는 역할
+        if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
                 errorMap.put(error.getField(), error.getDefaultMessage());
@@ -60,7 +59,7 @@ public class AuthController {
             CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(errorMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
-        try {//로그인 로직 수행
+        try {
              userDetailsService.loadUserByUsername(userDetailss.getEmail());
              Optional<Member> member = memberService.findByEmail(userDetailss.getEmail());
             if (!passwordEncoder.matches(userDetailss.getPassword(), member.get().getPassword())) {throw new BadCredentialsException("비밀번호를 확인해주세요");}
@@ -69,8 +68,6 @@ public class AuthController {
             String successMessage = member.get().getEmail() + "로 로그인에 성공하였습니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(tokenDto), successMessage, HttpStatus.OK);
         } catch (UsernameNotFoundException e) {
-//            Map<String, String> responseMap = new HashMap<>();
-//            responseMap.put("이게뭐지", e.getMessage() + "--->위 로그중 Duplicate entry '?'에서 ?는 이미 있는값입니다()");
             CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(e.getMessage()), "아이디가 없습니다", HttpStatus.UNAUTHORIZED.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
 
@@ -80,13 +77,10 @@ public class AuthController {
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestParam("memberId") Long id) {
-
             Optional<Member> member = memberService.findById(id);
             memberService.logout(id);
             String successMessage = member.get().getEmail() + "님 로그아웃에 성공하였습니다";
-
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(member.get().getEmail()), successMessage, HttpStatus.OK);
-
     }
 
 }

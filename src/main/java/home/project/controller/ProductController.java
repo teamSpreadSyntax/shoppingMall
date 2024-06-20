@@ -75,85 +75,6 @@ public class ProductController {
             return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
-    /*@Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
-    @GetMapping("FindAllProduct")
-    public CustomListResponseEntity<Product> findAllProduct(
-            @PageableDefault(page = 0, size = 5)
-            @SortDefault.SortDefaults({
-                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
-            }) @ParameterObject Pageable pageable) {
-
-        Page<Product> productList = productService.findAll(pageable);
-        String successMessage = "전체상품 입니다";
-        long totalCount = productList.getTotalElements();
-        int page = productList.getNumber();
-
-        return new CustomListResponseEntity<>(productList.getContent(),successMessage, HttpStatus.OK, totalCount, page);
-    }
-
-    @Operation(summary = "상품명으로 상품조회 메서드", description = "상품명으로 상품조회 메서드입니다.")
-    @GetMapping("FindByName")
-    public CustomOptionalResponseEntity<Optional<Product>> findProductByName(@RequestParam("productName") String productName) {
-        if (productName == null || productName.isEmpty()) {
-            throw new IllegalStateException("상품명이 입력되지 않았습니다.");
-        }
-
-        Optional<Product> productOptional = productService.findByName(productName);
-        String successMessage = productName + "로 등록된 상품정보입니다";
-
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
-    }*/
-//    @Operation(summary = "상품 조회 메서드", description = "상품명으로 상품을 조회하거나, 검색어가 없으면 전체 상품을 조회합니다.")
-//    @GetMapping("/FindProduct")
-//    public ResponseEntity<?> findProduct(
-//            @RequestParam(value = "productName", required = false) String productName,
-//            @PageableDefault(page = 1, size = 5)
-//            @SortDefault.SortDefaults({
-//                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
-//            }) @ParameterObject Pageable pageable) {
-//        if (productName == null || productName.isEmpty()) {
-//            Page<Product> productList = productService.findAll(pageable);
-//            String successMessage = "전체상품 입니다";
-//            long totalCount = productList.getTotalElements();
-//            int page = productList.getNumber();
-//            return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-//        } else {
-//            Page<Product> productList = productService.findProductsByName(productName, pageable);
-//            String successMessage = productName + "로 등록된 상품정보입니다";
-//            long totalCount = productList.getTotalElements();
-//            int page = productList.getNumber();
-//            return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-//        }
-//    }
-
-//    @Operation(summary = "검색", description = "단순검색 메서드입니다. 값을 입력하지 않으면 전체 상품이 조회됩니다.")
-//    @GetMapping("search")
-//    public CustomListResponseEntity<Product> search(
-//            @RequestParam(value="contents", required = false) String contents,
-//            @PageableDefault(page = 1, size = 5)
-//            @SortDefault.SortDefaults({
-//                    @SortDefault(sort = "name", direction = Sort.Direction.ASC)
-//            }) @ParameterObject Pageable pageable) {
-//        if (contents == null || contents.isEmpty()) {
-//            Page<Product> productList = productService.findAll(pageable);
-//            String successMessage = "전체상품 입니다";
-//            long totalCount = productList.getTotalElements();
-//            int page = productList.getNumber();
-//            return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-//        } else {
-//            Page<Product> productList = productService.search(contents, pageable);
-//            String successMessage = contents + "에 해당하는 상품 입니다";
-//            if (productList.isEmpty()) {
-//                CustomListResponseBody.Result<Product> result = new CustomListResponseBody.Result<>(0, 0, null);
-//                CustomListResponseBody<Product> responseBody = new CustomListResponseBody<>(result, "No products found", HttpStatus.NO_CONTENT.value());
-//                return new CustomListResponseEntity<>(responseBody, HttpStatus.NO_CONTENT);
-//            } else {
-//                long totalCount = productList.getTotalElements();
-//                int page = productList.getNumber();
-//                return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-//            }
-//        }
-//    }
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
     @GetMapping("/searchProducts")
     public ResponseEntity<?> searchProducts(
@@ -165,61 +86,22 @@ public class ProductController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Product> productPage = productService.findProducts(brand, category, productName, query, pageable);
         String successMessage = "검색 결과입니다";
-
-
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
-
         return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "ID로 상품조회 메서드", description = "ID로 상품조회 메서드입니다")
     @GetMapping("FindProductById")
     public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("ID") Long ID) {
-        if (ID == null) {
-            throw new IllegalStateException("id가 입력되지 않았습니다.");
-        }
+        if (ID == null) { throw new IllegalStateException("id가 입력되지 않았습니다.");  }
             Optional<Product> product = productService.findById(ID);
             String successMessage = ID+"에 해당하는 상품 입니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(product), successMessage, HttpStatus.OK);
     }
-
-//    @Operation(summary = "브랜드명으로 상품조회 메서드", description = "브랜드명으로 상품조회 메서드입니다")
-//    @GetMapping("FindByBrand")
-//    public CustomListResponseEntity<Product> findProductByBrand(
-//            @RequestParam("brand") String brand,
-//            @PageableDefault(page = 1, size = 5)
-//            @SortDefault.SortDefaults({
-//                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
-//            }) @ParameterObject Pageable pageable) {
-//            Page<Product> productPage = productService.findByBrand(brand, pageable);
-//            String successMessage = brand + "에 해당하는 상품 입니다";
-//            long totalCount = productPage.getTotalElements();
-//            int page = productPage.getNumber();
-//
-//            return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-//
-//
-//    }
-
-//    @Operation(summary = "카테고리로 상품조회 메서드", description = "카테고리로 상품조회 메서드입니다.")
-//    @GetMapping("FindByCategory")
-//    public CustomListResponseEntity<Product> findProductByCategory(
-//            @RequestParam("category") String category,
-//            @PageableDefault(page = 1, size = 5)
-//            @SortDefault.SortDefaults({
-//                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
-//            }) @ParameterObject Pageable pageable) {
-//            Page<Product> productPage = productService.findByCategory(category, pageable);
-//            String successMessage = category + "에 해당하는 상품입니다";
-//            long totalCount = productPage.getTotalElements();
-//            int page = productPage.getNumber();
-//            return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-//    }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
     @PutMapping("UpdateProduct")
@@ -237,25 +119,6 @@ public class ProductController {
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
 
     }
-
-//    @Operation(summary = "상품상세 메서드", description = "상품상세 메서드입니다.")
-//    @GetMapping("DetailProduct")
-//    public CustomOptionalResponseEntity<Optional<Product>> DetailProduct(@RequestParam("productId") Long productId) {
-////        switch (productName){
-////            case "하의": productName = "10";
-////                break;
-////            case "상의": productName = "20";
-////                break;
-////            case "바지": productName = "1010";
-////                break;
-////            case "티셔츠": productName = "2010";
-////                break;
-////        }
-//
-//            Optional<Product> productOptional = productService.findById(productId);
-//            String successMessage = productId+"로 등록된 상품 정보입니다";
-//            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
-//    }
 
     @Transactional
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
@@ -292,15 +155,6 @@ public class ProductController {
             return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct),successMessage, HttpStatus.OK);
     }
 
-//    @Operation(summary = "판매취소(재고수량 증가 메서드)", description = "판매취소(재고수량 증가 메서드 입니다.)")
-//    @PutMapping ("selledCancle")
-//    public CustomOptionalResponseEntity<Product> selledCancle(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
-//            Product increaseProduct = productService.selledCancle(productId,stock);
-//            String successMessage = increaseProduct.getName()+"상품이"+stock+"개 판매취소되어"+increaseProduct.getStock()+"개가 되었습니다";
-//            return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct),successMessage, HttpStatus.OK);
-//
-//    }
-
     @Operation(summary = "재고수량 감소 메서드", description = "재고수량 감소 메서드 입니다.")
     @PutMapping("DecreaseStock")
     public CustomOptionalResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
@@ -309,11 +163,4 @@ public class ProductController {
             return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
     }
 
-//    @Operation(summary = "판매완료(재고수량 감소 메서드)", description = "판매완료(재고수량 감소 메서드 입니다.)")
-//    @PutMapping("SelledProduct")
-//    public CustomOptionalResponseEntity<Product> selledProduct(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
-//            Product decreaseProduct = productService.selledProduct(productId,stock);
-//            String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 판매되어"+decreaseProduct.getStock()+"개가 되었습니다";
-//            return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
-//    }
 }

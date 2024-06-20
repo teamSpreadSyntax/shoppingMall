@@ -1,10 +1,7 @@
 package home.project.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import home.project.repository.MemberRepository;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.models.annotations.OpenAPI30;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;

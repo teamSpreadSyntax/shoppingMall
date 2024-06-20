@@ -7,12 +7,8 @@ import lombok.Setter;
 @Setter
 public class MemberDTOWithoutPw{
     private Long id;
-
     private String email;
-
-
     private String name;
-
     private String phone;
 
     public MemberDTOWithoutPw(Long id, String email, String name, String phone) {
