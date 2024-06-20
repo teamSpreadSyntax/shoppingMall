@@ -9,18 +9,18 @@ public interface MemberService {
 
    void join(Member member);
 
-   void logout(Long id);
-
    Optional<Member> findById(Long id);
 
    Optional<Member> findByEmail(String email);
 
    Page<Member> findAll(Pageable pageable);
 
+   Page<Member> findMembers(String name, String email, String phone,String query,Pageable pageable);
+
    Optional<Member> update(Member member);
 
-   void deleteMember(Long memberId);
+   void deleteById(Long memberId);
 
-   Page<Member> findMembers(String name, String email, String phone,String query,Pageable pageable);
+   void logout(Long id);
 
 }

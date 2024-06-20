@@ -12,8 +12,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -45,7 +45,7 @@ public class AuthController {
 
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid home.project.domain.UserDetails userDetailss, BindingResult bindingResult) {
+    public ResponseEntity<?> login(@RequestBody @Valid UserDetailsDTO userDetailsDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errorMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -54,18 +54,12 @@ public class AuthController {
             CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(errorMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
-        try {
-             userDetailsService.loadUserByUsername(userDetailss.getEmail());
-             Optional<Member> member = memberService.findByEmail(userDetailss.getEmail());
-            if (!passwordEncoder.matches(userDetailss.getPassword(), member.get().getPassword())) {throw new BadCredentialsException("비밀번호를 확인해주세요");}
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailss.getEmail(), userDetailss.getPassword()));
+             UserDetails member = userDetailsService.loadUserByUsername(userDetailsDTO.getEmail());
+            if (!passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())) {throw new BadCredentialsException("비밀번호를 확인해주세요");}
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
             TokenDto tokenDto = tokenProvider.generateToken(authentication);
-            String successMessage = member.get().getEmail() + "로 로그인에 성공하였습니다";
+            String successMessage = member.getUsername() + "로 로그인에 성공하였습니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(tokenDto), successMessage, HttpStatus.OK);
-        } catch (UsernameNotFoundException e) {
-            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(e.getMessage()), "아이디가 없습니다", HttpStatus.UNAUTHORIZED.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
-        }
     }
 
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")

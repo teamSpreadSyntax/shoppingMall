@@ -23,18 +23,22 @@ public class ProductServiceImpl implements ProductService {
 
     public void join (Product product){ productRepository.save(product); }
 
-    public Page<Product> findAll(Pageable pageable) { return productRepository.findAll(pageable); }
-
-
     public Optional<Product> findById(Long ID) {
         Product product = productRepository.findById(ID).orElseThrow(() -> { throw new IllegalArgumentException(ID+"로 설정된 상품이 없습니다."); });
         return Optional.ofNullable(product);
     }
 
+    public Page<Product> findAll(Pageable pageable) { return productRepository.findAll(pageable); }
+
     public Page<Product> findProducts(String brand, String category, String productName, String query, Pageable pageable) {
         Page<Product> productPage = productRepository.findProducts(brand ,category, productName, query, pageable);
         if (productPage.getSize()==0||productPage.getTotalElements()==0) { throw new IllegalArgumentException("해당하는 제품을 찾을 수 없습니다."); }
         return productRepository.findProducts(brand, category, productName, query, pageable);
+    }
+
+    public Page<Product> brandList(Pageable pageable){
+        Page<Product> brandList = productRepository.findAllByOrderByBrandAsc(pageable);
+        return brandList;
     }
 
     public Optional<Product> update (Product product){
@@ -58,11 +62,6 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(productId);
     }
 
-    public Page<Product> brandList(Pageable pageable){
-        Page<Product> brandList = productRepository.findAllByOrderByBrandAsc(pageable);
-        return brandList;
-    }
-
     public Product increaseStock(Long productId , Long stock) {
         if (stock < 0) {
             throw new DataIntegrityViolationException("재고 수량은 음수일 수 없습니다.");
@@ -71,21 +70,6 @@ public class ProductServiceImpl implements ProductService {
         Long currentStock = product.getStock();
         Long newStock = currentStock + stock;
         product.setStock(newStock);
-        return productRepository.save(product);
-    }
-
-    public Product selledCancle(Long productId, Long stock) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
-        if (stock < 0) {
-            throw new DataIntegrityViolationException("재고 수량은 음수일 수 없습니다.");
-        }
-        Long currentStock = product.getStock();
-        Long newStock = Math.max(currentStock + stock, 0);
-        Long diffStock = newStock - currentStock;
-        product.setStock(newStock);
-        Long currentSelledCount = product.getSelledcount();
-        Long newSelledCount = Math.max(currentSelledCount - diffStock, 0);
-        product.setSelledcount(newSelledCount);
         return productRepository.save(product);
     }
 
@@ -98,19 +82,5 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
-    public Product selledProduct(Long productId, Long stock) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
-        Long currentStock = product.getStock();
 
-        if (currentStock == 0) { throw new DataIntegrityViolationException("재고가 없어 상품을 판매할 수 없습니다.");}
-        if (currentStock <= 0 || stock > currentStock) { throw new DataIntegrityViolationException("재고가 부족합니다.");}
-
-        Long newStock = currentStock - stock;
-        product.setStock(newStock);
-
-        Long soldCount = product.getSelledcount();
-        product.setSelledcount(soldCount + stock);
-
-        return productRepository.save(product);
-        }
     }

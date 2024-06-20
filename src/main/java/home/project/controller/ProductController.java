@@ -119,34 +119,6 @@ public class ProductController {
         return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
-    @PutMapping("UpdateProduct")
-    public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> responseMap = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                responseMap.put(error.getField(), error.getDefaultMessage());
-            }
-            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
-            Optional<Product> productOptional = productService.update(product);
-            String successMessage = "상품정보가 수정되었습니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
-
-    }
-
-    @Transactional
-    @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
-    @DeleteMapping("DeleteProduct")
-    public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
-            productService.deleteById(productId);
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("상품삭제 완료", productId+"가 삭제되었습니다");
-            CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap),"상품삭제 성공", HttpStatus.OK.value());
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
-    }
-
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
     @GetMapping("brandList")
     public CustomListResponseEntity<Product> brandList(
@@ -159,8 +131,34 @@ public class ProductController {
         String successMessage = "전체 브랜드 입니다";
         long totalCount = brandListPage.getTotalElements();
         int page = brandListPage.getNumber();
-
         return new CustomListResponseEntity<>(brandListPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
+    @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
+    @PutMapping("UpdateProduct")
+    public CustomOptionalResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> responseMap = new HashMap<>();
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                responseMap.put(error.getField(), error.getDefaultMessage());
+            }
+            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
+            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        }
+            Optional<Product> productOptional = productService.update(product);
+            String successMessage = "상품정보가 수정되었습니다";
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
+    }
+
+    @Transactional
+    @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
+    @DeleteMapping("DeleteProduct")
+    public  CustomOptionalResponseEntity<Optional<Product>> deleteProduct(@RequestParam("productId") Long productId) {
+            productService.deleteById(productId);
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("상품삭제 완료", productId+"가 삭제되었습니다");
+            CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap),"상품삭제 성공", HttpStatus.OK.value());
+            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "재고수량 증가 메서드", description = "재고수량 증가 메서드 입니다.")

@@ -150,7 +150,7 @@ public class MemberController {
     @Operation(summary = "멤버 삭제 메서드", description = "멤버를 삭제하는 메서드입니다.")
     @DeleteMapping("DeleteMember")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
-            memberService.deleteMember(memberId);
+            memberService.deleteById(memberId);
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("이용해주셔서 감사합니다", memberId+"님의 계정이 삭제되었습니다");
             CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap),"회원삭제 성공", HttpStatus.OK.value());

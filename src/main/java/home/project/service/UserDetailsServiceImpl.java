@@ -3,7 +3,6 @@ package home.project.service;
 import home.project.domain.Member;
 import home.project.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -30,7 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username)throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username)throws UsernameNotFoundException {
       Member member =  memberRepository.findByEmail(username).orElseThrow(() -> { throw new UsernameNotFoundException(username+"로 가입된 회원이 없습니다."); });
                 List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));

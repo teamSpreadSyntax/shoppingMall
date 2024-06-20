@@ -44,7 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(UsernameNotFound.class)
+    @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<?> handleUsernameNotFoundException(UsernameNotFoundException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());

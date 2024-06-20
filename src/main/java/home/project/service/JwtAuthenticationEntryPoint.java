@@ -31,15 +31,10 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException authException) throws IOException {
-
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", "인증 토큰이 필요합니다");
-
-        CustomOptionalResponseBody<Map<String, Object>> errorBody =
-                new CustomOptionalResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다", HttpStatus.UNAUTHORIZED.value());
-
+        CustomOptionalResponseBody<Map<String, Object>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다", HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write(objectMapper.writeValueAsString(errorBody));
