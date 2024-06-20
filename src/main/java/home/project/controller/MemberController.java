@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -99,6 +100,7 @@ public class MemberController {
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         try {
+            pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
             Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member ->
                     new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
@@ -123,6 +125,7 @@ public class MemberController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Member> memberPage = memberService.findMembers(name, email, phone, query, pageable);
         String successMessage = "검색 결과입니다";
         long totalCount = memberPage.getTotalElements();
