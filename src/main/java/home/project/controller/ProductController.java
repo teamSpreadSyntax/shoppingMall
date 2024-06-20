@@ -275,7 +275,7 @@ public class ProductController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-
+        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Product> brandListPage = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다";
         long totalCount = brandListPage.getTotalElements();
