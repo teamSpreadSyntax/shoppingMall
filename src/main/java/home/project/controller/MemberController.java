@@ -55,7 +55,7 @@ public class MemberController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @PostMapping("Join")
-    public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
+    public CustomOptionalResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> responseMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -82,9 +82,7 @@ public class MemberController {
     @Operation(summary = "ID로 회원조회 메서드", description = "ID로 회원조회 메서드입니다.")
     @GetMapping("findMemberById")
     public CustomOptionalResponseEntity<Optional<Member>> findMemberById(@RequestParam("MemberId") Long id) {
-        if (id == null) {
-            throw new IllegalStateException("id가 입력되지 않았습니다.");
-        }
+        if (id == null) { throw new IllegalStateException("id가 입력되지 않았습니다."); }
         Optional<Member> memberOptional = memberService.findById(id);
         String successMessage = id + "으로 가입된 회원정보입니다";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
@@ -108,7 +106,7 @@ public class MemberController {
             int page = memberPage.getNumber();
             return new CustomListResponseEntity<>(memberDtoPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
         } catch (AccessDeniedException e) {
-            String errorMessage = "에 해당하는 상품 입니다";
+            String errorMessage = "접근 권한이 없습니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(e.getMessage()), errorMessage, HttpStatus.BAD_REQUEST);
         }
     }
@@ -120,7 +118,7 @@ public class MemberController {
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "phone", required = false) String phone,
             @RequestParam(value = "content", required = false) String content,
-            @PageableDefault(page = 1, size = 10)
+            @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
@@ -144,13 +142,13 @@ public class MemberController {
             return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
             Optional<Member> memberOptional = memberService.update(member);
-            String successMessage = "정보가 수정되었습니다";
+            String successMessage = "회원정보가 수정되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
     @Transactional
     @Operation(summary = "멤버 삭제 메서드", description = "멤버를 삭제하는 메서드입니다.")
-    @DeleteMapping("DeleteMember") // 멤버 삭제
+    @DeleteMapping("DeleteMember")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
             memberService.deleteMember(memberId);
             Map<String, String> responseMap = new HashMap<>();

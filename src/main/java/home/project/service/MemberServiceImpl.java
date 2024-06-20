@@ -20,8 +20,7 @@ import java.util.Optional;
 public class MemberServiceImpl implements MemberService{
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-//    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-//    private final  OAuth2ResourceServerProperties.Jwt jwt;
+
 @Autowired
     public  MemberServiceImpl(MemberRepository memberRepository,PasswordEncoder passwordEncoder/*, AuthenticationManagerBuilder authenticationManagerBuilder, OAuth2ResourceServerProperties.Jwt jwt*/){
         this.memberRepository = memberRepository;
@@ -54,16 +53,12 @@ public class MemberServiceImpl implements MemberService{
         return Optional.ofNullable(member);
     }
 
-    public Page<Member> findAll(Pageable pageable) {
-        return memberRepository.findAll(pageable);
-    }
+    public Page<Member> findAll(Pageable pageable) { return memberRepository.findAll(pageable); }
+
     public Page<Member> findMembers(String name, String email, String phone,String query, Pageable pageable) {
         Page<Member> memberPage = memberRepository.findMembers(name, email, phone, query, pageable);
-        if (memberPage.getSize()==0||memberPage.getTotalElements()==0) {
-            throw new IllegalArgumentException("해당하는 회원을 찾을 수 없습니다.");
-        }
+        if (memberPage.getSize()==0||memberPage.getTotalElements()==0) { throw new IllegalArgumentException("해당하는 회원을 찾을 수 없습니다."); }
         return memberRepository.findMembers(name, email, phone, query, pageable);
-
     }
 
     public Optional<Member> update (Member member){

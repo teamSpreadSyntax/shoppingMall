@@ -37,6 +37,8 @@ import java.util.*;
         @ApiResponse(responseCode = "403", description = "접근이 금지되었습니다.", content = @Content(schema = @Schema(implementation = Product.class))),
         @ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = Product.class)))
 })
+
+
 @RestController
 public class ProductController {
     private final ProductService productService;
@@ -74,6 +76,30 @@ public class ProductController {
             return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
+    @Operation(summary = "ID로 상품조회 메서드", description = "ID로 상품조회 메서드입니다")
+    @GetMapping("FindProductById")
+    public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("id") Long id) {
+        if (id == null) { throw new IllegalStateException("id가 입력되지 않았습니다.");  }
+            Optional<Product> productOptional = productService.findById(id);
+            String successMessage = id+"에 해당하는 상품 입니다";
+            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
+    @GetMapping("FindAllProduct")
+    public CustomListResponseEntity<Product> findAllProduct(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "id", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+        Page<Product> productList = productService.findAll(pageable);
+        String successMessage = "전체 상품입니다";
+        long totalCount = productList.getTotalElements();
+        int page = productList.getNumber();
+        return new CustomListResponseEntity<>(productList.getContent(),successMessage, HttpStatus.OK, totalCount, page);
+    }
+
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
     @GetMapping("/searchProducts")
     public ResponseEntity<?> searchProducts(
@@ -91,15 +117,6 @@ public class ProductController {
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
         return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-    }
-
-    @Operation(summary = "ID로 상품조회 메서드", description = "ID로 상품조회 메서드입니다")
-    @GetMapping("FindProductById")
-    public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("ID") Long ID) {
-        if (ID == null) { throw new IllegalStateException("id가 입력되지 않았습니다.");  }
-            Optional<Product> productOptional = productService.findById(ID);
-            String successMessage = ID+"에 해당하는 상품 입니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")

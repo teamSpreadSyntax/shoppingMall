@@ -12,4 +12,5 @@ public class HomeController {
     public String home() {
         return "재고관리 프로젝트 입니다";
     }
+
 }
