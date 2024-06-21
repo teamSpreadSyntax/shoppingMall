@@ -14,7 +14,7 @@ import java.util.Optional;
 @Service
 @Transactional
 public class ProductServiceImpl implements ProductService {
-    private ProductRepository productRepository;
+    private final ProductRepository productRepository;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository){
@@ -52,7 +52,6 @@ public class ProductServiceImpl implements ProductService {
         Long currentStock = product.getStock();
         if (currentStock < 0 || exsitsProduct.getStock() > currentStock){throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");}
         productRepository.save(exsitsProduct);
-
         Optional<Product> newProduct = productRepository.findById(exsitsProduct.getId());
         return newProduct;
     }
