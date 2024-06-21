@@ -10,11 +10,11 @@ public interface ProductService {
 
     void join(Product product);
 
-    Optional<Product> findById(Long ID);
+    Optional<Product> findById(Long productId);
 
     Page<Product> findAll(Pageable pageable);
 
-    Page<Product> findProducts(String brand, String category, String productName, String query, Pageable pageable);
+    Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable);
 
     Page<Product> brandList(Pageable pageable);
 

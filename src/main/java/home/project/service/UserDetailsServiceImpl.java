@@ -30,7 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username)throws UsernameNotFoundException {
-      Member member =  memberRepository.findByEmail(username).orElseThrow(() -> { throw new UsernameNotFoundException(username+"로 가입된 회원이 없습니다."); });
+      Member member =  memberRepository.findByEmail(username).orElseThrow(() -> { throw new UsernameNotFoundException(username+"로 등록된 회원이 없습니다."); });
                 List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         User userDetails = new User(member.getEmail(), member.getPassword(), authorities);

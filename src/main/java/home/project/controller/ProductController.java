@@ -3,6 +3,7 @@ package home.project.controller;
 
 import home.project.domain.*;
 import home.project.service.ProductService;
+import home.project.service.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,24 +42,21 @@ import java.util.*;
 
 @RestController
 public class ProductController {
+
     private final ProductService productService;
+    private ValidationCheck validationCheck;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ValidationCheck validationCheck) {
         this.productService = productService;
+        this.validationCheck = validationCheck;
     }
 
     @Operation(summary = "상품추가 메서드", description = "상품추가 메서드입니다.")
-    @PostMapping("CreateProduct")
+    @PostMapping("create")
     public CustomOptionalResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> responseMap = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                responseMap.put(error.getField(), error.getDefaultMessage());
-            }
-            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
+        CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
             Product product = new Product();
             product.setBrand(productDTOWithoutId.getBrand());
             product.setCategory(productDTOWithoutId.getCategory());
@@ -77,7 +75,7 @@ public class ProductController {
     }
 
     @Operation(summary = "ID로 상품조회 메서드", description = "ID로 상품조회 메서드입니다")
-    @GetMapping("FindProductById")
+    @GetMapping("product")
     public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("id") Long id) {
         if (id == null) { throw new IllegalStateException("id가 입력되지 않았습니다.");  }
             Optional<Product> productOptional = productService.findById(id);
@@ -86,7 +84,7 @@ public class ProductController {
     }
 
     @Operation(summary = "전체상품조회 메서드", description = "전체상품조회 메서드입니다.")
-    @GetMapping("FindAllProduct")
+    @GetMapping("products")
     public CustomListResponseEntity<Product> findAllProduct(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -101,7 +99,7 @@ public class ProductController {
     }
 
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
-    @GetMapping("/searchProducts")
+    @GetMapping("search")
     public ResponseEntity<?> searchProducts(
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
@@ -120,7 +118,7 @@ public class ProductController {
     }
 
     @Operation(summary = "전체브랜드조회 메서드", description = "브랜드조회(판매량기준 오름차순정렬) 메서드입니다.")
-    @GetMapping("brandList")
+    @GetMapping("brands")
     public CustomListResponseEntity<Product> brandList(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -135,16 +133,10 @@ public class ProductController {
     }
 
     @Operation(summary = "상품업데이트(수정) 메서드", description = "상품업데이트(수정) 메서드입니다.")
-    @PutMapping("UpdateProduct")
+    @PutMapping("update")
     public CustomOptionalResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> responseMap = new HashMap<>();
-            for (FieldError error : bindingResult.getFieldErrors()) {
-                responseMap.put(error.getField(), error.getDefaultMessage());
-            }
-            CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "Validation failed", HttpStatus.BAD_REQUEST.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
-        }
+        CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
             Optional<Product> productOptional = productService.update(product);
             String successMessage = "상품정보가 수정되었습니다";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
@@ -152,7 +144,7 @@ public class ProductController {
 
     @Transactional
     @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
-    @DeleteMapping("DeleteProduct")
+    @DeleteMapping("delete")
     public  CustomOptionalResponseEntity<Optional<Product>> deleteProduct(@RequestParam("productId") Long productId) {
             productService.deleteById(productId);
             Map<String, String> responseMap = new HashMap<>();
@@ -162,7 +154,7 @@ public class ProductController {
     }
 
     @Operation(summary = "재고수량 증가 메서드", description = "재고수량 증가 메서드 입니다.")
-    @PutMapping ("IncreaseStock")
+    @PutMapping ("increase_stock")
     public CustomOptionalResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
             Product increaseProduct = productService.increaseStock(productId,stock);
             String successMessage = increaseProduct.getName()+"상품이"+stock+"개 증가하여"+increaseProduct.getStock()+"개가 되었습니다";
@@ -170,7 +162,7 @@ public class ProductController {
     }
 
     @Operation(summary = "재고수량 감소 메서드", description = "재고수량 감소 메서드 입니다.")
-    @PutMapping("DecreaseStock")
+    @PutMapping("decrease_stock")
     public CustomOptionalResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
             Product decreaseProduct = productService.decreaseStock(productId,stock);
             String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 감소하여"+decreaseProduct.getStock()+"개가 되었습니다";
