@@ -29,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -79,7 +80,9 @@ public class MemberController {
     @Operation(summary = "ID로 회원 조회 메서드", description = "ID로 회원 조회 메서드입니다.")
     @GetMapping("member")
     public CustomOptionalResponseEntity<Optional<Member>> findMemberById(@RequestParam("memberId") Long memberId) {
-        if (memberId == null) { throw new IllegalStateException("id가 입력되지 않았습니다."); }
+        if (memberId == null) {
+            throw new IllegalStateException("id가 입력되지 않았습니다.");
+        }
         Optional<Member> memberOptional = memberService.findById(memberId);
         String successMessage = memberId + "로 가입된 회원정보입니다";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
@@ -129,7 +132,7 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 업데이트(수정) 메서드", description = "회원 정보 업데이트(수정) 메서드입니다.")
     @PutMapping("update")
-    public ResponseEntity<?> updateMember(@RequestBody @Valid Member member, BindingResult bindingResult) {
+    public CustomOptionalResponseEntity<?> updateMember(@RequestBody @Valid Member member, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         Optional<Member> memberOptional = memberService.update(member);
@@ -140,12 +143,12 @@ public class MemberController {
     @Transactional
     @Operation(summary = "멤버 삭제 메서드", description = "멤버 삭제 메서드입니다.")
     @DeleteMapping("delete")
-    public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
-            memberService.deleteById(memberId);
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("이용해주셔서 감사합니다", memberId+"님의 계정이 삭제되었습니다");
-            CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap),"회원 삭제 성공", HttpStatus.OK.value());
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+    public CustomOptionalResponseEntity<Optional<Member>> deleteMember(@RequestParam("memberId") Long memberId) {
+        memberService.deleteById(memberId);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("이용해주셔서 감사합니다", memberId + "님의 계정이 삭제되었습니다");
+        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원 삭제 성공", HttpStatus.OK.value());
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
 

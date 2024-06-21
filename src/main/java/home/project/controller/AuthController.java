@@ -20,6 +20,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -52,7 +53,9 @@ public class AuthController {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         UserDetails member = userDetailsService.loadUserByUsername(userDetailsDTO.getEmail());
-        if (!passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())) {throw new BadCredentialsException("비밀번호를 확인해주세요");}
+        if (!passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())) {
+            throw new BadCredentialsException("비밀번호를 확인해주세요");
+        }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
         String successMessage = member.getUsername() + "로 로그인에 성공하였습니다";
@@ -62,10 +65,10 @@ public class AuthController {
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
     @PostMapping("logout")
     public CustomOptionalResponseEntity<?> logout(@RequestParam("memberId") Long memberId) {
-            Optional<Member> member = memberService.findById(memberId);
-            memberService.logout(memberId);
-            String successMessage = "로그아웃에 성공하였습니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(member.get().getEmail()), successMessage, HttpStatus.OK);
+        Optional<Member> member = memberService.findById(memberId);
+        memberService.logout(memberId);
+        String successMessage = "로그아웃에 성공하였습니다";
+        return new CustomOptionalResponseEntity<>(Optional.ofNullable(member.get().getEmail()), successMessage, HttpStatus.OK);
     }
 
 }

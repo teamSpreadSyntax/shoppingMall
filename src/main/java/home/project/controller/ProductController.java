@@ -57,30 +57,33 @@ public class ProductController {
     public CustomOptionalResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-            Product product = new Product();
-            product.setBrand(productDTOWithoutId.getBrand());
-            product.setCategory(productDTOWithoutId.getCategory());
-            product.setSelledcount(productDTOWithoutId.getSelledcount());
-            product.setName(productDTOWithoutId.getName());
-            product.setStock(productDTOWithoutId.getStock());
-            product.setImage(productDTOWithoutId.getImage());
-            productService.join(product);
-            Long currentStock = productDTOWithoutId.getStock();
-             if (currentStock < 0){
-            throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");}
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("상품 등록 완료", product.getName() + "가 등록되었습니다");
-            CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품등록 성공", HttpStatus.OK.value());
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        Product product = new Product();
+        product.setBrand(productDTOWithoutId.getBrand());
+        product.setCategory(productDTOWithoutId.getCategory());
+        product.setSelledcount(productDTOWithoutId.getSelledcount());
+        product.setName(productDTOWithoutId.getName());
+        product.setStock(productDTOWithoutId.getStock());
+        product.setImage(productDTOWithoutId.getImage());
+        productService.join(product);
+        Long currentStock = productDTOWithoutId.getStock();
+        if (currentStock < 0) {
+            throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");
+        }
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("상품 등록 완료", product.getName() + "가 등록되었습니다");
+        CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품등록 성공", HttpStatus.OK.value());
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "ID로 상품 조회 메서드", description = "ID로 상품 조회 메서드입니다")
     @GetMapping("product")
     public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("id") Long id) {
-        if (id == null) { throw new IllegalStateException("id가 입력되지 않았습니다.");  }
-            Optional<Product> productOptional = productService.findById(id);
-            String successMessage = id+"에 해당하는 상품 입니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
+        if (id == null) {
+            throw new IllegalStateException("id가 입력되지 않았습니다.");
+        }
+        Optional<Product> productOptional = productService.findById(id);
+        String successMessage = id + "에 해당하는 상품 입니다";
+        return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
@@ -95,7 +98,7 @@ public class ProductController {
         String successMessage = "전체 상품입니다";
         long totalCount = productList.getTotalElements();
         int page = productList.getNumber();
-        return new CustomListResponseEntity<>(productList.getContent(),successMessage, HttpStatus.OK, totalCount, page);
+        return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
@@ -137,36 +140,36 @@ public class ProductController {
     public CustomOptionalResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-            Optional<Product> productOptional = productService.update(product);
-            String successMessage = "상품정보가 수정되었습니다";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional),successMessage, HttpStatus.OK);
+        Optional<Product> productOptional = productService.update(product);
+        String successMessage = "상품정보가 수정되었습니다";
+        return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
     }
 
     @Transactional
-    @Operation(summary = "상품삭제 메서드", description = "상품삭제 메서드입니다.")
+    @Operation(summary = "상품 삭제 메서드", description = "상품 삭제 메서드입니다.")
     @DeleteMapping("delete")
-    public  CustomOptionalResponseEntity<Optional<Product>> deleteProduct(@RequestParam("productId") Long productId) {
-            productService.deleteById(productId);
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("상품삭제 완료", productId+"가 삭제되었습니다");
-            CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap),"상품삭제 성공", HttpStatus.OK.value());
-            return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+    public CustomOptionalResponseEntity<Optional<Product>> deleteProduct(@RequestParam("productId") Long productId) {
+        productService.deleteById(productId);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("상품삭제 완료", productId + "가 삭제되었습니다");
+        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품삭제 성공", HttpStatus.OK.value());
+        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
-    @Operation(summary = "재고수량 증가 메서드", description = "재고수량 증가 메서드입니다.")
-    @PutMapping ("increase_stock")
-    public CustomOptionalResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
-            Product increaseProduct = productService.increaseStock(productId,stock);
-            String successMessage = increaseProduct.getName()+"상품이"+stock+"개 증가하여"+increaseProduct.getStock()+"개가 되었습니다";
-            return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct),successMessage, HttpStatus.OK);
+    @Operation(summary = "재고 수량 증가 메서드", description = "재고 수량 증가 메서드입니다.")
+    @PutMapping("increase_stock")
+    public CustomOptionalResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
+        Product increaseProduct = productService.increaseStock(productId, stock);
+        String successMessage = increaseProduct.getName() + "상품이" + stock + "개 증가하여" + increaseProduct.getStock() + "개가 되었습니다";
+        return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "재고수량 감소 메서드", description = "재고수량 감소 메서드입니다.")
+    @Operation(summary = "재고 수량 감소 메서드", description = "재고 수량 감소 메서드입니다.")
     @PutMapping("decrease_stock")
-    public CustomOptionalResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock){
-            Product decreaseProduct = productService.decreaseStock(productId,stock);
-            String successMessage = decreaseProduct.getName()+"상품이"+stock+"개 감소하여"+decreaseProduct.getStock()+"개가 되었습니다";
-            return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct),successMessage, HttpStatus.OK);
+    public CustomOptionalResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
+        Product decreaseProduct = productService.decreaseStock(productId, stock);
+        String successMessage = decreaseProduct.getName() + "상품이" + stock + "개 감소하여" + decreaseProduct.getStock() + "개가 되었습니다";
+        return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
     }
 
 }

@@ -8,20 +8,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.Optional;
 
 @Service
-public class MemberServiceImpl implements MemberService{
+public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
-@Autowired
-    public  MemberServiceImpl(MemberRepository memberRepository,PasswordEncoder passwordEncoder/*, AuthenticationManagerBuilder authenticationManagerBuilder, OAuth2ResourceServerProperties.Jwt jwt*/){
+    @Autowired
+    public MemberServiceImpl(MemberRepository memberRepository, PasswordEncoder passwordEncoder/*, AuthenticationManagerBuilder authenticationManagerBuilder, OAuth2ResourceServerProperties.Jwt jwt*/) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public void join (Member member){
+    public void join(Member member) {
         boolean emailExists = memberRepository.existsByEmail(member.getEmail());
         boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
         if (emailExists && phoneExists) {
@@ -36,7 +37,9 @@ public class MemberServiceImpl implements MemberService{
     }
 
     public Optional<Member> findById(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> { throw new IllegalArgumentException(memberId+"로 등록된 회원이 없습니다."); });
+        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
+            throw new IllegalArgumentException(memberId + "로 등록된 회원이 없습니다.");
+        });
         return Optional.ofNullable(member);
     }
 
@@ -45,16 +48,20 @@ public class MemberServiceImpl implements MemberService{
 //        return Optional.ofNullable(member);
 //    }
 
-    public Page<Member> findAll(Pageable pageable) { return memberRepository.findAll(pageable); }
+    public Page<Member> findAll(Pageable pageable) {
+        return memberRepository.findAll(pageable);
+    }
 
-    public Page<Member> findMembers(String name, String email, String phone,String content, Pageable pageable) {
+    public Page<Member> findMembers(String name, String email, String phone, String content, Pageable pageable) {
         Page<Member> memberPage = memberRepository.findMembers(name, email, phone, content, pageable);
-        if (memberPage.getSize()==0||memberPage.getTotalElements()==0) { throw new IllegalArgumentException("해당하는 회원이 없습니다."); }
+        if (memberPage.getSize() == 0 || memberPage.getTotalElements() == 0) {
+            throw new IllegalArgumentException("해당하는 회원이 없습니다.");
+        }
         return memberRepository.findMembers(name, email, phone, content, pageable);
     }
 
-    public Optional<Member> update (Member member){
-        Member exsitsMember = memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalArgumentException(member.getId()+"로 등록된 회원이 없습니다."));
+    public Optional<Member> update(Member member) {
+        Member exsitsMember = memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalArgumentException(member.getId() + "로 등록된 회원이 없습니다."));
         boolean emailExists = memberRepository.existsByEmail(member.getEmail());
         boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
         if (emailExists && phoneExists) {
@@ -73,11 +80,14 @@ public class MemberServiceImpl implements MemberService{
         return newMember;
     }
 
-    public void deleteById(Long memberId){
-        memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException(memberId+"로 등록된 회원이 없습니다."));
+    public void deleteById(Long memberId) {
+        memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException(memberId + "로 등록된 회원이 없습니다."));
         memberRepository.deleteById(memberId);
     }
 
-    public void logout(Long memberId){};
+    public void logout(Long memberId) {
+    }
+
+    ;
 
 }

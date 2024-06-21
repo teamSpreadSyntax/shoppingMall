@@ -3,7 +3,7 @@ package home.project.domain;
 import lombok.*;
 
 
-public class searchDTO{
+public class searchDTO {
     public static String handleShirts(String contents) {
         if (contents.contains("티")) {
             if (contents.contains("반팔")) {

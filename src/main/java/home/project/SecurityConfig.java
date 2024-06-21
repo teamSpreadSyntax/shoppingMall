@@ -34,12 +34,14 @@ import java.util.Arrays;
         scheme = "bearer",
         bearerFormat = "JWT"
 )
-public class SecurityConfig{
+public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider) { this.jwtTokenProvider = jwtTokenProvider;  }
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     @Bean
     public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
@@ -50,9 +52,9 @@ public class SecurityConfig{
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET","POST","PUT","DELETE"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173","https://localhost:5173", "https://projectkkk.vercel.app"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://localhost:5173", "https://projectkkk.vercel.app"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -60,7 +62,7 @@ public class SecurityConfig{
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService)  throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(userDetailsService);
@@ -81,21 +83,21 @@ public class SecurityConfig{
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/home/**").permitAll()
-                        .requestMatchers("/swagger-ui/**" ).permitAll()
-                        .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
+                                .requestMatchers("/home/**").permitAll()
+                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/api/member/**").permitAll()//hasAnyRole("user","center","admin")
 //                        .requestMatchers("/api/member/members").authenticated()
-                        .requestMatchers("/api/product/**").permitAll()//hasRole("USER")
-                        .requestMatchers("http://localhost:5173/**").permitAll()
-                        .requestMatchers("https://localhost:5173/**").permitAll()
-                        .requestMatchers("https://localhost:443/**").permitAll()
-                        .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
-                        .anyRequest().permitAll()
+                                .requestMatchers("/api/product/**").permitAll()//hasRole("USER")
+                                .requestMatchers("http://localhost:5173/**").permitAll()
+                                .requestMatchers("https://localhost:5173/**").permitAll()
+                                .requestMatchers("https://localhost:443/**").permitAll()
+                                .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
+                                .anyRequest().permitAll()
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
                         .permitAll())
-                        .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint()))
+                .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(jwtAuthenticationEntryPoint()))
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")

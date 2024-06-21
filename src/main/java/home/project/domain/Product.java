@@ -22,7 +22,7 @@ public class Product {
     private String brand;
 
     @Column(name = "selledcount")
-    private Long selledcount=0L;
+    private Long selledcount = 0L;
 
     @Column(name = "name")
     @NotBlank(message = "상품명을 입력해주세요.")
@@ -31,7 +31,7 @@ public class Product {
     @Column(name = "category")
     @NotBlank(message = "상품카테고리를 입력해주세요.")
     private String category;
-    
+
     @Check(name = "stock", constraints = "stock >= 0")
     @Column(name = "stock")
     @NotNull(message = "현재재고를 입력해주세요.")
