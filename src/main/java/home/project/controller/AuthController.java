@@ -30,12 +30,12 @@ import java.util.Optional;
 @RestController
 public class AuthController {
 
-    private AuthenticationManager authenticationManager;
-    private JwtTokenProvider tokenProvider;
-    private UserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider tokenProvider;
+    private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final MemberService memberService;
-    private ValidationCheck validationCheck;
+    private final ValidationCheck validationCheck;
 
     @Autowired
     public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, MemberService memberService, ValidationCheck validationCheck) {
