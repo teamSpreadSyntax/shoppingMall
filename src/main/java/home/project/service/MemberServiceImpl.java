@@ -60,25 +60,44 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findMembers(name, email, phone, content, pageable);
     }
 
+
     public Optional<Member> update(Member member) {
-        Member exsitsMember = memberRepository.findById(member.getId()).orElseThrow(() -> new IllegalArgumentException(member.getId() + "로 등록된 회원이 없습니다."));
-        boolean emailExists = memberRepository.existsByEmail(member.getEmail());
-        boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
-        if (emailExists && phoneExists) {
-            throw new DataIntegrityViolationException("이메일과 휴대폰번호가 모두 중복됩니다.");
-        } else if (emailExists) {
-            throw new DataIntegrityViolationException("이메일이 중복됩니다.");
-        } else if (phoneExists) {
-            throw new DataIntegrityViolationException("휴대폰번호가 중복됩니다.");
+
+        Member existsMember = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new IllegalArgumentException(member.getId() + "로 등록된 회원이 없습니다."));
+
+        if (member.getName() != null) {
+            existsMember.setName(member.getName());
         }
-        exsitsMember.setName(member.getName());
-        exsitsMember.setEmail(member.getEmail());
-        exsitsMember.setPhone(member.getPhone());
-        exsitsMember.setPassword(passwordEncoder.encode(member.getPassword()));
-        memberRepository.save(exsitsMember);
-        Optional<Member> newMember = memberRepository.findById(exsitsMember.getId());
-        return newMember;
+        if (member.getEmail() != null) {
+
+            if (!member.getEmail().equals(existsMember.getEmail())) {
+                boolean emailExists = memberRepository.existsByEmail(member.getEmail());
+                if (emailExists) {
+                    throw new DataIntegrityViolationException("이미 사용 중인 이메일입니다.");
+                }
+                existsMember.setEmail(member.getEmail());
+            }
+        }
+        if (member.getPhone() != null) {
+
+            if (!member.getPhone().equals(existsMember.getPhone())) {
+                boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
+                if (phoneExists) {
+                    throw new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다.");
+                }
+                existsMember.setPhone(member.getPhone());
+            }
+        }
+        if (member.getPassword() != null) {
+            existsMember.setPassword(passwordEncoder.encode(member.getPassword()));
+        }
+
+        memberRepository.save(existsMember);
+
+        return Optional.of(existsMember);
     }
+
 
     public void deleteById(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException(memberId + "로 등록된 회원이 없습니다."));
