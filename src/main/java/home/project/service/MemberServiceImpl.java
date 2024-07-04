@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.Role;
 import home.project.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -43,10 +44,10 @@ public class MemberServiceImpl implements MemberService {
         return Optional.ofNullable(member);
     }
 
-//    public Optional<Member> findByEmail(String email) {
-//        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalArgumentException(email+"로 등록된 회원이 없습니다."); });
-//        return Optional.ofNullable(member);
-//    }
+    public Optional<Member> findByEmail(String email) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalArgumentException(email+"로 등록된 회원이 없습니다."); });
+        return Optional.ofNullable(member);
+    }
 
     public Page<Member> findAll(Pageable pageable) {
         return memberRepository.findAll(pageable);
@@ -59,7 +60,6 @@ public class MemberServiceImpl implements MemberService {
         }
         return memberRepository.findMembers(name, email, phone, content, pageable);
     }
-
 
     public Optional<Member> update(Member member) {
 
@@ -97,6 +97,8 @@ public class MemberServiceImpl implements MemberService {
 
         return Optional.of(existsMember);
     }
+
+
 
 
     public void deleteById(Long memberId) {

@@ -4,6 +4,7 @@ package home.project.controller;
 import home.project.domain.*;
 import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
+import home.project.service.RoleService;
 import home.project.service.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -49,12 +50,14 @@ public class MemberController {
     private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
     private final ValidationCheck validationCheck;
+    private final RoleService roleService;
 
     @Autowired
-    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, ValidationCheck validationCheck) {
+    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, ValidationCheck validationCheck, RoleService roleService) {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
         this.validationCheck = validationCheck;
+        this.roleService = roleService;
     }
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
@@ -68,6 +71,10 @@ public class MemberController {
         member.setName(memberDTO.getName());
         member.setPhone(memberDTO.getPhone());
         memberService.join(member);
+        Optional<Member> memberForAddRole = memberService.findByEmail(member.getEmail());
+        Role role = new Role();
+        role.setId(memberForAddRole.get().getId());
+        roleService.join(role);
         TokenDto tokenDto = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(member.getEmail(), member.getPassword()));
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("accessToken", tokenDto.getAccessToken());
@@ -91,7 +98,7 @@ public class MemberController {
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
     @GetMapping("members")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<?> findAllMember(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -150,6 +157,7 @@ public class MemberController {
         CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원 삭제 성공", HttpStatus.OK.value());
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
+
 
 
 }

@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,7 +13,7 @@ public interface MemberService {
 
     Optional<Member> findById(Long memberId);
 
-//   Optional<Member> findByEmail(String email);
+   Optional<Member> findByEmail(String email);
 
     Page<Member> findAll(Pageable pageable);
 

@@ -1,7 +1,9 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.Role;
 import home.project.repository.MemberRepository;
+import home.project.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,12 +21,14 @@ import java.util.List;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
 
     @Autowired
-    public UserDetailsServiceImpl(MemberRepository memberRepository, PasswordEncoder passwordEncoder) {
+    public UserDetailsServiceImpl(MemberRepository memberRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
 
     }
 
@@ -33,8 +37,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Member member = memberRepository.findByEmail(username).orElseThrow(() -> {
             throw new UsernameNotFoundException(username + "로 등록된 회원이 없습니다.");
         });
+        Role role = roleRepository.findById(member.getId()).get();
         List<GrantedAuthority> authorities = new ArrayList<>();
+        if(role.getRole().equals("admin")){
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        } else if (role.getRole().equals("user")) {
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        } else if (role.getRole().equals("center")) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+        }
         User userDetails = new User(member.getEmail(), member.getPassword(), authorities);
         return userDetails;
     }

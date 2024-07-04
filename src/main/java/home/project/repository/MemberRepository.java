@@ -1,6 +1,7 @@
 package home.project.repository;
 
 import home.project.domain.Member;
+import home.project.domain.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

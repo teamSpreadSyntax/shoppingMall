@@ -137,38 +137,3 @@ public class JwtTokenProvider {
                 .compact();
     }
 }
-
-//@Value("${jwt.secret}")
-//private String secretKey;
-//
-//@Value("${jwt.expiration}")
-//private long validityInMilliseconds;
-//
-//public String createToken(Authentication authentication) {
-//    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-//
-//    Date now = new Date();
-//    Date validity = new Date(now.getTime() + validityInMilliseconds);
-//
-//    return Jwts.builder()
-//            .setSubject(userDetails.getUsername())
-//            .setIssuedAt(now)
-//            .setExpiration(validity)
-//            .signWith(SignatureAlgorithm.HS256, secretKey)
-//            .compact();
-//}
-//
-//// 토큰에서 사용자 이름 추출
-//public String getUsernameFromToken(String token) {
-//    return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-//}
-//
-//// 토큰 유효성 검사
-//public boolean validateToken(String token) {
-//    try {
-//        Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-//        return true;
-//    } catch (Exception e) {
-//        return false;
-//    }
-//}

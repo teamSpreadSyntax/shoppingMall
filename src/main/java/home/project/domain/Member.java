@@ -1,6 +1,7 @@
 package home.project.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
@@ -34,4 +35,9 @@ public class Member {
     @NotEmpty(message = "전화번호를 입력해주세요")
     @Column(name = "phone")
     private String phone;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "role_id")
+    @JsonIgnore
+    private Role role;
 }
