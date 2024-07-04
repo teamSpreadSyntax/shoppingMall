@@ -9,8 +9,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.HashMap;
@@ -83,7 +86,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "서버 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
 
 }
 
