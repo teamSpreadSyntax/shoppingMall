@@ -1,7 +1,6 @@
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.domain.Product;
 import home.project.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
