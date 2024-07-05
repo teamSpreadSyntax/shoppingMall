@@ -4,6 +4,7 @@ import home.project.domain.Product;
 import home.project.repository.ProductRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -61,145 +62,213 @@ public class ProductServiceImplTest {
         product3.setImage("abcadfadd.jpg");
 
     }
-    @Test
-    void 제품등록_성공() {
-        productService.join(product3);
-        verify(productRepository).save(product3);
-        assertEquals("puma", product3.getBrand());
+
+    @Nested
+    class JoinTests {
+        @Test
+        void registerProductSuccess() {
+            productService.join(product3);
+            verify(productRepository).save(product3);
+            assertEquals("puma", product3.getBrand());
+        }
     }
 
-    @Test
-    void ID_찾기_성공() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+    @Nested
+    class FindByIdTests {
+        @Test
+        void findByIdSuccess() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        Optional<Product> findProduct = productService.findById(1L);
+            Optional<Product> findProduct = productService.findById(1L);
 
-        assertTrue(findProduct.isPresent());
-        assertEquals(product, findProduct.get());
+            assertTrue(findProduct.isPresent());
+            assertEquals(product, findProduct.get());
+        }
+
+        @Test
+        void findByIdThrowsException() {
+            when(productRepository.findById(3L)).thenReturn(Optional.empty());
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.findById(3L));
+            assertEquals("3로 등록된 상품이 없습니다.", exception.getMessage());
+        }
     }
 
-    @Test
-    void  ID_찾기_예외() {
-        when(productRepository.findById(3L)).thenReturn(Optional.empty());
+    @Nested
+    class FindAllTests  {
+        @Test
+        void findAllProducts() {
+            Pageable pageable = PageRequest.of(0, 10);
+            List<Product> productList = Arrays.asList(product, product2);
+            Page<Product> page = new PageImpl<>(productList, pageable, productList.size());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,() -> productService.findById(3L));
-        assertEquals("3로 등록된 상품이 없습니다.", exception.getMessage());
+            when(productRepository.findAll(pageable)).thenReturn(page);
+            Page<Product> result = productService.findAll(pageable);
+
+            assertEquals(2, result.getTotalElements());
+            assertEquals(1, result.getTotalPages());
+            assertEquals(productList, result.getContent());
+        }
     }
 
-    @Test
-    void 모든_제품_검색() {
-        Pageable pageable = PageRequest.of(0,10);
-        List<Product> productList = Arrays.asList(product, product2);
-        Page<Product> page = new PageImpl<>(productList, pageable, productList.size());
+    @Nested
+    class FindProductsTests {
+        @Test
+        void findProductsByCondition() {
+            Pageable pageable = PageRequest.of(0, 10);
 
-        when(productRepository.findAll(pageable)).thenReturn(page);
-        Page<Product> result = productService.findAll(pageable);
+            List<Product> pantsProducts = Arrays.asList(product2);
+            Page<Product> pantsProductsPage = new PageImpl<>(pantsProducts, pageable, pantsProducts.size());
 
-        assertEquals(2, result.getTotalElements());
-        assertEquals(1, result.getTotalPages());
-        assertEquals(productList, result.getContent());
+            when(productRepository.findProducts(null, "바", null, null, pageable)).thenReturn(pantsProductsPage);
+
+            Page<Product> result = productService.findProducts(null, "바", null, null, pageable);
+
+            assertEquals(1, result.getTotalElements());
+            assertEquals("바지", result.getContent().get(0).getCategory());
+            assertEquals(product2, result.getContent().get(0));
+        }
+
+        @Test
+        void findProductsByConditionThrowsException() {
+            Pageable pageable = PageRequest.of(0, 10);
+            Page<Product> emptyPage = Page.empty(pageable);
+
+            when(productRepository.findProducts("1", "2", "3", null, pageable)).thenReturn(emptyPage);
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.findProducts("1", "2", "3", null, pageable));
+            assertEquals("해당하는 상품이 없습니다.", exception.getMessage());
+        }
     }
 
-    @Test
-    void 특정_조건_검색() {
-        Pageable pageable = PageRequest.of(0, 10);
+    @Nested
+    class BrandListTests {
+        @Test
+        void getBrandList() {
+            Pageable pageable = PageRequest.of(0, 10);
+            List<Product> products = Arrays.asList(product, product2);
+            Page<Product> page = new PageImpl<>(products, pageable, products.size());
+            when(productRepository.findAllByOrderByBrandAsc(pageable)).thenReturn(page);
 
-        List<Product> pantsProducts = Arrays.asList(product2);
-        Page<Product> pantsProductsPage = new PageImpl<>(pantsProducts, pageable, pantsProducts.size());
-
-        when(productRepository.findProducts(null, "바", null, null, pageable)).thenReturn(pantsProductsPage);
-
-        Page<Product> result = productService.findProducts(null, "바", null, null, pageable);
-
-        assertEquals(1, result.getTotalElements());
-        assertEquals("바지", result.getContent().get(0).getCategory());
-        assertEquals(product2, result.getContent().get(0));
+            Page<Product> result = productService.brandList(pageable);
+            assertEquals(2, result.getTotalElements());
+            assertEquals(products, result.getContent());
+        }
     }
 
-    @Test
-    void 특정_조건_검색_예외() {
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Product> emptyPage = Page.empty(pageable);
+    @Nested
+    class UpdateTests {
+        @Test
+        void updateProductSuccess() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        when(productRepository.findProducts("1","2","3",null,pageable)).thenReturn(emptyPage);
+            product.setBrand("PUMA");
+            product.setStock(15L);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,() -> productService.findProducts("1","2","3",null, pageable));
-        assertEquals("해당하는 상품이 없습니다.",exception.getMessage());
+            Optional<Product> updatedProduct = productService.update(product);
+
+            verify(productRepository).save(product);
+            assertTrue(updatedProduct.isPresent());
+            assertEquals("PUMA", updatedProduct.get().getBrand());
+            assertEquals(15L, updatedProduct.get().getStock());
+        }
+
+        @Test
+        void updateStockToNegativeThrowsException() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+            product.setBrand("PUMA");
+            product.setStock(-15L);
+
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.update(product));
+            assertEquals("재고가 음수 일 수 없습니다.", exception.getMessage());
+        }
     }
 
-    @Test
-    void 브랜드_리스트() {
-        Pageable pageable = PageRequest.of(0, 10);
-        List<Product> products = Arrays.asList(product, product2);
-        Page<Product> page = new PageImpl<>(products, pageable, products.size());
-        when(productRepository.findAllByOrderByBrandAsc(pageable)).thenReturn(page);
+    @Nested
+    class DeleteByIdTests {
+        @Test
+        void deleteProductById() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-        Page<Product> result = productService.brandList(pageable);
-        assertEquals(2, result.getTotalElements());
-        assertEquals(products, result.getContent());
+            productService.deleteById(1L);
+
+            verify(productRepository).deleteById(1L);
+        }
+
+        @Test
+        void deleteProductByIdThrowsException() {
+            when(productRepository.findById(234L)).thenReturn(Optional.empty());
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.deleteById(234L));
+            assertEquals("234로 등록된 상품이 없습니다.", exception.getMessage());
+        }
     }
 
-    @Test
-    void 업데이트_성공() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+    @Nested
+    class IncreaseStockTests {
+        @Test
+        void increaseStockSuccess() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            when(productRepository.save(product)).thenReturn(product);
 
-        product.setBrand("PUMA");
-        product.setStock(15L);
+            product.setStock(2L);
 
-        Optional<Product> updatedProduct = productService.update(product);
+            Product updatedStock = productService.increaseStock(1L, 15L);
 
-        verify(productRepository).save(product);
-        assertTrue(updatedProduct.isPresent());
-        assertEquals("PUMA", updatedProduct.get().getBrand());
-        assertEquals(15L, updatedProduct.get().getStock());
+            verify(productRepository).save(product);
+            assertEquals(17L, product.getStock());
+            assertEquals(17L, updatedStock.getStock());
+        }
+
+        @Test
+        void increaseStockWithNegativeThrowsException() {
+
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.increaseStock(1L, -5L));
+            assertEquals("재고가 음수일 수 없습니다.", exception.getMessage());
+        }
+
+        @Test
+        void increaseStockWithInvalidIdThrowsException() {
+            when(productRepository.findById(999L)).thenReturn(Optional.empty());
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.increaseStock(999L, 14L));
+            assertEquals("123로 등록된 상품이 없습니다.", exception.getMessage());
+
+        }
     }
+    @Nested
+    class DecreaseStockTests {
+        @Test
+        void decreaseStockSuccess() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            when(productRepository.save(product)).thenReturn(product);
 
-    @Test
-    void 재고_음수_업데이트_예외() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            product.setStock(20L);
 
-        product.setBrand("PUMA");
-        product.setStock(-15L);
+            Product updatedStock = productService.decreaseStock(1L, 15L);
 
-        DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.update(product));
-        assertEquals("재고가 음수 일 수 없습니다.",exception.getMessage());
-    }
+            verify(productRepository).save(product);
+            assertEquals(5L, product.getStock());
+            assertEquals(5L, updatedStock.getStock());
+        }
 
-    @Test
-    void Id_제품_삭제() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        @Test
+        void decreaseStockWithInsufficientStockThrowsException() {
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            product.setStock(0L);
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.decreaseStock(1L, 5L));
+            assertEquals("재고가 부족합니다.", exception.getMessage());
+        }
 
-        productService.deleteById(1L);
+        @Test
+        void decreaseStockWithInvalidIdThrowsException() {
+            when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
-        verify(productRepository).deleteById(1L);
-    }
-
-    @Test
-    void Id_제품_삭제_예외() {
-        when(productRepository.findById(234L)).thenReturn(Optional.empty());
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class , () -> productService.deleteById(234L));
-        assertEquals("234로 등록된 상품이 없습니다.", exception.getMessage());
-    }
-
-    @Test
-    void 재고_증가_성공() {
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(product)).thenReturn(product);
-
-        product.setStock(2L);
-
-        Product updatedStock = productService.increaseStock(1L, 15L);
-
-        verify(productRepository).save(product);
-        assertEquals(17L, product.getStock());
-        assertEquals(17L, updatedStock.getStock());
-    }
-
-    @Test
-    void 재고_증가_음수() {
-
-        DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.increaseStock(1L, -5L));
-        assertEquals("재고가 음수일 수 없습니다.", exception.getMessage());
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.decreaseStock(999L, 14L));
+            assertEquals("123로 등록된 상품이 없습니다.", exception.getMessage());
+        }
     }
 }
+
+
