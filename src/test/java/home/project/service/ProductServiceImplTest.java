@@ -233,7 +233,7 @@ public class ProductServiceImplTest {
             when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.increaseStock(999L, 14L));
-            assertEquals("123로 등록된 상품이 없습니다.", exception.getMessage());
+            assertEquals("999로 등록된 상품이 없습니다.", exception.getMessage());
 
         }
     }
@@ -266,7 +266,7 @@ public class ProductServiceImplTest {
             when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.decreaseStock(999L, 14L));
-            assertEquals("123로 등록된 상품이 없습니다.", exception.getMessage());
+            assertEquals("999로 등록된 상품이 없습니다.", exception.getMessage());
         }
     }
 }

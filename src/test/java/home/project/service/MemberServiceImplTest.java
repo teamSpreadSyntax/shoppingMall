@@ -168,8 +168,8 @@ class MemberServiceImplTest {
         @Test
         void shouldUpdateMemberSuccessfully() {
             when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-            when(memberRepository.existsByEmail("sksdmltkek12@naver.com")).thenReturn(false);
-            when(memberRepository.existsByPhone("010-1234-5672")).thenReturn(false);
+            /*when(memberRepository.existsByEmail("sksdmltkek12@naver.com")).thenReturn(false);
+            when(memberRepository.existsByPhone("010-1234-5672")).thenReturn(false);*/
             when(passwordEncoder.encode("newPassword")).thenReturn("encodeNewPassword");
 
             Member updateMember = new Member();
