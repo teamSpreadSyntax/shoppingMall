@@ -12,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.util.Optional;
 
@@ -30,7 +32,8 @@ class UserDetailsServiceImplTest {
     UserDetailsDTO userDetailsDTO;
 
     @InjectMocks
-    private UserDetailsServiceImpl userDetailsService;
+    UserDetailsServiceImpl userDetailsService;
+
     private Member member;
     private Role role;
 
@@ -45,13 +48,28 @@ class UserDetailsServiceImplTest {
         role.setId(1L);
         role.setRole("user");
     }
-//    @Nested
-//    class loadUserByUsername {
-//        @Test
-//        void 유저에게_권한부여_성공() {
-//            when(memberRepository.findByEmail("test@test.com")).thenReturn(Optional.of(Member));
-//        }
-//    }
 
+    @Nested
+    class loadUserByUsernameTests {
+        @Test
+        void 유저에게_권한부여_성공() {
+            when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+            when(roleRepository.findById(member.getId())).thenReturn(Optional.of(role));
 
+            UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmail());
+
+            assertNotNull(userDetails);
+            assertEquals("test@test.com", userDetails.getUsername());
+            assertEquals("password", userDetails.getPassword());
+            assertEquals("ROLE_USER", userDetails.getAuthorities().iterator().next().getAuthority());
+        }
+
+        @Test
+        void 이메일_검색_실패() {
+            when(memberRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
+
+            UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("test@test.com"));
+            assertEquals("test@test.com로 등록된 회원이 없습니다.", exception.getMessage());
+        }
+    }
 }
