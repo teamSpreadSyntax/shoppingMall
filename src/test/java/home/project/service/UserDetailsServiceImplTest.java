@@ -52,7 +52,7 @@ class UserDetailsServiceImplTest {
     @Nested
     class loadUserByUsernameTests {
         @Test
-        void 유저에게_권한부여_성공() {
+        void loadUserByUsername_LoadUserSuccessfully_GrantedAuthoritiesToUser() {
             when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
             when(roleRepository.findById(member.getId())).thenReturn(Optional.of(role));
 
@@ -65,7 +65,7 @@ class UserDetailsServiceImplTest {
         }
 
         @Test
-        void 이메일_검색_실패() {
+        void loadUserByUsername_EmailNotFound_ThrowsUsernameNotFoundException() {
             when(memberRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
 
             UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("test@test.com"));

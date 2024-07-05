@@ -29,7 +29,7 @@ public class ValidationCheckTest {
 
     @Test
     void validationChecks_WithErrors_ShouldReturnBadRequest() {
-        FieldError fieldError = new FieldError("Name", "field", "default message");
+        FieldError fieldError = new FieldError("name", "field", "default message");
         when(bindingResult.hasErrors()).thenReturn(true);
         when(bindingResult.getFieldErrors()).thenReturn(Collections.singletonList(fieldError));
 
