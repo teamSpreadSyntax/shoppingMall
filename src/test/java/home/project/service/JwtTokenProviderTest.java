@@ -48,7 +48,7 @@ class JwtTokenProviderTest {
     @Nested
     class generateTokenTests {
         @Test
-        void generateToken_shouldReturnValidTokenDto() {
+        void generateToken_ValidAuthentication_ReturnsValidToken() {
 
             TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
 
@@ -62,7 +62,7 @@ class JwtTokenProviderTest {
     class getAuthenticationTests {
 
         @Test
-        void getAuthentication_shouldReturnAuthentication() {
+        void getAuthentication_ValidToken_ReturnsAuthenticationWithRoleUser() {
         TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
 
         Authentication auth = jwtTokenProvider.getAuthentication(tokenDto.getAccessToken());
@@ -72,7 +72,7 @@ class JwtTokenProviderTest {
         assertEquals(auth.getName(), authentication.getName());
         }
         @Test
-        void getAuthentication_에서_예외처리() {
+        void getAuthentication_TokenWithoutAuthority_ThrowsRuntimeException() {
         String tokenWithoutAuth = Jwts.builder()
                 .setSubject("user")
                 .setExpiration(new Date(System.currentTimeMillis() + 10000))
@@ -86,7 +86,7 @@ class JwtTokenProviderTest {
     @Nested
     class validateTokenTests {
         @Test
-        void validateToken_shouldReturnTrueForValidToken() {
+        void validateToken_ValidToken_ReturnsTrue() {
 
             TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
 
@@ -96,7 +96,7 @@ class JwtTokenProviderTest {
         }
 
         @Test
-        void validateToken_shouldReturnFalseForInvalidToken() {
+        void validateToken_InvalidToken_ReturnsFalse() {
             String wrongKeyToken = Jwts.builder()
                     .setSubject("user")
                     .setExpiration(new Date(System.currentTimeMillis() + 10000))
@@ -109,7 +109,7 @@ class JwtTokenProviderTest {
         }
 
         @Test
-        void validateToken_shouldReturnFalseForExpiredToken() {
+        void validateToken_ExpiredToken_ReturnsFalse() {
             String expiredToken = Jwts.builder()
                     .setSubject("user")
                     .setExpiration(new Date(System.currentTimeMillis() - 1000))

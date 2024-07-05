@@ -66,7 +66,7 @@ public class ProductServiceImplTest {
     @Nested
     class JoinTests {
         @Test
-        void shouldJoinProductSuccessfully() {
+        void join_ProductSuccessfully_SavesProductToRepositoryAndVerifiesBrand() {
             productService.join(product3);
             verify(productRepository).save(product3);
             assertEquals("puma", product3.getBrand());
@@ -76,7 +76,7 @@ public class ProductServiceImplTest {
     @Nested
     class FindByIdTests {
         @Test
-        void shouldFindByIdSuccessfully() {
+        void findById_ExistingId_ReturnsProduct() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
             Optional<Product> findProduct = productService.findById(1L);
@@ -86,7 +86,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void shouldThrowsExceptionWhenCanNotFoundById() {
+        void findById_NonExistingId_ThrowsException() {
             when(productRepository.findById(3L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.findById(3L));
@@ -97,7 +97,7 @@ public class ProductServiceImplTest {
     @Nested
     class FindAllTests  {
         @Test
-        void shouldFindAllProductsSuccessfully() {
+        void findAll_AllProductsFound_ReturnsPageOfProducts() {
             Pageable pageable = PageRequest.of(0, 10);
             List<Product> productList = Arrays.asList(product, product2);
             Page<Product> page = new PageImpl<>(productList, pageable, productList.size());
@@ -114,7 +114,7 @@ public class ProductServiceImplTest {
     @Nested
     class FindProductsTests {
         @Test
-        void shouldFindProductsByConditionSuccessfully() {
+        void findProducts_ByCategory_ReturnsMatchingProducts() {
             Pageable pageable = PageRequest.of(0, 10);
 
             List<Product> pantsProducts = Arrays.asList(product2);
@@ -130,7 +130,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void shouldThrowsExceptionWhenCanNotFoundProduct() {
+        void findProducts_NoMatchingProducts_ThrowsException() {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Product> emptyPage = Page.empty(pageable);
 
@@ -144,7 +144,7 @@ public class ProductServiceImplTest {
     @Nested
     class BrandListTests {
         @Test
-        void shouldGetBrandListSuccessfully() {
+        void brandList_AllBrandsSorted_ReturnsPageOfProducts() {
             Pageable pageable = PageRequest.of(0, 10);
             List<Product> products = Arrays.asList(product, product2);
             Page<Product> page = new PageImpl<>(products, pageable, products.size());
@@ -159,7 +159,7 @@ public class ProductServiceImplTest {
     @Nested
     class UpdateTests {
         @Test
-        void shouldUpdateProductSuccessfully() {
+        void update_ProductSuccessfullyUpdated_ReturnsUpdatedProduct() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
             product.setBrand("puma");
@@ -174,7 +174,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void shouldThrowsExceptionWhenUpdatingStockToNegative() {
+        void update_InvalidStockUpdate_ThrowsDataIntegrityViolationException() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
             product.setBrand("puma");
@@ -188,7 +188,7 @@ public class ProductServiceImplTest {
     @Nested
     class DeleteByIdTests {
         @Test
-        void shouldDeleteProductByIdSuccessfully() {
+        void deleteById_ExistingId_ProductDeletedSuccessfully() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
             productService.deleteById(1L);
@@ -197,7 +197,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void shouldThrowsExceptionWhenCanNotFoundProduct() {
+        void deleteById_NonExistingId_ThrowsException() {
             when(productRepository.findById(234L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.deleteById(234L));
@@ -208,7 +208,7 @@ public class ProductServiceImplTest {
     @Nested
     class IncreaseStockTests {
         @Test
-        void shouldIncreaseStockSuccessfully() {
+        void increaseStock_StockIncreasedSuccessfully_ReturnsUpdatedProduct() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
             when(productRepository.save(product)).thenReturn(product);
 
@@ -222,14 +222,14 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void shouldThrowsExceptionWhenIncreasingStockToNegative() {
+        void increaseStock_NegativeStockIncrement_ThrowsDataIntegrityViolationException() {
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.increaseStock(1L, -5L));
             assertEquals("재고가 음수일 수 없습니다.", exception.getMessage());
         }
 
         @Test
-        void shouldThrowExceptionWhenIncreasingStockWithInvalidId() {
+        void increaseStock_InvalidProductId_ThrowsIllegalArgumentException() {
             when(productRepository.findById(123L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.increaseStock(123L, 14L));
@@ -240,7 +240,7 @@ public class ProductServiceImplTest {
     @Nested
     class DecreaseStockTests {
         @Test
-        void shouldDecreaseStockSuccessfully() {
+        void decreaseStock_StockDecreasedSuccessfully_ReturnsUpdatedProduct() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
             when(productRepository.save(product)).thenReturn(product);
 
@@ -254,7 +254,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void shouldThrowExceptionWhenDecreasingStockWithInsufficientStock() {
+        void decreaseStock_InsufficientStock_ThrowsDataIntegrityViolationException() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
             product.setStock(0L);
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.decreaseStock(1L, 5L));
@@ -262,7 +262,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void shouldThrowExceptionWhenDecreasingStockWithInvalidId() {
+        void decreaseStock_InvalidProductId_ThrowsIllegalArgumentException() {
             when(productRepository.findById(123L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.decreaseStock(123L, 14L));

@@ -68,7 +68,7 @@ class MemberServiceImplTest {
     @Nested
     class JoinTests {
         @Test
-        void shouldThrowExceptionWhenJoinWithDuplicateEmailAndPhone() {
+        void join_DuplicateEmailAndPhone_ThrowsDataIntegrityViolationException() {
             when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
 
@@ -77,7 +77,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void shouldThrowExceptionWhenJoinWithDuplicateEmail() {
+        void join_DuplicateEmail_ThrowsDataIntegrityViolationException() {
             when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
 
@@ -86,7 +86,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void shouldThrowExceptionWhenJoinWithDuplicatePhone() {
+        void join_DuplicatePhone_ThrowsDataIntegrityViolationException() {
             when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
 
@@ -95,7 +95,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void shouldJoinMemberSuccessfully() {
+        void join_SuccessfullyJoinsMember_EncodesPasswordAndSavesMember() {
             when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
             when(passwordEncoder.encode(member.getPassword())).thenReturn("encodedPassword");
@@ -112,7 +112,7 @@ class MemberServiceImplTest {
     @Nested
     class FindByIdTests {
         @Test
-        void shouldFindMemberByIdSuccessfully() {
+        void findById_ExistingId_ReturnMember() {
             when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
             Optional<Member> findMember = memberService.findById(1L);
 
@@ -121,7 +121,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void shouldThrowExceptionWhenMemberNotFoundById() {
+        void findById_NonExistingId_ThrowsException() {
             when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findById(1L));
@@ -132,7 +132,7 @@ class MemberServiceImplTest {
     @Nested
     class FindAllTests {
         @Test
-        void shouldFindAllMembersSuccessfully() {
+        void findAll_AllMembersFound_ReturnsPageOfMembers() {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Member> page = new PageImpl<>(Arrays.asList(member, member2));
 
@@ -151,7 +151,7 @@ class MemberServiceImplTest {
     @Nested
     class FindMembersTests {
         @Test
-        void shouldFindMembersByConditionSuccessfully() {
+        void findMembers_ByCondition_ReturnsMatchingMembers() {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Member> page = new PageImpl<>(Arrays.asList(member, member2));
 
@@ -168,7 +168,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void shouldThrowsExceptionWhenCanNotFoundMember() {
+        void findMembers_NoMatchingMembers_ThrowsException() {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Member> emptyPage = Page.empty(pageable);
 
@@ -183,7 +183,7 @@ class MemberServiceImplTest {
     @Nested
     class UpdateTests {
         @Test
-        void shouldUpdateMemberSuccessfully() {
+        void update_MemberSuccessfullyUpdated_ReturnsUpdatedMember() {
             when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
             when(passwordEncoder.encode("newPassword")).thenReturn("encodeNewPassword");
 
@@ -206,7 +206,7 @@ class MemberServiceImplTest {
     @Nested
     class DeleteByIdTests {
         @Test
-        void shouldDeleteMemberByIdSuccessfully() {
+        void deleteById_ExistingId_MemberDeletedSuccessfully() {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
             memberService.deleteById(member.getId());
@@ -215,7 +215,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void shouldThrowExceptionWhenDeletingNonExistentMember() {
+        void deleteById_NonExistentId_ThrowsException() {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.deleteById(member.getId()));
