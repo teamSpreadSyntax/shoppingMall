@@ -1,32 +1,38 @@
+/*
 package home.project.controller;
 
+import home.project.service.JwtTokenProvider;
+import home.project.service.MemberService;
+import home.project.service.RoleService;
+import home.project.service.ValidationCheck;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@WebMvcTest
 class MemberControllerTest {
+    @Autowired
+    private MockMvc mockMvc;
 
-    @Test
-    void createMember() {
-    }
+    @MockBean
+    private MemberService memberService;
 
-    @Test
-    void findMemberById() {
-    }
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
 
-    @Test
-    void findAllMember() {
-    }
+    @MockBean
+    private ValidationCheck validationCheck;
 
-    @Test
-    void searchMembers() {
-    }
+    @MockBean
+    private RoleService roleService;
 
-    @Test
-    void updateMember() {
+    @Nested
+    class createMemberTest{
+        @Test
+        void
     }
-
-    @Test
-    void deleteMember() {
-    }
-}
+}*/
