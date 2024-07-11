@@ -24,7 +24,6 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -70,19 +69,19 @@ public class ProductController {
             throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");
         }
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("상품 등록 완료", product.getName() + "가 등록되었습니다");
+        responseMap.put("successMessage", product.getName() + "가 등록되었습니다");
         CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품등록 성공", HttpStatus.OK.value());
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
     @Operation(summary = "ID로 상품 조회 메서드", description = "ID로 상품 조회 메서드입니다")
     @GetMapping("product")
-    public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("id") Long id) {
-        if (id == null) {
+    public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("productId") Long productId) {
+        if (productId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
-        Optional<Product> productOptional = productService.findById(id);
-        String successMessage = id + "에 해당하는 상품 입니다";
+        Optional<Product> productOptional = productService.findById(productId);
+        String successMessage = productId + "에 해당하는 상품 입니다";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
     }
 
@@ -151,8 +150,8 @@ public class ProductController {
     public CustomOptionalResponseEntity<Optional<Product>> deleteProduct(@RequestParam("productId") Long productId) {
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("상품삭제 완료", productId + "가 삭제되었습니다");
-        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품삭제 성공", HttpStatus.OK.value());
+        responseMap.put("thanksMessage", productId + "가 삭제되었습니다");
+        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품 삭제 성공", HttpStatus.OK.value());
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
@@ -160,7 +159,7 @@ public class ProductController {
     @PutMapping("increase_stock")
     public CustomOptionalResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product increaseProduct = productService.increaseStock(productId, stock);
-        String successMessage = increaseProduct.getName() + "상품이" + stock + "개 증가하여" + increaseProduct.getStock() + "개가 되었습니다";
+        String successMessage = increaseProduct.getName() + "상품이 " + stock + "개 증가하여 " + increaseProduct.getStock() + "개가 되었습니다";
         return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
     }
 
@@ -168,7 +167,7 @@ public class ProductController {
     @PutMapping("decrease_stock")
     public CustomOptionalResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product decreaseProduct = productService.decreaseStock(productId, stock);
-        String successMessage = decreaseProduct.getName() + "상품이" + stock + "개 감소하여" + decreaseProduct.getStock() + "개가 되었습니다";
+        String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다";
         return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
     }
 

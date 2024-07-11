@@ -60,7 +60,7 @@ public class MemberControllerTest {
     private ValidationCheck validationCheck;
 
     @MockBean
-    private UserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService; //이걸 지우면 왜 안될까
 
     @MockBean
     private PasswordEncoder passwordEncoder;
@@ -130,7 +130,9 @@ public class MemberControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result.accessToken").exists())
                     .andExpect(jsonPath("$.result.refreshToken").exists())
-                    .andExpect(jsonPath("$.result.message").value("회원가입이 성공적으로 완료되었습니다."));
+                    .andExpect(jsonPath("$.result.message").value("회원가입이 성공적으로 완료되었습니다."))
+                    .andExpect(jsonPath("$.status").value(200));;
+
         }
     }
 
@@ -177,7 +179,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void findAllMembers_NoMembers_ReturnsEmptyPage() throws Exception {
+        public void findAllMembers_RequestOverPage_ReturnsEmptyPage() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
 
             mockMvc.perform(get("/api/member/members")
