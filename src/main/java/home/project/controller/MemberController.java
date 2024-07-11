@@ -153,7 +153,7 @@ public class MemberController {
     public CustomOptionalResponseEntity<Optional<Member>> deleteMember(@RequestParam("memberId") Long memberId) {
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("이용해주셔서 감사합니다", memberId + "님의 계정이 삭제되었습니다");
+        responseMap.put("thanksMessage", memberId + "님의 계정이 삭제되었습니다");
         CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원 삭제 성공", HttpStatus.OK.value());
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
