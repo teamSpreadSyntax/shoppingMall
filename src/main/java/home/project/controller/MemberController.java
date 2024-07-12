@@ -91,7 +91,7 @@ public class MemberController {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
         Optional<Member> memberOptional = memberService.findById(memberId);
-        String successMessage = memberId + "로 가입된 회원정보입니다";
+        String successMessage = memberId + "(으)로 가입된 회원정보입니다";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
@@ -143,7 +143,7 @@ public class MemberController {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         Optional<Member> memberOptional = memberService.update(member);
-        String successMessage = "회원 정보가 수정되었습니다";
+        String successMessage = "회원정보가 수정되었습니다";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
@@ -154,7 +154,7 @@ public class MemberController {
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("thanksMessage", memberId + "님의 계정이 삭제되었습니다");
-        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원 삭제 성공", HttpStatus.OK.value());
+        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원삭제 성공", HttpStatus.OK.value());
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 

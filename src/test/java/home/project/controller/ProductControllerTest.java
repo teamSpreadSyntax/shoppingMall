@@ -108,7 +108,7 @@ public class ProductControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"brand\": \"TestBrand\", \"category\": \"TestCategory\", \"name\": \"TestProduct\", \"stock\": 100, \"selledcount\": 0, \"image\": \"test.jpg\" }"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.result.successMessage").value(product.getName() + "가 등록되었습니다"))
+                    .andExpect(jsonPath("$.result.successMessage").value(product.getName() + "(이)가 등록되었습니다"))
                     .andExpect(jsonPath("$.responseMessage").value("상품등록 성공"))
                     .andExpect(jsonPath("$.status").value(200));
         }
@@ -133,7 +133,7 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.result.category").value(product.getCategory()))
                     .andExpect(jsonPath("$.result.stock").value(product.getStock()))
                     .andExpect(jsonPath("$.result.image").value(product.getImage()))
-                    .andExpect(jsonPath("$.responseMessage").value("1에 해당하는 상품 입니다"))
+                    .andExpect(jsonPath("$.responseMessage").value(product.getId() + "에 해당하는 상품 입니다"))
                     .andExpect(jsonPath("$.status").value(200));
         }
     }
@@ -250,8 +250,8 @@ public class ProductControllerTest {
                             .param("productId", String.valueOf(productId)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
-                    .andExpect(jsonPath("$.result.thanksMessage").value(productId + "가 삭제되었습니다"))
-                    .andExpect(jsonPath("$.responseMessage").value("상품 삭제 성공"))
+                    .andExpect(jsonPath("$.result.thanksMessage").value(productId + "(이)가 삭제되었습니다"))
+                    .andExpect(jsonPath("$.responseMessage").value("상품삭제 성공"))
                     .andExpect(jsonPath("$.status").value(200));
         }
     }

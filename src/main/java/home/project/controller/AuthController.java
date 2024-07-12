@@ -61,7 +61,7 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
         System.out.println(authentication);
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
-        String successMessage = member.getUsername() + "로 로그인에 성공하였습니다";
+        String successMessage = member.getUsername() + "(으)로 로그인에 성공하였습니다";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(tokenDto), successMessage, HttpStatus.OK);
     }
 

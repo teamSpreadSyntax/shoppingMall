@@ -102,7 +102,7 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.result.grantType").value("Bearer"))
                     .andExpect(jsonPath("$.result.accessToken").value("accessToken"))
                     .andExpect(jsonPath("$.result.refreshToken").value("refreshToken"))
-                    .andExpect(jsonPath("$.responseMessage").value(userDetails.getUsername() + "로 로그인에 성공하였습니다"))
+                    .andExpect(jsonPath("$.responseMessage").value(userDetails.getUsername() + "(으)로 로그인에 성공하였습니다"))
                     .andExpect(jsonPath("$.status").value(200));
         }
     }

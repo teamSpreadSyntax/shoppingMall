@@ -69,7 +69,7 @@ public class ProductController {
             throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");
         }
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", product.getName() + "가 등록되었습니다");
+        responseMap.put("successMessage", product.getName() + "(이)가 등록되었습니다");
         CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품등록 성공", HttpStatus.OK.value());
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
@@ -150,8 +150,8 @@ public class ProductController {
     public CustomOptionalResponseEntity<Optional<Product>> deleteProduct(@RequestParam("productId") Long productId) {
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("thanksMessage", productId + "가 삭제되었습니다");
-        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품 삭제 성공", HttpStatus.OK.value());
+        responseMap.put("thanksMessage", productId + "(이)가 삭제되었습니다");
+        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품삭제 성공", HttpStatus.OK.value());
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
