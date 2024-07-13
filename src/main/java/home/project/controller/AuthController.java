@@ -56,12 +56,12 @@ public class AuthController {
         if (validationResponse != null) return validationResponse;
         UserDetails member = userDetailsService.loadUserByUsername(userDetailsDTO.getEmail());
         if (!passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())) {
-            throw new BadCredentialsException("비밀번호를 확인해주세요");
+            throw new BadCredentialsException("비밀번호를 확인해주세요.");
         }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
         System.out.println(authentication);
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
-        String successMessage = member.getUsername() + "(으)로 로그인에 성공하였습니다";
+        String successMessage = member.getUsername() + "(으)로 로그인에 성공했습니다.";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(tokenDto), successMessage, HttpStatus.OK);
     }
 
@@ -80,7 +80,7 @@ public class AuthController {
             role.get().setRole("center");
         }
         roleService.update(role.get());
-        String successMessage = "로그아웃에 성공하였습니다";
+        String successMessage = "로그아웃에 성공했습니다.";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(member.get().getEmail()), successMessage, HttpStatus.OK);
     }
 
@@ -104,7 +104,7 @@ public class AuthController {
             roleService.update(role);
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(role), successMessage, HttpStatus.OK);
         } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다";
+            String errorMessage = "접근 권한이 없습니다.";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(e.getMessage()), errorMessage, HttpStatus.BAD_REQUEST);
         }
     }

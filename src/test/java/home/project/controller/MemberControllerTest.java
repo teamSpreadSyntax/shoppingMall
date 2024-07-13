@@ -175,7 +175,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.result.content[0].email").value(memberDtoPage.getContent().get(0).getEmail()))
                     .andExpect(jsonPath("$.result.content[0].name").value(memberDtoPage.getContent().get(0).getName()))
                     .andExpect(jsonPath("$.result.content[0].phone").value(memberDtoPage.getContent().get(0).getPhone()))
-                    .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다"))
+                    .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
@@ -189,7 +189,7 @@ public class MemberControllerTest {
                         .andExpect(jsonPath("$.result").exists())
                         .andExpect(jsonPath("$.result.content").isArray())
                         .andExpect(jsonPath("$.result.content.length()").value(0))
-                        .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다"))
+                        .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다."))
                         .andExpect(jsonPath("$.status").value(200));
 
         }
@@ -222,7 +222,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.result.content[0].password").value(memberPage.getContent().get(0).getPassword()))
                     .andExpect(jsonPath("$.result.content[0].name").value(memberPage.getContent().get(0).getName()))
                     .andExpect(jsonPath("$.result.content[0].phone").value(memberPage.getContent().get(0).getPhone()))
-                    .andExpect(jsonPath("$.responseMessage").value("검색 결과입니다"))
+                    .andExpect(jsonPath("$.responseMessage").value("검색 결과입니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
     }
@@ -244,7 +244,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.result.email").value(member.getEmail()))
                     .andExpect(jsonPath("$.result.name").value(member.getName()))
                     .andExpect(jsonPath("$.result.phone").value(member.getPhone()))
-                    .andExpect(jsonPath("$.responseMessage").value("회원정보가 수정되었습니다"))
+                    .andExpect(jsonPath("$.responseMessage").value("회원 정보가 수정되었습니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
     }
@@ -261,8 +261,8 @@ public class MemberControllerTest {
                             .param("memberId", String.valueOf(memberId)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
-                    .andExpect(jsonPath("$.result.thanksMessage").value(memberId + "님의 계정이 삭제되었습니다"))
-                    .andExpect(jsonPath("$.responseMessage").value("회원삭제 성공"))
+                    .andExpect(jsonPath("$.result.thanksMessage").value(memberId + "님의 계정이 삭제되었습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("회원 삭제 성공"))
                     .andExpect(jsonPath("$.status").value(200));
         }
     }

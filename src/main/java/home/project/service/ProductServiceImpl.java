@@ -27,7 +27,7 @@ public class ProductServiceImpl implements ProductService {
 
     public Optional<Product> findById(Long productId) {
         Product product = productRepository.findById(productId).orElseThrow(() -> {
-            throw new IllegalArgumentException(productId + "로 등록된 상품이 없습니다.");
+            throw new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다.");
         });
         return Optional.ofNullable(product);
     }
@@ -50,10 +50,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Optional<Product> update(Product product) {
-        Product exsitsProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalArgumentException(product.getId() + "로 등록된 상품이 없습니다."));
+        Product exsitsProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalArgumentException(product.getId() + "(으)로 등록된 상품이 없습니다."));
         exsitsProduct.setBrand(product.getBrand());
         exsitsProduct.setName(product.getName());
-        exsitsProduct.setSelledcount(product.getSelledcount());
+        exsitsProduct.setSoldQuantity(product.getSoldQuantity());
         exsitsProduct.setImage(product.getImage());
         exsitsProduct.setStock(product.getStock());
         exsitsProduct.setCategory(product.getCategory());
@@ -67,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void deleteById(Long productId) {
-        productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "로 등록된 상품이 없습니다."));
+        productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다."));
         productRepository.deleteById(productId);
     }
 
@@ -75,7 +75,7 @@ public class ProductServiceImpl implements ProductService {
         if (stock < 0) {
             throw new DataIntegrityViolationException("재고가 음수일 수 없습니다.");
         }
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "로 등록된 상품이 없습니다."));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다."));
         Long currentStock = product.getStock();
         Long newStock = currentStock + stock;
         product.setStock(newStock);
@@ -83,7 +83,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Product decreaseStock(Long productId, Long stock) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "로 등록된 상품이 없습니다."));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다."));
         Long currentStock = product.getStock();
         Long newStock = Math.max(currentStock - stock, 0);
         if (currentStock <= 0 || stock > currentStock) {

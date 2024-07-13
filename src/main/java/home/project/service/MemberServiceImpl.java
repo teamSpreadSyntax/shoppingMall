@@ -39,13 +39,13 @@ public class MemberServiceImpl implements MemberService {
 
     public Optional<Member> findById(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            throw new IllegalArgumentException(memberId + "로 등록된 회원이 없습니다.");
+            throw new IllegalArgumentException(memberId + "(으)로 등록된 회원이 없습니다.");
         });
         return Optional.ofNullable(member);
     }
 
     public Optional<Member> findByEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalArgumentException(email+"로 등록된 회원이 없습니다."); });
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalArgumentException(email+"(으)로 등록된 회원이 없습니다."); });
         return Optional.ofNullable(member);
     }
 
@@ -64,7 +64,7 @@ public class MemberServiceImpl implements MemberService {
     public Optional<Member> update(Member member) {
 
         Member existsMember = memberRepository.findById(member.getId())
-                .orElseThrow(() -> new IllegalArgumentException(member.getId() + "로 등록된 회원이 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException(member.getId() + "(으)로 등록된 회원이 없습니다."));
 
         if (member.getName() != null) {
             existsMember.setName(member.getName());
@@ -102,13 +102,11 @@ public class MemberServiceImpl implements MemberService {
 
 
     public void deleteById(Long memberId) {
-        memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException(memberId + "로 등록된 회원이 없습니다."));
+        memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException(memberId + "(으)로 등록된 회원이 없습니다."));
         memberRepository.deleteById(memberId);
     }
 
     public void logout(Long memberId) {
     }
-
-    ;
 
 }

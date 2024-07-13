@@ -125,7 +125,7 @@ class MemberServiceImplTest {
             when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findById(1L));
-            assertEquals("1로 등록된 회원이 없습니다.", exception.getMessage());
+            assertEquals("1(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
 
@@ -219,7 +219,7 @@ class MemberServiceImplTest {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.deleteById(member.getId()));
-            assertEquals(member.getId() + "로 등록된 회원이 없습니다.", exception.getMessage());
+            assertEquals(member.getId() + "(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
 }

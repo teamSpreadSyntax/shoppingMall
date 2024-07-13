@@ -27,7 +27,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handlePageNotFoundException(PageNotFoundException e) {
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "해당 페이지가 존재하지 않습니다", HttpStatus.BAD_REQUEST.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "해당 페이지가 존재하지 않습니다.", HttpStatus.BAD_REQUEST.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
 
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleUsernameNotFoundException(UsernameNotFoundException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "아이디가 존재하지 않습니다", HttpStatus.UNAUTHORIZED.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "아이디가 존재하지 않습니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "인증되지 않은 사용자입니다", HttpStatus.UNAUTHORIZED.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
@@ -67,7 +67,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "인증되지 않은 사용자입니다", HttpStatus.UNAUTHORIZED.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "비밀번호가 틀립니다", HttpStatus.UNAUTHORIZED.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "비밀번호가 틀립니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 

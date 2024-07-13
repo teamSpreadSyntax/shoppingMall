@@ -11,7 +11,7 @@ public class ProductDTOWithoutId {
     @NotBlank(message = "상품의 브랜드를 입력해주세요.")
     private String brand;
 
-    private Long selledcount = 0L;
+    private Long soldQuantity = 0L;
 
     @NotBlank(message = "상품명을 입력해주세요.")
     private String name;

@@ -84,7 +84,7 @@ public class MemberController {
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
-    @Operation(summary = "ID로 회원 조회 메서드", description = "ID로 회원 조회 메서드입니다.")
+    @Operation(summary = "id로 회원 조회 메서드", description = "id로 회원 조회 메서드입니다.")
     @GetMapping("member")
     public CustomOptionalResponseEntity<Optional<Member>> findMemberById(@RequestParam("memberId") Long memberId) {
         if (memberId == null) {
@@ -108,12 +108,12 @@ public class MemberController {
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
             Page<MemberDTOWithoutPw> memberDtoPage = memberPage.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
-            String successMessage = "전체 회원입니다";
+            String successMessage = "전체 회원입니다.";
             long totalCount = memberPage.getTotalElements();
             int page = memberPage.getNumber();
             return new CustomListResponseEntity<>(memberDtoPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
         } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다";
+            String errorMessage = "접근 권한이 없습니다.";
             return new CustomOptionalResponseEntity<>(Optional.ofNullable(e.getMessage()), errorMessage, HttpStatus.BAD_REQUEST);
         }
     }
@@ -131,7 +131,7 @@ public class MemberController {
             }) @ParameterObject Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Member> memberPage = memberService.findMembers(name, email, phone, content, pageable);
-        String successMessage = "검색 결과입니다";
+        String successMessage = "검색 결과입니다.";
         long totalCount = memberPage.getTotalElements();
         int page = memberPage.getNumber();
         return new CustomListResponseEntity<>(memberPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
@@ -143,18 +143,18 @@ public class MemberController {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         Optional<Member> memberOptional = memberService.update(member);
-        String successMessage = "회원정보가 수정되었습니다";
+        String successMessage = "회원 정보가 수정되었습니다.";
         return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
     }
 
     @Transactional
-    @Operation(summary = "멤버 삭제 메서드", description = "멤버 삭제 메서드입니다.")
+    @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")
     @DeleteMapping("delete")
     public CustomOptionalResponseEntity<Optional<Member>> deleteMember(@RequestParam("memberId") Long memberId) {
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("thanksMessage", memberId + "님의 계정이 삭제되었습니다");
-        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원삭제 성공", HttpStatus.OK.value());
+        responseMap.put("thanksMessage", memberId + "님의 계정이 삭제되었습니다.");
+        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원 삭제 성공", HttpStatus.OK.value());
         return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
     }
 
