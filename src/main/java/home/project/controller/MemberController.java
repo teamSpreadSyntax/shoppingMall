@@ -8,6 +8,7 @@ import home.project.service.RoleService;
 import home.project.service.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -37,13 +38,6 @@ import java.util.Optional;
 
 @Tag(name = "회원", description = "회원관련 API입니다")
 @RequestMapping(path = "/api/member")
-@ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "403", description = "접근이 금지되었습니다.", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = Member.class)))
-})
-
 @RestController
 public class MemberController {
 
@@ -61,9 +55,19 @@ public class MemberController {
     }
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/CustomOptionalResponseBody200"))),
+            @ApiResponse(responseCode = "400", description = "bad request operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/CustomOptionalResponseBody400"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/CustomOptionalResponseBody409"))),
+            @ApiResponse(responseCode = "500", description = "Internal server error",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/CustomOptionalResponseBody500")))
+    })
     @PostMapping("join")
-    public CustomOptionalResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
-        CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+    public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
+        CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         Member member = new Member();
         member.setEmail(memberDTO.getEmail());
@@ -79,20 +83,19 @@ public class MemberController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("accessToken", tokenDto.getAccessToken());
         responseMap.put("refreshToken", tokenDto.getRefreshToken());
-        responseMap.put("message", "회원가입이 성공적으로 완료되었습니다.");
-        CustomOptionalResponseBody<Optional<Map<String, String>>> responseBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK.value());
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
+        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK);
     }
 
     @Operation(summary = "id로 회원 조회 메서드", description = "id로 회원 조회 메서드입니다.")
     @GetMapping("member")
-    public CustomOptionalResponseEntity<Optional<Member>> findMemberById(@RequestParam("memberId") Long memberId) {
+    public ResponseEntity<?> findMemberById(@RequestParam("memberId") Long memberId) {
         if (memberId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
         Optional<Member> memberOptional = memberService.findById(memberId);
         String successMessage = memberId + "(으)로 가입된 회원정보입니다";
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
+        return new CustomOptionalResponseEntity<>(memberOptional, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
@@ -114,7 +117,7 @@ public class MemberController {
             return new CustomListResponseEntity<>(memberDtoPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
         } catch (AccessDeniedException e) {
             String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(e.getMessage()), errorMessage, HttpStatus.BAD_REQUEST);
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
         }
     }
 
@@ -144,18 +147,18 @@ public class MemberController {
         if (validationResponse != null) return validationResponse;
         Optional<Member> memberOptional = memberService.update(member);
         String successMessage = "회원 정보가 수정되었습니다.";
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(memberOptional), successMessage, HttpStatus.OK);
+        return new CustomOptionalResponseEntity<>(memberOptional, successMessage, HttpStatus.OK);
     }
 
     @Transactional
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")
     @DeleteMapping("delete")
-    public CustomOptionalResponseEntity<Optional<Member>> deleteMember(@RequestParam("memberId") Long memberId) {
+    public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("thanksMessage", memberId + "님의 계정이 삭제되었습니다.");
-        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "회원 삭제 성공", HttpStatus.OK.value());
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        responseMap.put("successMessage", memberId + "님의 계정이 삭제되었습니다.");
+        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "회원 삭제 성공", HttpStatus.OK);
+
     }
 
 

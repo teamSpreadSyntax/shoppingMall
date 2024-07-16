@@ -6,6 +6,10 @@ import home.project.service.MemberService;
 import home.project.service.RoleService;
 import home.project.service.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,10 +27,21 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃관련 API입니다")
 @RequestMapping(path = "/api/loginToken")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "403", description = "Forbidden.", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = Member.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Member.class)))
+})
 @RestController
 public class AuthController {
 
@@ -62,12 +77,12 @@ public class AuthController {
         System.out.println(authentication);
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
         String successMessage = member.getUsername() + "(으)로 로그인에 성공했습니다.";
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(tokenDto), successMessage, HttpStatus.OK);
+        return new CustomOptionalResponseEntity<>(Optional.of(tokenDto), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
     @PostMapping("logout")
-    public CustomOptionalResponseEntity<?> logout(@RequestParam("memberId") Long memberId) {
+    public ResponseEntity<?> logout(@RequestParam("memberId") Long memberId) {
         Optional<Member> member = memberService.findById(memberId);
         memberService.logout(memberId);
         Optional<Role> role = roleService.findById(memberId);
@@ -80,8 +95,11 @@ public class AuthController {
             role.get().setRole("center");
         }
         roleService.update(role.get());
-        String successMessage = "로그아웃에 성공했습니다.";
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(member.get().getEmail()), successMessage, HttpStatus.OK);
+        String email = member.get().getEmail();
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", email+"님 이용해주셔서 감사합니다.");
+        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "로그아웃되었습니다.", HttpStatus.OK);
+
     }
 
     @Operation(summary = "권한 부여 메서드", description = "권한 부여 메서드입니다.")
@@ -102,10 +120,10 @@ public class AuthController {
                     successMessage = memberId + "에게 일반 사용자 권한을 부여했습니다.";
                 }
             roleService.update(role);
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(role), successMessage, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.of(role), successMessage, HttpStatus.OK);
         } catch (AccessDeniedException e) {
             String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.ofNullable(e.getMessage()), errorMessage, HttpStatus.BAD_REQUEST);
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
         }
     }
 

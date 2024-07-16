@@ -126,8 +126,8 @@ public class AuthControllerTest {
             mockMvc.perform(post("/api/loginToken/logout")
                             .param("memberId", memberId.toString()))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.result").value(member.getEmail()))
-                    .andExpect(jsonPath("$.responseMessage").value("로그아웃에 성공했습니다."))
+                    .andExpect(jsonPath("$.result.successMessage").value(member.getEmail()+"님 이용해주셔서 감사합니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("로그아웃되었습니다."))
                     .andExpect(jsonPath("$.status").value(200));
 
         }

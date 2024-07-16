@@ -34,8 +34,11 @@ import java.util.*;
 @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Product.class))),
         @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = Product.class))),
-        @ApiResponse(responseCode = "403", description = "접근이 금지되었습니다.", content = @Content(schema = @Schema(implementation = Product.class))),
-        @ApiResponse(responseCode = "404", description = "요청한 리소스를 찾을 수 없습니다.", content = @Content(schema = @Schema(implementation = Product.class)))
+        @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = Product.class))),
+        @ApiResponse(responseCode = "403", description = "Forbidden.", content = @Content(schema = @Schema(implementation = Product.class))),
+        @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(schema = @Schema(implementation = Product.class))),
+        @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = Product.class))),
+        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Product.class)))
 })
 
 
@@ -53,7 +56,7 @@ public class ProductController {
 
     @Operation(summary = "상품 추가 메서드", description = "상품 추가 메서드입니다.")
     @PostMapping("create")
-    public CustomOptionalResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
+    public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         Product product = new Product();
@@ -70,24 +73,24 @@ public class ProductController {
         }
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", product.getName() + "(이)가 등록되었습니다");
-        CustomOptionalResponseBody<Optional<Product>> responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품 등록 성공", HttpStatus.OK.value());
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 등록 성공", HttpStatus.OK);
+
     }
 
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다")
     @GetMapping("product")
-    public CustomOptionalResponseEntity<Optional<Product>> findProductById(@RequestParam("productId") Long productId) {
+    public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
         if (productId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
         Optional<Product> productOptional = productService.findById(productId);
         String successMessage = productId + "에 해당하는 상품 입니다.";
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
+        return new CustomOptionalResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
     @GetMapping("products")
-    public CustomListResponseEntity<Product> findAllProduct(
+    public ResponseEntity<?> findAllProduct(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
@@ -121,7 +124,7 @@ public class ProductController {
 
     @Operation(summary = "전체 브랜드 조회 메서드", description = "브랜드 조회(판매량기준 오름차순정렬) 메서드입니다.")
     @GetMapping("brands")
-    public CustomListResponseEntity<Product> brandList(
+    public ResponseEntity<?> brandList(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
@@ -136,28 +139,28 @@ public class ProductController {
 
     @Operation(summary = "상품 업데이트(수정) 메서드", description = "상품 업데이트(수정) 메서드입니다.")
     @PutMapping("update")
-    public CustomOptionalResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
+    public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         Optional<Product> productOptional = productService.update(product);
         String successMessage = "상품 정보가 수정되었습니다.";
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(productOptional), successMessage, HttpStatus.OK);
+        return new CustomOptionalResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
     }
 
     @Transactional
     @Operation(summary = "상품 삭제 메서드", description = "상품 삭제 메서드입니다.")
     @DeleteMapping("delete")
-    public CustomOptionalResponseEntity<Optional<Product>> deleteProduct(@RequestParam("productId") Long productId) {
+    public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("thanksMessage", productId + "(이)가 삭제되었습니다.");
-        CustomOptionalResponseBody responseBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "상품 삭제 성공", HttpStatus.OK.value());
-        return new CustomOptionalResponseEntity<>(responseBody, HttpStatus.OK);
+        responseMap.put("successMessage", productId + "(이)가 삭제되었습니다.");
+        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
+
     }
 
     @Operation(summary = "재고 수량 증가 메서드", description = "재고 수량 증가 메서드입니다.")
     @PutMapping("increase_stock")
-    public CustomOptionalResponseEntity<Product> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
+    public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product increaseProduct = productService.increaseStock(productId, stock);
         String successMessage = increaseProduct.getName() + "상품이 " + stock + "개 증가하여 " + increaseProduct.getStock() + "개가 되었습니다.";
         return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
@@ -165,7 +168,7 @@ public class ProductController {
 
     @Operation(summary = "재고 수량 감소 메서드", description = "재고 수량 감소 메서드입니다.")
     @PutMapping("decrease_stock")
-    public CustomOptionalResponseEntity<Product> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
+    public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product decreaseProduct = productService.decreaseStock(productId, stock);
         String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다.";
         return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);

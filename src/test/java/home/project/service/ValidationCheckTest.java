@@ -41,7 +41,7 @@ public class ValidationCheckTest {
         CustomOptionalResponseBody<?> responseBody = responseEntity.getBody();
         assertNotNull(responseBody);
         assertNotNull(responseBody.result);
-        assertEquals("Validation failed", responseBody.responseMessage);
+        assertEquals("입력값을 확인해주세요.", responseBody.responseMessage);
         assertEquals(HttpStatus.BAD_REQUEST.value(), responseBody.status);
 
 

@@ -1,5 +1,6 @@
 package home.project.domain;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpHeaders;
@@ -10,6 +11,7 @@ import java.util.Optional;
 
 @Getter
 @Setter
+@Schema(name = "CustomOptionalResponseEntity", description = "Custom response entity for optional data")
 public class CustomOptionalResponseEntity<T> extends ResponseEntity<CustomOptionalResponseBody<T>> {
 
     public CustomOptionalResponseEntity(CustomOptionalResponseBody<T> body, HttpStatus status) {

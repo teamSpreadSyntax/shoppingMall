@@ -27,7 +27,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handlePageNotFoundException(PageNotFoundException e) {
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "해당 페이지가 존재하지 않습니다.", HttpStatus.BAD_REQUEST.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "해당 페이지가 존재하지 않습니다.", HttpStatus.BAD_REQUEST.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
 
@@ -35,7 +35,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "검색내용이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+        CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "검색내용이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
     }
 
@@ -43,7 +44,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "데이터 무결성 위반 오류입니다.", HttpStatus.CONFLICT.value());
+        CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "데이터 무결성 위반 오류입니다.", HttpStatus.CONFLICT.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.CONFLICT);
     }
 
@@ -51,7 +52,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleUsernameNotFoundException(UsernameNotFoundException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "아이디가 존재하지 않습니다.", HttpStatus.UNAUTHORIZED.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "아이디가 존재하지 않습니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
@@ -59,7 +60,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
@@ -67,7 +68,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleJwtAuthenticationException(JwtAuthenticationException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
@@ -75,15 +76,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseBody), "비밀번호가 틀립니다.", HttpStatus.UNAUTHORIZED.value());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "비밀번호가 틀립니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<Optional<Product>> errorBody = new CustomOptionalResponseBody<>(Optional.ofNullable(responseMap), "서버 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", e.getMessage());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "서버 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

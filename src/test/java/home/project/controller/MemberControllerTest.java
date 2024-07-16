@@ -261,7 +261,7 @@ public class MemberControllerTest {
                             .param("memberId", String.valueOf(memberId)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
-                    .andExpect(jsonPath("$.result.thanksMessage").value(memberId + "님의 계정이 삭제되었습니다."))
+                    .andExpect(jsonPath("$.result.successMessage").value(memberId + "님의 계정이 삭제되었습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("회원 삭제 성공"))
                     .andExpect(jsonPath("$.status").value(200));
         }

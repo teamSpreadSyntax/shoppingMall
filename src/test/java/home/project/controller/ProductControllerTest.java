@@ -250,7 +250,7 @@ public class ProductControllerTest {
                             .param("productId", String.valueOf(productId)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
-                    .andExpect(jsonPath("$.result.thanksMessage").value(productId + "(이)가 삭제되었습니다."))
+                    .andExpect(jsonPath("$.result.successMessage").value(productId + "(이)가 삭제되었습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("상품 삭제 성공"))
                     .andExpect(jsonPath("$.status").value(200));
         }
