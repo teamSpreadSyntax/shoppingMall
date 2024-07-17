@@ -34,13 +34,24 @@ import java.util.Optional;
 @Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃관련 API입니다")
 @RequestMapping(path = "/api/loginToken")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "403", description = "Forbidden.", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = Member.class))),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Member.class)))
+        @ApiResponse(responseCode = "200", description = "Successful operation",
+                content = {
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/LoginSuccessResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/LogoutSuccessResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/AuthorityChangeSuccessResponseSchema"))
+                }),
+        @ApiResponse(responseCode = "400", description = "Bad request",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/BaseResponseSchema"))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/LoginFailedResponseSchema"))),
+        @ApiResponse(responseCode = "403", description = "Forbidden",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+        @ApiResponse(responseCode = "404", description = "Resource not found",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+        @ApiResponse(responseCode = "409", description = "Conflict",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/BaseResponseSchema")))
 })
 @RestController
 public class AuthController {

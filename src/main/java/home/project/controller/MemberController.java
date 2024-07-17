@@ -38,6 +38,27 @@ import java.util.Optional;
 
 @Tag(name = "회원", description = "회원관련 API입니다")
 @RequestMapping(path = "/api/member")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successful operation",
+                content = {
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/MemberResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/PagedListResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/BaseResponseSchema"))
+                }),
+        @ApiResponse(responseCode = "400", description = "Bad Request",
+                content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized",
+                content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+        @ApiResponse(responseCode = "403", description = "Forbidden",
+                content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+        @ApiResponse(responseCode = "404", description = "Resource not found",
+                content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+        @ApiResponse(responseCode = "409", description = "Conflict",
+                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+                content = @Content(schema = @Schema(ref = "#/components/schemas/BaseResponseSchema")))
+})
 @RestController
 public class MemberController {
 
@@ -55,16 +76,6 @@ public class MemberController {
     }
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CustomOptionalResponseBody200"))),
-            @ApiResponse(responseCode = "400", description = "bad request operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CustomOptionalResponseBody400"))),
-            @ApiResponse(responseCode = "409", description = "Conflict",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CustomOptionalResponseBody409"))),
-            @ApiResponse(responseCode = "500", description = "Internal server error",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CustomOptionalResponseBody500")))
-    })
     @PostMapping("join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);

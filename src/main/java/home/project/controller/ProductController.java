@@ -32,16 +32,26 @@ import java.util.*;
 @Tag(name = "상품", description = "상품관련 API입니다")
 @RequestMapping(path = "/api/product")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "successful operation", content = @Content(schema = @Schema(implementation = Product.class))),
-        @ApiResponse(responseCode = "400", description = "bad request operation", content = @Content(schema = @Schema(implementation = Product.class))),
-        @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema(implementation = Product.class))),
-        @ApiResponse(responseCode = "403", description = "Forbidden.", content = @Content(schema = @Schema(implementation = Product.class))),
-        @ApiResponse(responseCode = "404", description = "Resource not found", content = @Content(schema = @Schema(implementation = Product.class))),
-        @ApiResponse(responseCode = "409", description = "Conflict", content = @Content(schema = @Schema(implementation = Product.class))),
-        @ApiResponse(responseCode = "500", description = "Internal server error", content = @Content(schema = @Schema(implementation = Product.class)))
+        @ApiResponse(responseCode = "200", description = "Successful operation",
+                content = {
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/PagedListResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ProductCreateSuccessResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/StockChangeResponseSchema"))
+                }),
+        @ApiResponse(responseCode = "400", description = "Bad request",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+        @ApiResponse(responseCode = "401", description = "Unauthorized",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+        @ApiResponse(responseCode = "403", description = "Forbidden",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+        @ApiResponse(responseCode = "404", description = "Resource not found",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+        @ApiResponse(responseCode = "409", description = "Conflict",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/BaseResponseSchema")))
 })
-
-
 @RestController
 public class ProductController {
 
