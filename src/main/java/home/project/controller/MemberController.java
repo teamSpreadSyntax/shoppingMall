@@ -41,10 +41,9 @@ import java.util.Optional;
 @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful operation",
                 content = {
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/MemberResponseSchema")),
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/PagedListResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema")),
                         @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema")),
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/BaseResponseSchema"))
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))
                 }),
         @ApiResponse(responseCode = "400", description = "Bad Request",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
@@ -57,7 +56,7 @@ import java.util.Optional;
         @ApiResponse(responseCode = "409", description = "Conflict",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/BaseResponseSchema")))
+                content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RestController
 public class MemberController {
@@ -76,6 +75,10 @@ public class MemberController {
     }
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema")))
+    })
     @PostMapping("join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -99,6 +102,10 @@ public class MemberController {
     }
 
     @Operation(summary = "id로 회원 조회 메서드", description = "id로 회원 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberResponseSchema")))
+    })
     @GetMapping("member")
     public ResponseEntity<?> findMemberById(@RequestParam("memberId") Long memberId) {
         if (memberId == null) {
@@ -110,6 +117,10 @@ public class MemberController {
     }
 
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema")))
+    })
     @GetMapping("members")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -133,6 +144,10 @@ public class MemberController {
     }
 
     @Operation(summary = "회원 통합 조회 메서드", description = "이름, 이메일, 전화번호 및 일반 검색어로 회원을 조회합니다. 모든 조건을 만족하는 회원을 조회합니다. 검색어가 없으면 전체 회원을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema")))
+    })
     @GetMapping("search")
     public ResponseEntity<?> searchMembers(
             @RequestParam(value = "name", required = false) String name,

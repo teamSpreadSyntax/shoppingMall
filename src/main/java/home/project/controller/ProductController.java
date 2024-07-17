@@ -34,10 +34,8 @@ import java.util.*;
 @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successful operation",
                 content = {
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")),
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/PagedListResponseSchema")),
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ProductCreateSuccessResponseSchema")),
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/StockChangeResponseSchema"))
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema")),
+                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))
                 }),
         @ApiResponse(responseCode = "400", description = "Bad request",
                 content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
@@ -50,7 +48,7 @@ import java.util.*;
         @ApiResponse(responseCode = "409", description = "Conflict",
                 content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
-                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/BaseResponseSchema")))
+                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RestController
 public class ProductController {
@@ -65,6 +63,10 @@ public class ProductController {
     }
 
     @Operation(summary = "상품 추가 메서드", description = "상품 추가 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
+    })
     @PostMapping("create")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -99,6 +101,10 @@ public class ProductController {
     }
 
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema")))
+    })
     @GetMapping("products")
     public ResponseEntity<?> findAllProduct(
             @PageableDefault(page = 1, size = 5)
@@ -114,6 +120,10 @@ public class ProductController {
     }
 
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema")))
+    })
     @GetMapping("search")
     public ResponseEntity<?> searchProducts(
             @RequestParam(value = "brand", required = false) String brand,

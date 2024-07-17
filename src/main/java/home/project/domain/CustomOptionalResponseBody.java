@@ -7,7 +7,7 @@ import java.util.Optional;
 
 @Schema(name = "CustomOptionalResponseBody", description = "Custom response body for optional data")
 public class CustomOptionalResponseBody<T> {
-    @Schema(description = "Response result", implementation = Object.class)
+    @Schema(description = "Response result", anyOf = {Member.class, Product.class, Role.class, MemberDTOWithoutId.class})
     public Optional<T> result;
 
     @Schema(description = "Response message")
