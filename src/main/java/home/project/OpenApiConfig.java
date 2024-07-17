@@ -111,8 +111,6 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
-
-
         // 회원가입 성공 응답 스키마
         Schema<?> memberJoinSuccessResponseSchema = new ObjectSchema()
                 .addProperty("result", new ObjectSchema()
