@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.MemberDTOWithoutId;
 import home.project.domain.Role;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 public interface MemberService {
+
+    Member convertToEntity(MemberDTOWithoutId memberDTOWithoutId);
 
     void join(Member member);
 

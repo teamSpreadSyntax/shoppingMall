@@ -44,7 +44,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         } else if (role.getRole().equals("user")) {
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         } else if (role.getRole().equals("center")) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_CENTER"));
         }
         User userDetails = new User(member.getEmail(), member.getPassword(), authorities);
         return userDetails;

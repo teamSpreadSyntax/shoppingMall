@@ -10,8 +10,18 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -20,6 +30,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,8 +39,12 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.mysql.cj.conf.PropertyKey.logger;
 
 @Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃관련 API입니다")
 @RequestMapping(path = "/api/loginToken")
@@ -57,6 +72,8 @@ public class AuthController {
     private final MemberService memberService;
     private final ValidationCheck validationCheck;
     private final RoleService roleService;
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
 
     @Autowired
     public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, MemberService memberService, ValidationCheck validationCheck, RoleService roleService) {
@@ -120,10 +137,13 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/AuthorityChangeSuccessResponseSchema")))
     })
-    @PostMapping("authority")
+    @PostMapping("authorization")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") String authority) {
         String successMessage = "";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        logger.info("Current authentication in controller: {}", auth);
         try {
             Role role = roleService.findById(memberId).get();
                 if (authority.equals("admin")) {
@@ -138,6 +158,37 @@ public class AuthController {
                 }
             roleService.update(role);
             return new CustomOptionalResponseEntity<>(Optional.of(role), successMessage, HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            String errorMessage = "접근 권한이 없습니다.";
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
+        }
+    }
+
+
+    @Operation(summary = "권한 조회 메서드", description = "권한 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/AuthorityCheckSuccessResponseSchema")))
+    })
+    @PostMapping("authorities")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ROLE_CENTER')")
+    public ResponseEntity<?> checkAuthority(
+        @PageableDefault(page = 1, size = 5)
+        @SortDefault.SortDefaults({
+                @SortDefault(sort = "id", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+        String successMessage = "사용자별 권한 목록입니다.";
+        try {
+            pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+            Page<Member> memberPage = memberService.findAll(pageable);
+            List<RoleWithMemberName> rolesWithMemberNames = memberPage.stream()
+                    .map(member -> {
+                        String role = roleService.findById(member.getId()).get().getRole();
+                        return new RoleWithMemberName(member.getId(), role, member.getName());
+                    })
+                    .collect(Collectors.toList());
+            return new CustomOptionalResponseEntity<>(Optional.of(rolesWithMemberNames), successMessage, HttpStatus.OK);
         } catch (AccessDeniedException e) {
             String errorMessage = "접근 권한이 없습니다.";
             return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);

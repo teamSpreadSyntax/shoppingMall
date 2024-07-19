@@ -73,25 +73,27 @@ public class MemberController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema")))
     })
+    @Transactional
     @PostMapping("join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
+        System.out.println("1");
         if(!memberDTO.getPassword().equals(memberDTO.getPasswordConfirm())){
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
-        Member member = new Member();
-        member.setEmail(memberDTO.getEmail());
-        member.setPassword(memberDTO.getPassword());
-        member.setName(memberDTO.getName());
-        member.setPhone(memberDTO.getPhone());
+        System.out.println("2");
+        Member member = memberService.convertToEntity(memberDTO);
+        System.out.println("3");
         memberService.join(member);
         Optional<Member> memberForAddRole = memberService.findByEmail(member.getEmail());
+        System.out.println("4");
         Role role = new Role();
         role.setId(memberForAddRole.get().getId());
         roleService.join(role);
         TokenDto tokenDto = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(member.getEmail(), member.getPassword()));
         Map<String, String> responseMap = new HashMap<>();
+        System.out.println("5");
         responseMap.put("accessToken", tokenDto.getAccessToken());
         responseMap.put("refreshToken", tokenDto.getRefreshToken());
         responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
@@ -104,13 +106,20 @@ public class MemberController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberResponseSchema")))
     })
     @GetMapping("member")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findMemberById(@RequestParam("memberId") Long memberId) {
+        try{
         if (memberId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
         Optional<Member> memberOptional = memberService.findById(memberId);
         String successMessage = memberId + "(으)로 가입된 회원정보입니다";
         return new CustomOptionalResponseEntity<>(memberOptional, successMessage, HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            String errorMessage = "접근 권한이 없습니다.";
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
+        }
     }
 
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
@@ -120,7 +129,7 @@ public class MemberController {
     })
     @GetMapping("members")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findAllMember(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -146,6 +155,8 @@ public class MemberController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema")))
     })
     @GetMapping("search")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> searchMembers(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
@@ -155,12 +166,17 @@ public class MemberController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
+        try{
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Member> memberPage = memberService.findMembers(name, email, phone, content, pageable);
         String successMessage = "검색 결과입니다.";
         long totalCount = memberPage.getTotalElements();
         int page = memberPage.getNumber();
         return new CustomListResponseEntity<>(memberPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        } catch (AccessDeniedException e) {
+            String errorMessage = "접근 권한이 없습니다.";
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
+        }
     }
 
     @Transactional
@@ -170,7 +186,10 @@ public class MemberController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberResponseSchema")))
     })
     @PutMapping("update")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public CustomOptionalResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, BindingResult bindingResult) {
+        try{
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
@@ -185,6 +204,10 @@ public class MemberController {
         Optional<Member> memberOptional = memberService.update(member);
         String successMessage = "회원 정보가 수정되었습니다.";
         return new CustomOptionalResponseEntity<>(memberOptional, successMessage, HttpStatus.OK);
+        } catch (AccessDeniedException e) {
+            String errorMessage = "접근 권한이 없습니다.";
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
+        }
     }
 
     @Transactional
@@ -194,14 +217,19 @@ public class MemberController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
     })
     @DeleteMapping("delete")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
+        try{
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", memberId + "님의 계정이 삭제되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "회원 삭제 성공", HttpStatus.OK);
-
+        } catch (AccessDeniedException e) {
+            String errorMessage = "접근 권한이 없습니다.";
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
+        }
     }
-
 
 
 }

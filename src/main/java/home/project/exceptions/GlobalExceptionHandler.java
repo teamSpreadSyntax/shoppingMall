@@ -3,6 +3,8 @@ package home.project.exceptions;
 import home.project.domain.CustomOptionalResponseBody;
 import home.project.domain.CustomOptionalResponseEntity;
 import home.project.domain.Product;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -65,6 +67,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "아이디가 존재하지 않습니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
+
+//    @ExceptionHandler(ConstraintViolationException.class)
+//    public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException e) {
+//        Map<String, String> errors = new HashMap<>();
+//        for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
+//            errors.put(violation.getPropertyPath().toString(), violation.getMessage());
+//        }
+//        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+//    }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {

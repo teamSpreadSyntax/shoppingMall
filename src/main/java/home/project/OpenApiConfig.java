@@ -6,6 +6,8 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.ObjectSchema;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -199,6 +201,16 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(500));
 
+        SecurityScheme apiKey = new SecurityScheme()
+                .type(SecurityScheme.Type.HTTP)
+                .in(SecurityScheme.In.HEADER)
+                .name("Authorization")
+                .scheme("bearer")
+                .bearerFormat("JWT");
+
+        SecurityRequirement securityRequirement = new SecurityRequirement()
+                .addList("Bearer Token");
+
         return new OpenAPI()
                 .info(new Info()
                         .title("예제 게시판 Swagger")
@@ -226,6 +238,7 @@ public class OpenApiConfig {
                         .addSchemas("NotFoundResponseSchema", notFoundResponseSchema)
                         .addSchemas("ConflictResponseSchema", conflictResponseSchema)
                         .addSchemas("InternalServerErrorResponseSchema", internalServerErrorResponseSchema)
-                );
+                        .addSecuritySchemes("bearerAuth", apiKey))
+                .addSecurityItem(securityRequirement);
     }
 }

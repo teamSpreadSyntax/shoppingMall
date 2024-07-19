@@ -8,9 +8,11 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,6 +30,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)//true
 @SecurityScheme(
         name = "bearerAuth",
         type = SecuritySchemeType.HTTP,
@@ -86,14 +89,16 @@ public class SecurityConfig {
                                 .requestMatchers("/home/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("https://localhost/swagger-ui/**").permitAll()
-                                .requestMatchers("/api/member/**").permitAll()//hasAnyRole("ROLE_USER","ROLE_ADMIN","ROLE_CENTER")
-//                        .requestMatchers("/api/member/members").authenticated()
-                                .requestMatchers("/api/product/**").permitAll()//hasRole("USER")
+                                .requestMatchers("/api/member/**").permitAll()//hasAnyRole("ROLE_ADMIN","ROLE_CENTER")
+//                        .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ROLE_ADMIN", "ROLE_CENTER", "ROLE_USER")
+                        .requestMatchers("/api/product/**").permitAll()//hasAnyRole("ROLE_ADMIN","ROLE_CENTER")
                                 .requestMatchers("http://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:443/**").permitAll()
                                 .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
-                                .anyRequest().permitAll()
+                                .requestMatchers("/api/loginToken/login").permitAll()
+                                .requestMatchers("/api/loginToken/authorization").hasRole("CENTER")
+                                .anyRequest().permitAll()//authenticated()
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
