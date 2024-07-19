@@ -3,6 +3,7 @@ package home.project.exceptions;
 import home.project.domain.CustomOptionalResponseBody;
 import home.project.domain.CustomOptionalResponseEntity;
 import home.project.domain.Product;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("errorMessage", e.getMessage());
         CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "검색내용이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<?> handleIllegalStateException(IllegalStateException e) {
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("errorMessage", e.getMessage());
+        CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "입력값을 확인해주세요.", HttpStatus.NOT_FOUND.value());
 
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
     }

@@ -32,23 +32,18 @@ import java.util.*;
 @Tag(name = "상품", description = "상품관련 API입니다")
 @RequestMapping(path = "/api/product")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successful operation",
-                content = {
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema")),
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))
-                }),
-        @ApiResponse(responseCode = "400", description = "Bad request",
-                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+        @ApiResponse(responseCode = "400", description = "Bad Request",
+                content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
         @ApiResponse(responseCode = "401", description = "Unauthorized",
-                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+                content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
         @ApiResponse(responseCode = "403", description = "Forbidden",
-                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+                content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
         @ApiResponse(responseCode = "404", description = "Resource not found",
-                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+                content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
         @ApiResponse(responseCode = "409", description = "Conflict",
-                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
+                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
-                content = @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
+                content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RestController
 public class ProductController {
@@ -90,6 +85,10 @@ public class ProductController {
     }
 
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
+    })
     @GetMapping("product")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
         if (productId == null) {
@@ -143,6 +142,10 @@ public class ProductController {
     }
 
     @Operation(summary = "전체 브랜드 조회 메서드", description = "브랜드 조회(판매량기준 오름차순정렬) 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BrandListResponseSchema")))
+    })
     @GetMapping("brands")
     public ResponseEntity<?> brandList(
             @PageableDefault(page = 1, size = 5)
@@ -157,7 +160,12 @@ public class ProductController {
         return new CustomListResponseEntity<>(brandListPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
+    @Transactional
     @Operation(summary = "상품 업데이트(수정) 메서드", description = "상품 업데이트(수정) 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
+    })
     @PutMapping("update")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -169,6 +177,10 @@ public class ProductController {
 
     @Transactional
     @Operation(summary = "상품 삭제 메서드", description = "상품 삭제 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
+    })
     @DeleteMapping("delete")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
         productService.deleteById(productId);
@@ -178,7 +190,12 @@ public class ProductController {
 
     }
 
+    @Transactional
     @Operation(summary = "재고 수량 증가 메서드", description = "재고 수량 증가 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
+    })
     @PutMapping("increase_stock")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product increaseProduct = productService.increaseStock(productId, stock);
@@ -186,7 +203,12 @@ public class ProductController {
         return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
     }
 
+    @Transactional
     @Operation(summary = "재고 수량 감소 메서드", description = "재고 수량 감소 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
+    })
     @PutMapping("decrease_stock")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product decreaseProduct = productService.decreaseStock(productId, stock);

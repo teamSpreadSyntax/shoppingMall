@@ -16,6 +16,33 @@ public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
+
+        // 로그인 성공 응답 스키마
+        Schema<?> loginSuccessResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("grantType", new Schema<>().type("string"))
+                        .addProperty("accessToken", new Schema<>().type("string"))
+                        .addProperty("refreshToken", new Schema<>().type("string")))
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(200));
+
+        // 권한 변경 성공 응답 스키마
+        Schema<?> authorityChangeSuccessResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("id", new Schema<>().type("integer").format("int64"))
+                        .addProperty("role", new Schema<>().type("string")))
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(200));
+
+        // 로그인 유효성 검사 실패 응답 스키마
+        Schema<?> loginValidationFailedResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("password", new Schema<>().type("string"))
+                        .addProperty("email", new Schema<>().type("string"))
+                )
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(400));
+
         // 기본 응답 스키마 정의.
         Schema<?> baseResponseSchema = new ObjectSchema()
                 .addProperty("result", new Schema<>().type("object"))
@@ -41,7 +68,24 @@ public class OpenApiConfig {
 
         // 상품 응답 스키마
         Schema<?> productResponseSchema = new ObjectSchema()
-                .addProperty("result", productSchema)
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("id", new Schema<>().type("integer").format("int64"))
+                        .addProperty("brand", new Schema<>().type("string"))
+                        .addProperty("soldQuantity", new Schema<>().type("integer").format("int64"))
+                        .addProperty("name", new Schema<>().type("string"))
+                        .addProperty("category", new Schema<>().type("string"))
+                        .addProperty("stock", new Schema<>().type("integer").format("int64"))
+                        .addProperty("image", new Schema<>().type("string")))
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(200));
+
+        //브랜드 목록 스키마
+        Schema<?> brandListResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("totalCount", new Schema<>().type("integer"))
+                        .addProperty("page", new Schema<>().type("integer"))
+                        .addProperty("content", new ArraySchema().items(new Schema<>().type("string")))
+                )
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
@@ -65,30 +109,6 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(400));
 
-        // 로그인 성공 응답 스키마
-        Schema<?> loginSuccessResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("grantType", new Schema<>().type("string"))
-                        .addProperty("accessToken", new Schema<>().type("string"))
-                        .addProperty("refreshToken", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        // 로그인 실패 응답 스키마
-        Schema<?> loginFailedResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("errorMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(401));
-
-        // 권한 변경 성공 응답 스키마
-        Schema<?> authorityChangeSuccessResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("id", new Schema<>().type("integer").format("int64"))
-                        .addProperty("role", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
         // 회원 스키마
         Schema<?> memberSchema = new ObjectSchema()
                 .addProperty("id", new Schema<>().type("integer").format("int64"))
@@ -98,7 +118,12 @@ public class OpenApiConfig {
 
         // 회원 응답 스키마
         Schema<?> memberResponseSchema = new ObjectSchema()
-                .addProperty("result", memberSchema)
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("id", new Schema<>().type("integer").format("int64"))
+                        .addProperty("email", new Schema<>().type("string"))
+                        .addProperty("name", new Schema<>().type("string"))
+                        .addProperty("password", new Schema<>().type("string"))
+                        .addProperty("phone", new Schema<>().type("string")))
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
@@ -125,8 +150,17 @@ public class OpenApiConfig {
                 .addProperty("result", new ObjectSchema()
                         .addProperty("email", new Schema<>().type("string"))
                         .addProperty("password", new Schema<>().type("string"))
+                        .addProperty("passwordConfirm", new Schema<>().type("string"))
                         .addProperty("phone", new Schema<>().type("string"))
-                        .addProperty("name", new Schema<>().type("string")))
+                        .addProperty("name", new Schema<>().type("string"))
+                )
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(400));
+
+        // Unauthorized 응답 스키마
+        Schema<?> badRequestResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("errorMessage", new Schema<>().type("string")))
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(400));
 
@@ -176,15 +210,17 @@ public class OpenApiConfig {
                         .addSchemas("ProductSchema", productSchema)
                         .addSchemas("ProductResponseSchema", productResponseSchema)
                         .addSchemas("PagedProductListResponseSchema", pagedProductListResponseSchema)
+                        .addSchemas("BrandListResponseSchema", brandListResponseSchema)
                         .addSchemas("ProductValidationFailedResponseSchema", productValidationFailedResponseSchema)
                         .addSchemas("LoginSuccessResponseSchema", loginSuccessResponseSchema)
-                        .addSchemas("LoginFailedResponseSchema", loginFailedResponseSchema)
                         .addSchemas("AuthorityChangeSuccessResponseSchema", authorityChangeSuccessResponseSchema)
+                        .addSchemas("LoginValidationFailedResponseSchema", loginValidationFailedResponseSchema)
                         .addSchemas("MemberSchema", memberSchema)
                         .addSchemas("MemberResponseSchema", memberResponseSchema)
                         .addSchemas("PagedMemberListResponseSchema", pagedMemberListResponseSchema)
                         .addSchemas("MemberJoinSuccessResponseSchema", memberJoinSuccessResponseSchema)
                         .addSchemas("MemberValidationFailedResponseSchema", memberValidationFailedResponseSchema)
+                        .addSchemas("BadRequestResponseSchema", badRequestResponseSchema)
                         .addSchemas("UnauthorizedResponseSchema", unauthorizedResponseSchema)
                         .addSchemas("ForbiddenResponseSchema", forbiddenResponseSchema)
                         .addSchemas("NotFoundResponseSchema", notFoundResponseSchema)

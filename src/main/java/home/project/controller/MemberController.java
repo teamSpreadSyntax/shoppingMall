@@ -39,12 +39,6 @@ import java.util.Optional;
 @Tag(name = "회원", description = "회원관련 API입니다")
 @RequestMapping(path = "/api/member")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Successful operation",
-                content = {
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema")),
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema")),
-                        @Content(mediaType = "application/json", schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))
-                }),
         @ApiResponse(responseCode = "400", description = "Bad Request",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
         @ApiResponse(responseCode = "401", description = "Unauthorized",
@@ -83,6 +77,9 @@ public class MemberController {
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
+        if(!memberDTO.getPassword().equals(memberDTO.getPasswordConfirm())){
+            throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        }
         Member member = new Member();
         member.setEmail(memberDTO.getEmail());
         member.setPassword(memberDTO.getPassword());
@@ -166,11 +163,25 @@ public class MemberController {
         return new CustomListResponseEntity<>(memberPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
+    @Transactional
     @Operation(summary = "회원 정보 업데이트(수정) 메서드", description = "회원 정보 업데이트(수정) 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberResponseSchema")))
+    })
     @PutMapping("update")
-    public CustomOptionalResponseEntity<?> updateMember(@RequestBody @Valid Member member, BindingResult bindingResult) {
+    public CustomOptionalResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
+        if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
+            throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        }
+        Member member = new Member();
+        member.setId(memberDTOWithPasswordConfirm.getId());
+        member.setName(memberDTOWithPasswordConfirm.getName());
+        member.setPhone(memberDTOWithPasswordConfirm.getPhone());
+        member.setEmail(memberDTOWithPasswordConfirm.getEmail());
+        member.setPassword(memberDTOWithPasswordConfirm.getPassword());
         Optional<Member> memberOptional = memberService.update(member);
         String successMessage = "회원 정보가 수정되었습니다.";
         return new CustomOptionalResponseEntity<>(memberOptional, successMessage, HttpStatus.OK);
@@ -178,6 +189,10 @@ public class MemberController {
 
     @Transactional
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
+    })
     @DeleteMapping("delete")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
         memberService.deleteById(memberId);

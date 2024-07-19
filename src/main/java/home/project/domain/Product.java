@@ -34,7 +34,7 @@ public class Product {
 
     @Check(name = "stock", constraints = "stock >= 0")
     @Column(name = "stock")
-    @NotNull(message = "현재 재고를 입력해주세요.")
+    @NotNull(message = "상품의 현재 재고를 입력해주세요.")
     private Long stock;
 
     @Column(name = "image")

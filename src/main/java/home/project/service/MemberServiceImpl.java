@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -62,41 +63,44 @@ public class MemberServiceImpl implements MemberService {
     }
 
     public Optional<Member> update(Member member) {
-
-        Member existsMember = memberRepository.findById(member.getId())
+        Member existingMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new IllegalArgumentException(member.getId() + "(으)로 등록된 회원이 없습니다."));
 
-        if (member.getName() != null) {
-            existsMember.setName(member.getName());
-        }
-        if (member.getEmail() != null) {
+        boolean isModified = false;
 
-            if (!member.getEmail().equals(existsMember.getEmail())) {
-                boolean emailExists = memberRepository.existsByEmail(member.getEmail());
-                if (emailExists) {
-                    throw new DataIntegrityViolationException("이미 사용 중인 이메일입니다.");
-                }
-                existsMember.setEmail(member.getEmail());
+        if (member.getName() != null && !Objects.equals(existingMember.getName(), member.getName())) {
+            existingMember.setName(member.getName());
+            isModified = true;
+        }
+
+        if (member.getEmail() != null && !Objects.equals(existingMember.getEmail(), member.getEmail())) {
+            if (memberRepository.existsByEmail(member.getEmail())) {
+                throw new DataIntegrityViolationException("이미 사용 중인 이메일입니다.");
             }
+            existingMember.setEmail(member.getEmail());
+            isModified = true;
         }
-        if (member.getPhone() != null) {
 
-            if (!member.getPhone().equals(existsMember.getPhone())) {
-                boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
-                if (phoneExists) {
-                    throw new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다.");
-                }
-                existsMember.setPhone(member.getPhone());
+        if (member.getPhone() != null && !Objects.equals(existingMember.getPhone(), member.getPhone())) {
+            if (memberRepository.existsByPhone(member.getPhone())) {
+                throw new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다.");
             }
-        }
-        if (member.getPassword() != null) {
-            existsMember.setPassword(passwordEncoder.encode(member.getPassword()));
+            existingMember.setPhone(member.getPhone());
+            isModified = true;
         }
 
-        memberRepository.save(existsMember);
+        if (member.getPassword() != null && !passwordEncoder.matches(member.getPassword(), existingMember.getPassword())) {
+            existingMember.setPassword(passwordEncoder.encode(member.getPassword()));
+            isModified = true;
+        }
 
-        return Optional.of(existsMember);
+        if (!isModified) {
+            throw new DataIntegrityViolationException("변경된 회원 정보가 없습니다.");
+        }
+
+        return Optional.of(memberRepository.save(existingMember));
     }
+
 
 
 

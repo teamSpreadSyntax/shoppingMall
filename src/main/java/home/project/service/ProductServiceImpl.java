@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -50,20 +51,49 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Optional<Product> update(Product product) {
-        Product exsitsProduct = productRepository.findById(product.getId()).orElseThrow(() -> new IllegalArgumentException(product.getId() + "(으)로 등록된 상품이 없습니다."));
-        exsitsProduct.setBrand(product.getBrand());
-        exsitsProduct.setName(product.getName());
-        exsitsProduct.setSoldQuantity(product.getSoldQuantity());
-        exsitsProduct.setImage(product.getImage());
-        exsitsProduct.setStock(product.getStock());
-        exsitsProduct.setCategory(product.getCategory());
-        Long currentStock = product.getStock();
-        if (currentStock < 0 || exsitsProduct.getStock() > currentStock) {
-            throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");
+        Product existingProduct = productRepository.findById(product.getId())
+                .orElseThrow(() -> new IllegalArgumentException(product.getId() + "(으)로 등록된 상품이 없습니다."));
+
+        boolean isModified = false;
+
+        if (product.getBrand() != null && !Objects.equals(existingProduct.getBrand(), product.getBrand())) {
+            existingProduct.setBrand(product.getBrand());
+            isModified = true;
         }
-        productRepository.save(exsitsProduct);
-        Optional<Product> newProduct = productRepository.findById(exsitsProduct.getId());
-        return newProduct;
+
+        if (product.getName() != null && !Objects.equals(existingProduct.getName(), product.getName())) {
+            existingProduct.setName(product.getName());
+            isModified = true;
+        }
+
+        if (product.getSoldQuantity() != null && !Objects.equals(existingProduct.getSoldQuantity(), product.getSoldQuantity())) {
+            existingProduct.setSoldQuantity(product.getSoldQuantity());
+            isModified = true;
+        }
+
+        if (product.getImage() != null && !Objects.equals(existingProduct.getImage(), product.getImage())) {
+            existingProduct.setImage(product.getImage());
+            isModified = true;
+        }
+
+        if (product.getStock() != null && !Objects.equals(existingProduct.getStock(), product.getStock())) {
+            if (product.getStock() < 0) {
+                throw new DataIntegrityViolationException("재고가 음수일 수 없습니다.");
+            }
+            existingProduct.setStock(product.getStock());
+            isModified = true;
+        }
+
+        if (product.getCategory() != null && !Objects.equals(existingProduct.getCategory(), product.getCategory())) {
+            existingProduct.setCategory(product.getCategory());
+            isModified = true;
+        }
+
+        if (!isModified) {
+            throw new DataIntegrityViolationException("변경된 상품 정보가 없습니다.");
+        }
+
+        return Optional.of(productRepository.save(existingProduct));
     }
 
     public void deleteById(Long productId) {

@@ -2,6 +2,7 @@ package home.project.domain;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +14,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserDetailsDTO {
 
-    @NotEmpty(message = "이메일은 필수 입력값입니다.")
-    @Email(message = "이메일 형식이 올바르지 않습니다")
+    @NotEmpty(message = "이메일을 입력해주세요.")
+    @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$", message = "이메일 형식이 올바르지 않습니다.")
     private String email;
 
     @NotEmpty(message = "비밀번호는 필수 입력값입니다.")
