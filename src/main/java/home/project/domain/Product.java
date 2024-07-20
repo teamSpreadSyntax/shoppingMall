@@ -17,16 +17,13 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "brand")
-    @NotBlank(message = "상품의 브랜드를 입력해주세요.")
-    private String brand;
-
-    @Column(name = "soldQuantity")
-    private Long soldQuantity = 0L;
-
     @Column(name = "name")
     @NotBlank(message = "상품의 이름을 입력해주세요.")
     private String name;
+
+    @Column(name = "brand")
+    @NotBlank(message = "상품의 브랜드를 입력해주세요.")
+    private String brand;
 
     @Column(name = "category")
     @NotBlank(message = "상품의 카테고리를 입력해주세요.")
@@ -36,6 +33,9 @@ public class Product {
     @Column(name = "stock")
     @NotNull(message = "상품의 현재 재고를 입력해주세요.")
     private Long stock;
+
+    @Column(name = "soldQuantity")
+    private Long soldQuantity = 0L;
 
     @Column(name = "image")
     @NotBlank(message = "상품의 이미지를 입력해주세요.")

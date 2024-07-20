@@ -60,17 +60,23 @@ public class ProductController {
         this.validationCheck = validationCheck;
     }
 
-    @Operation(summary = "상품 추가 메서드", description = "상품 추가 메서드입니다.")
+
+    @Operation(summary = "상품 등록 메서드", description = "상품 등록 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
     })
+    @Transactional
     @PostMapping("create")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         try{
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+            Long currentStock = productDTOWithoutId.getStock();
+            if (currentStock < 0) {
+                throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");
+            }
         if (validationResponse != null) return validationResponse;
         Product product = new Product();
         product.setBrand(productDTOWithoutId.getBrand());
@@ -80,12 +86,8 @@ public class ProductController {
         product.setStock(productDTOWithoutId.getStock());
         product.setImage(productDTOWithoutId.getImage());
         productService.join(product);
-        Long currentStock = productDTOWithoutId.getStock();
-        if (currentStock < 0) {
-            throw new DataIntegrityViolationException("재고가 음수 일 수 없습니다.");
-        }
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", product.getName() + "(이)가 등록되었습니다");
+        responseMap.put("successMessage", product.getName() + "(이)가 등록되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 등록 성공", HttpStatus.OK);
         } catch (AccessDeniedException e) {
             String errorMessage = "접근 권한이 없습니다.";
@@ -93,14 +95,14 @@ public class ProductController {
         }
     }
 
-    @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다")
+    @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
     })
     @GetMapping("product")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
         try{
         if (productId == null) {
@@ -121,8 +123,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema")))
     })
     @GetMapping("products")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findAllProduct(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -147,8 +149,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema")))
     })
     @GetMapping("search")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> searchProducts(
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
@@ -161,7 +163,21 @@ public class ProductController {
         try{
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Product> productPage = productService.findProducts(brand, category, productName, content, pageable);
-        String successMessage = "검색 결과입니다.";
+
+            StringBuilder searchCriteria = new StringBuilder();
+            if (brand != null) searchCriteria.append(brand).append(", ");
+            if (category != null) searchCriteria.append(category).append(", ");
+            if (productName != null) searchCriteria.append(productName).append(", ");
+            if (content != null) searchCriteria.append(content).append(", ");
+
+            String successMessage;
+            if (!searchCriteria.isEmpty()) {
+                searchCriteria.setLength(searchCriteria.length() - 2);
+                successMessage = "검색 키워드 : " + searchCriteria;
+            } else {
+                successMessage = "전체 상품입니다.";
+            }
+
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
         return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
@@ -177,8 +193,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BrandListResponseSchema")))
     })
     @GetMapping("brands")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> brandList(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -204,8 +220,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
     })
     @PutMapping("update")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         try{
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -226,13 +242,14 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
     })
     @DeleteMapping("delete")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
         try{
+        String name = productService.findById(productId).get().getName();
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", productId + "(이)가 삭제되었습니다.");
+        responseMap.put("successMessage", name +"(id:" +productId + ")(이)가 삭제되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
         } catch (AccessDeniedException e) {
             String errorMessage = "접근 권한이 없습니다.";
@@ -247,8 +264,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
     })
     @PutMapping("increase_stock")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         try{
         Product increaseProduct = productService.increaseStock(productId, stock);
@@ -267,8 +284,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
     })
     @PutMapping("decrease_stock")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         try{
         Product decreaseProduct = productService.decreaseStock(productId, stock);

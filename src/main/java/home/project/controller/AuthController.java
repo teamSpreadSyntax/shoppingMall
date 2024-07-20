@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springdoc.core.annotations.ParameterObject;
@@ -72,8 +73,6 @@ public class AuthController {
     private final MemberService memberService;
     private final ValidationCheck validationCheck;
     private final RoleService roleService;
-    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
-
 
     @Autowired
     public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, MemberService memberService, ValidationCheck validationCheck, RoleService roleService) {
@@ -132,29 +131,30 @@ public class AuthController {
 
     }
 
-    @Operation(summary = "권한 부여 메서드", description = "권한 부여 메서드입니다.")
+    @Operation(summary = "권한 부여 메서드", description = "권한 부여 메서드입니다. (center : 중앙 관리자, admin : 중간 관리자, user : 일반 사용자)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/AuthorityChangeSuccessResponseSchema")))
     })
     @PostMapping("authorization")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('ROLE_CENTER')")
-    public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") String authority) {
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasRole('ROLE_CENTER')")
+    public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") @Pattern(regexp = "^(user|admin|center)$", message = "Authority must be either 'user', 'admin', or 'center'") String authority) {
+
         String successMessage = "";
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("Current authentication in controller: {}", auth);
+
         try {
             Role role = roleService.findById(memberId).get();
+            String name = memberService.findById(memberId).get().getName();
                 if (authority.equals("admin")) {
                     role.setRole("admin");
-                    successMessage = memberId + "에게 관리자 권한을 부여했습니다.";
+                    successMessage = name + "(id : " + memberId + ")" + "님에게 중간 관리자 권한을 부여했습니다.";
                 } else if (authority.equals("center")) {
                     role.setRole("center");
-                    successMessage = memberId + "에게 최고 관리자 권한을 부여했습니다.";
+                    successMessage = name + "(id : " + memberId + ")" + "님에게 중앙 관리자 권한을 부여했습니다.";
                 } else if (authority.equals("user")) {
                     role.setRole("user");
-                    successMessage = memberId + "에게 일반 사용자 권한을 부여했습니다.";
+                    successMessage = name + "(id : " + memberId + ")" + "님에게 일반 사용자 권한을 부여했습니다.";
                 }
             roleService.update(role);
             return new CustomOptionalResponseEntity<>(Optional.of(role), successMessage, HttpStatus.OK);
@@ -164,32 +164,31 @@ public class AuthController {
         }
     }
 
-
-    @Operation(summary = "권한 조회 메서드", description = "권한 조회 메서드입니다.")
+    @Operation(summary = "전체 회원별 권한 조회 메서드", description = "전체 회원별 권한 조회 메서드입니다. (center : 중앙 관리자, admin : 중간 관리자, user : 일반 사용자)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/AuthorityCheckSuccessResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedUserRoleListResponseSchema")))
     })
-    @PostMapping("authorities")
-    @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('ROLE_CENTER')")
+    @GetMapping("authorities")
+//    @SecurityRequirement(name = "bearerAuth")
+//    @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> checkAuthority(
         @PageableDefault(page = 1, size = 5)
         @SortDefault.SortDefaults({
                 @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        String successMessage = "사용자별 권한 목록입니다.";
+        String successMessage = "전체 회원별 권한 목록입니다.";
         try {
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
-            List<RoleWithMemberName> rolesWithMemberNames = memberPage.stream()
-                    .map(member -> {
+            Page<RoleWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
                         String role = roleService.findById(member.getId()).get().getRole();
-                        return new RoleWithMemberName(member.getId(), role, member.getName());
-                    })
-                    .collect(Collectors.toList());
-            return new CustomOptionalResponseEntity<>(Optional.of(rolesWithMemberNames), successMessage, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
+                        return new RoleWithMemberName(member.getId(), role, member.getName());});
+            long totalCount = memberPage.getTotalElements();
+            int page = memberPage.getNumber();
+            return new CustomListResponseEntity<>(rolesWithMemberNamesPage .getContent(), successMessage, HttpStatus.OK, totalCount, page);
+
+            } catch (AccessDeniedException e) {
             String errorMessage = "접근 권한이 없습니다.";
             return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
         }

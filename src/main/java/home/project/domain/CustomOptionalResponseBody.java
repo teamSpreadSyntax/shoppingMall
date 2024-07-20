@@ -1,19 +1,16 @@
 package home.project.domain;
 
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.Map;
 import java.util.Optional;
 
-@Schema(name = "CustomOptionalResponseBody", description = "Custom response body for optional data")
 public class CustomOptionalResponseBody<T> {
-    @Schema(description = "Response result", anyOf = {Member.class, Product.class, Role.class, MemberDTOWithoutId.class})
+    @JsonSerialize(using = CustomOptionalSerializer.class)
     public Optional<T> result;
-
-    @Schema(description = "Response message")
     public String responseMessage;
-
-    @Schema(description = "Response status code")
     public int status;
 
     public CustomOptionalResponseBody(Optional<T> result, String responseMessage, int status) {

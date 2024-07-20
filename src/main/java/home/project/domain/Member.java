@@ -20,12 +20,10 @@ public class Member {
     private Long id;
 
     @NotEmpty(message = "이메일을 입력해주세요.")
-    @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+[.][a-zA-Z]{2,3}$", message = "이메일 형식이 올바르지 않습니다.")
     @Column(name = "email")
     private String email;
 
     @NotEmpty(message = "비밀번호를 입력해주세요.")
-    @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{12,}$", message = "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.")
     @Column(name = "password")//, columnDefinition = ("VARCHAR(255)"))
     private String password;
 
@@ -34,7 +32,6 @@ public class Member {
     private String name;
 
     @NotEmpty(message = "전화번호를 입력해주세요.")
-    @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다.")
     @Column(name = "phone")
     private String phone;
 

@@ -81,8 +81,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
         Map<String, Object> responseBody = new HashMap<>();
         responseBody.put("errorMessage", ex.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.FORBIDDEN.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(JwtAuthenticationException.class)
