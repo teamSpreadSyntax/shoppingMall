@@ -38,11 +38,11 @@ public class MemberServiceImpl implements MemberService {
         boolean emailExists = memberRepository.existsByEmail(member.getEmail());
         boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
         if (emailExists && phoneExists) {
-            throw new DataIntegrityViolationException("이메일과 휴대폰번호가 모두 중복됩니다.");
+            throw new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다.");
         } else if (emailExists) {
-            throw new DataIntegrityViolationException("이메일이 중복됩니다.");
+            throw new DataIntegrityViolationException("이미 사용 중인 이메일입니다.");
         } else if (phoneExists) {
-            throw new DataIntegrityViolationException("휴대폰번호가 중복됩니다.");
+            throw new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다.");
         }
         memberRepository.save(member);
     }
@@ -63,12 +63,12 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findAll(pageable);
     }
 
-    public Page<Member> findMembers(String name, String email, String phone, String content, Pageable pageable) {
-        Page<Member> memberPage = memberRepository.findMembers(name, email, phone, content, pageable);
+    public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
+        Page<Member> memberPage = memberRepository.findMembers(name, email, phone, role, content, pageable);
         if (memberPage.getSize() == 0 || memberPage.getTotalElements() == 0) {
             throw new IllegalArgumentException("해당하는 회원이 없습니다.");
         }
-        return memberRepository.findMembers(name, email, phone, content, pageable);
+        return memberPage;
     }
 
     public Optional<Member> update(Member member) {
@@ -76,6 +76,8 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new IllegalArgumentException(member.getId() + "(으)로 등록된 회원이 없습니다."));
 
         boolean isModified = false;
+        boolean isEmailDuplicate = false;
+        boolean isPhoneDuplicate = false;
 
         if (member.getName() != null && !Objects.equals(existingMember.getName(), member.getName())) {
             existingMember.setName(member.getName());
@@ -84,23 +86,33 @@ public class MemberServiceImpl implements MemberService {
 
         if (member.getEmail() != null && !Objects.equals(existingMember.getEmail(), member.getEmail())) {
             if (memberRepository.existsByEmail(member.getEmail())) {
-                throw new DataIntegrityViolationException("이미 사용 중인 이메일입니다.");
+                isEmailDuplicate = true;
+            } else {
+                existingMember.setEmail(member.getEmail());
+                isModified = true;
             }
-            existingMember.setEmail(member.getEmail());
-            isModified = true;
         }
 
         if (member.getPhone() != null && !Objects.equals(existingMember.getPhone(), member.getPhone())) {
             if (memberRepository.existsByPhone(member.getPhone())) {
-                throw new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다.");
+                isPhoneDuplicate = true;
+            } else {
+                existingMember.setPhone(member.getPhone());
+                isModified = true;
             }
-            existingMember.setPhone(member.getPhone());
-            isModified = true;
         }
 
         if (member.getPassword() != null && !passwordEncoder.matches(member.getPassword(), existingMember.getPassword())) {
             existingMember.setPassword(passwordEncoder.encode(member.getPassword()));
             isModified = true;
+        }
+
+        if (isEmailDuplicate && isPhoneDuplicate) {
+            throw new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다.");
+        } else if (isEmailDuplicate) {
+            throw new DataIntegrityViolationException("이미 사용 중인 이메일입니다.");
+        } else if (isPhoneDuplicate) {
+            throw new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다.");
         }
 
         if (!isModified) {

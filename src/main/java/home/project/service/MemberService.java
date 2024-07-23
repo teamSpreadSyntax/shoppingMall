@@ -20,7 +20,7 @@ public interface MemberService {
 
     Page<Member> findAll(Pageable pageable);
 
-    Page<Member> findMembers(String name, String email, String phone, String content, Pageable pageable);
+    Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable);
 
     Optional<Member> update(Member member);
 

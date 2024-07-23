@@ -27,10 +27,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Optional<Product> findById(Long productId) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> {
-            throw new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다.");
-        });
-        return Optional.ofNullable(product);
+        return Optional.ofNullable(productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다.")));
     }
 
     public Page<Product> findAll(Pageable pageable) {
@@ -42,7 +40,7 @@ public class ProductServiceImpl implements ProductService {
         if (productPage.getSize() == 0 || productPage.getTotalElements() == 0) {
             throw new IllegalArgumentException("해당하는 상품이 없습니다.");
         }
-        return productRepository.findProducts(brand, category, productName, content, pageable);
+        return productPage;
     }
 
     public Page<Product> brandList(Pageable pageable) {

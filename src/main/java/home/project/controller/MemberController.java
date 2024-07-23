@@ -33,8 +33,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Tag(name = "회원", description = "회원관련 API입니다")
 @RequestMapping(path = "/api/member")
@@ -109,7 +111,8 @@ public class MemberController {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
         Optional<Member> memberOptional = memberService.findById(memberId);
-        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+        String role = roleService.findById(memberId).get().getRole();
+        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
             String successMessage = memberId + "(으)로 가입된 회원정보입니다";
         return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
         } catch (AccessDeniedException e) {
@@ -134,7 +137,17 @@ public class MemberController {
         try {
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
-            Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+
+            Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
+                Long roleId = member.getId();
+                String roleName = "No Role";
+                if (roleId != null) {
+                    Optional<Role> role = roleService.findById(roleId);
+                    roleName = role.get().getRole();
+                }
+                return new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
+            });
+
             String successMessage = "전체 회원입니다.";
             long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
             int page = pagedMemberDTOWithoutPw.getNumber();
@@ -157,6 +170,7 @@ public class MemberController {
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
             @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "role", required = false) String role,
             @RequestParam(value = "content", required = false) String content,
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -164,13 +178,21 @@ public class MemberController {
             }) @ParameterObject Pageable pageable) {
         try{
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
-        Page<Member> memberPage = memberService.findMembers(name, email, phone, content, pageable);
-            Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
-
+        Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
+            Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
+                Long roleId = member.getId();
+                String roleName = "No Role";
+                if (roleId != null) {
+                    Optional<Role> role2 = roleService.findById(roleId);
+                    roleName = role2.get().getRole();
+                }
+                return new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
+            });
             StringBuilder searchCriteria = new StringBuilder();
             if (name != null) searchCriteria.append(name).append(", ");
             if (email != null) searchCriteria.append(email).append(", ");
             if (phone != null) searchCriteria.append(phone).append(", ");
+            if (role != null) searchCriteria.append(role).append(", ");
             if (content != null) searchCriteria.append(content).append(", ");
 
             String successMessage;
@@ -212,8 +234,9 @@ public class MemberController {
         member.setPhone(memberDTOWithPasswordConfirm.getPhone());
         member.setEmail(memberDTOWithPasswordConfirm.getEmail());
         member.setPassword(memberDTOWithPasswordConfirm.getPassword());
+        member.setRole(roleService.findById(memberDTOWithPasswordConfirm.getId()).get());
         Optional<Member> memberOptional = memberService.update(member);
-            Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(memberWithoutPw -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone()));
+            Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(memberWithoutPw -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
             String successMessage = "회원 정보가 수정되었습니다.";
         return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
         } catch (AccessDeniedException e) {

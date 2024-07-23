@@ -133,7 +133,8 @@ public class OpenApiConfig {
                 .addProperty("id", new Schema<>().type("integer").format("int64"))
                 .addProperty("email", new Schema<>().type("string"))
                 .addProperty("name", new Schema<>().type("string"))
-                .addProperty("phone", new Schema<>().type("string"));
+                .addProperty("phone", new Schema<>().type("string"))
+                .addProperty("role", new Schema<>().type("string"));
 
         // 회원 응답 스키마
         Schema<?> memberResponseSchema = new ObjectSchema()
@@ -152,7 +153,8 @@ public class OpenApiConfig {
                         .addProperty("id", new Schema<>().type("integer").format("int64"))
                         .addProperty("email", new Schema<>().type("string"))
                         .addProperty("name", new Schema<>().type("string"))
-                        .addProperty("phone", new Schema<>().type("string")))
+                        .addProperty("phone", new Schema<>().type("string"))
+                        .addProperty("role", new Schema<>().type("string")))
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 

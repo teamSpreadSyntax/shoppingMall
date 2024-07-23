@@ -155,9 +155,9 @@ class MemberServiceImplTest {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Member> page = new PageImpl<>(Arrays.asList(member, member2));
 
-            when(memberRepository.findMembers("김길동", "null", "null", "null", pageable)).thenReturn(page);
+            when(memberRepository.findMembers("김길동", "null", "null", "null", "null", pageable)).thenReturn(page);
 
-            Page<Member> resultList = memberService.findMembers("김길동", "null", "null", "null", pageable);
+            Page<Member> resultList = memberService.findMembers("김길동", "null", "null", "null", "null", pageable);
 
             assertNotNull(resultList);
             assertEquals(2, resultList.getTotalElements());
@@ -172,9 +172,9 @@ class MemberServiceImplTest {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Member> emptyPage = Page.empty(pageable);
 
-            when(memberRepository.findMembers("1", "2", "3", null, pageable)).thenReturn(emptyPage);
+            when(memberRepository.findMembers("1", "2", "3", null, "null", pageable)).thenReturn(emptyPage);
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findMembers("1", "2", "3", null, pageable));
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findMembers("1", "2", "3", null, "null", pageable));
             assertEquals("해당하는 회원이 없습니다.", exception.getMessage());
         }
 
