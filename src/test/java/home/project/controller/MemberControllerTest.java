@@ -127,6 +127,9 @@ public class MemberControllerTest {
             when(memberService.findByEmail(memberDTO.getEmail())).thenReturn(Optional.of(member));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(role));
 
+            when(memberService.convertToEntity(any(MemberDTOWithoutId.class))).thenReturn(member);
+
+
             doNothing().when(memberService).join(any(Member.class));
             doNothing().when(roleService).join(any(Role.class));
             when(jwtTokenProvider.generateToken(any())).thenReturn(new TokenDto("bearer", "accessToken", "refreshToken"));
@@ -160,21 +163,26 @@ public class MemberControllerTest {
         @Test
         public void createMember_InvalidEmail_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
-            errors.put("email", "유효하지 않은 이메일 형식입니다.");
+            errors.put("email", "이메일 형식이 올바르지 않습니다.");
+            errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
+            errors.put("phone", "전화번호 형식이 올바르지 않습니다.");
 
-            when(validationCheck.validationChecks(bindingResult)).thenReturn(new CustomOptionalResponseEntity<>(
-                    new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST
-            ));
+            CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value());
+            CustomOptionalResponseEntity<Map<String, String>> errorResponse = new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(errorResponse);
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{ \"email\": \"invalid-email\", \"password\": \"1111\", \"passwordConfirm\": \"1111\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }"))
+                            .content("{ \"email\": \"invalid-email\", \"password\": \"weakpassword\", \"passwordConfirm\": \"weakpassword\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }"))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.result.email").value("유효하지 않은 이메일 형식입니다."));
+                    .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
+                    .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
+                    .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."));
         }
+
     }
 
     @Nested
@@ -229,6 +237,8 @@ public class MemberControllerTest {
                             .param("size", String.valueOf(pageable.getPageSize())))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
+                    .andExpect(jsonPath("$.result.totalCount").value(memberPage.getTotalElements()))
+                    .andExpect(jsonPath("$.result.page").value(memberPage.getNumber()))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(members.size()))
                     .andExpect(jsonPath("$.result.content[0].id").value(memberDtoPage.getContent().get(0).getId()))
@@ -248,6 +258,8 @@ public class MemberControllerTest {
                                 .param("size", String.valueOf(pageable.getPageSize())))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.result").exists())
+                        .andExpect(jsonPath("$.result.totalCount").value(memberPage.getTotalElements()))
+                        .andExpect(jsonPath("$.result.page").value(memberPage.getNumber()))
                         .andExpect(jsonPath("$.result.content").isArray())
                         .andExpect(jsonPath("$.result.content.length()").value(0))
                         .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다."))
@@ -280,6 +292,8 @@ public class MemberControllerTest {
                             .param("size", String.valueOf(pageable.getPageSize())))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
+                    .andExpect(jsonPath("$.result.totalCount").value(memberPage.getTotalElements()))
+                    .andExpect(jsonPath("$.result.page").value(memberPage.getNumber()))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(members.size()))
                     .andExpect(jsonPath("$.result.content[0].id").value(memberPage.getContent().get(0).getId()))
@@ -301,6 +315,8 @@ public class MemberControllerTest {
                             .param("size", String.valueOf(pageable.getPageSize())))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
+                    .andExpect(jsonPath("$.result.totalCount").value(memberPage.getTotalElements()))
+                    .andExpect(jsonPath("$.result.page").value(memberPage.getNumber()))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(members.size()))
                     .andExpect(jsonPath("$.result.content[0].id").value(memberPage.getContent().get(0).getId()))
@@ -350,20 +366,23 @@ public class MemberControllerTest {
         @Test
         public void updateMember_InvalidEmail_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
-            errors.put("email", "유효하지 않은 이메일 형식입니다.");
+            errors.put("email", "이메일 형식이 올바르지 않습니다.");
+            errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
+            errors.put("phone", "전화번호 형식이 올바르지 않습니다.");
 
-            when(validationCheck.validationChecks(bindingResult)).thenReturn(new CustomOptionalResponseEntity<>(
-                    new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()),
-                    HttpStatus.BAD_REQUEST
-            ));
+            CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value());
+            CustomOptionalResponseEntity<Map<String, String>> errorResponse = new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(errorResponse);
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{ \"id\": 1, \"email\": \"invalid-email\", \"password\": \"1111\", \"passwordConfirm\": \"1111\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }"))
-                    .andExpect(status().isBadRequest())
+                            .content("{ \"id\": 1, \"email\": \"invalid-email\", \"password\": \"weakpassword\", \"passwordConfirm\": \"weakpassword\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }")).andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
                     .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.result.email").value("유효하지 않은 이메일 형식입니다."));
+                    .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
+                    .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
+                    .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."));
         }
     }
 

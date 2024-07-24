@@ -21,6 +21,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,13 +35,19 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.BindingResult;
 
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+
 
 @WebMvcTest(controllers = AuthController.class)
 @Import({SecurityConfig.class})
@@ -87,14 +97,15 @@ public class AuthControllerTest {
 
             Member member = new Member();
             member.setEmail(userDetailsDTO.getEmail());
-            member.setPassword(passwordEncoder.encode(userDetailsDTO.getPassword()));
+            member.setPassword("encodedPassword");
 
             when(userDetailsService.loadUserByUsername(userDetailsDTO.getEmail())).thenReturn(userDetails);
+            when(userDetails.getPassword()).thenReturn(member.getPassword());
             when(passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())).thenReturn(true);
 
             TokenDto tokenDto = new TokenDto("Bearer", "accessToken", "refreshToken");
             when(tokenProvider.generateToken(any())).thenReturn(tokenDto);
-            System.out.println(userDetailsDTO.getEmail());
+
             mockMvc.perform(post("/api/loginToken/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"email\": \"test@example.com\", \"password\": \"password\" }"))
@@ -104,6 +115,8 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.result.refreshToken").value("refreshToken"))
                     .andExpect(jsonPath("$.responseMessage").value(userDetails.getUsername() + "(으)로 로그인에 성공했습니다."))
                     .andExpect(jsonPath("$.status").value(200));
+
+            verify(passwordEncoder).matches(userDetailsDTO.getPassword(), member.getPassword());
         }
     }
 
@@ -139,21 +152,81 @@ public class AuthControllerTest {
         void addAuthority_CenterRole_SuccessfullyAssignsRole() throws Exception {
 
             String authority = "admin";
+            String memberName = "홍길동";
 
             Role role = new Role();
             role.setId(memberId);
             role.setRole("center");
 
+            Member member = new Member();
+            member.setId(memberId);
+            member.setName(memberName);
+
             when(roleService.findById(memberId)).thenReturn(Optional.of(role));
+            when(memberService.findById(memberId)).thenReturn(Optional.of(member));
             when(roleService.update(role)).thenReturn(Optional.of(role));
 
-            mockMvc.perform(post("/api/loginToken/authority")
+            mockMvc.perform(post("/api/loginToken/authorization")
                             .param("memberId", memberId.toString())
                             .param("authority", authority))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result.role").value(authority))
-                    .andExpect(jsonPath("$.responseMessage").value(memberId + "에게 관리자 권한을 부여했습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value(memberName + "(id : " + memberId + ")님에게 중간 관리자 권한을 부여했습니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
+    }
+
+    @Nested
+    class AuthoritiesTests {
+        @Test
+        void checkAuthority_ReturnsPagedUserRoleList() throws Exception {
+            int page = 1;
+            int size = 5;
+            long totalElements = 10L;
+
+            Member member1 = new Member();
+            member1.setId(1L);
+            member1.setName("User1");
+            member1.setEmail("user1@example.com");
+
+            Member member2 = new Member();
+            member2.setId(2L);
+            member2.setName("User2");
+            member2.setEmail("user2@example.com");
+
+            List<Member> members = Arrays.asList(member1, member2);
+            Page<Member> memberPage = new PageImpl<>(members, PageRequest.of(page - 1, size), totalElements);
+
+            Role role1 = new Role();
+            role1.setId(1L);
+            role1.setRole("user");
+
+            Role role2 = new Role();
+            role2.setId(2L);
+            role2.setRole("admin");
+
+            when(memberService.findAll(any(Pageable.class))).thenReturn(memberPage);
+            when(roleService.findById(1L)).thenReturn(Optional.of(role1));
+            when(roleService.findById(2L)).thenReturn(Optional.of(role2));
+
+            mockMvc.perform(get("/api/loginToken/authorities")
+                            .param("page", String.valueOf(page))
+                            .param("size", String.valueOf(size)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result").exists())
+                    .andExpect(jsonPath("$.result.totalCount").value(totalElements))
+                    .andExpect(jsonPath("$.result.page").value(page - 1))
+                    .andExpect(jsonPath("$.result.content").isArray())
+                    .andExpect(jsonPath("$.result.content.length()").value(members.size()))
+                    .andExpect(jsonPath("$.result.content[0].id").value(1))
+                    .andExpect(jsonPath("$.result.content[0].role").value("user"))
+                    .andExpect(jsonPath("$.result.content[0].name").value("User1"))
+                    .andExpect(jsonPath("$.result.content[1].id").value(2))
+                    .andExpect(jsonPath("$.result.content[1].role").value("admin"))
+                    .andExpect(jsonPath("$.result.content[1].name").value("User2"))
+                    .andExpect(jsonPath("$.responseMessage").value("전체 회원별 권한 목록입니다."))
+                    .andExpect(jsonPath("$.status").value(200));
+        }
+
     }
 }

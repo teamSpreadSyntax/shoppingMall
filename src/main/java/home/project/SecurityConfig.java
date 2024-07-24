@@ -121,8 +121,8 @@ public class SecurityConfig {
                                 .requestMatchers("https://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:443/**").permitAll()
                                 .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
-                                .requestMatchers("/api/loginToken/login").permitAll()
-                                .requestMatchers("/api/loginToken/authorization").hasRole("CENTER")
+//                                .requestMatchers("/api/loginToken/login").permitAll()
+//                                .requestMatchers("/api/loginToken/authorization").hasRole("CENTER")
                                 .anyRequest().permitAll()//authenticated()
                 )
                 .formLogin(formLogin -> formLogin
