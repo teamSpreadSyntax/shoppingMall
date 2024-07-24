@@ -27,6 +27,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,10 +38,12 @@ import org.springframework.validation.BindingResult;
 
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -99,9 +102,15 @@ public class AuthControllerTest {
             member.setEmail(userDetailsDTO.getEmail());
             member.setPassword("encodedPassword");
 
-            when(userDetailsService.loadUserByUsername(userDetailsDTO.getEmail())).thenReturn(userDetails);
             when(userDetails.getPassword()).thenReturn(member.getPassword());
+            when(userDetails.getUsername()).thenReturn(userDetailsDTO.getEmail());
+            when(userDetails.getAuthorities()).thenReturn(Collections.emptyList());
+
+            when(userDetailsService.loadUserByUsername(userDetailsDTO.getEmail())).thenReturn(userDetails);
             when(passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())).thenReturn(true);
+
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            when(authenticationManager.authenticate(any())).thenReturn(authToken);
 
             TokenDto tokenDto = new TokenDto("Bearer", "accessToken", "refreshToken");
             when(tokenProvider.generateToken(any())).thenReturn(tokenDto);
@@ -117,6 +126,25 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
 
             verify(passwordEncoder).matches(userDetailsDTO.getPassword(), member.getPassword());
+        }
+
+        @Test
+//        @WithMockUser(roles = "USER")
+        void login_InvalidPassword_ReturnsBadCredentials() throws Exception {
+            UserDetailsDTO userDetailsDTO = new UserDetailsDTO();
+            userDetailsDTO.setEmail("test@example.com");
+            userDetailsDTO.setPassword("wrongPassword");
+
+            when(userDetailsService.loadUserByUsername(userDetailsDTO.getEmail())).thenReturn(userDetails);
+            when(passwordEncoder.matches(userDetailsDTO.getPassword(), userDetails.getPassword())).thenReturn(false);
+
+            mockMvc.perform(post("/api/loginToken/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(userDetailsDTO)))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호를 확인해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("비밀번호가 틀립니다."))
+                    .andExpect(jsonPath("$.status").value(401));
         }
     }
 
@@ -143,6 +171,19 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("로그아웃되었습니다."))
                     .andExpect(jsonPath("$.status").value(200));
 
+        }
+
+        @Test
+//        @WithMockUser(roles = "USER")
+        void logout_NonExistingMember_ReturnsNotFound() throws Exception {
+            when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
+
+            mockMvc.perform(post("/api/loginToken/logout")
+                            .param("memberId", "99"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 회원이 없습니다."));
         }
     }
 
@@ -174,6 +215,23 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value(memberName + "(id : " + memberId + ")님에게 중간 관리자 권한을 부여했습니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
+
+        @Test
+        void addAuthority_NonExistingMember_ReturnsNotFound() throws Exception {
+            when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
+            when(roleService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
+
+
+
+            mockMvc.perform(post("/api/loginToken/authorization")
+                            .param("memberId", "99")
+                            .param("authority", "admin"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 회원이 없습니다."));
+
+        }
     }
 
     @Nested
@@ -195,7 +253,7 @@ public class AuthControllerTest {
             member2.setEmail("user2@example.com");
 
             List<Member> members = Arrays.asList(member1, member2);
-            Page<Member> memberPage = new PageImpl<>(members, PageRequest.of(page - 1, size), totalElements);
+            Page<Member> memberPage = new PageImpl<>(members, PageRequest.of(page, size), totalElements);
 
             Role role1 = new Role();
             role1.setId(1L);
@@ -215,7 +273,7 @@ public class AuthControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
                     .andExpect(jsonPath("$.result.totalCount").value(totalElements))
-                    .andExpect(jsonPath("$.result.page").value(page - 1))
+                    .andExpect(jsonPath("$.result.page").value(page))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(members.size()))
                     .andExpect(jsonPath("$.result.content[0].id").value(1))
@@ -224,6 +282,23 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.result.content[1].id").value(2))
                     .andExpect(jsonPath("$.result.content[1].role").value("admin"))
                     .andExpect(jsonPath("$.result.content[1].name").value("User2"))
+                    .andExpect(jsonPath("$.responseMessage").value("전체 회원별 권한 목록입니다."))
+                    .andExpect(jsonPath("$.status").value(200));
+        }
+
+        @Test
+//        @WithMockUser(roles = "CENTER")
+        void checkAuthority_EmptyPage_ReturnsEmptyList() throws Exception {
+            Page<Member> emptyPage = new PageImpl<>(Collections.emptyList());
+            when(memberService.findAll(any(Pageable.class))).thenReturn(emptyPage);
+
+            mockMvc.perform(get("/api/loginToken/authorities")
+                            .param("page", "1")
+                            .param("size", "5"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.content").isEmpty())
+                    .andExpect(jsonPath("$.result.totalCount").value(0))
+                    .andExpect(jsonPath("$.result.page").value(emptyPage.getNumber()))
                     .andExpect(jsonPath("$.responseMessage").value("전체 회원별 권한 목록입니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }

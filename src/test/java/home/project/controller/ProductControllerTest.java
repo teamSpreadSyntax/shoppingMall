@@ -61,6 +61,7 @@ public class ProductControllerTest {
 
     private ProductDTOWithoutId productDTO;
     private Product product;
+    private Product product2;
     private List<Product> products;
     private Page<Product> productPage;
     private Pageable pageable;
@@ -128,9 +129,14 @@ public class ProductControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"brand\": \"\", \"category\": \"TestCategory\", \"name\": \"TestProduct\", \"stock\": 100, \"soldQuantity\": 0, \"image\": \"test.jpg\" }"))
                     .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result").exists())
+                    .andExpect(jsonPath("$.result.name").value("상품의 이름을 입력해주세요."))
+                    .andExpect(jsonPath("$.result.brand").value("상품의 브랜드를 입력해주세요."))
+                    .andExpect(jsonPath("$.result.category").value("상품의 카테고리를 입력해주세요."))
+                    .andExpect(jsonPath("$.result.stock").value("상품의 현재 재고를 입력해주세요."))
+                    .andExpect(jsonPath("$.result.image").value("상품의 이미지를 입력해주세요."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.result.brand").value("브랜드명은 필수입니다."));
+                    .andExpect(jsonPath("$.status").value(400));
         }
     }
 
@@ -362,6 +368,27 @@ public class ProductControllerTest {
     }
 
     @Nested
+    class BrandListTest {
+        @Test
+//        @WithMockUser(roles = "USER")
+        void brandList_ReturnsPagedBrandList() throws Exception {
+            Page<Product> brandPage = new PageImpl<>(products);
+            when(productService.brandList(any(Pageable.class))).thenReturn(brandPage);
+
+            mockMvc.perform(get("/api/product/brands")
+                            .param("page", "1")
+                            .param("size", "5"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.content").isArray())
+                    .andExpect(jsonPath("$.result.content.length()").value(products.size()))
+                    .andExpect(jsonPath("$.result.content[0].brand").value("TestBrand"))
+                    .andExpect(jsonPath("$.result.content[1].brand").value("AnotherBrand"))
+                    .andExpect(jsonPath("$.responseMessage").value("전체 브랜드 입니다."))
+                    .andExpect(jsonPath("$.status").value(200));
+        }
+    }
+
+    @Nested
     class DeleteProductTest {
         @Test
         public void deleteProduct_ExistingProduct_ReturnsSuccessMessage() throws Exception {
@@ -421,6 +448,20 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.status").value(409))
                     .andExpect(jsonPath("$.result.errorMessage").value("재고가 음수일 수 없습니다."));
         }
+
+        @Test
+//        @WithMockUser(roles = "ADMIN")
+        void increaseStock_NonExistingProduct_ReturnsNotFound() throws Exception {
+            when(productService.increaseStock(99L, 50L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
+
+            mockMvc.perform(put("/api/product/increase_stock")
+                            .param("productId", "99")
+                            .param("stock", "50"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."));
+        }
     }
 
     @Nested
@@ -454,6 +495,19 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
                     .andExpect(jsonPath("$.status").value(409))
                     .andExpect(jsonPath("$.result.errorMessage").value("재고가 부족합니다."));
+        }
+
+        @Test
+        void decreaseStock_NonExistingProduct_ReturnsNotFound() throws Exception {
+            when(productService.decreaseStock(99L, 50L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
+
+            mockMvc.perform(put("/api/product/decrease_stock")
+                            .param("productId", "99")
+                            .param("stock", "50"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."));
         }
     }
 

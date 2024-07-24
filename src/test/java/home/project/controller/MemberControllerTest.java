@@ -1,5 +1,6 @@
 package home.project.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.SecurityConfig;
 import home.project.domain.*;
 import home.project.service.JwtTokenProvider;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -68,10 +70,14 @@ public class MemberControllerTest {
 
     private MemberDTOWithoutId memberDTO;
     private Member member;
+    private Member member1;
     private List<Member> members;
     private Page<Member> memberPage;
     private Page<MemberDTOWithoutPw> memberDtoPage;
     private Pageable pageable;
+    private MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm;
+    private Role role;
+    private Role role2;
 
     @BeforeEach
     public void setUp() {
@@ -88,22 +94,30 @@ public class MemberControllerTest {
         member.setName(memberDTO.getName());
         member.setPhone(memberDTO.getPhone());
 
-        Member member1 = new Member();
+        member1 = new Member();
         member1.setId(2L);
         member1.setEmail("test2@example.com");
         member1.setPassword("2222");
         member1.setName("김길동");
         member1.setPhone("010-2222-2222");
 
-        Role role = new Role();
+        role = new Role();
         role.setId(1L);
         role.setRole("user");
         member.setRole(role);
 
-        Role role2 = new Role();
+        role2 = new Role();
         role2.setId(2L);
         role2.setRole("user");
         member1.setRole(role2);
+
+        memberDTOWithPasswordConfirm = new MemberDTOWithPasswordConfirm();
+        memberDTOWithPasswordConfirm.setId(1L);
+        memberDTOWithPasswordConfirm.setEmail("existing@example.com");
+        memberDTOWithPasswordConfirm.setPassword("Password123!");
+        memberDTOWithPasswordConfirm.setPasswordConfirm("Password123!");
+        memberDTOWithPasswordConfirm.setName("Existing User");
+        memberDTOWithPasswordConfirm.setPhone("010-1111-1111");
 
         members = Arrays.asList(member, member1);
         pageable = PageRequest.of(1, 5);
@@ -143,7 +157,8 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.result.refreshToken").exists())
                     .andExpect(jsonPath("$.result.successMessage").value("회원가입이 성공적으로 완료되었습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("회원가입 성공"))
-                    .andExpect(jsonPath("$.status").value(200));;
+                    .andExpect(jsonPath("$.status").value(200));
+
 
         }
 
@@ -181,6 +196,49 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
                     .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
                     .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."));
+        }
+
+        @Test
+//        @WithMockUser(roles = "USER")
+        void createMember_DuplicateEmail_ReturnsConflict() throws Exception {
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
+            when(memberService.convertToEntity(any())).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일입니다."));
+
+            mockMvc.perform(post("/api/member/join")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{ \"email\": \"existing@example.com\", \"password\": \"Password123!\", \"passwordConfirm\": \"Password123!\", \"name\": \"Existing User\", \"phone\": \"010-1234-5678\" }"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."));
+        }
+
+        @Test
+        public void createMember_DuplicatePhone_ReturnsConflict() throws Exception {
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
+            when(memberService.convertToEntity(any())).thenThrow(new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다."));
+
+            mockMvc.perform(post("/api/member/join")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{ \"email\": \"new@example.com\", \"password\": \"Password123!\", \"passwordConfirm\": \"Password123!\", \"name\": \"New User\", \"phone\": \"010-1111-1111\" }"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 휴대폰번호입니다."));
+        }
+
+        @Test
+        public void createMember_DuplicateEmailAndPhone_ReturnsConflict() throws Exception {
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
+            when(memberService.convertToEntity(any())).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다."));
+
+            mockMvc.perform(post("/api/member/join")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{ \"email\": \"existing@example.com\", \"password\": \"Password123!\", \"passwordConfirm\": \"Password123!\", \"name\": \"Existing User\", \"phone\": \"010-1111-1111\" }"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일과 휴대폰번호입니다."));
         }
 
     }
@@ -251,17 +309,19 @@ public class MemberControllerTest {
         }
         @Test
         public void findAllMembers_RequestOverPage_ReturnsEmptyPage() throws Exception {
-            when(memberService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList(), pageable, 0));
+            when(memberService.findAll(any(Pageable.class))).thenReturn(memberPage);
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+            System.out.println(memberPage.getSize());
 
             mockMvc.perform(get("/api/member/members")
-                                .param("page", String.valueOf(pageable.getPageNumber()))
-                                .param("size", String.valueOf(pageable.getPageSize())))
+                            .param("page", String.valueOf(pageable.getPageNumber()))
+                            .param("size", String.valueOf(pageable.getPageSize())))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.result").exists())
                         .andExpect(jsonPath("$.result.totalCount").value(memberPage.getTotalElements()))
                         .andExpect(jsonPath("$.result.page").value(memberPage.getNumber()))
                         .andExpect(jsonPath("$.result.content").isArray())
-                        .andExpect(jsonPath("$.result.content.length()").value(0))
+                        .andExpect(jsonPath("$.result.content.length()").value(members.size()))
                         .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다."))
                         .andExpect(jsonPath("$.status").value(200));
 
@@ -327,6 +387,21 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
+
+        @Test
+        public void searchMembers_NoResults_ReturnsNotFound() throws Exception {
+            when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class)))
+                    .thenThrow(new IllegalArgumentException("해당하는 회원이 없습니다."));
+
+            mockMvc.perform(get("/api/member/search")
+                            .param("name", "NonExistingName")
+                            .param("page", "1")
+                            .param("size", "5"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("해당하는 회원이 없습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404));
+        }
     }
 
     @Nested
@@ -384,6 +459,68 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
                     .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."));
         }
+
+        @Test
+//        @WithMockUser(roles = "USER")
+        void updateMember_NonExistingMember_ReturnsNotFound() throws Exception {
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+            when(memberService.update(any(Member.class))).thenThrow(new IllegalArgumentException("1(으)로 등록된 회원이 없습니다."));
+
+            mockMvc.perform(put("/api/member/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.result.errorMessage").value("1(으)로 등록된 회원이 없습니다."));
+        }
+
+        @Test
+        public void updateMember_DuplicateEmail_ReturnsConflict() throws Exception {
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+            when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일입니다."));
+
+            mockMvc.perform(put("/api/member/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."));
+        }
+
+        @Test
+        public void updateMember_DuplicatePhone_ReturnsConflict() throws Exception {
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+            when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다."));
+
+            mockMvc.perform(put("/api/member/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 휴대폰번호입니다."));
+        }
+
+        @Test
+        public void updateMember_DuplicateEmailAndPhone_ReturnsConflict() throws Exception {
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+            when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다."));
+
+            mockMvc.perform(put("/api/member/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
+                    .andExpect(jsonPath("$.status").value(409))
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일과 휴대폰번호입니다."));
+        }
+
     }
 
     @Nested
