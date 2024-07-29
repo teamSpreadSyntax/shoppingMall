@@ -50,7 +50,7 @@ public class RoleServiceImplTest {
             when(roleRepository.findById(1L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roleService.findById(1L));
-            assertEquals("1로 등록된 회원이 없습니다.", exception.getMessage());
+            assertEquals("1(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
 

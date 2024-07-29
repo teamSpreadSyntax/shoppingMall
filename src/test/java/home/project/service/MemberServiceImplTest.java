@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.MemberDTOWithoutId;
 import home.project.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,6 +65,24 @@ class MemberServiceImplTest {
         member3.setPassword("anotherPassword");
         member3.setName("박길동");
     }
+    @Nested
+    class convertToEntityTests {
+    @Test
+    void convertToEntity_EncodesPassword_returnMember() {
+        MemberDTOWithoutId memberDTOWithoutId = new MemberDTOWithoutId();
+        memberDTOWithoutId.setEmail("test@example.com");
+        memberDTOWithoutId.setPassword("password");
+        memberDTOWithoutId.setName("Test User");
+        memberDTOWithoutId.setPhone("010-1234-5678");
+
+        when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+
+        Member member = memberService.convertToEntity(memberDTOWithoutId);
+
+        assertEquals("encodedPassword", member.getPassword());
+        verify(passwordEncoder).encode("password");
+    }
+}
 
     @Nested
     class JoinTests {
@@ -73,7 +92,7 @@ class MemberServiceImplTest {
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
-            assertEquals("이메일과 휴대폰번호가 모두 중복됩니다.", exception.getMessage());
+            assertEquals("이미 사용 중인 이메일과 휴대폰번호입니다.", exception.getMessage());
         }
 
         @Test
@@ -82,7 +101,7 @@ class MemberServiceImplTest {
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
-            assertEquals("이메일이 중복됩니다.", exception.getMessage());
+            assertEquals("이미 사용 중인 이메일입니다.", exception.getMessage());
         }
 
         @Test
@@ -91,23 +110,22 @@ class MemberServiceImplTest {
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
-            assertEquals("휴대폰번호가 중복됩니다.", exception.getMessage());
+            assertEquals("이미 사용 중인 휴대폰번호입니다.", exception.getMessage());
         }
 
         @Test
         void join_SuccessfullyJoinsMember_EncodesPasswordAndSavesMember() {
             when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
-            when(passwordEncoder.encode(member.getPassword())).thenReturn("encodedPassword");
+            when(memberRepository.save(any(Member.class))).thenReturn(member);
 
             memberService.join(member);
 
-            verify(passwordEncoder).encode("password");
             verify(memberRepository).save(member);
-
-            assertEquals("encodedPassword", member.getPassword());
         }
+
     }
+
 
     @Nested
     class FindByIdTests {
@@ -184,9 +202,6 @@ class MemberServiceImplTest {
     class UpdateTests {
         @Test
         void update_MemberSuccessfullyUpdated_ReturnsUpdatedMember() {
-            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-            when(passwordEncoder.encode("newPassword")).thenReturn("encodeNewPassword");
-
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setEmail("test@example.com");
@@ -194,11 +209,15 @@ class MemberServiceImplTest {
             updateMember.setPassword("newPassword");
             updateMember.setName("김길동");
 
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+            when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+            when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
             Optional<Member> resultMember = memberService.update(updateMember);
             assertTrue(resultMember.isPresent());
             assertEquals("test@example.com", resultMember.get().getEmail());
             assertEquals("010-1234-5678", resultMember.get().getPhone());
-            assertEquals("encodeNewPassword", resultMember.get().getPassword());
+            assertEquals("encodedNewPassword", resultMember.get().getPassword());
             assertEquals("김길동", resultMember.get().getName());
         }
     }

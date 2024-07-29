@@ -1,5 +1,6 @@
 package home.project.service;
 
+import home.project.domain.Member;
 import home.project.domain.Product;
 import home.project.repository.ProductRepository;
 import org.assertj.core.api.Assertions;
@@ -160,28 +161,43 @@ public class ProductServiceImplTest {
     class UpdateTests {
         @Test
         void update_ProductSuccessfullyUpdated_ReturnsUpdatedProduct() {
+            Product updatedProduct = new Product();
+            updatedProduct.setId(1L);
+            updatedProduct.setBrand("puma");
+            updatedProduct.setStock(15L);
+            updatedProduct.setName("트레이닝");
+            updatedProduct.setSoldQuantity(0L);
+            updatedProduct.setCategory("바지");
+            updatedProduct.setImage("adidas.jpg");
+
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+            when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
 
-            product.setBrand("puma");
-            product.setStock(15L);
-
-            Optional<Product> updatedProduct = productService.update(product);
-
-            verify(productRepository).save(product);
-            assertTrue(updatedProduct.isPresent());
-            assertEquals("puma", updatedProduct.get().getBrand());
-            assertEquals(15L, updatedProduct.get().getStock());
+            Optional<Product> savedProduct = productService.update(updatedProduct);
+            assertTrue(savedProduct.isPresent());
+            assertEquals("puma", savedProduct.get().getBrand());
+            assertEquals(15L, savedProduct.get().getStock());
+            assertEquals("트레이닝", savedProduct.get().getName());
+            assertEquals(0L, savedProduct.get().getSoldQuantity());
+            assertEquals("바지", savedProduct.get().getCategory());
+            assertEquals("adidas.jpg", savedProduct.get().getImage());
         }
 
         @Test
         void update_InvalidStockUpdate_ThrowsDataIntegrityViolationException() {
+
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-            product.setBrand("puma");
-            product.setStock(-15L);
+            Product updatedProduct = new Product();
+            updatedProduct.setId(1L);
+            updatedProduct.setBrand("puma");
+            updatedProduct.setStock(-15L);
+            updatedProduct.setName("트레이닝");
+            updatedProduct.setCategory("바지");
+            updatedProduct.setImage("adidas.jpg");
 
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.update(product));
-            assertEquals("재고가 음수 일 수 없습니다.", exception.getMessage());
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.update(updatedProduct));
+            assertEquals("재고가 음수일 수 없습니다.", exception.getMessage());
         }
     }
 

@@ -69,7 +69,7 @@ class UserDetailsServiceImplTest {
             when(memberRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
 
             UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("test@test.com"));
-            assertEquals("test@test.com로 등록된 회원이 없습니다.", exception.getMessage());
+            assertEquals("test@test.com(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
 }
