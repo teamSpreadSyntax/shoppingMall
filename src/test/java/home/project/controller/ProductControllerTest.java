@@ -147,9 +147,9 @@ public class ProductControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"brand\": \"TestBrand\", \"category\": \"TestCategory\", \"name\": \"TestProduct\", \"stock\": -50, \"soldQuantity\": 0, \"image\": \"test.jpg\" }"))
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 음수일 수 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 음수일 수 없습니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
     }
@@ -182,9 +182,9 @@ public class ProductControllerTest {
             mockMvc.perform(get("/api/product/product")
                             .param("productId", "99"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -229,12 +229,12 @@ public class ProductControllerTest {
                             .param("page", "1000")
                             .param("size", "5"))
                     .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.totalCount").value(0))
+                    .andExpect(jsonPath("$.result.page").value(0))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(0))
                     .andExpect(jsonPath("$.responseMessage").value("전체 상품입니다."))
-                    .andExpect(jsonPath("$.status").value(200))
-                    .andExpect(jsonPath("$.result.totalCount").value(0))
-                    .andExpect(jsonPath("$.result.page").value(0));
+                    .andExpect(jsonPath("$.status").value(200));
         }
 
         @Test
@@ -245,9 +245,9 @@ public class ProductControllerTest {
                             .param("page", "-1")
                             .param("size", "5"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"));
+                    .andExpect(jsonPath("$.status").value(404));
         }
 
     }
@@ -335,9 +335,9 @@ public class ProductControllerTest {
                     .param("page", "1")
                     .param("size", "5"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("해당하는 상품이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("해당하는 상품이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
 
 
@@ -349,12 +349,12 @@ public class ProductControllerTest {
                             .param("page", "1000")  // 존재하지 않는 페이지 번호
                             .param("size", "5"))
                     .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.totalCount").value(0))
+                    .andExpect(jsonPath("$.result.page").value(0))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(0))
                     .andExpect(jsonPath("$.responseMessage").value("전체 상품입니다."))
-                    .andExpect(jsonPath("$.status").value(200))
-                    .andExpect(jsonPath("$.result.totalCount").value(0))
-                    .andExpect(jsonPath("$.result.page").value(0));
+                    .andExpect(jsonPath("$.status").value(200));
         }
 
         @Test
@@ -369,9 +369,9 @@ public class ProductControllerTest {
                             .param("page", "-1")
                             .param("size", "5"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -387,6 +387,8 @@ public class ProductControllerTest {
                             .param("page", "1")
                             .param("size", "5"))
                     .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.totalCount").value(brandPage.getTotalElements()))
+                    .andExpect(jsonPath("$.result.page").value(brandPage.getNumber()))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(productList.size()))
                     .andExpect(jsonPath("$.result.content[0].brand").value("TestBrand"))
@@ -402,12 +404,12 @@ public class ProductControllerTest {
                             .param("page", "1000")
                             .param("size", "5"))
                     .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.totalCount").value(0))
+                    .andExpect(jsonPath("$.result.page").value(0))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(0))
                     .andExpect(jsonPath("$.responseMessage").value("전체 브랜드 입니다."))
-                    .andExpect(jsonPath("$.status").value(200))
-                    .andExpect(jsonPath("$.result.totalCount").value(0))
-                    .andExpect(jsonPath("$.result.page").value(0));
+                    .andExpect(jsonPath("$.status").value(200));
         }
 
         @Test
@@ -418,9 +420,9 @@ public class ProductControllerTest {
                             .param("page", "-1")
                             .param("size", "5"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -498,9 +500,9 @@ public class ProductControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"id\": 1, \"brand\": \"UpdatedBrand\", \"category\": \"UpdatedCategory\", \"name\": \"UpdatedProduct\", \"stock\": -1, \"soldQuantity\": 50, \"image\": \"updated.jpg\" }"))
                     .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.stock").value("재고는 0 이상이어야 합니다."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.result.stock").value("재고는 0 이상이어야 합니다."));
+                    .andExpect(jsonPath("$.status").value(400));
 
             verify(productService, never()).update(any(Product.class));
         }
@@ -529,9 +531,9 @@ public class ProductControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestBody))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value(nonExistingId + "(으)로 등록된 상품이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value(nonExistingId + "(으)로 등록된 상품이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
 
             verify(productService).update(any(Product.class));
         }
@@ -547,8 +549,8 @@ public class ProductControllerTest {
                             .content("{ \"id\": 1, \"brand\": \"TestBrand\", \"category\": \"TestCategory\", \"name\": \"TestProduct\", \"stock\": 100, \"soldQuantity\": 10, \"image\": \"test.jpg\" }"))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result").exists())
-                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
                     .andExpect(jsonPath("$.result.errorMessage").value("변경된 상품 정보가 없습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
                     .andExpect(jsonPath("$.status").value(409));
 
             verify(productService).update(any(Product.class));
@@ -577,9 +579,9 @@ public class ProductControllerTest {
             mockMvc.perform(delete("/api/product/delete")
                             .param("productId", "99"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -611,9 +613,9 @@ public class ProductControllerTest {
                             .param("productId", "1")
                             .param("stock", "-50"))
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 음수일 수 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 음수일 수 없습니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
         @Test
@@ -625,9 +627,9 @@ public class ProductControllerTest {
                             .param("productId", "99")
                             .param("stock", "50"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -659,9 +661,9 @@ public class ProductControllerTest {
                             .param("productId", "1")
                             .param("stock", "150"))
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 부족합니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 부족합니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
         @Test
@@ -672,9 +674,9 @@ public class ProductControllerTest {
                             .param("productId", "99")
                             .param("stock", "50"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 

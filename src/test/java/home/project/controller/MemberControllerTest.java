@@ -192,9 +192,9 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: 하드코딩된 JSON -> ObjectMapper 사용
                     .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."));
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
         @Test
@@ -213,11 +213,11 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: 하드코딩된 JSON -> ObjectMapper 사용
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
                     .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
-                    .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."));
+                    .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
         @Test
@@ -230,9 +230,9 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: memberDTOWithPasswordConfirm -> memberDTOWithoutId
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
         @Test
@@ -244,9 +244,9 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 휴대폰번호입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 휴대폰번호입니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
         @Test
@@ -258,9 +258,9 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일과 휴대폰번호입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일과 휴대폰번호입니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
     }
@@ -294,9 +294,9 @@ public class MemberControllerTest {
             mockMvc.perform(get("/api/member/member")
                             .param("memberId", String.valueOf(nonExistingMemberId)))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value(nonExistingMemberId + "(으)로 등록된 회원이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value(nonExistingMemberId + "(으)로 등록된 회원이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
 
     }
@@ -361,9 +361,9 @@ public class MemberControllerTest {
                             .param("page", "-1")
                             .param("size", "5"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"));
+                    .andExpect(jsonPath("$.status").value(404));
         }
 
     }
@@ -453,8 +453,8 @@ public class MemberControllerTest {
                             .param("size", "5"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
-                    .andExpect(jsonPath("$.result.page").value(0))
                     .andExpect(jsonPath("$.result.totalCount").value(0))
+                    .andExpect(jsonPath("$.result.page").value(0))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(0))
                     .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다."))
@@ -476,9 +476,9 @@ public class MemberControllerTest {
                             .param("page", "-1")
                             .param("size", "5"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"));
+                    .andExpect(jsonPath("$.status").value(404));
         }
 
     }
@@ -541,9 +541,9 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"id\": 1, \"email\": \"test@example.com\", \"password\": \"1111\", \"passwordConfirm\": \"wrong\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }"))
                     .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."));
+                    .andExpect(jsonPath("$.status").value(400));
         }
         @Test
         public void updateMember_invalidEmail_returnsBadRequest() throws Exception {
@@ -560,11 +560,11 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"id\": 1, \"email\": \"invalid-email\", \"password\": \"weakpassword\", \"passwordConfirm\": \"weakpassword\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }")).andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
                     .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
-                    .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."));
+                    .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
         @Test
@@ -593,9 +593,9 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
         @Test
@@ -608,9 +608,9 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 휴대폰번호입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 휴대폰번호입니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
         @Test
@@ -623,9 +623,9 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
                     .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일과 휴대폰번호입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409))
-                    .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일과 휴대폰번호입니다."));
+                    .andExpect(jsonPath("$.status").value(409));
         }
 
         @Test
@@ -676,9 +676,9 @@ public class MemberControllerTest {
             mockMvc.perform(delete("/api/member/delete")
                             .param("memberId", String.valueOf(memberId)))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value(memberId + "(으)로 등록된 회원이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value(memberId + "(으)로 등록된 회원이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 }

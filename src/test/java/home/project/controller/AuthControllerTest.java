@@ -155,19 +155,20 @@ public class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
                     .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value(validUserDetailsDTO.getEmail() + "(으)로 등록된 회원이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("해당 회원이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(401))
-                    .andExpect(jsonPath("$.result.errorMessage").value(validUserDetailsDTO.getEmail() + "(으)로 등록된 회원이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(401));
         }
 
         @Test
         void login_invalidEmail_returnsBadRequest() throws Exception {
             UserDetailsDTO invalidEmailDTO = new UserDetailsDTO();
             invalidEmailDTO.setEmail("invalid-email");
-            invalidEmailDTO.setPassword("ValidPassword123!");
+            invalidEmailDTO.setPassword("invalid-password");
 
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "올바른 이메일 형식이 아닙니다.");
+            errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
             when(validationCheck.validationChecks(any())).thenReturn(
                     new CustomOptionalResponseEntity<>(new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST)
             );
@@ -176,9 +177,10 @@ public class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidEmailDTO)))
                     .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.email").value("올바른 이메일 형식이 아닙니다."))
+                    .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400))
-                    .andExpect(jsonPath("$.result.email").value("올바른 이메일 형식이 아닙니다."));
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
         @Test
@@ -198,10 +200,10 @@ public class AuthControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidEmailDTO)))
                     .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400))
                     .andExpect(jsonPath("$.result.email").value("이메일을 입력해주세요."))
-                    .andExpect(jsonPath("$.result.password").value("비밀번호를 입력해주세요."));
+                    .andExpect(jsonPath("$.result.password").value("비밀번호를 입력해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
         }
     }
 
@@ -231,9 +233,9 @@ public class AuthControllerTest {
             mockMvc.perform(post("/api/loginToken/logout")
                             .param("memberId", "99"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 회원이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 회원이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -263,9 +265,9 @@ public class AuthControllerTest {
                             .param("memberId", "99")
                             .param("authority", "admin"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 회원이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 회원이 없습니다."));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 
@@ -301,9 +303,9 @@ public class AuthControllerTest {
                             .param("page", "1")
                             .param("size", "5"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.result.content").isEmpty())
                     .andExpect(jsonPath("$.result.totalCount").value(0))
                     .andExpect(jsonPath("$.result.page").value(0))
+                    .andExpect(jsonPath("$.result.content").isEmpty())
                     .andExpect(jsonPath("$.responseMessage").value("전체 회원별 권한 목록입니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
@@ -317,8 +319,8 @@ public class AuthControllerTest {
                             .param("size", "5"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
-                    .andExpect(jsonPath("$.result.page").value(0))
                     .andExpect(jsonPath("$.result.totalCount").value(0))
+                    .andExpect(jsonPath("$.result.page").value(0))
                     .andExpect(jsonPath("$.result.content").isArray())
                     .andExpect(jsonPath("$.result.content.length()").value(0))
                     .andExpect(jsonPath("$.responseMessage").value("전체 회원별 권한 목록입니다."))
@@ -334,9 +336,9 @@ public class AuthControllerTest {
                             .param("page", "-1")
                             .param("size", "5"))
                     .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"));
+                    .andExpect(jsonPath("$.status").value(404));
         }
     }
 }
