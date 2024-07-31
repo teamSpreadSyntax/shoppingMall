@@ -290,24 +290,6 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void searchProducts_emptyPage_returnsEmptyPage() throws Exception {
-            when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
-                    .thenThrow(new IllegalArgumentException("해당하는 상품이 없습니다."));
-
-            mockMvc.perform(get("/api/product/search")
-                    .param("brand", "TestBrand")
-                    .param("category", "TestCategory")
-                    .param("productName", "TestProduct")
-                    .param("content", "TestContent")
-                    .param("page", "1")
-                    .param("size", "5"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("해당하는 상품이 없습니다."));
-        }
-
-        @Test
         public void searchProducts_noKeywords_returnsAllMembers() throws Exception {
             when(productService.findProducts(any(), any(), any(), any(), any(Pageable.class))).thenReturn(productPage);
 
@@ -339,6 +321,26 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
 
+
+        @Test
+        public void searchProducts_emptyPage_returnsEmptyPage() throws Exception {
+            when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
+                    .thenThrow(new IllegalArgumentException("해당하는 상품이 없습니다."));
+
+            mockMvc.perform(get("/api/product/search")
+                    .param("brand", "TestBrand")
+                    .param("category", "TestCategory")
+                    .param("productName", "TestProduct")
+                    .param("content", "TestContent")
+                    .param("page", "1")
+                    .param("size", "5"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.result.errorMessage").value("해당하는 상품이 없습니다."));
+        }
+
+
         @Test
         public void searchProducts_requestOverPage_returnsEmptyPage() throws Exception {
             when(productService.findProducts(any(), any(), any(), any(), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
@@ -364,6 +366,55 @@ public class ProductControllerTest {
                             .param("category", "TestCategory")
                             .param("productName", "TestProduct")
                             .param("content", "TestContent")
+                            .param("page", "-1")
+                            .param("size", "5"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404))
+                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"));
+        }
+    }
+
+    @Nested
+    class BrandListTests {
+        @Test
+//        @WithMockUser(roles = "USER")
+        void brandList_ReturnsPagedBrandList() throws Exception {
+            Page<Product> brandPage = new PageImpl<>(productList);
+            when(productService.brandList(any(Pageable.class))).thenReturn(brandPage);
+
+            mockMvc.perform(get("/api/product/brands")
+                            .param("page", "1")
+                            .param("size", "5"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.content").isArray())
+                    .andExpect(jsonPath("$.result.content.length()").value(productList.size()))
+                    .andExpect(jsonPath("$.result.content[0].brand").value("TestBrand"))
+                    .andExpect(jsonPath("$.result.content[1].brand").value("AnotherBrand"))
+                    .andExpect(jsonPath("$.responseMessage").value("전체 브랜드 입니다."))
+                    .andExpect(jsonPath("$.status").value(200));
+        }
+        @Test
+        public void brandList_emptyPage_returnsEmptyList() throws Exception {
+            when(productService.brandList(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+
+            mockMvc.perform(get("/api/product/brands")
+                            .param("page", "1000")
+                            .param("size", "5"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.content").isArray())
+                    .andExpect(jsonPath("$.result.content.length()").value(0))
+                    .andExpect(jsonPath("$.responseMessage").value("전체 브랜드 입니다."))
+                    .andExpect(jsonPath("$.status").value(200))
+                    .andExpect(jsonPath("$.result.totalCount").value(0))
+                    .andExpect(jsonPath("$.result.page").value(0));
+        }
+
+        @Test
+        public void brandList_negativePage_returnsEmptyList() throws Exception {
+            when(productService.brandList(any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));
+
+            mockMvc.perform(get("/api/product/brands")
                             .param("page", "-1")
                             .param("size", "5"))
                     .andExpect(status().isNotFound())
@@ -501,55 +552,6 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.status").value(409));
 
             verify(productService).update(any(Product.class));
-        }
-    }
-
-    @Nested
-    class BrandListTests {
-        @Test
-//        @WithMockUser(roles = "USER")
-        void brandList_ReturnsPagedBrandList() throws Exception {
-            Page<Product> brandPage = new PageImpl<>(productList);
-            when(productService.brandList(any(Pageable.class))).thenReturn(brandPage);
-
-            mockMvc.perform(get("/api/product/brands")
-                            .param("page", "1")
-                            .param("size", "5"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.result.content").isArray())
-                    .andExpect(jsonPath("$.result.content.length()").value(productList.size()))
-                    .andExpect(jsonPath("$.result.content[0].brand").value("TestBrand"))
-                    .andExpect(jsonPath("$.result.content[1].brand").value("AnotherBrand"))
-                    .andExpect(jsonPath("$.responseMessage").value("전체 브랜드 입니다."))
-                    .andExpect(jsonPath("$.status").value(200));
-        }
-        @Test
-        public void brandList_emptyPage_returnsEmptyList() throws Exception {
-            when(productService.brandList(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            mockMvc.perform(get("/api/product/brands")
-                            .param("page", "1000")
-                            .param("size", "5"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.result.content").isArray())
-                    .andExpect(jsonPath("$.result.content.length()").value(0))
-                    .andExpect(jsonPath("$.responseMessage").value("전체 브랜드 입니다."))
-                    .andExpect(jsonPath("$.status").value(200))
-                    .andExpect(jsonPath("$.result.totalCount").value(0))
-                    .andExpect(jsonPath("$.result.page").value(0));
-        }
-
-        @Test
-        public void brandList_negativePage_returnsEmptyList() throws Exception {
-            when(productService.brandList(any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));
-
-            mockMvc.perform(get("/api/product/brands")
-                            .param("page", "-1")
-                            .param("size", "5"))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404))
-                    .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"));
         }
     }
 
