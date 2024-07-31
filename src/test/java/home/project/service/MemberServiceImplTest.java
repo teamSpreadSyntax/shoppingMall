@@ -11,6 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -26,17 +29,17 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class MemberServiceImplTest {
 
-    @Mock
+    @Autowired
+    private MemberService memberService;
+
+    @MockBean
     private MemberRepository memberRepository;
 
-    @Mock
+    @MockBean
     private PasswordEncoder passwordEncoder;
-
-    @InjectMocks
-    private MemberServiceImpl memberService;
 
     private Member member;
     private Member member2;
