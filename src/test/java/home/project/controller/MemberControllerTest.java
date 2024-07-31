@@ -1,18 +1,23 @@
 package home.project.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.project.SecurityConfig;
+import home.project.config.SecurityConfig;
 import home.project.domain.*;
+import home.project.dto.MemberDTOWithPasswordConfirm;
+import home.project.dto.MemberDTOWithoutId;
+import home.project.dto.MemberDTOWithoutPw;
+import home.project.dto.TokenDto;
+import home.project.response.CustomOptionalResponseBody;
+import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import home.project.service.RoleService;
-import home.project.service.ValidationCheck;
+import home.project.util.ValidationCheck;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

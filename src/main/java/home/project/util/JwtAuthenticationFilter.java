@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.util;
 
 
 import home.project.service.JwtTokenProvider;

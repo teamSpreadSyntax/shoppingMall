@@ -1,20 +1,22 @@
 package home.project.controller;
 
 import home.project.domain.*;
+import home.project.dto.RoleDTOWithMemberName;
+import home.project.dto.TokenDto;
+import home.project.dto.UserDetailsDTO;
+import home.project.response.CustomListResponseEntity;
+import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import home.project.service.RoleService;
-import home.project.service.ValidationCheck;
+import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,12 +28,10 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,12 +40,8 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static com.mysql.cj.conf.PropertyKey.logger;
 
 @Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃관련 API입니다")
 @RequestMapping(path = "/api/loginToken")
@@ -181,9 +177,9 @@ public class AuthController {
         try {
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
-            Page<RoleWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
+            Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
                         String role = roleService.findById(member.getId()).get().getRole();
-                        return new RoleWithMemberName(member.getId(), role, member.getName());});
+                        return new RoleDTOWithMemberName(member.getId(), role, member.getName());});
             long totalCount = memberPage.getTotalElements();
             int page = memberPage.getNumber();
             return new CustomListResponseEntity<>(rolesWithMemberNamesPage .getContent(), successMessage, HttpStatus.OK, totalCount, page);

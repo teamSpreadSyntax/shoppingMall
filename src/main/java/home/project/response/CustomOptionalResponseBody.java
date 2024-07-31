@@ -1,10 +1,9 @@
-package home.project.domain;
+package home.project.response;
 
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import io.swagger.v3.oas.annotations.media.Schema;
+import home.project.util.CustomOptionalSerializer;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class CustomOptionalResponseBody<T> {

@@ -2,16 +2,12 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Role;
-import home.project.domain.UserDetailsDTO;
+import home.project.dto.UserDetailsDTO;
 import home.project.repository.MemberRepository;
 import home.project.repository.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

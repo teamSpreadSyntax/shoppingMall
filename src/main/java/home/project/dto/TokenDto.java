@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.dto;
 
 import lombok.*;
 

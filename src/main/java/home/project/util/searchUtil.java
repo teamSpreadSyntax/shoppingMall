@@ -1,9 +1,7 @@
-package home.project.domain;
-
-import lombok.*;
+package home.project.util;
 
 
-public class searchDTO {
+public class searchUtil {
     public static String handleShirts(String contents) {
         if (contents.contains("티")) {
             if (contents.contains("반팔")) {

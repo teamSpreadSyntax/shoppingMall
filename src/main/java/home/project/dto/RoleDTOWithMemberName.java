@@ -1,13 +1,11 @@
-package home.project.domain;
+package home.project.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class RoleWithMemberName {
+public class RoleDTOWithMemberName {
 
     private Long id;
 
@@ -15,7 +13,7 @@ public class RoleWithMemberName {
 
     private String name;
 
-    public RoleWithMemberName(Long id, String role, String name){
+    public RoleDTOWithMemberName(Long id, String role, String name){
         this.id = id;
         this.name = name;
         this.role = role;

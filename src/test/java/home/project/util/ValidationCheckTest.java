@@ -1,12 +1,9 @@
-package home.project.service;
+package home.project.util;
 
-import home.project.domain.CustomOptionalResponseBody;
-import home.project.domain.CustomOptionalResponseEntity;
+import home.project.response.CustomOptionalResponseBody;
+import home.project.response.CustomOptionalResponseEntity;
+import home.project.util.ValidationCheck;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;

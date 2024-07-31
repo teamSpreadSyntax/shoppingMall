@@ -1,8 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.domain.MemberDTOWithoutId;
-import home.project.domain.Role;
+import home.project.dto.MemberDTOWithoutId;
 import home.project.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;

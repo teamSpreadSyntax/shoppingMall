@@ -1,24 +1,13 @@
-package home.project.service;
+package home.project.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.project.domain.CustomOptionalResponseBody;
-import home.project.domain.CustomOptionalResponseEntity;
-import home.project.domain.Member;
-import home.project.domain.Product;
-import home.project.exceptions.GlobalExceptionHandler;
-import home.project.exceptions.JwtAuthenticationException;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.ServletException;
+import home.project.response.CustomOptionalResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
-import org.springframework.validation.FieldError;
 
 import java.io.IOException;
 import java.util.HashMap;

@@ -1,18 +1,20 @@
 package home.project.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.project.SecurityConfig;
+import home.project.config.SecurityConfig;
 import home.project.domain.*;
+import home.project.dto.TokenDto;
+import home.project.dto.UserDetailsDTO;
+import home.project.response.CustomOptionalResponseBody;
+import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import home.project.service.RoleService;
-import home.project.service.ValidationCheck;
+import home.project.util.ValidationCheck;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -30,10 +32,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.validation.BindingResult;
 
 
 import java.util.*;

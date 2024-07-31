@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.util;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;

@@ -1,7 +1,7 @@
 package home.project.exceptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.project.domain.CustomOptionalResponseBody;
+import home.project.response.CustomOptionalResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;

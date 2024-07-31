@@ -1,6 +1,6 @@
 package home.project.service;
 
-import home.project.domain.TokenDto;
+import home.project.dto.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;

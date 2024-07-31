@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.dto;
 
 
 import io.swagger.v3.oas.annotations.media.Schema;

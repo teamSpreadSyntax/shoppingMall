@@ -1,7 +1,7 @@
-package home.project.service;
+package home.project.util;
 
-import home.project.domain.CustomOptionalResponseBody;
-import home.project.domain.CustomOptionalResponseEntity;
+import home.project.response.CustomOptionalResponseBody;
+import home.project.response.CustomOptionalResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;

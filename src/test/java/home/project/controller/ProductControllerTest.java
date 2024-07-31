@@ -1,11 +1,14 @@
 package home.project.controller;
 
-import home.project.SecurityConfig;
+import home.project.config.SecurityConfig;
 import home.project.domain.*;
+import home.project.dto.ProductDTOWithoutId;
 import home.project.exceptions.GlobalExceptionHandler;
+import home.project.response.CustomOptionalResponseBody;
+import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
 import home.project.service.ProductService;
-import home.project.service.ValidationCheck;
+import home.project.util.ValidationCheck;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
