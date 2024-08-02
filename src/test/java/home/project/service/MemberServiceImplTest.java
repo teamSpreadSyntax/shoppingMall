@@ -73,7 +73,7 @@ class MemberServiceImplTest {
     @Nested
     class convertToEntityTests {
     @Test
-    void convertToEntity_EncodesPassword_returnMember() {
+    void convertToEntity_EncodesPassword_ReturnMember() {
         when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
 
         Member member = memberService.convertToEntity(memberDTOWithoutId);
@@ -113,7 +113,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void join_SuccessfullyJoinsMember_EncodesPasswordAndSavesMember() {
+        void join_SuccessfullyJoinsMember_SavesMember() {
             when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
             when(memberRepository.save(any(Member.class))).thenReturn(member);
@@ -129,7 +129,7 @@ class MemberServiceImplTest {
     @Nested
     class FindByIdTests {
         @Test
-        void findById_ExistingId_ReturnMember() {
+        void findById_ExistingMember_ReturnMember() {
             when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
             Optional<Member> findMember = memberService.findById(1L);
 
@@ -138,7 +138,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void findById_NonExistingId_ThrowsException() {
+        void findById_NonExistingId_ThrowsIllegalArgumentExceptionException() {
             when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findById(1L));
@@ -183,7 +183,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void findMembers_NoMatchingMembers_ThrowsException() {
+        void findMembers_NoMatchingMembers_ThrowsIllegalArgumentExceptionException() {
             Page<Member> emptyPage = Page.empty(pageable);
 
             when(memberRepository.findMembers("1", "2", "3", null, "null", pageable)).thenReturn(emptyPage);
@@ -197,7 +197,7 @@ class MemberServiceImplTest {
     @Nested
     class UpdateTests {
         @Test
-        void update_MemberSuccessfullyUpdated_ReturnsUpdatedMember() {
+        void update_ProductSuccessfullyUpdated_ReturnsUpdatedMember() {
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setEmail("test@example.com");
@@ -218,7 +218,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void update_ProductPartialChangeUpdated_ReturnUpdatedMember() {
+        void update_DuplicateEmail_ThrowsDataIntegrityViolationException() {
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setEmail("test2@example.com");
@@ -248,7 +248,7 @@ class MemberServiceImplTest {
                 assertEquals("이미 사용 중인 휴대폰번호입니다.", exception.getMessage());
             }
         @Test
-        void update_DuplicateEmail_ThrowsDataIntegrityViolationException(){
+        void update_DuplicateEmailAndPhone_ThrowsDataIntegrityViolationException(){
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setEmail("test4@example.com");
@@ -265,7 +265,7 @@ class MemberServiceImplTest {
             assertEquals("이미 사용 중인 이메일과 휴대폰번호입니다.", exception.getMessage());
         }
         @Test
-        void 업데이트_변경사항_없음(){
+        void update_NoChanges_ThrowsDataIntegrityViolationExceptionException(){
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setEmail(member.getEmail());
@@ -283,7 +283,7 @@ class MemberServiceImplTest {
 
         }
         @Test
-        void 업데이트_일부만_변경() {
+        void update_ProductPartialChangeUpdated_ReturnUpdatedMember() {
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setName("새이름");
@@ -300,7 +300,7 @@ class MemberServiceImplTest {
             assertEquals(member.getPassword(), result.get().getPassword());
         }
         @Test
-        void 업데이트_비밀번호_변경_인코딩() {
+        void update_EncodesPassword_returnMember() {
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setPassword("newPassword");
@@ -316,7 +316,7 @@ class MemberServiceImplTest {
             verify(passwordEncoder).encode("newPassword");
         }
         @Test
-        void 업데이트_존재하지_않는_회원() {
+        void update_NonExistingMember_ThrowsIllegalArgumentExceptionException() {
             Member updateMember = new Member();
             updateMember.setId(999L);
             updateMember.setName("새이름");
@@ -330,7 +330,7 @@ class MemberServiceImplTest {
     @Nested
     class DeleteByIdTests {
         @Test
-        void deleteById_ExistingId_MemberDeletedSuccessfully() {
+        void deleteById_ExistingMember_MemberDeletedSuccessfully() {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
             memberService.deleteById(member.getId());
@@ -339,7 +339,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void deleteById_NonExistentId_ThrowsException() {
+        void deleteById_NonExistentMember_ThrowsIllegalArgumentExceptionException() {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.deleteById(member.getId()));

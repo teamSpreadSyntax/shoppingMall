@@ -103,7 +103,7 @@ public class ProductControllerTest {
     @Nested
     class CreateProductTests {
         @Test
-        public void createProduct_validInput_returnsCreatedProduct() throws Exception {
+        public void createProduct_ValidInput_ReturnsCreatedProduct() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             doNothing().when(productService).join(any(Product.class));
 
@@ -117,7 +117,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void createProduct_invalidInput_returnsBadRequest() throws Exception {
+        public void createProduct_InvalidInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("name", "상품의 이름을 입력해주세요.");
             errors.put("brand", "상품의 브랜드를 입력해주세요.");
@@ -143,7 +143,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void createProduct_negativeStock_returnsConflict() throws Exception {
+        public void createProduct_NegativeStock_ReturnsConflict() throws Exception {
             doThrow(new DataIntegrityViolationException("재고가 음수일 수 없습니다.")).when(productService).join(any(Product.class));
 
             mockMvc.perform(post("/api/product/create")
@@ -160,7 +160,7 @@ public class ProductControllerTest {
     @Nested
     class FindProductByIdTests {
         @Test
-        public void findProductById_existingProduct_returnsProductInfo() throws Exception {
+        public void findProductById_ExistingProduct_ReturnsProductInfo() throws Exception {
             when(productService.findById(1L)).thenReturn(Optional.of(product));
 
             mockMvc.perform(get("/api/product/product")
@@ -179,7 +179,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void findProductById_nonExistingProduct_returnsNotFound() throws Exception {
+        public void findProductById_NonExistingProduct_ReturnsNotFound() throws Exception {
             when(productService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
 
             mockMvc.perform(get("/api/product/product")
@@ -194,7 +194,7 @@ public class ProductControllerTest {
     @Nested
     class FindAllProductsTests {
         @Test
-        public void findAllProducts_successfully_returnsProductsPage() throws Exception {
+        public void findAllProducts_ExistingProduct_ReturnsPageOfProducts() throws Exception {
             when(productService.findAll(any(Pageable.class))).thenReturn(productPage);
 
             mockMvc.perform(get("/api/product/products")
@@ -225,7 +225,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void findAllProducts_emptyPage_returnsEmptyList() throws Exception {
+        public void findAllProducts_EmptyPage_ReturnsListOfEmpty() throws Exception {
             when(productService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
             mockMvc.perform(get("/api/product/products")
@@ -241,7 +241,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void findAllProducts_negativePage_returnsEmptyList() throws Exception {
+        public void findAllProducts_NegativePage_ReturnsListOfEmpty() throws Exception {
             when(productService.findAll(any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));
 
             mockMvc.perform(get("/api/product/products")
@@ -258,7 +258,7 @@ public class ProductControllerTest {
     @Nested
     class SearchProductsTests {
         @Test
-        public void searchProducts_validInput_returnsMatchingProducts() throws Exception {
+        public void searchProducts_ValidInput_ReturnsMatchingProducts() throws Exception {
             when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class))).thenReturn(productPage);
 
             mockMvc.perform(get("/api/product/search")
@@ -293,7 +293,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void searchProducts_noKeywords_returnsAllMembers() throws Exception {
+        public void searchProducts_NoKeywords_ReturnsPageOfProducts() throws Exception {
             when(productService.findProducts(any(), any(), any(), any(), any(Pageable.class))).thenReturn(productPage);
 
 
@@ -326,7 +326,7 @@ public class ProductControllerTest {
 
 
         @Test
-        public void searchProducts_emptyPage_returnsEmptyPage() throws Exception {
+        public void searchProducts_EmptyPage_ReturnsPageOfEmpty() throws Exception {
             when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
                     .thenThrow(new IllegalArgumentException("해당하는 상품이 없습니다."));
 
@@ -345,7 +345,7 @@ public class ProductControllerTest {
 
 
         @Test
-        public void searchProducts_requestOverPage_returnsEmptyPage() throws Exception {
+        public void searchProducts_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
             when(productService.findProducts(any(), any(), any(), any(), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
             mockMvc.perform(get("/api/product/search")
@@ -361,7 +361,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void searchProducts_negativePage_returnsEmptyList() throws Exception {
+        public void searchProducts_NegativePage_ReturnsListOfEmpty() throws Exception {
             when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));
 
             mockMvc.perform(get("/api/product/search")
@@ -400,7 +400,7 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void brandList_emptyPage_returnsEmptyList() throws Exception {
+        public void brandList_EmptyPage_ReturnsListOfEmpty() throws Exception {
             when(productService.brandList(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
             mockMvc.perform(get("/api/product/brands")
@@ -416,7 +416,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void brandList_negativePage_returnsEmptyList() throws Exception {
+        public void brandList_NegativePage_ReturnsListOfEmpty() throws Exception {
             when(productService.brandList(any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));
 
             mockMvc.perform(get("/api/product/brands")
@@ -432,7 +432,7 @@ public class ProductControllerTest {
     @Nested
     class UpdateProductTests {
         @Test
-        public void updateProduct_validInput_returnsUpdatedProduct() throws Exception {
+        public void updateProduct_ValidInput_ReturnsUpdatedProduct() throws Exception {
             Product updatedProduct = new Product();
             updatedProduct.setId(1L);
             updatedProduct.setBrand("UpdatedBrand");
@@ -464,7 +464,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void updateProduct_invalidInput_returnsBadRequest() throws Exception {
+        public void updateProduct_InvalidInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("name", "상품의 이름을 입력해주세요.");
             errors.put("brand", "상품의 브랜드를 입력해주세요.");
@@ -490,7 +490,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void updateProduct_negativeInput_returnsBadRequest() throws Exception {
+        public void updateProduct_NegativeInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("stock", "재고는 0 이상이어야 합니다.");
             when(validationCheck.validationChecks(any(BindingResult.class)))
@@ -511,7 +511,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void updateProduct_nonExistingProduct_returnsNotFound() throws Exception {
+        public void updateProduct_NonExistingProduct_ReturnsNotFound() throws Exception {
             Long nonExistingId = 99L;
             ProductDTOWithoutId updatedProductDTO = new ProductDTOWithoutId();
             updatedProductDTO.setBrand("UpdatedBrand");
@@ -542,7 +542,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void updateProduct_noChanges_returnsUnmodifiedProduct() throws Exception {
+        public void updateProduct_NoChanges_ReturnsUnmodifiedProduct() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(productService.update(any(Product.class))).thenThrow(new DataIntegrityViolationException("변경된 상품 정보가 없습니다."));
 

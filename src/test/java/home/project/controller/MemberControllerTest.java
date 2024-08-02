@@ -133,7 +133,7 @@ public class MemberControllerTest {
     @Nested
     class createMemberTests {
         @Test
-        public void createMember_validInput_returnsTokens() throws Exception {
+        public void createMember_ValidInput_ReturnsTokens() throws Exception {
 
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(memberService.findByEmail(memberDTOWithoutId.getEmail())).thenReturn(Optional.of(member));
@@ -161,7 +161,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void createMember_validNoInput_returnsBadRequest() throws Exception {
+        public void createMember_ValidNoInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("name", "이름을 입력해주세요.");
             errors.put("email", "이메일을 입력해주세요.");
@@ -189,7 +189,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void createMember_invalidPasswordConfirm_returnsBadRequest() throws Exception {
+        public void createMember_InvalidPasswordConfirm_ReturnsBadRequest() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             memberDTOWithoutId.setPasswordConfirm("WrongPassword123!"); // 추가: 비밀번호 확인 불일치 설정
 
@@ -203,7 +203,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void createMember_invalidInput_returnsBadRequest() throws Exception {
+        public void createMember_InvalidInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일 형식이 올바르지 않습니다.");
             errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
@@ -227,7 +227,7 @@ public class MemberControllerTest {
 
         @Test
 //        @WithMockUser(roles = "USER")
-        void createMember_DuplicateEmail_returnsConflict() throws Exception {
+        void createMember_DuplicateEmail_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(memberService.convertToEntity(any())).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일입니다."));
 
@@ -241,7 +241,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void createMember_duplicatePhone_returnsConflict() throws Exception {
+        public void createMember_DuplicatePhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(memberService.convertToEntity(any())).thenThrow(new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다."));
 
@@ -255,7 +255,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void createMember_duplicateEmailAndPhone_returnsConflict() throws Exception {
+        public void createMember_DuplicateEmailAndPhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(memberService.convertToEntity(any())).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다."));
 
@@ -273,7 +273,7 @@ public class MemberControllerTest {
     @Nested
     class findMemberByIdTests {
         @Test
-        public void findMemberById_existing_returnsMemberInfo() throws Exception {
+        public void findMemberById_ExistingMember_ReturnsMemberInfo() throws Exception {
             when(memberService.findById(member.getId())).thenReturn(Optional.of(member));//memberId->member.getId()
             when(roleService.findById(member.getId())).thenReturn(Optional.of(member.getRole()));//memberId->member.getId()
 
@@ -291,7 +291,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void findMemberById_nonExisting_returnsNotFound() throws Exception {
+        public void findMemberById_NonExistingMember_ReturnsNotFound() throws Exception {
             long nonExistingMemberId = 99L;
 
             when(memberService.findById(nonExistingMemberId)).thenThrow(new IllegalArgumentException(nonExistingMemberId + "(으)로 등록된 회원이 없습니다."));
@@ -309,7 +309,7 @@ public class MemberControllerTest {
     @Nested
     class findAllMembersTests {
         @Test
-        public void findAllMembers_existing_returnsMembersPage() throws Exception {
+        public void findAllMembers_ExistingMember_ReturnsPageOfMembers() throws Exception {
 
             when(memberService.findAll(any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
@@ -333,7 +333,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void findAllMembers_requestOverPage_returnsEmptyPage() throws Exception {
+        public void findAllMembers_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
             System.out.println(memberPage.getSize());
@@ -353,7 +353,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void findAllMembers_negativePage_returnsEmptyList() throws Exception {
+        public void findAllMembers_NegativePage_ReturnsListOfEmpty() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));;
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
@@ -376,7 +376,7 @@ public class MemberControllerTest {
     @Nested
     class searchMembersTests {
         @Test
-        public void searchMembers_matchingCriteria_returnsMatchingMembers() throws Exception {
+        public void searchMembers_MatchingCriteria_ReturnsMatchingMembers() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(member.getRole()));
 
@@ -411,7 +411,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void searchMembers_noKeywords_returnsAllMembers() throws Exception {
+        public void searchMembers_NoKeywords_ReturnsAllMembers() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(member.getRole()));
 
@@ -434,7 +434,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void searchMembers_noResults_returnsNotFound() throws Exception {
+        public void searchMembers_NoResults_ReturnsNotFound() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class)))
                     .thenThrow(new IllegalArgumentException("해당하는 회원이 없습니다."));
 
@@ -449,7 +449,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void searchMembers_requestOverPage_returnsEmptyPage() throws Exception {
+        public void searchMembers_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
@@ -468,7 +468,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void searchMembers_negativePage_returnsEmptyList() throws Exception {
+        public void searchMembers_NegativePage_ReturnsListOfEmpty() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));;
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
@@ -491,7 +491,7 @@ public class MemberControllerTest {
     @Nested
     class updateMemberTests {
         @Test
-        public void updateMember_success_returnsUpdatedMemberInfo() throws Exception {
+        public void updateMember_Success_ReturnsUpdatedMemberInfo() throws Exception {
 
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(memberService.update(any(Member.class))).thenReturn(Optional.of(member));
@@ -513,7 +513,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void updateMember_validNoInput_returnsBadRequest() throws Exception {
+        public void updateMember_ValidNoInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("name", "이름을 입력해주세요.");
             errors.put("email", "이메일을 입력해주세요.");
@@ -541,7 +541,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void updateMember_passwordMismatch_returnsBadRequest() throws Exception {
+        public void updateMember_PasswordMismatch_ReturnsBadRequest() throws Exception {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"id\": 1, \"email\": \"test@example.com\", \"password\": \"1111\", \"passwordConfirm\": \"wrong\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }"))
@@ -551,7 +551,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(400));
         }
         @Test
-        public void updateMember_invalidEmail_returnsBadRequest() throws Exception {
+        public void updateMember_InvalidEmail_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일 형식이 올바르지 않습니다.");
             errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
@@ -574,7 +574,7 @@ public class MemberControllerTest {
 
         @Test
 //        @WithMockUser(roles = "USER")
-        void updateMember_nonExistingMember_returnsNotFound() throws Exception {
+        void updateMember_NonExistingMember_ReturnsNotFound() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
             when(memberService.update(any(Member.class))).thenThrow(new IllegalArgumentException("1(으)로 등록된 회원이 없습니다."));
@@ -589,7 +589,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void updateMember_duplicateEmail_returnsConflict() throws Exception {
+        public void updateMember_DuplicateEmail_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일입니다."));
@@ -604,7 +604,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void updateMember_duplicatePhone_returnsConflict() throws Exception {
+        public void updateMember_DuplicatePhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다."));
@@ -619,7 +619,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void updateMember_duplicateEmailAndPhone_returnsConflict() throws Exception {
+        public void updateMember_DuplicateEmailAndPhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다."));
@@ -634,7 +634,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void updateMember_noChanges_returnsUnmodifiedProduct() throws Exception {
+        public void updateMember_NoChanges_ReturnsUnmodifiedProduct() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("변경된 회원 정보가 없습니다."));
@@ -657,7 +657,7 @@ public class MemberControllerTest {
     @Nested
     class deleteMemberTests {
         @Test
-        public void deleteMember_existing_deletesMemberAndReturnsSuccessMessage() throws Exception {
+        public void deleteMember_ExistingMember_DeletesMemberAndReturnsSuccessMessage() throws Exception {
             long memberId = 1L;
             String email = "test@example.com";
 
@@ -673,7 +673,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void deleteMember_nonExisting_returnsNotFound() throws Exception {
+        public void deleteMember_NonExistingMember_ReturnsNotFound() throws Exception {
             long memberId = 99L;
 
             when(memberService.findById(memberId)).thenThrow(new IllegalArgumentException(memberId + "(으)로 등록된 회원이 없습니다."));

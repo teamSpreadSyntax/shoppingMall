@@ -40,7 +40,7 @@ public class RoleServiceImplTest {
     @Nested
     class FindByIdTests {
         @Test
-        void shouldFindRoleByIdSuccessfully() {
+        void findById_ExistingRole_ReturnsRole() {
             when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
             Optional<Role> findRole = roleService.findById(1L);
 
@@ -49,7 +49,7 @@ public class RoleServiceImplTest {
         }
 
         @Test
-        void shouldThrowExceptionWhenRoleNotFoundById() {
+        void findById_NonExistingRole_ThrowsIllegalArgumentExceptionException() {
             when(roleRepository.findById(1L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roleService.findById(1L));
@@ -60,7 +60,7 @@ public class RoleServiceImplTest {
     @Nested
     class UpdateTests {
         @Test
-        void shouldUpdateRoleSuccessfully() {
+        void update_RoleSuccessfullyUpdated_ReturnsUpdateRole() {
             when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
 
             Role updateRole = new Role();
@@ -76,7 +76,7 @@ public class RoleServiceImplTest {
     @Nested
     class JoinTests {
         @Test
-        void shouldJoinRoleSuccessfully() {
+        void join_RoleDoesNotExist_SavesRole() {
             when(roleRepository.save(role)).thenReturn(role);
 
             roleService.join(role);

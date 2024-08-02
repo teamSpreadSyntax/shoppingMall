@@ -108,7 +108,7 @@ public class AuthControllerTest {
     @Nested
     class LoginTests {
         @Test
-        void login_validCredentials_returnsToken() throws Exception {
+        void login_ValidCredentials_ReturnsToken() throws Exception {
             UserDetails userDetails = mock(UserDetails.class);
             when(userDetails.getUsername()).thenReturn(validUserDetailsDTO.getEmail());
             when(userDetails.getPassword()).thenReturn("encodedPassword");
@@ -132,7 +132,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void login_invalidPassword_returnsBadCredentials() throws Exception {
+        void login_InvalidPassword_ReturnsBadCredentials() throws Exception {
             when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail())).thenReturn(mock(UserDetails.class));
             when(passwordEncoder.matches(any(), any())).thenReturn(false);
 
@@ -146,7 +146,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void login_nonExistingUser_returnsNotFound() throws Exception {
+        void login_NonExistingUser_ReturnsNotFound() throws Exception {
             when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail()))
                     .thenThrow(new UsernameNotFoundException(validUserDetailsDTO.getEmail() + "(으)로 등록된 회원이 없습니다."));
 
@@ -160,7 +160,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void login_invalidEmail_returnsBadRequest() throws Exception {
+        void login_InvalidEmail_ReturnsBadRequest() throws Exception {
             UserDetailsDTO invalidEmailDTO = new UserDetailsDTO();
             invalidEmailDTO.setEmail("invalid-email");
             invalidEmailDTO.setPassword("invalid-password");
@@ -183,7 +183,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void login_validNoInput_returnsBadRequest() throws Exception {
+        void login_ValidNoInput_ReturnsBadRequest() throws Exception {
             UserDetailsDTO invalidEmailDTO = new UserDetailsDTO();
             invalidEmailDTO.setEmail("");
             invalidEmailDTO.setPassword("ValidPassword123!");
@@ -209,7 +209,7 @@ public class AuthControllerTest {
     @Nested
     class LogoutTests {
         @Test
-        void logout_existingMember_returnsSuccessMessage() throws Exception {
+        void logout_ExistingMember_ReturnsSuccessMessage() throws Exception {
             when(memberService.findById(1L)).thenReturn(Optional.of(testMember));
             when(roleService.findById(1L)).thenReturn(Optional.of(testRole));
 
@@ -226,7 +226,7 @@ public class AuthControllerTest {
 
         @Test
 //        @WithMockUser(roles = "USER")
-        void logout_nonExistingMember_returnsNotFound() throws Exception {
+        void logout_NonExistingMember_ReturnsNotFound() throws Exception {
             when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
 
             mockMvc.perform(post("/api/loginToken/logout")
@@ -241,7 +241,7 @@ public class AuthControllerTest {
     @Nested
     class AuthorityTests {
         @Test
-        void addAuthority_validInput_successfullyAssignsRole() throws Exception {
+        void addAuthority_ValidInput_SuccessfullyAssignsRole() throws Exception {
             when(roleService.findById(1L)).thenReturn(Optional.of(testRole));
             when(memberService.findById(1L)).thenReturn(Optional.of(testMember));
             when(roleService.update(any(Role.class))).thenReturn(Optional.of(testRole));
@@ -256,7 +256,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void addAuthority_nonExistingMember_returnsNotFound() throws Exception {
+        void addAuthority_NonExistingMember_ReturnsNotFound() throws Exception {
             when(roleService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
             when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
 
@@ -273,7 +273,7 @@ public class AuthControllerTest {
     @Nested
     class AuthoritiesTests {
         @Test
-        void checkAuthority_returnsPagedUserRoleList() throws Exception {
+        void checkAuthority_ReturnsPagedUserRoleList() throws Exception {
             List<Member> members = Arrays.asList(testMember);
             Page<Member> memberPage = new PageImpl<>(members, PageRequest.of(0, 5), 1);
 
@@ -294,7 +294,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void checkAuthority_emptyPage_returnsEmptyList() throws Exception {
+        void checkAuthority_EmptyPage_ReturnsListOfEmpty() throws Exception {
             Page<Member> emptyPage = new PageImpl<>(Collections.emptyList());
             when(memberService.findAll(any(Pageable.class))).thenReturn(emptyPage);
 
@@ -310,7 +310,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        public void checkAuthority_requestOverPage_returnsEmptyPage() throws Exception {
+        public void checkAuthority_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
             mockMvc.perform(get("/api/loginToken/authorities")
@@ -328,7 +328,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void checkAuthority_negativePageNumber_returnsBadRequest() throws Exception {
+        void checkAuthority_NegativePageNumber_ReturnsBadRequest() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenThrow(new IllegalArgumentException("Page index must not be less than zero"));
 
             mockMvc.perform(get("/api/loginToken/authorities")
