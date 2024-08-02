@@ -2,10 +2,7 @@ package home.project.controller;
 
 
 import home.project.domain.*;
-import home.project.dto.MemberDTOWithPasswordConfirm;
-import home.project.dto.MemberDTOWithoutId;
-import home.project.dto.MemberDTOWithoutPw;
-import home.project.dto.TokenDto;
+import home.project.dto.*;
 import home.project.response.CustomListResponseEntity;
 import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
@@ -244,9 +241,18 @@ public class MemberController {
     })
     @PutMapping("update")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
-    public ResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, BindingResult bindingResult) {
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, BindingResult bindingResult, UserDetailsDTO userDetailsDTO) {
         try{
+            String email = userDetailsDTO.getEmail();
+            String password = userDetailsDTO.getPassword();
+
+
+//            if(){
+//                boolean identification = ;
+//            }
+//            memberService.findByEmail(userDetailsDTO.getEmail());
+//        Long id = ;
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){

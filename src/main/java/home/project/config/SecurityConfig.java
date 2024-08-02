@@ -106,18 +106,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                                 .requestMatchers("/home/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
-                                .requestMatchers("/api/member/join").permitAll()
                                 .requestMatchers("https://localhost/swagger-ui/**").permitAll()
+                                .requestMatchers("/api/member/join").permitAll()
                                 .requestMatchers("/api/member/**").hasAnyRole("ADMIN","CENTER")//permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ADMIN", "CENTER", "USER")//
-                        .requestMatchers("/api/product/**").hasAnyRole("ADMIN","CENTER")//permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ADMIN", "CENTER", "USER")
+                                .requestMatchers("/api/product/**").hasAnyRole("ADMIN","CENTER")//permitAll()
                                 .requestMatchers("http://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:443/**").permitAll()
                                 .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
                                 .requestMatchers("/api/loginToken/login").permitAll()
                                 .requestMatchers("/api/loginToken/authorization").hasRole("CENTER")
-                                .anyRequest().permitAll()//authenticated()
+                                .requestMatchers("/api/loginToken/authorities").hasRole("CENTER")
+                        .anyRequest().permitAll()//authenticated()
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
