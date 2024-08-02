@@ -164,28 +164,71 @@ public class ProductServiceImplTest {
     class UpdateTests {
         @Test
         void update_ProductSuccessfullyUpdated_ReturnsUpdatedProduct() {
-            Product updatedProduct = new Product();
-            updatedProduct.setId(1L);
-            updatedProduct.setBrand("puma");
-            updatedProduct.setStock(15L);
-            updatedProduct.setName("트레이닝");
-            updatedProduct.setSoldQuantity(0L);
-            updatedProduct.setCategory("바지");
-            updatedProduct.setImage("adidas.jpg");
+            Product updateProduct = new Product();
+            updateProduct.setId(1L);
+            updateProduct.setBrand("puma");
+            updateProduct.setStock(15L);
+            updateProduct.setName("트레이닝");
+            updateProduct.setSoldQuantity(5L);
+            updateProduct.setCategory("바지");
+            updateProduct.setImage("adidas.jpg");
 
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-            when(productRepository.save(any(Product.class))).thenReturn(updatedProduct);
+            when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-            Optional<Product> savedProduct = productService.update(updatedProduct);
-            assertTrue(savedProduct.isPresent());
-            assertEquals("puma", savedProduct.get().getBrand());
-            assertEquals(15L, savedProduct.get().getStock());
-            assertEquals("트레이닝", savedProduct.get().getName());
-            assertEquals(0L, savedProduct.get().getSoldQuantity());
-            assertEquals("바지", savedProduct.get().getCategory());
-            assertEquals("adidas.jpg", savedProduct.get().getImage());
+            Optional<Product> result = productService.update(updateProduct);
+
+            assertTrue(result.isPresent());
+            Product updatedProduct = result.get();
+
+            assertEquals("puma", updatedProduct.getBrand());
+            assertEquals(15L, updatedProduct.getStock());
+            assertEquals("트레이닝", updatedProduct.getName());
+            assertEquals("바지", updatedProduct.getCategory());
+            assertEquals("adidas.jpg", updatedProduct.getImage());
+            assertEquals(5L, updatedProduct.getSoldQuantity());
         }
+        @Test
+        void update_ProductPartialChangeUpdated_ReturnUpdatedProduct(){
+                Product updateProduct = new Product();
+                updateProduct.setId(1L);
+                updateProduct.setName("새로운 에어맥스");
+                updateProduct.setStock(10L);
 
+                when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+                when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+                Optional<Product> result = productService.update(updateProduct);
+
+                assertTrue(result.isPresent());
+                Product updatedProduct = result.get();
+                assertEquals("새로운 에어맥스", updatedProduct.getName());
+                assertEquals(10L, updatedProduct.getStock());
+                assertEquals("nike", updatedProduct.getBrand());
+                assertEquals("신발", updatedProduct.getCategory());
+                assertEquals("nike.jpg", updatedProduct.getImage());
+
+        }
+        @Test
+        void 업데이트_변경사항_없음(){
+            Product updateProduct = new Product();
+            updateProduct.setId(1L);
+
+            when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.update(updateProduct));
+            assertEquals("변경된 상품 정보가 없습니다.", exception.getMessage());
+        }
+        @Test
+        void  업데이트_존재하지않는_제품(){
+            Product updateProduct = new Product();
+            updateProduct.setId(999L);
+
+            when(productRepository.findById(999L)).thenReturn(Optional.empty());
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.findById(999L));
+            assertEquals("999(으)로 등록된 상품이 없습니다.", exception.getMessage());
+        }
         @Test
         void update_InvalidStockUpdate_ThrowsDataIntegrityViolationException() {
 
@@ -248,7 +291,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void increaseStock_InvalidProductId_ThrowsIllegalArgumentException() {
+        void increaseStock_NonExistingId_ThrowsIllegalArgumentException() {
             when(productRepository.findById(123L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.increaseStock(123L, 14L));
@@ -281,7 +324,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void decreaseStock_InvalidProductId_ThrowsIllegalArgumentException() {
+        void decreaseStock_NonExistingId_ThrowsIllegalArgumentException() {
             when(productRepository.findById(123L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.decreaseStock(123L, 14L));

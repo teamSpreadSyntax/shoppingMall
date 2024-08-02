@@ -216,6 +216,115 @@ class MemberServiceImplTest {
             assertEquals("encodedNewPassword", resultMember.get().getPassword());
             assertEquals("김길동", resultMember.get().getName());
         }
+
+        @Test
+        void 업데이트_이메일중복() {
+            Member updateMember = new Member();
+            updateMember.setId(member.getId());
+            updateMember.setEmail("test2@example.com");
+            updateMember.setPhone("010-1234-5678");
+            updateMember.setPassword("newPassword");
+            updateMember.setName("김길동");
+
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+            when(memberRepository.existsByEmail(updateMember.getEmail())).thenReturn(true);
+
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.update(updateMember));
+            assertEquals("이미 사용 중인 이메일입니다.", exception.getMessage());
+        }
+        @Test
+        void 업데이트_번호중복() {
+                Member updateMember = new Member();
+                updateMember.setId(member.getId());
+                updateMember.setEmail("test4@example.com");
+                updateMember.setPhone("010-2345-5678");
+                updateMember.setPassword("newPassword");
+                updateMember.setName("김길동");
+
+                when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+                when(memberRepository.existsByPhone(updateMember.getPhone())).thenReturn(true);
+
+                DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.update(updateMember));
+                assertEquals("이미 사용 중인 휴대폰번호입니다.", exception.getMessage());
+            }
+        @Test
+        void 업데이트_이메일_번호중복(){
+            Member updateMember = new Member();
+            updateMember.setId(member.getId());
+            updateMember.setEmail("test4@example.com");
+            updateMember.setPhone("010-2345-5678");
+            updateMember.setPassword("newPassword");
+            updateMember.setName("김길동");
+
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+            when(memberRepository.existsByEmail(updateMember.getEmail())).thenReturn(true);
+            when(memberRepository.existsByPhone(updateMember.getPhone())).thenReturn(true);
+
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.update(updateMember));
+
+            assertEquals("이미 사용 중인 이메일과 휴대폰번호입니다.", exception.getMessage());
+        }
+        @Test
+        void 업데이트_변경사항_없음(){
+            Member updateMember = new Member();
+            updateMember.setId(member.getId());
+            updateMember.setEmail(member.getEmail());
+            updateMember.setPhone(member.getPhone());
+            updateMember.setName(member.getName());
+            updateMember.setPassword("samePassword");
+
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+            when(passwordEncoder.matches("samePassword", member.getPassword())).thenReturn(true);
+
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.update(updateMember)
+            );
+
+            assertEquals("변경된 회원 정보가 없습니다.", exception.getMessage());
+
+        }
+        @Test
+        void 업데이트_일부만_변경() {
+            Member updateMember = new Member();
+            updateMember.setId(member.getId());
+            updateMember.setName("새이름");
+
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+            when(memberRepository.save(any(Member.class))).thenAnswer(i -> i.getArguments()[0]);
+
+            Optional<Member> result = memberService.update(updateMember);
+
+            assertTrue(result.isPresent());
+            assertEquals("새이름", result.get().getName());
+            assertEquals(member.getEmail(), result.get().getEmail());
+            assertEquals(member.getPhone(), result.get().getPhone());
+            assertEquals(member.getPassword(), result.get().getPassword());
+        }
+        @Test
+        void 업데이트_비밀번호_변경_인코딩() {
+            Member updateMember = new Member();
+            updateMember.setId(member.getId());
+            updateMember.setPassword("newPassword");
+
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+            when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+            when(memberRepository.save(any(Member.class))).thenAnswer(i -> i.getArguments()[0]);
+
+            Optional<Member> result = memberService.update(updateMember);
+
+            assertTrue(result.isPresent());
+            assertEquals("encodedNewPassword", result.get().getPassword());
+            verify(passwordEncoder).encode("newPassword");
+        }
+        @Test
+        void 업데이트_존재하지_않는_회원() {
+            Member updateMember = new Member();
+            updateMember.setId(999L);
+            updateMember.setName("새이름");
+
+            when(memberRepository.findById(999L)).thenReturn(Optional.empty());
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findById(999L));
+            assertEquals("999(으)로 등록된 회원이 없습니다.", exception.getMessage());        }
     }
 
     @Nested
