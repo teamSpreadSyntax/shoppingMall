@@ -14,10 +14,6 @@ import lombok.Setter;
 @Setter
 public class MemberDTOWithPasswordConfirm {
 
-    @Id
-    @Schema(description = "사용자 id", required = true)
-    private Long id;
-
     @NotEmpty(message = "이메일을 입력해주세요.")
     @Pattern(regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])+\\.[a-zA-Z]{2,3}$", message = "이메일 형식이 올바르지 않습니다.")
     @Schema(description = "사용자 이메일", required = true)

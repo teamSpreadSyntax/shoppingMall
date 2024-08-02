@@ -10,6 +10,7 @@ import home.project.service.MemberService;
 import home.project.service.RoleService;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,7 +32,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,13 +65,15 @@ public class MemberController {
     private final JwtTokenProvider jwtTokenProvider;
     private final ValidationCheck validationCheck;
     private final RoleService roleService;
+    private  final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, ValidationCheck validationCheck, RoleService roleService) {
+    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, ValidationCheck validationCheck, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
         this.validationCheck = validationCheck;
         this.roleService = roleService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
@@ -229,6 +234,48 @@ public class MemberController {
         }
     }
 
+    @Operation(summary = "본인확인 메서드", description = "본인확인 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
+    })
+    @PutMapping("verify")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    public ResponseEntity<?> verifyUser(@RequestBody @Valid UserDetailsDTO userDetailsDTO, BindingResult bindingResult, @RequestHeader("id") Long id) {
+        try {
+            CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+            if (validationResponse != null) {
+                return validationResponse;
+            }
+
+            String email = userDetailsDTO.getEmail();
+            String password = userDetailsDTO.getPassword();
+            if (!email.equals(memberService.findByEmail(email).get().getEmail())) {
+                throw new IllegalArgumentException("이메일이 일치하지 않습니다.");
+            }else if (!passwordEncoder.matches(password, memberService.findByEmail(email).get().getPassword())){
+                throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+            } else if(!id.equals(memberService.findByEmail(email).get().getId())){
+                throw new IllegalStateException("회원 정보 수정은 본인만 가능합니다.");
+            }
+
+            // 본인 확인 성공 시 토큰 생성
+            String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "본인 확인이 완료되었습니다.");
+            response.put("verificationToken", verificationToken);
+
+            return new CustomOptionalResponseEntity<>(Optional.of(response), "본인 확인 성공", HttpStatus.OK);
+        } catch (IllegalArgumentException | BadCredentialsException e) {
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @Transactional
     @Operation(summary = "회원 정보 업데이트(수정) 메서드", description = "회원 정보 업데이트(수정) 메서드입니다.")
     @ApiResponses(value = {
@@ -242,36 +289,40 @@ public class MemberController {
     @PutMapping("update")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, BindingResult bindingResult, UserDetailsDTO userDetailsDTO) {
+    public ResponseEntity<?> updateMember(      @RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
+                                                BindingResult bindingResult,
+                                                @RequestHeader("Verification-Token") String verificationToken) {
         try{
-            String email = userDetailsDTO.getEmail();
-            String password = userDetailsDTO.getPassword();
+            CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+            if (validationResponse != null) {
+                return validationResponse;
+            }
 
+            String email = jwtTokenProvider.getEmailFromVerificationToken(verificationToken);
+            if (email == null) {
+                throw new IllegalArgumentException("유효하지 않은 검증 토큰입니다.");
+            }
 
-//            if(){
-//                boolean identification = ;
-//            }
-//            memberService.findByEmail(userDetailsDTO.getEmail());
-//        Long id = ;
-        CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
-        if (validationResponse != null) return validationResponse;
         if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
+
+        Long id = Long.parseLong(jwtTokenProvider.getIdFromVerificationToken(verificationToken));
         Member member = new Member();
-        member.setId(memberDTOWithPasswordConfirm.getId());
+        member.setId(id);
         member.setName(memberDTOWithPasswordConfirm.getName());
         member.setPhone(memberDTOWithPasswordConfirm.getPhone());
         member.setEmail(memberDTOWithPasswordConfirm.getEmail());
         member.setPassword(memberDTOWithPasswordConfirm.getPassword());
-        member.setRole(roleService.findById(memberDTOWithPasswordConfirm.getId()).get());
+        member.setRole(roleService.findById(id).get());
         Optional<Member> memberOptional = memberService.update(member);
             Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(memberWithoutPw -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
             String successMessage = "회원 정보가 수정되었습니다.";
         return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
+            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), "접근 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
     }
 

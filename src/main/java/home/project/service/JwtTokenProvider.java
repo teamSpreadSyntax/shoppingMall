@@ -26,6 +26,8 @@ public class JwtTokenProvider {
     private final Key key; // JWT 토큰을 암호화/복호화하는데 샤용되는 비밀키
     private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 1000;
     private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
+    private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 5 * 1000; // 5분
+
     //각각의 액세스 토큰과 리프레시토큰의 유효기간을 밀리초 단위로 정의한것.
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
@@ -119,7 +121,50 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+    public String generateVerificationToken(String email, Long id) {
+        long now = getNow();
+        Date expiresIn = new Date(now + VERIFICATION_TOKEN_VALIDATION_PERIOD);
 
+        return Jwts.builder()
+                .setSubject(email)
+                .setId(id.toString())
+                .setIssuedAt(new Date())
+                .setExpiration(expiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String getEmailFromVerificationToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return claims.getSubject();
+        } catch (JwtException e) {
+            log.error("Invalid verification token", e);
+            return null;
+        }
+
+
+    }
+
+    public String getIdFromVerificationToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            return claims.getId();
+        } catch (JwtException e) {
+            log.error("Invalid verification token", e);
+            return null;
+        }
+    }
     private Date getRefreshTokenExpires(long now) {
         return new Date(now + REFRESH_TOKEN_VALIDATION_PERIOD);
     }

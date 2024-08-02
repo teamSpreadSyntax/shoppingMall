@@ -108,6 +108,8 @@ public class SecurityConfig {
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("https://localhost/swagger-ui/**").permitAll()
                                 .requestMatchers("/api/member/join").permitAll()
+                                .requestMatchers("/api/member/update").hasRole("USER")
+                                .requestMatchers("/api/member/verify").hasRole("USER")
                                 .requestMatchers("/api/member/**").hasAnyRole("ADMIN","CENTER")//permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ADMIN", "CENTER", "USER")
                                 .requestMatchers("/api/product/**").hasAnyRole("ADMIN","CENTER")//permitAll()
