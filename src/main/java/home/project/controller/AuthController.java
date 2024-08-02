@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import org.springdoc.core.annotations.ParameterObject;
@@ -28,6 +29,7 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,7 +48,7 @@ import java.util.Optional;
 @Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃관련 API입니다")
 @RequestMapping(path = "/api/loginToken")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Bad Request",
+        /*@ApiResponse(responseCode = "400", description = "Bad Request",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/LoginValidationFailedResponseSchema"))),
         @ApiResponse(responseCode = "401", description = "Unauthorized",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
@@ -55,7 +57,7 @@ import java.util.Optional;
         @ApiResponse(responseCode = "404", description = "Resource not found",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
         @ApiResponse(responseCode = "409", description = "Conflict",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
+                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),*/
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
@@ -84,7 +86,11 @@ public class AuthController {
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/LoginSuccessResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/LoginSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/LoginValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
     })
     @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody @Valid UserDetailsDTO userDetailsDTO, BindingResult bindingResult) {
@@ -104,7 +110,9 @@ public class AuthController {
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+            content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @PostMapping("logout")
     public ResponseEntity<?> logout(@RequestParam("memberId") Long memberId) {
@@ -130,11 +138,15 @@ public class AuthController {
     @Operation(summary = "권한 부여 메서드", description = "권한 부여 메서드입니다. (center : 중앙 관리자, admin : 중간 관리자, user : 일반 사용자)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/AuthorityChangeSuccessResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/AuthorityChangeSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @PostMapping("authorization")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasRole('ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") @Pattern(regexp = "^(user|admin|center)$", message = "Authority must be either 'user', 'admin', or 'center'") String authority) {
 
         String successMessage = "";
@@ -163,11 +175,15 @@ public class AuthController {
     @Operation(summary = "전체 회원별 권한 조회 메서드", description = "전체 회원별 권한 조회 메서드입니다. (center : 중앙 관리자, admin : 중간 관리자, user : 일반 사용자)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedUserRoleListResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedUserRoleListResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("authorities")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasRole('ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> checkAuthority(
         @PageableDefault(page = 1, size = 5)
         @SortDefault.SortDefaults({

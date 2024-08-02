@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -32,6 +33,7 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +45,7 @@ import java.util.Optional;
 @Tag(name = "회원", description = "회원관련 API입니다")
 @RequestMapping(path = "/api/member")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Bad Request",
+        /*@ApiResponse(responseCode = "400", description = "Bad Request",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
         @ApiResponse(responseCode = "401", description = "Unauthorized",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
@@ -52,7 +54,7 @@ import java.util.Optional;
         @ApiResponse(responseCode = "404", description = "Resource not found",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
         @ApiResponse(responseCode = "409", description = "Conflict",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
+                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),*/
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
@@ -75,7 +77,11 @@ public class MemberController {
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @Transactional
     @PostMapping("join")
@@ -102,11 +108,15 @@ public class MemberController {
     @Operation(summary = "id로 회원 조회 메서드", description = "id로 회원 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("member")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findMemberById(@RequestParam("memberId") Long memberId) {
         try{
         if (memberId == null) {
@@ -126,11 +136,15 @@ public class MemberController {
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("members")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findAllMember(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -163,11 +177,15 @@ public class MemberController {
     @Operation(summary = "회원 통합 조회 메서드", description = "이름, 이메일, 전화번호 및 일반 검색어로 회원을 조회합니다. 모든 조건을 만족하는 회원을 조회합니다. 검색어가 없으면 전체 회원을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("search")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> searchMembers(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
@@ -218,11 +236,17 @@ public class MemberController {
     @Operation(summary = "회원 정보 업데이트(수정) 메서드", description = "회원 정보 업데이트(수정) 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @PutMapping("update")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, BindingResult bindingResult) {
         try{
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -251,11 +275,15 @@ public class MemberController {
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @DeleteMapping("delete")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
         try{
         String email = memberService.findById(memberId).get().getEmail();

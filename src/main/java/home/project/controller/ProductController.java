@@ -36,7 +36,7 @@ import java.util.*;
 @Tag(name = "상품", description = "상품관련 API입니다")
 @RequestMapping(path = "/api/product")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "400", description = "Bad Request",
+        /*@ApiResponse(responseCode = "400", description = "Bad Request",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
         @ApiResponse(responseCode = "401", description = "Unauthorized",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
@@ -45,7 +45,7 @@ import java.util.*;
         @ApiResponse(responseCode = "404", description = "Resource not found",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
         @ApiResponse(responseCode = "409", description = "Conflict",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),
+                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),*/
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
@@ -65,7 +65,14 @@ public class ProductController {
     @Operation(summary = "상품 등록 메서드", description = "상품 등록 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
+
     })
     @Transactional
     @PostMapping("create")
@@ -99,7 +106,11 @@ public class ProductController {
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("product")
 //    @SecurityRequirement(name = "bearerAuth")
@@ -121,7 +132,11 @@ public class ProductController {
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("products")
 //    @SecurityRequirement(name = "bearerAuth")
@@ -147,7 +162,11 @@ public class ProductController {
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("search")
 //    @SecurityRequirement(name = "bearerAuth")
@@ -191,7 +210,11 @@ public class ProductController {
     @Operation(summary = "전체 브랜드 조회 메서드", description = "브랜드 조회(판매량기준 오름차순정렬) 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BrandListResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BrandListResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("brands")
 //    @SecurityRequirement(name = "bearerAuth")
@@ -218,7 +241,15 @@ public class ProductController {
     @Operation(summary = "상품 업데이트(수정) 메서드", description = "상품 업데이트(수정) 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @PutMapping("update")
 //    @SecurityRequirement(name = "bearerAuth")
@@ -240,7 +271,11 @@ public class ProductController {
     @Operation(summary = "상품 삭제 메서드", description = "상품 삭제 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @DeleteMapping("delete")
 //    @SecurityRequirement(name = "bearerAuth")
@@ -262,7 +297,11 @@ public class ProductController {
     @Operation(summary = "재고 수량 증가 메서드", description = "재고 수량 증가 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @PutMapping("increase_stock")
 //    @SecurityRequirement(name = "bearerAuth")
@@ -282,7 +321,14 @@ public class ProductController {
     @Operation(summary = "재고 수량 감소 메서드", description = "재고 수량 감소 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
+
     })
     @PutMapping("decrease_stock")
 //    @SecurityRequirement(name = "bearerAuth")

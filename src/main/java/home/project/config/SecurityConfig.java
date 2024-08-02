@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,7 +33,7 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @SecurityScheme(
         name = "bearerAuth",
         type = SecuritySchemeType.HTTP,
@@ -105,15 +106,15 @@ public class SecurityConfig {
                                 .requestMatchers("/home/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
                                 .requestMatchers("https://localhost/swagger-ui/**").permitAll()
-                                .requestMatchers("/api/member/**").permitAll()//hasAnyRole("ADMIN","CENTER")
+                                .requestMatchers("/api/member/**").hasAnyRole("ADMIN","CENTER")//permitAll()
 //                        .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ADMIN", "CENTER", "USER")//
-                        .requestMatchers("/api/product/**").permitAll()//hasAnyRole("ADMIN","CENTER")
+                        .requestMatchers("/api/product/**").hasAnyRole("ADMIN","CENTER")//permitAll()
                                 .requestMatchers("http://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:443/**").permitAll()
                                 .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
-//                                .requestMatchers("/api/loginToken/login").permitAll()
-//                                .requestMatchers("/api/loginToken/authorization").hasRole("CENTER")
+                                .requestMatchers("/api/loginToken/login").permitAll()
+                                .requestMatchers("/api/loginToken/authorization").hasRole("CENTER")
                                 .anyRequest().permitAll()//authenticated()
                 )
                 .formLogin(formLogin -> formLogin
