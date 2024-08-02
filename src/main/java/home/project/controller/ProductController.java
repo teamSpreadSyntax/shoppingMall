@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -76,8 +78,8 @@ public class ProductController {
     })
     @Transactional
     @PostMapping("create")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         try{
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -107,14 +109,12 @@ public class ProductController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("product")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
         try{
         if (productId == null) {
@@ -133,14 +133,12 @@ public class ProductController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("products")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findAllProduct(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -163,14 +161,12 @@ public class ProductController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("search")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> searchProducts(
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
@@ -217,8 +213,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("brands")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> brandList(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -252,8 +248,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @PutMapping("update")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         try{
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -278,8 +274,8 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @DeleteMapping("delete")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
         try{
         String name = productService.findById(productId).get().getName();
@@ -301,11 +297,13 @@ public class ProductController {
             @ApiResponse(responseCode = "403", description = "Forbidden",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @PutMapping("increase_stock")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         try{
         Product increaseProduct = productService.increaseStock(productId, stock);
@@ -331,8 +329,8 @@ public class ProductController {
 
     })
     @PutMapping("decrease_stock")
-//    @SecurityRequirement(name = "bearerAuth")
-//    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         try{
         Product decreaseProduct = productService.decreaseStock(productId, stock);

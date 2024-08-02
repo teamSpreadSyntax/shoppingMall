@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -105,9 +106,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                                 .requestMatchers("/home/**").permitAll()
                                 .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/api/member/join").permitAll()
                                 .requestMatchers("https://localhost/swagger-ui/**").permitAll()
                                 .requestMatchers("/api/member/**").hasAnyRole("ADMIN","CENTER")//permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ADMIN", "CENTER", "USER")//
+                        .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ADMIN", "CENTER", "USER")//
                         .requestMatchers("/api/product/**").hasAnyRole("ADMIN","CENTER")//permitAll()
                                 .requestMatchers("http://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:5173/**").permitAll()

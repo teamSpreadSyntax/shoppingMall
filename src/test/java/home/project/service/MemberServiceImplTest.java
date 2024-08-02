@@ -218,7 +218,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void 업데이트_이메일중복() {
+        void update_ProductPartialChangeUpdated_ReturnUpdatedMember() {
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setEmail("test2@example.com");
@@ -233,7 +233,7 @@ class MemberServiceImplTest {
             assertEquals("이미 사용 중인 이메일입니다.", exception.getMessage());
         }
         @Test
-        void 업데이트_번호중복() {
+        void update_DuplicatePhone_ThrowsDataIntegrityViolationException() {
                 Member updateMember = new Member();
                 updateMember.setId(member.getId());
                 updateMember.setEmail("test4@example.com");
@@ -248,7 +248,7 @@ class MemberServiceImplTest {
                 assertEquals("이미 사용 중인 휴대폰번호입니다.", exception.getMessage());
             }
         @Test
-        void 업데이트_이메일_번호중복(){
+        void update_DuplicateEmailAndPhone_ThrowsDataIntegrityViolationException(){
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setEmail("test4@example.com");
@@ -265,7 +265,7 @@ class MemberServiceImplTest {
             assertEquals("이미 사용 중인 이메일과 휴대폰번호입니다.", exception.getMessage());
         }
         @Test
-        void 업데이트_변경사항_없음(){
+        void update_NoChanges_ThrowsException(){
             Member updateMember = new Member();
             updateMember.setId(member.getId());
             updateMember.setEmail(member.getEmail());
