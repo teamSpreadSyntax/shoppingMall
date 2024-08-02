@@ -38,6 +38,7 @@ public class ProductServiceImplTest {
     private Product product;
     private Product product2;
     private Product product3;
+    private Pageable pageable;
 
     @BeforeEach
     public void setUp() {
@@ -64,6 +65,8 @@ public class ProductServiceImplTest {
         product3.setCategory("바지");
         product3.setStock(4L);
         product3.setImage("puma.jpg");
+
+        pageable = PageRequest.of(0, 10);
 
     }
 
@@ -102,7 +105,6 @@ public class ProductServiceImplTest {
     class FindAllTests  {
         @Test
         void findAll_AllProductsFound_ReturnsPageOfProducts() {
-            Pageable pageable = PageRequest.of(0, 10);
             List<Product> productList = Arrays.asList(product, product2);
             Page<Product> page = new PageImpl<>(productList, pageable, productList.size());
 
@@ -135,7 +137,6 @@ public class ProductServiceImplTest {
 
         @Test
         void findProducts_NoMatchingProducts_ThrowsException() {
-            Pageable pageable = PageRequest.of(0, 10);
             Page<Product> emptyPage = Page.empty(pageable);
 
             when(productRepository.findProducts("1", "2", "3", null, pageable)).thenReturn(emptyPage);
@@ -149,7 +150,6 @@ public class ProductServiceImplTest {
     class BrandListTests {
         @Test
         void brandList_AllBrandsSorted_ReturnsPageOfProducts() {
-            Pageable pageable = PageRequest.of(0, 10);
             List<Product> products = Arrays.asList(product, product2);
             Page<Product> page = new PageImpl<>(products, pageable, products.size());
             when(productRepository.findAllByOrderByBrandAsc(pageable)).thenReturn(page);

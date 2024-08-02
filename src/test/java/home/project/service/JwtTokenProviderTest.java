@@ -31,6 +31,8 @@ class JwtTokenProviderTest {
 
     private Authentication authentication;
 
+    private TokenDto tokenDto;
+
     @BeforeEach
     void setUp() {
         String secretKey = "thisisaverylongsecretkeythisisaverylongsecretkey";
@@ -43,14 +45,14 @@ class JwtTokenProviderTest {
         UserDetails userDetails = new User("user", "password", authorities);
 
         authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+
+        tokenDto = jwtTokenProvider.generateToken(authentication);
     }
 
     @Nested
     class generateTokenTests {
         @Test
         void generateToken_validAuthentication_returnsValidToken() {
-
-            TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
 
             assertNotNull(tokenDto);
             assertNotNull(tokenDto.getAccessToken());
@@ -63,7 +65,6 @@ class JwtTokenProviderTest {
 
         @Test
         void getAuthentication_validToken_returnsAuthenticationWithRoleUser() {
-        TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
 
         Authentication auth = jwtTokenProvider.getAuthentication(tokenDto.getAccessToken());
 
@@ -87,8 +88,6 @@ class JwtTokenProviderTest {
     class validateTokenTests {
         @Test
         void validateToken_validToken_returnsTrue() {
-
-            TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
 
             boolean isValid = jwtTokenProvider.validateToken(tokenDto.getAccessToken());
 
