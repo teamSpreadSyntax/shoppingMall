@@ -58,8 +58,8 @@ class UserDetailsServiceImplTest {
             UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmail());
 
             assertNotNull(userDetails);
-            assertEquals("test@test.com", userDetails.getUsername());
-            assertEquals("password", userDetails.getPassword());
+            assertEquals(member.getEmail(), userDetails.getUsername());
+            assertEquals(member.getPassword(), userDetails.getPassword());
             assertEquals("ROLE_USER", userDetails.getAuthorities().iterator().next().getAuthority());
         }
 

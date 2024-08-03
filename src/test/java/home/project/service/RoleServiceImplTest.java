@@ -49,7 +49,7 @@ public class RoleServiceImplTest {
         }
 
         @Test
-        void findById_NonExistingRole_ThrowsIllegalArgumentExceptionException() {
+        void findById_NonExistingRole_ThrowsIllegalArgumentException() {
             when(roleRepository.findById(1L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roleService.findById(1L));

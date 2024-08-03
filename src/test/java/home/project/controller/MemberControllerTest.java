@@ -157,7 +157,7 @@ public class MemberControllerTest {
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: 하드코딩된 JSON -> ObjectMapper 사용
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result.accessToken").exists())
                     .andExpect(jsonPath("$.result.refreshToken").exists())
