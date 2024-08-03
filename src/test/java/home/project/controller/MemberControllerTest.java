@@ -281,6 +281,7 @@ public class MemberControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class findMemberByIdTests {
         @Test
         public void findMemberById_ExistingMember_ReturnsMemberInfo() throws Exception {
@@ -317,6 +318,7 @@ public class MemberControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class findAllMembersTests {
         @Test
         public void findAllMembers_ExistingMember_ReturnsPageOfMembers() throws Exception {
@@ -384,6 +386,7 @@ public class MemberControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class searchMembersTests {
         @Test
         public void searchMembers_MatchingCriteria_ReturnsMatchingMembers() throws Exception {
@@ -499,9 +502,9 @@ public class MemberControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class verifyUserTests {
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void verifyUser_ValidInput_ReturnsVerificationToken() throws Exception {
             when(validationCheck.validationChecks(any())).thenReturn(null);
             when(memberService.findById(anyLong())).thenReturn(Optional.of(member));
@@ -520,7 +523,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void verifyUser_BothEmailAndPasswordNotProvided_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일을 입력해주세요.");
@@ -542,7 +544,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void verifyUser_BothInvalidEmailAndPasswordFormat_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일 형식이 올바르지 않습니다.");
@@ -564,7 +565,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void verifyUser_NonExistingId_ReturnsNotFound() throws Exception {
             when(validationCheck.validationChecks(any())).thenReturn(null);
             when(memberService.findById(anyLong())).thenThrow(new IllegalArgumentException("0(으)로 등록된 회원이 없습니다."));
@@ -580,7 +580,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void verifyUser_EmailMismatch_ReturnsBadRequest() throws Exception {
             when(validationCheck.validationChecks(any())).thenReturn(null);
             when(memberService.findById(anyLong())).thenReturn(Optional.of(member));
@@ -596,7 +595,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void verifyUser_PasswordMismatch_ReturnsUnauthorized() throws Exception {
             when(validationCheck.validationChecks(any())).thenReturn(null);
             when(memberService.findById(anyLong())).thenReturn(Optional.of(member));
@@ -614,9 +612,9 @@ public class MemberControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class updateMemberTests {
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_Success_ReturnsUpdatedMemberInfo() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
@@ -641,7 +639,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_InvalidToken_ReturnsBadRequest() throws Exception {
             String invalidToken = "invalidToken";
             when(jwtTokenProvider.getEmailFromVerificationToken(invalidToken)).thenReturn(null);
@@ -657,7 +654,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_ValidNoInput_ReturnsBadRequest() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
@@ -693,7 +689,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_InvalidEmail_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일 형식이 올바르지 않습니다.");
@@ -720,7 +715,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_PasswordMismatch_ReturnsBadRequest() throws Exception {
 
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
@@ -738,7 +732,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_DuplicateEmail_ReturnsConflict() throws Exception {
 
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
@@ -758,7 +751,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_DuplicatePhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
@@ -777,7 +769,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_DuplicateEmailAndPhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
@@ -796,7 +787,6 @@ public class MemberControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_NoChanges_ReturnsUnmodifiedProduct() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
@@ -821,6 +811,7 @@ public class MemberControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class deleteMemberTests {
         @Test
         public void deleteMember_ExistingMember_DeletesMemberAndReturnsSuccessMessage() throws Exception {
