@@ -32,6 +32,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 
@@ -239,6 +240,7 @@ public class AuthControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"CENTER"})
     class AuthorityTests {
         @Test
         void addAuthority_ValidInput_SuccessfullyAssignsRole() throws Exception {
@@ -271,6 +273,7 @@ public class AuthControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"CENTER"})
     class AuthoritiesTests {
         @Test
         void checkAuthority_ReturnsPagedUserRoleList() throws Exception {

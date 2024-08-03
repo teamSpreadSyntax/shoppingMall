@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BindingResult;
 
@@ -101,6 +102,7 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class CreateProductTests {
         @Test
         public void createProduct_ValidInput_ReturnsCreatedProduct() throws Exception {
@@ -158,6 +160,7 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class FindProductByIdTests {
         @Test
         public void findProductById_ExistingProduct_ReturnsProductInfo() throws Exception {
@@ -192,6 +195,7 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class FindAllProductsTests {
         @Test
         public void findAllProducts_ExistingProduct_ReturnsPageOfProducts() throws Exception {
@@ -256,6 +260,7 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class SearchProductsTests {
         @Test
         public void searchProducts_ValidInput_ReturnsMatchingProducts() throws Exception {
@@ -379,9 +384,9 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class BrandListTests {
         @Test
-//        @WithMockUser(roles = "USER")
         void brandList_ReturnsPagedBrandList() throws Exception {
             Page<Product> brandPage = new PageImpl<>(productList);
             when(productService.brandList(any(Pageable.class))).thenReturn(brandPage);
@@ -430,6 +435,7 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class UpdateProductTests {
         @Test
         public void updateProduct_ValidInput_ReturnsUpdatedProduct() throws Exception {
@@ -561,6 +567,7 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class DeleteProductTests {
         @Test
         public void deleteProduct_ExistingProduct_ReturnsSuccessMessage() throws Exception {
@@ -589,6 +596,7 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class IncreaseStockTests {
         @Test
         public void increaseStock_ValidInput_ReturnsUpdatedStock() throws Exception {
@@ -622,7 +630,6 @@ public class ProductControllerTest {
         }
 
         @Test
-//        @WithMockUser(roles = "ADMIN")
         void increaseStock_NonExistingProduct_ReturnsNotFound() throws Exception {
             when(productService.increaseStock(99L, 50L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
 
@@ -637,6 +644,7 @@ public class ProductControllerTest {
     }
 
     @Nested
+    @WithMockUser(roles = {"ADMIN", "CENTER"})
     class DecreaseStockTests {
         @Test
         public void decreaseStock_ValidInput_ReturnsUpdatedStock() throws Exception {

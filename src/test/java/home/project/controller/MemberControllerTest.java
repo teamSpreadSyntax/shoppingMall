@@ -157,7 +157,7 @@ public class MemberControllerTest {
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: 하드코딩된 JSON -> ObjectMapper 사용
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result.accessToken").exists())
                     .andExpect(jsonPath("$.result.refreshToken").exists())
@@ -199,7 +199,7 @@ public class MemberControllerTest {
         @Test
         public void createMember_InvalidPasswordConfirm_ReturnsBadRequest() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            memberDTOWithoutId.setPasswordConfirm("WrongPassword123!"); // 추가: 비밀번호 확인 불일치 설정
+            memberDTOWithoutId.setPasswordConfirm("WrongPassword123!");
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
