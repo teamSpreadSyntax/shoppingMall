@@ -3,10 +3,7 @@ package home.project.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.config.SecurityConfig;
 import home.project.domain.*;
-import home.project.dto.MemberDTOWithPasswordConfirm;
-import home.project.dto.MemberDTOWithoutId;
-import home.project.dto.MemberDTOWithoutPw;
-import home.project.dto.TokenDto;
+import home.project.dto.*;
 import home.project.response.CustomOptionalResponseBody;
 import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
@@ -32,6 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BindingResult;
 
@@ -74,12 +72,14 @@ public class MemberControllerTest {
 
     private MemberDTOWithoutId memberDTOWithoutId;
     private Member member;
+    private Member updatedMember;
     private List<Member> memberList;
     private Page<Member> memberPage;
     private Page<MemberDTOWithoutPw> memberDtoPage;
     private Pageable pageable;
     private MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm;
     private Role role;
+    private String verificationToken;
 
     @BeforeEach
     public void setUp() {
@@ -121,13 +121,21 @@ public class MemberControllerTest {
         memberDtoPage = memberPage.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
 
         memberDTOWithPasswordConfirm = new MemberDTOWithPasswordConfirm();
-        memberDTOWithPasswordConfirm.setId(1L);
         memberDTOWithPasswordConfirm.setEmail("update@example.com");
         memberDTOWithPasswordConfirm.setPassword("UpdatedPass123!");
         memberDTOWithPasswordConfirm.setPasswordConfirm("UpdatedPass123!");
         memberDTOWithPasswordConfirm.setName("Updated User");
         memberDTOWithPasswordConfirm.setPhone("010-1111-2222");
 
+        updatedMember = new Member();
+        updatedMember.setId(1L);
+        updatedMember.setName(memberDTOWithPasswordConfirm.getName());
+        updatedMember.setEmail(memberDTOWithPasswordConfirm.getEmail());
+        updatedMember.setPhone(memberDTOWithPasswordConfirm.getPhone());
+        updatedMember.setPassword(memberDTOWithPasswordConfirm.getPassword());
+        updatedMember.setRole(role);
+
+        verificationToken = "validToken";
     }
 
     @Nested
@@ -149,7 +157,7 @@ public class MemberControllerTest {
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: 하드코딩된 JSON -> ObjectMapper 사용
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result.accessToken").exists())
                     .andExpect(jsonPath("$.result.refreshToken").exists())
@@ -168,11 +176,11 @@ public class MemberControllerTest {
             errors.put("password", "비밀번호를 입력해주세요.");
             errors.put("passwordConfirm", "비밀번호를 한번 더 입력해주세요.");
             errors.put("phone", "전화번호를 입력해주세요.");
-            when(validationCheck.validationChecks(any(BindingResult.class)))
-                    .thenReturn(new CustomOptionalResponseEntity<>(
-                            new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()),
-                            HttpStatus.BAD_REQUEST
-                    ));
+
+            CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value());
+            CustomOptionalResponseEntity<Map<String, String>> errorResponse = new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(errorResponse);
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -195,7 +203,7 @@ public class MemberControllerTest {
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: 하드코딩된 JSON -> ObjectMapper 사용
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
@@ -207,6 +215,7 @@ public class MemberControllerTest {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일 형식이 올바르지 않습니다.");
             errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
+            errors.put("passwordConfirm", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
             errors.put("phone", "전화번호 형식이 올바르지 않습니다.");
 
             CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value());
@@ -216,10 +225,11 @@ public class MemberControllerTest {
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: 하드코딩된 JSON -> ObjectMapper 사용
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
                     .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
+                    .andExpect(jsonPath("$.result.passwordConfirm").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
                     .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
                     .andExpect(jsonPath("$.status").value(400));
@@ -233,7 +243,7 @@ public class MemberControllerTest {
 
             mockMvc.perform(post("/api/member/join")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId))) // 변경: memberDTOWithPasswordConfirm -> memberDTOWithoutId
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
@@ -274,8 +284,8 @@ public class MemberControllerTest {
     class findMemberByIdTests {
         @Test
         public void findMemberById_ExistingMember_ReturnsMemberInfo() throws Exception {
-            when(memberService.findById(member.getId())).thenReturn(Optional.of(member));//memberId->member.getId()
-            when(roleService.findById(member.getId())).thenReturn(Optional.of(member.getRole()));//memberId->member.getId()
+            when(memberService.findById(member.getId())).thenReturn(Optional.of(member));
+            when(roleService.findById(member.getId())).thenReturn(Optional.of(member.getRole()));
 
 
             mockMvc.perform(get("/api/member/member")
@@ -489,46 +499,188 @@ public class MemberControllerTest {
     }
 
     @Nested
+    class verifyUserTests {
+        @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
+        public void verifyUser_ValidInput_ReturnsVerificationToken() throws Exception {
+            when(validationCheck.validationChecks(any())).thenReturn(null);
+            when(memberService.findById(anyLong())).thenReturn(Optional.of(member));
+            when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+            when(jwtTokenProvider.generateVerificationToken(anyString(), anyLong())).thenReturn(verificationToken);
+
+            mockMvc.perform(post("/api/member/verify")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(new UserDetailsDTO("test@example.com", "password")))
+                            .header("id", "1"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.successMessage").value("본인 확인이 완료되었습니다."))
+                    .andExpect(jsonPath("$.result.verificationToken").exists())
+                    .andExpect(jsonPath("$.responseMessage").value("본인 확인 성공"))
+                    .andExpect(jsonPath("$.status").value(200));
+        }
+
+        @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
+        public void verifyUser_BothEmailAndPasswordNotProvided_ReturnsBadRequest() throws Exception {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("email", "이메일을 입력해주세요.");
+            errors.put("password", "비밀번호를 입력해주세요.");
+            when(validationCheck.validationChecks(any())).thenReturn(new CustomOptionalResponseEntity<>(
+                    new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()),
+                    HttpStatus.BAD_REQUEST
+            ));
+
+            mockMvc.perform(post("/api/member/verify")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(new UserDetailsDTO(null, null)))
+                            .header("id", "1"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.email").value("이메일을 입력해주세요."))
+                    .andExpect(jsonPath("$.result.password").value("비밀번호를 입력해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
+        }
+
+        @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
+        public void verifyUser_BothInvalidEmailAndPasswordFormat_ReturnsBadRequest() throws Exception {
+            Map<String, String> errors = new HashMap<>();
+            errors.put("email", "이메일 형식이 올바르지 않습니다.");
+            errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
+            when(validationCheck.validationChecks(any())).thenReturn(new CustomOptionalResponseEntity<>(
+                    new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()),
+                    HttpStatus.BAD_REQUEST
+            ));
+
+            mockMvc.perform(post("/api/member/verify")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(new UserDetailsDTO("invalid-email", "weakPassword")))
+                            .header("id", "1"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
+                    .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
+        }
+
+        @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
+        public void verifyUser_NonExistingId_ReturnsNotFound() throws Exception {
+            when(validationCheck.validationChecks(any())).thenReturn(null);
+            when(memberService.findById(anyLong())).thenThrow(new IllegalArgumentException("0(으)로 등록된 회원이 없습니다."));
+
+            mockMvc.perform(post("/api/member/verify")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(new UserDetailsDTO("test@example.com", "Password123!")))
+                            .header("id", "0"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("0(으)로 등록된 회원이 없습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+        @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
+        public void verifyUser_EmailMismatch_ReturnsBadRequest() throws Exception {
+            when(validationCheck.validationChecks(any())).thenReturn(null);
+            when(memberService.findById(anyLong())).thenReturn(Optional.of(member));
+
+            mockMvc.perform(post("/api/member/verify")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(new UserDetailsDTO("wrong@example.com", "Password123!")))
+                            .header("id", "1"))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.errorMessage").value("이메일이 일치하지 않습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
+        }
+
+        @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
+        public void verifyUser_PasswordMismatch_ReturnsUnauthorized() throws Exception {
+            when(validationCheck.validationChecks(any())).thenReturn(null);
+            when(memberService.findById(anyLong())).thenReturn(Optional.of(member));
+            when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+            mockMvc.perform(post("/api/member/verify")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(new UserDetailsDTO("test@example.com", "WrongPassword123!")))
+                            .header("id", "1"))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호가 일치하지 않습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("비밀번호가 틀립니다."))
+                    .andExpect(jsonPath("$.status").value(401));
+        }
+    }
+
+    @Nested
     class updateMemberTests {
         @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_Success_ReturnsUpdatedMemberInfo() throws Exception {
-
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            when(memberService.update(any(Member.class))).thenReturn(Optional.of(member));
+            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
+            when(memberService.update(any(Member.class))).thenReturn(Optional.of(updatedMember));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{ \"id\": 1, \"email\": \"test@example.com\", \"password\": \"1111\", \"passwordConfirm\": \"1111\", \"name\": \"Test User\", \"phone\": \"010-1234-5678\" }"))
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
+                            .header("Verification-Token", verificationToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
-                    .andExpect(jsonPath("$.result.id").value(member.getId()))
-                    .andExpect(jsonPath("$.result.email").value(member.getEmail()))
-                    .andExpect(jsonPath("$.result.name").value(member.getName()))
-                    .andExpect(jsonPath("$.result.phone").value(member.getPhone()))
-                    .andExpect(jsonPath("$.result.role").value(member.getRole().getRole()))
+                    .andExpect(jsonPath("$.result.id").value(updatedMember.getId()))
+                    .andExpect(jsonPath("$.result.email").value(updatedMember.getEmail()))
+                    .andExpect(jsonPath("$.result.name").value(updatedMember.getName()))
+                    .andExpect(jsonPath("$.result.phone").value(updatedMember.getPhone()))
+                    .andExpect(jsonPath("$.result.role").value(updatedMember.getRole().getRole()))
                     .andExpect(jsonPath("$.responseMessage").value("회원 정보가 수정되었습니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
 
         @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
+        public void updateMember_InvalidToken_ReturnsBadRequest() throws Exception {
+            String invalidToken = "invalidToken";
+            when(jwtTokenProvider.getEmailFromVerificationToken(invalidToken)).thenReturn(null);
+
+            mockMvc.perform(put("/api/member/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
+                            .header("Verification-Token", invalidToken))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 검증 토큰입니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+        @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_ValidNoInput_ReturnsBadRequest() throws Exception {
+            when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
+            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
+            when(memberService.update(any(Member.class))).thenReturn(Optional.of(updatedMember));
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+
             Map<String, String> errors = new HashMap<>();
             errors.put("name", "이름을 입력해주세요.");
             errors.put("email", "이메일을 입력해주세요.");
             errors.put("password", "비밀번호를 입력해주세요.");
             errors.put("passwordConfirm", "비밀번호를 한번 더 입력해주세요.");
             errors.put("phone", "전화번호를 입력해주세요.");
-            when(validationCheck.validationChecks(any(BindingResult.class)))
-                    .thenReturn(new CustomOptionalResponseEntity<>(
-                            new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()),
-                            HttpStatus.BAD_REQUEST
-                    ));
+
+            CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value());
+            CustomOptionalResponseEntity<Map<String, String>> errorResponse = new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+
+            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(errorResponse);
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{ \"name\": \"\", \"email\": \"\", \"password\": \"\", \"passwordConfirm\": \"\", \"phone\": \"\" }"))
+                            .content("{ \"name\": \"\", \"email\": \"\", \"password\": \"\", \"passwordConfirm\": \"\", \"phone\": \"\"}")
+                            .header("Verification-Token", verificationToken))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result").exists())
                     .andExpect(jsonPath("$.result.name").value("이름을 입력해주세요."))
@@ -541,20 +693,12 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void updateMember_PasswordMismatch_ReturnsBadRequest() throws Exception {
-            mockMvc.perform(put("/api/member/update")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{ \"id\": 1, \"email\": \"test@example.com\", \"password\": \"1111\", \"passwordConfirm\": \"wrong\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400));
-        }
-        @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_InvalidEmail_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일 형식이 올바르지 않습니다.");
             errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
+            errors.put("passwordConfirm", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
             errors.put("phone", "전화번호 형식이 올바르지 않습니다.");
 
             CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value());
@@ -564,39 +708,49 @@ public class MemberControllerTest {
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content("{ \"id\": 1, \"email\": \"invalid-email\", \"password\": \"weakpassword\", \"passwordConfirm\": \"weakpassword\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }")).andExpect(status().isBadRequest())
+                            .content("{\"email\": \"invalid-email\", \"password\": \"weakPassword\", \"passwordConfirm\": \"weakPassword\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }")
+                            .header("Verification-Token", verificationToken))
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
                     .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
+                    .andExpect(jsonPath("$.result.passwordConfirm").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
                     .andExpect(jsonPath("$.result.phone").value("전화번호 형식이 올바르지 않습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
                     .andExpect(jsonPath("$.status").value(400));
         }
 
         @Test
-//        @WithMockUser(roles = "USER")
-        void updateMember_NonExistingMember_ReturnsNotFound() throws Exception {
-            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
-            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
-            when(memberService.update(any(Member.class))).thenThrow(new IllegalArgumentException("1(으)로 등록된 회원이 없습니다."));
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
+        public void updateMember_PasswordMismatch_ReturnsBadRequest() throws Exception {
+
+            when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
+            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.result.errorMessage").value("1(으)로 등록된 회원이 없습니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
+                            .content("{ \"email\": \"test@example.com\", \"password\": \"1111\", \"passwordConfirm\": \"wrong\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }")
+                            .header("Verification-Token", verificationToken))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));;
         }
 
         @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_DuplicateEmail_ReturnsConflict() throws Exception {
-            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
-            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+
+            when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
+            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일입니다."));
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
+                            .header("Verification-Token", verificationToken))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
@@ -604,14 +758,18 @@ public class MemberControllerTest {
         }
 
         @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_DuplicatePhone_ReturnsConflict() throws Exception {
-            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
-            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+            when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
+            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다."));
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
+                            .header("Verification-Token", verificationToken))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 휴대폰번호입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
@@ -619,14 +777,18 @@ public class MemberControllerTest {
         }
 
         @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_DuplicateEmailAndPhone_ReturnsConflict() throws Exception {
-            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
-            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+            when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
+            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다."));
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
+                            .header("Verification-Token", verificationToken))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일과 휴대폰번호입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
@@ -634,15 +796,19 @@ public class MemberControllerTest {
         }
 
         @Test
+        @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
         public void updateMember_NoChanges_ReturnsUnmodifiedProduct() throws Exception {
-            when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
-            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
+            when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
+            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("변경된 회원 정보가 없습니다."));
+            when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm)))
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
+                            .header("Verification-Token", verificationToken))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result").exists())
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))

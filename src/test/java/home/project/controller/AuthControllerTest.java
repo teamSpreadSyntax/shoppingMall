@@ -294,22 +294,6 @@ public class AuthControllerTest {
         }
 
         @Test
-        void checkAuthority_EmptyPage_ReturnsListOfEmpty() throws Exception {
-            Page<Member> emptyPage = new PageImpl<>(Collections.emptyList());
-            when(memberService.findAll(any(Pageable.class))).thenReturn(emptyPage);
-
-            mockMvc.perform(get("/api/loginToken/authorities")
-                            .param("page", "1")
-                            .param("size", "5"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.result.totalCount").value(0))
-                    .andExpect(jsonPath("$.result.page").value(0))
-                    .andExpect(jsonPath("$.result.content").isEmpty())
-                    .andExpect(jsonPath("$.responseMessage").value("전체 회원별 권한 목록입니다."))
-                    .andExpect(jsonPath("$.status").value(200));
-        }
-
-        @Test
         public void checkAuthority_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
