@@ -1,5 +1,6 @@
 package home.project.service;
 
+import home.project.domain.Member;
 import home.project.dto.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -33,6 +34,10 @@ class JwtTokenProviderTest {
 
     private TokenDto tokenDto;
 
+    private Member member;
+
+    private String invalidToken;
+
     @BeforeEach
     void setUp() {
         String secretKey = "thisisaverylongsecretkeythisisaverylongsecretkey";
@@ -47,6 +52,12 @@ class JwtTokenProviderTest {
         authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
         tokenDto = jwtTokenProvider.generateToken(authentication);
+
+        member = new Member();
+        member.setId(1L);
+        member.setEmail("test@test.com");
+
+        invalidToken = "invalidToken";
     }
 
     @Nested
@@ -118,6 +129,47 @@ class JwtTokenProviderTest {
             boolean isValid = jwtTokenProvider.validateToken(expiredToken);
 
             assertFalse(isValid);
+        }
+    }
+    @Nested
+    class VerificationTokenTests {
+        @Test
+        void generateVerificationToken_ValidInput_ReturnsToken() {
+            String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
+
+            assertNotNull(token);
+        }
+
+        @Test
+        void getEmailFromVerificationToken_ValidToken_ReturnsEmail() {
+            String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
+
+            String extractedEmail = jwtTokenProvider.getEmailFromVerificationToken(token);
+
+            assertEquals(member.getEmail(), extractedEmail);
+        }
+
+        @Test
+        void getIdFromVerificationToken_ValidToken_ReturnsId() {
+            String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
+
+            String extractedId = jwtTokenProvider.getIdFromVerificationToken(token);
+
+            assertEquals(member.getId().toString(), extractedId);
+        }
+
+        @Test
+        void getEmailFromVerificationToken_InvalidToken_ReturnsNull() {
+            String extractedEmail = jwtTokenProvider.getEmailFromVerificationToken(invalidToken);
+
+            assertNull(extractedEmail);
+        }
+
+        @Test
+        void getIdFromVerificationToken_InvalidToken_ReturnsNull() {
+            String extractedId = jwtTokenProvider.getIdFromVerificationToken(invalidToken);
+
+            assertNull(extractedId);
         }
     }
 
