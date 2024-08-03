@@ -121,7 +121,7 @@ public class MemberControllerTest {
         memberDtoPage = memberPage.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
 
         memberDTOWithPasswordConfirm = new MemberDTOWithPasswordConfirm();
-        memberDTOWithPasswordConfirm.setId(1L);
+        /*memberDTOWithPasswordConfirm.setId(1L);*/
         memberDTOWithPasswordConfirm.setEmail("update@example.com");
         memberDTOWithPasswordConfirm.setPassword("UpdatedPass123!");
         memberDTOWithPasswordConfirm.setPasswordConfirm("UpdatedPass123!");
