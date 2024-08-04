@@ -31,7 +31,7 @@ public class MemberDTOWithoutId {
     private String name;
 
     @NotEmpty(message = "전화번호를 입력해주세요.")
-    @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다.")
+    @Pattern(regexp = "^01(?:0|1|[6-9])-(?:\\d{3}|\\d{4})-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다..")
     @Schema(description = "사용자 전화번호", required = true)
     private String phone;
 }
