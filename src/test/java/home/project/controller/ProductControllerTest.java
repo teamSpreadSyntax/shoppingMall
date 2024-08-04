@@ -119,7 +119,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void createProduct_InvalidInput_ReturnsBadRequest() throws Exception {
+        public void createProduct_EmptyInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("name", "상품의 이름을 입력해주세요.");
             errors.put("brand", "상품의 브랜드를 입력해주세요.");
@@ -198,7 +198,7 @@ public class ProductControllerTest {
     @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class FindAllProductsTests {
         @Test
-        public void findAllProducts_ExistingProduct_ReturnsPageOfProducts() throws Exception {
+        public void findAllProducts_ExistingProducts_ReturnsProductsPage() throws Exception {
             when(productService.findAll(any(Pageable.class))).thenReturn(productPage);
 
             mockMvc.perform(get("/api/product/products")
@@ -229,7 +229,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void findAllProducts_EmptyPage_ReturnsListOfEmpty() throws Exception {
+        public void findAllProducts_EmptyPage_ReturnsEmptyPage() throws Exception {
             when(productService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
             mockMvc.perform(get("/api/product/products")
@@ -245,7 +245,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void findAllProducts_NegativePage_ReturnsListOfEmpty() throws Exception {
+        public void findAllProducts_NegativePageNumber_ReturnsBadRequest() throws Exception {
             when(productService.findAll(any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));
 
             mockMvc.perform(get("/api/product/products")
@@ -263,7 +263,7 @@ public class ProductControllerTest {
     @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class SearchProductsTests {
         @Test
-        public void searchProducts_ValidInput_ReturnsMatchingProducts() throws Exception {
+        public void searchProducts_ExistingProducts_ReturnsMatchingProducts() throws Exception {
             when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class))).thenReturn(productPage);
 
             mockMvc.perform(get("/api/product/search")
@@ -298,7 +298,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void searchProducts_NoKeywords_ReturnsPageOfProducts() throws Exception {
+        public void searchProducts_NoKeywords_ReturnsAllProducts() throws Exception {
             when(productService.findProducts(any(), any(), any(), any(), any(Pageable.class))).thenReturn(productPage);
 
 
@@ -329,9 +329,23 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
 
-
         @Test
-        public void searchProducts_EmptyPage_ReturnsPageOfEmpty() throws Exception {
+        public void searchProducts_OverPageRequest_ReturnsEmptyPage() throws Exception {
+            when(productService.findProducts(any(), any(), any(), any(), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
+
+            mockMvc.perform(get("/api/product/search")
+                            .param("page", "1000")  // 존재하지 않는 페이지 번호
+                            .param("size", "5"))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.totalCount").value(0))
+                    .andExpect(jsonPath("$.result.page").value(0))
+                    .andExpect(jsonPath("$.result.content").isArray())
+                    .andExpect(jsonPath("$.result.content.length()").value(0))
+                    .andExpect(jsonPath("$.responseMessage").value("전체 상품입니다."))
+                    .andExpect(jsonPath("$.status").value(200));
+        }
+        @Test
+        public void searchProducts_NoResults_ReturnsNotFound() throws Exception {
             when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
                     .thenThrow(new IllegalArgumentException("해당하는 상품이 없습니다."));
 
@@ -347,26 +361,8 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
                     .andExpect(jsonPath("$.status").value(404));
         }
-
-
         @Test
-        public void searchProducts_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
-            when(productService.findProducts(any(), any(), any(), any(), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            mockMvc.perform(get("/api/product/search")
-                            .param("page", "1000")  // 존재하지 않는 페이지 번호
-                            .param("size", "5"))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.result.totalCount").value(0))
-                    .andExpect(jsonPath("$.result.page").value(0))
-                    .andExpect(jsonPath("$.result.content").isArray())
-                    .andExpect(jsonPath("$.result.content.length()").value(0))
-                    .andExpect(jsonPath("$.responseMessage").value("전체 상품입니다."))
-                    .andExpect(jsonPath("$.status").value(200));
-        }
-
-        @Test
-        public void searchProducts_NegativePage_ReturnsListOfEmpty() throws Exception {
+        public void searchProducts_NegativePageNumber_ReturnsBadRequest() throws Exception {
             when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));
 
             mockMvc.perform(get("/api/product/search")
@@ -387,7 +383,7 @@ public class ProductControllerTest {
     @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class BrandListTests {
         @Test
-        void brandList_ReturnsPagedBrandList() throws Exception {
+        void brandList_ExistingProducts_ReturnsProductsPage() throws Exception {
             Page<Product> brandPage = new PageImpl<>(productList);
             when(productService.brandList(any(Pageable.class))).thenReturn(brandPage);
 
@@ -405,7 +401,7 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void brandList_EmptyPage_ReturnsListOfEmpty() throws Exception {
+        public void brandList_EmptyPage_ReturnsEmptyPage() throws Exception {
             when(productService.brandList(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
             mockMvc.perform(get("/api/product/brands")
@@ -421,7 +417,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void brandList_NegativePage_ReturnsListOfEmpty() throws Exception {
+        public void brandList_NegativePageNumber_ReturnsBadRequest() throws Exception {
             when(productService.brandList(any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));
 
             mockMvc.perform(get("/api/product/brands")
@@ -438,7 +434,7 @@ public class ProductControllerTest {
     @WithMockUser(roles = {"ADMIN", "CENTER"})
     class UpdateProductTests {
         @Test
-        public void updateProduct_ValidInput_ReturnsUpdatedProduct() throws Exception {
+        public void updateProduct_ExistingProduct_ReturnsUpdatedProduct() throws Exception {
             Product updatedProduct = new Product();
             updatedProduct.setId(1L);
             updatedProduct.setBrand("UpdatedBrand");
@@ -470,7 +466,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void updateProduct_InvalidInput_ReturnsBadRequest() throws Exception {
+        public void updateProduct_EmptyInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("name", "상품의 이름을 입력해주세요.");
             errors.put("brand", "상품의 브랜드를 입력해주세요.");
@@ -495,26 +491,7 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.status").value(400));
         }
 
-        @Test
-        public void updateProduct_NegativeInput_ReturnsBadRequest() throws Exception {
-            Map<String, String> errors = new HashMap<>();
-            errors.put("stock", "재고는 0 이상이어야 합니다.");
-            when(validationCheck.validationChecks(any(BindingResult.class)))
-                    .thenReturn(new CustomOptionalResponseEntity<>(
-                            new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()),
-                            HttpStatus.BAD_REQUEST
-                    ));
 
-            mockMvc.perform(put("/api/product/update")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content("{ \"id\": 1, \"brand\": \"UpdatedBrand\", \"category\": \"UpdatedCategory\", \"name\": \"UpdatedProduct\", \"stock\": -1, \"soldQuantity\": 50, \"image\": \"updated.jpg\" }"))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.result.stock").value("재고는 0 이상이어야 합니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400));
-
-            verify(productService, never()).update(any(Product.class));
-        }
 
         @Test
         public void updateProduct_NonExistingProduct_ReturnsNotFound() throws Exception {
@@ -548,7 +525,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void updateProduct_NoChanges_ReturnsUnmodifiedProduct() throws Exception {
+        public void updateProduct_NoChanges_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
             when(productService.update(any(Product.class))).thenThrow(new DataIntegrityViolationException("변경된 상품 정보가 없습니다."));
 
@@ -565,7 +542,26 @@ public class ProductControllerTest {
             verify(productService).update(any(Product.class));
         }
     }
+    @Test
+    public void updateProduct_NegativeStock_ReturnsBadRequest() throws Exception {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("stock", "재고는 0 이상이어야 합니다.");
+        when(validationCheck.validationChecks(any(BindingResult.class)))
+                .thenReturn(new CustomOptionalResponseEntity<>(
+                        new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()),
+                        HttpStatus.BAD_REQUEST
+                ));
 
+        mockMvc.perform(put("/api/product/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{ \"id\": 1, \"brand\": \"UpdatedBrand\", \"category\": \"UpdatedCategory\", \"name\": \"UpdatedProduct\", \"stock\": -1, \"soldQuantity\": 50, \"image\": \"updated.jpg\" }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.result.stock").value("재고는 0 이상이어야 합니다."))
+                .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                .andExpect(jsonPath("$.status").value(400));
+
+        verify(productService, never()).update(any(Product.class));
+    }
     @Nested
     @WithMockUser(roles = {"ADMIN", "CENTER"})
     class DeleteProductTests {
@@ -599,7 +595,7 @@ public class ProductControllerTest {
     @WithMockUser(roles = {"ADMIN", "CENTER"})
     class IncreaseStockTests {
         @Test
-        public void increaseStock_ValidInput_ReturnsUpdatedStock() throws Exception {
+        public void increaseStock_ExistingProduct_ReturnsUpdatedStock() throws Exception {
             Product updatedProduct = new Product();
             updatedProduct.setId(1L);
             updatedProduct.setName("TestProduct");
@@ -615,20 +611,6 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("TestProduct상품이 50개 증가하여 150개가 되었습니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
-
-        @Test
-        public void increaseStock_NegativeStock_ReturnsConflict() throws Exception {
-            when(productService.increaseStock(1L, -50L)).thenThrow(new DataIntegrityViolationException("재고가 음수일 수 없습니다."));
-
-            mockMvc.perform(put("/api/product/increase_stock")
-                            .param("productId", "1")
-                            .param("stock", "-50"))
-                    .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 음수일 수 없습니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409));
-        }
-
         @Test
         void increaseStock_NonExistingProduct_ReturnsNotFound() throws Exception {
             when(productService.increaseStock(99L, 50L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
@@ -641,13 +623,25 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
                     .andExpect(jsonPath("$.status").value(404));
         }
+        @Test
+        public void increaseStock_NegativeStock_ReturnsConflict() throws Exception {
+            when(productService.increaseStock(1L, -50L)).thenThrow(new DataIntegrityViolationException("재고가 음수일 수 없습니다."));
+
+            mockMvc.perform(put("/api/product/increase_stock")
+                            .param("productId", "1")
+                            .param("stock", "-50"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 음수일 수 없습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
+                    .andExpect(jsonPath("$.status").value(409));
+        }
     }
 
     @Nested
     @WithMockUser(roles = {"ADMIN", "CENTER"})
     class DecreaseStockTests {
         @Test
-        public void decreaseStock_ValidInput_ReturnsUpdatedStock() throws Exception {
+        public void decreaseStock_ExistingProduct_ReturnsUpdatedStock() throws Exception {
             Product updatedProduct = new Product();
             updatedProduct.setId(1L);
             updatedProduct.setName("TestProduct");
@@ -665,19 +659,6 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void decreaseStock_InsufficientStock_ReturnsConflict() throws Exception {
-            when(productService.decreaseStock(1L, 150L)).thenThrow(new DataIntegrityViolationException("재고가 부족합니다."));
-
-            mockMvc.perform(put("/api/product/decrease_stock")
-                            .param("productId", "1")
-                            .param("stock", "150"))
-                    .andExpect(status().isConflict())
-                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 부족합니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409));
-        }
-
-        @Test
         void decreaseStock_NonExistingProduct_ReturnsNotFound() throws Exception {
             when(productService.decreaseStock(99L, 50L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
 
@@ -688,6 +669,18 @@ public class ProductControllerTest {
                     .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 상품이 없습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
                     .andExpect(jsonPath("$.status").value(404));
+        }
+        @Test
+        public void decreaseStock_InsufficientStock_ReturnsConflict() throws Exception {
+            when(productService.decreaseStock(1L, 150L)).thenThrow(new DataIntegrityViolationException("재고가 부족합니다."));
+
+            mockMvc.perform(put("/api/product/decrease_stock")
+                            .param("productId", "1")
+                            .param("stock", "150"))
+                    .andExpect(status().isConflict())
+                    .andExpect(jsonPath("$.result.errorMessage").value("재고가 부족합니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
+                    .andExpect(jsonPath("$.status").value(409));
         }
     }
 

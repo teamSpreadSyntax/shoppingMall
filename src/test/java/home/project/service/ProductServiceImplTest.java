@@ -80,7 +80,7 @@ public class ProductServiceImplTest {
     @Nested
     class JoinTests {
         @Test
-        void join_ProductSuccessfully_SavesProduct() {
+        void join_ValidInput_SavesProduct() {
             productService.join(product3);
             verify(productRepository).save(product3);
             assertEquals("puma", product3.getBrand());
@@ -111,7 +111,7 @@ public class ProductServiceImplTest {
     @Nested
     class FindAllTests  {
         @Test
-        void findAll_AllProductsFound_ReturnsPageOfProducts() {
+        void findAll_ExistingProducts_ReturnsProductsPage() {
             List<Product> productList = Arrays.asList(product, product2);
             Page<Product> page = new PageImpl<>(productList, pageable, productList.size());
 
@@ -127,7 +127,7 @@ public class ProductServiceImplTest {
     @Nested
     class FindProductsTests {
         @Test
-        void findProducts_ByCategory_ReturnsMatchingProducts() {
+        void findProducts_ExistingProducts_ReturnsMatchingProducts() {
             Pageable pageable = PageRequest.of(0, 10);
 
             List<Product> pantsProducts = Arrays.asList(product2);
@@ -156,7 +156,7 @@ public class ProductServiceImplTest {
     @Nested
     class BrandListTests {
         @Test
-        void brandList_AllBrandsSorted_ReturnsPageOfProducts() {
+        void brandList_ExistingProducts_ReturnsProductsPage() {
             List<Product> products = Arrays.asList(product, product2);
             Page<Product> page = new PageImpl<>(products, pageable, products.size());
             when(productRepository.findAllByOrderByBrandAsc(pageable)).thenReturn(page);
@@ -170,7 +170,7 @@ public class ProductServiceImplTest {
     @Nested
     class UpdateTests {
         @Test
-        void update_ProductSuccessfullyUpdated_ReturnsUpdatedProduct() {
+        void update_ExistingProduct_ReturnsUpdatedProduct() {
             when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
             when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -188,7 +188,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void update_ProductPartialChangeUpdated_ReturnsUpdatedProduct(){
+        void update_PartialChange_ReturnsUpdatedProduct(){
             Product partialUpdateProduct = new Product();
             partialUpdateProduct.setId(product.getId());
             partialUpdateProduct.setName(updateProduct.getName());
@@ -243,7 +243,7 @@ public class ProductServiceImplTest {
     @Nested
     class DeleteByIdTests {
         @Test
-        void deleteById_ExistingProduct_ProductDeletedSuccessfully() {
+        void deleteById_ExistingProduct_DeletesSuccessfully() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
             productService.deleteById(1L);
@@ -263,7 +263,7 @@ public class ProductServiceImplTest {
     @Nested
     class IncreaseStockTests {
         @Test
-        void increaseStock_StockIncreasedSuccessfully_ReturnsUpdatedProduct() {
+        void increaseStock_ExistingProduct_ReturnsUpdatedProduct() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
             when(productRepository.save(product)).thenReturn(product);
 
@@ -277,13 +277,13 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void increaseStock_NegativeStockIncrement_ThrowsDataIntegrityViolationException() {
+        void increaseStock_NegativeInput_ThrowsDataIntegrityViolationException() {
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.increaseStock(1L, -5L));
             assertEquals("재고가 음수일 수 없습니다.", exception.getMessage());
         }
 
         @Test
-        void increaseStock_NonExistingProduct_ThrowsDataIntegrityViolationException() {
+        void increaseStock_NonExistingProduct_ThrowsIllegalArgumentException() {
             when(productRepository.findById(123L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.increaseStock(123L, 14L));
@@ -294,7 +294,7 @@ public class ProductServiceImplTest {
     @Nested
     class DecreaseStockTests {
         @Test
-        void decreaseStock_StockDecreasedSuccessfully_ReturnsUpdatedProduct() {
+        void decreaseStock_ExistingProduct_ReturnsUpdatedProduct() {
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
             when(productRepository.save(product)).thenReturn(product);
 

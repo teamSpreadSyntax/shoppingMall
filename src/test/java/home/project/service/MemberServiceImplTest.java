@@ -84,7 +84,7 @@ class MemberServiceImplTest {
     @Nested
     class convertToEntityTests {
         @Test
-        void convertToEntity_EncodesPassword_ReturnMember() {
+        void convertToEntity_ValidInput_ReturnsEncodedMember() {
             when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
 
             Member member = memberService.convertToEntity(memberDTOWithoutId);
@@ -97,34 +97,7 @@ class MemberServiceImplTest {
     @Nested
     class JoinTests {
         @Test
-        void join_DuplicateEmailAndPhone_ThrowsDataIntegrityViolationException() {
-            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
-            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
-
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
-            assertEquals("이미 사용 중인 이메일과 휴대폰번호입니다.", exception.getMessage());
-        }
-
-        @Test
-        void join_DuplicateEmail_ThrowsDataIntegrityViolationException() {
-            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
-            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
-
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
-            assertEquals("이미 사용 중인 이메일입니다.", exception.getMessage());
-        }
-
-        @Test
-        void join_DuplicatePhone_ThrowsDataIntegrityViolationException() {
-            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
-            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
-
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
-            assertEquals("이미 사용 중인 휴대폰번호입니다.", exception.getMessage());
-        }
-
-        @Test
-        void join_SuccessfullyJoinsMember_SavesMember() {
+        void join_ValidInput_SavesMember() {
             when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
             when(memberRepository.save(any(Member.class))).thenReturn(member);
@@ -133,13 +106,36 @@ class MemberServiceImplTest {
 
             verify(memberRepository).save(member);
         }
+        @Test
+        void join_DuplicateEmail_ThrowsDataIntegrityViolationException() {
+            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
+            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
 
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
+            assertEquals("이미 사용 중인 이메일입니다.", exception.getMessage());
+        }
+        @Test
+        void join_DuplicatePhone_ThrowsDataIntegrityViolationException() {
+            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
+            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
+
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
+            assertEquals("이미 사용 중인 휴대폰번호입니다.", exception.getMessage());
+        }
+        @Test
+        void join_DuplicateEmailAndPhone_ThrowsDataIntegrityViolationException() {
+            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
+            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
+
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
+            assertEquals("이미 사용 중인 이메일과 휴대폰번호입니다.", exception.getMessage());
+        }
     }
 
     @Nested
     class FindByIdTests {
         @Test
-        void findById_ExistingMember_ReturnMember() {
+        void findAll_ExistingMember_ReturnsMembersPage() {
             when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
             Optional<Member> findMember = memberService.findById(1L);
 
@@ -177,7 +173,7 @@ class MemberServiceImplTest {
     @Nested
     class FindMembersTests {
         @Test
-        void findMembers_ByCondition_ReturnsMatchingMembers() {
+        void findMembers_ExistingMembers_ReturnsMatchingMembers() {
             Page<Member> page = new PageImpl<>(Arrays.asList(member, member2));
 
             when(memberRepository.findMembers("김길동", "null", "null", "null", "null", pageable)).thenReturn(page);
@@ -207,7 +203,7 @@ class MemberServiceImplTest {
     @Nested
     class UpdateTests {
         @Test
-        void update_ProductSuccessfullyUpdated_ReturnsUpdatedMember() {
+        void update_ExistingMember_ReturnsUpdatedMember() {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
             when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
             when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -219,6 +215,42 @@ class MemberServiceImplTest {
             assertEquals(updateMember.getPhone(), updatedMember.getPhone());
             assertEquals("encodedNewPassword", updatedMember.getPassword());
             assertEquals(updateMember.getName(), updatedMember.getName());
+        }
+
+        @Test
+        void update_PartialChange_ReturnsUpdatedMember() {
+            Member partialUpdateMember = new Member();
+            partialUpdateMember.setId(member.getId());
+            partialUpdateMember.setName(updateMember.getName());
+
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+            when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            Optional<Member> result = memberService.update(partialUpdateMember);
+
+            assertTrue(result.isPresent());
+            Member updatedMember = result.get();
+            assertEquals(updateMember.getName(), updatedMember.getName());
+            assertEquals(member.getEmail(), updatedMember.getEmail());
+            assertEquals(member.getPhone(), updatedMember.getPhone());
+            assertEquals(member.getPassword(), updatedMember.getPassword());
+        }
+
+        @Test
+        void update_NewPassword_ReturnsEncodedPassword() {
+            Member passwordUpdateMember = new Member();
+            passwordUpdateMember.setId(member.getId());
+            passwordUpdateMember.setPassword("newPassword");
+
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+            when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+            when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            Optional<Member> result = memberService.update(passwordUpdateMember);
+
+            assertTrue(result.isPresent());
+            Member updatedMember = result.get();
+            assertEquals("encodedNewPassword", updatedMember.getPassword());
+            verify(passwordEncoder).encode("newPassword");
         }
 
         @Test
@@ -250,6 +282,17 @@ class MemberServiceImplTest {
         }
 
         @Test
+        void update_NonExistingMember_ThrowsIllegalArgumentException() {
+            Member nonExistingUpdateMember = new Member();
+            nonExistingUpdateMember.setId(999L);
+
+            when(memberRepository.findById(999L)).thenReturn(Optional.empty());
+
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.update(nonExistingUpdateMember));
+            assertEquals("999(으)로 등록된 회원이 없습니다.", exception.getMessage());
+        }
+
+        @Test
         void update_NoChanges_ThrowsDataIntegrityViolationException(){
             Member noChangeMember = new Member();
             noChangeMember.setId(member.getId());
@@ -262,58 +305,13 @@ class MemberServiceImplTest {
 
         }
 
-        @Test
-        void update_ProductPartialChangeUpdated_ReturnUpdatedMember() {
-            Member partialUpdateMember = new Member();
-            partialUpdateMember.setId(member.getId());
-            partialUpdateMember.setName(updateMember.getName());
 
-            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
-            when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-            Optional<Member> result = memberService.update(partialUpdateMember);
-
-            assertTrue(result.isPresent());
-            Member updatedMember = result.get();
-            assertEquals(updateMember.getName(), updatedMember.getName());
-            assertEquals(member.getEmail(), updatedMember.getEmail());
-            assertEquals(member.getPhone(), updatedMember.getPhone());
-            assertEquals(member.getPassword(), updatedMember.getPassword());
-        }
-
-        @Test
-        void update_EncodesPassword_returnMember() {
-            Member passwordUpdateMember = new Member();
-            passwordUpdateMember.setId(member.getId());
-            passwordUpdateMember.setPassword("newPassword");
-
-            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
-            when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
-            when(memberRepository.save(any(Member.class))).thenAnswer(invocation -> invocation.getArgument(0));
-            Optional<Member> result = memberService.update(passwordUpdateMember);
-
-            assertTrue(result.isPresent());
-            Member updatedMember = result.get();
-            assertEquals("encodedNewPassword", updatedMember.getPassword());
-            verify(passwordEncoder).encode("newPassword");
-        }
-
-        @Test
-        void update_NonExistingMember_ThrowsIllegalArgumentException() {
-            Member nonExistingUpdateMember = new Member();
-            nonExistingUpdateMember.setId(999L);
-
-            when(memberRepository.findById(999L)).thenReturn(Optional.empty());
-
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.update(nonExistingUpdateMember));
-            assertEquals("999(으)로 등록된 회원이 없습니다.", exception.getMessage());
-        }
     }
 
     @Nested
     class DeleteByIdTests {
         @Test
-        void deleteById_ExistingMember_MemberDeletedSuccessfully() {
+        void deleteById_ExistingMember_DeletesSuccessfully() {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
 
             memberService.deleteById(member.getId());

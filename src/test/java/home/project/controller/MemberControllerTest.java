@@ -169,7 +169,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void createMember_ValidNoInput_ReturnsBadRequest() throws Exception {
+        public void createMember_EmptyInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("name", "이름을 입력해주세요.");
             errors.put("email", "이메일을 입력해주세요.");
@@ -196,19 +196,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(400));
         }
 
-        @Test
-        public void createMember_InvalidPasswordConfirm_ReturnsBadRequest() throws Exception {
-            when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            memberDTOWithoutId.setPasswordConfirm("WrongPassword123!");
 
-            mockMvc.perform(post("/api/member/join")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400));
-        }
 
         @Test
         public void createMember_InvalidInput_ReturnsBadRequest() throws Exception {
@@ -234,7 +222,19 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
                     .andExpect(jsonPath("$.status").value(400));
         }
+        @Test
+        public void createMember_InvalidPasswordConfirm_ReturnsBadRequest() throws Exception {
+            when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
+            memberDTOWithoutId.setPasswordConfirm("WrongPassword123!");
 
+            mockMvc.perform(post("/api/member/join")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithoutId)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
+        }
         @Test
 //        @WithMockUser(roles = "USER")
         void createMember_DuplicateEmail_ReturnsConflict() throws Exception {
@@ -321,7 +321,7 @@ public class MemberControllerTest {
     @WithMockUser(roles = {"ADMIN", "CENTER"})
     class findAllMembersTests {
         @Test
-        public void findAllMembers_ExistingMember_ReturnsPageOfMembers() throws Exception {
+        public void findAllMembers_ExistingMembers_ReturnsMembersPage() throws Exception {
 
             when(memberService.findAll(any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
@@ -345,7 +345,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void findAllMembers_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
+        public void findAllMembers_OverPageRequest_ReturnsEmptyPage() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
             System.out.println(memberPage.getSize());
@@ -365,7 +365,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void findAllMembers_NegativePage_ReturnsListOfEmpty() throws Exception {
+        public void findAllMembers_NegativePageNumber_ReturnsBadRequest() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));;
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
@@ -389,7 +389,7 @@ public class MemberControllerTest {
     @WithMockUser(roles = {"ADMIN", "CENTER"})
     class searchMembersTests {
         @Test
-        public void searchMembers_MatchingCriteria_ReturnsMatchingMembers() throws Exception {
+        public void searchMembers_ExistingMembers_ReturnsMatchingMembers() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(member.getRole()));
 
@@ -445,24 +445,8 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("전체 회원입니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
-
         @Test
-        public void searchMembers_NoResults_ReturnsNotFound() throws Exception {
-            when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class)))
-                    .thenThrow(new IllegalArgumentException("해당하는 회원이 없습니다."));
-
-            mockMvc.perform(get("/api/member/search")
-                            .param("name", "NonExistingName")
-                            .param("page", String.valueOf(pageable.getPageNumber()))
-                            .param("size", String.valueOf(pageable.getPageSize())))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.result.errorMessage").value("해당하는 회원이 없습니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
-        }
-
-        @Test
-        public void searchMembers_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
+        public void searchMembers_OverPageRequest_ReturnsEmptyPage() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
@@ -479,9 +463,25 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
 
         }
+        @Test
+        public void searchMembers_NoResults_ReturnsNotFound() throws Exception {
+            when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class)))
+                    .thenThrow(new IllegalArgumentException("해당하는 회원이 없습니다."));
+
+            mockMvc.perform(get("/api/member/search")
+                            .param("name", "NonExistingName")
+                            .param("page", String.valueOf(pageable.getPageNumber()))
+                            .param("size", String.valueOf(pageable.getPageSize())))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("해당하는 회원이 없습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404));
+        }
+
+
 
         @Test
-        public void searchMembers_NegativePage_ReturnsListOfEmpty() throws Exception {
+        public void searchMembers_NegativePageNumber_ReturnsBadRequest() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenThrow(new IllegalAccessError("Page index must not be less than zero"));;
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 
@@ -523,7 +523,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void verifyUser_BothEmailAndPasswordNotProvided_ReturnsBadRequest() throws Exception {
+        public void verifyUser_EmptyInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일을 입력해주세요.");
             errors.put("password", "비밀번호를 입력해주세요.");
@@ -544,7 +544,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void verifyUser_BothInvalidEmailAndPasswordFormat_ReturnsBadRequest() throws Exception {
+        public void verifyUser_InvalidInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일 형식이 올바르지 않습니다.");
             errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
@@ -565,7 +565,7 @@ public class MemberControllerTest {
         }
 
         @Test
-        public void verifyUser_NonExistingId_ReturnsNotFound() throws Exception {
+        public void verifyUser_NonExistingMember_ReturnsNotFound() throws Exception {
             when(validationCheck.validationChecks(any())).thenReturn(null);
             when(memberService.findById(anyLong())).thenThrow(new IllegalArgumentException("0(으)로 등록된 회원이 없습니다."));
 
@@ -615,7 +615,7 @@ public class MemberControllerTest {
     @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class updateMemberTests {
         @Test
-        public void updateMember_Success_ReturnsUpdatedMemberInfo() throws Exception {
+        public void updateMember_ExistingMember_ReturnsUpdatedMemberInfo() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
@@ -637,24 +637,8 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("회원 정보가 수정되었습니다."))
                     .andExpect(jsonPath("$.status").value(200));
         }
-
         @Test
-        public void updateMember_InvalidToken_ReturnsBadRequest() throws Exception {
-            String invalidToken = "invalidToken";
-            when(jwtTokenProvider.getEmailFromVerificationToken(invalidToken)).thenReturn(null);
-
-            mockMvc.perform(put("/api/member/update")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
-                            .header("Verification-Token", invalidToken))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 검증 토큰입니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
-        }
-
-        @Test
-        public void updateMember_ValidNoInput_ReturnsBadRequest() throws Exception {
+        public void updateMember_EmptyInput_ReturnsBadRequest() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
@@ -688,8 +672,11 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(400));
         }
 
+
+
+
         @Test
-        public void updateMember_InvalidEmail_ReturnsBadRequest() throws Exception {
+        public void updateMember_InvalidInput_ReturnsBadRequest() throws Exception {
             Map<String, String> errors = new HashMap<>();
             errors.put("email", "이메일 형식이 올바르지 않습니다.");
             errors.put("password", "비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다.");
@@ -730,7 +717,20 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
                     .andExpect(jsonPath("$.status").value(400));;
         }
+        @Test
+        public void updateMember_InvalidToken_ReturnsBadRequest() throws Exception {
+            String invalidToken = "invalidToken";
+            when(jwtTokenProvider.getEmailFromVerificationToken(invalidToken)).thenReturn(null);
 
+            mockMvc.perform(put("/api/member/update")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
+                            .header("Verification-Token", invalidToken))
+                    .andExpect(status().isNotFound())
+                    .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 검증 토큰입니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(404));
+        }
         @Test
         public void updateMember_DuplicateEmail_ReturnsConflict() throws Exception {
 
@@ -767,7 +767,6 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
                     .andExpect(jsonPath("$.status").value(409));
         }
-
         @Test
         public void updateMember_DuplicateEmailAndPhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
@@ -785,9 +784,8 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
                     .andExpect(jsonPath("$.status").value(409));
         }
-
         @Test
-        public void updateMember_NoChanges_ReturnsUnmodifiedProduct() throws Exception {
+        public void updateMember_NoChanges_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
             when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
@@ -814,7 +812,7 @@ public class MemberControllerTest {
     @WithMockUser(roles = {"ADMIN", "CENTER"})
     class deleteMemberTests {
         @Test
-        public void deleteMember_ExistingMember_DeletesMemberAndReturnsSuccessMessage() throws Exception {
+        public void deleteMember_ExistingMember_ReturnsSuccessMessage() throws Exception {
             long memberId = 1L;
             String email = "test@example.com";
 

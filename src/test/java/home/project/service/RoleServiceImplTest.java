@@ -60,7 +60,7 @@ public class RoleServiceImplTest {
     @Nested
     class UpdateTests {
         @Test
-        void update_RoleSuccessfullyUpdated_ReturnsUpdateRole() {
+        void update_ExistingRole_ReturnsUpdatedRole() {
             when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
 
             Role updateRole = new Role();
@@ -87,7 +87,7 @@ public class RoleServiceImplTest {
     @Nested
     class JoinTests {
         @Test
-        void join_RoleDoesNotExist_SavesRole() {
+        void join_NonExistingRole_SavesRole() {
             when(roleRepository.save(role)).thenReturn(role);
 
             roleService.join(role);
@@ -98,5 +98,4 @@ public class RoleServiceImplTest {
             assertEquals(1L, role.getId());
         }
     }
-//ㄴㅁㅇㄹ
 }

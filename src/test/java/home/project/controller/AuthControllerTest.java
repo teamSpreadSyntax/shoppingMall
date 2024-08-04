@@ -129,35 +129,29 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
 
             verify(passwordEncoder).matches(validUserDetailsDTO.getPassword(), userDetails.getPassword());
-
         }
 
         @Test
-        void login_InvalidPassword_ReturnsBadCredentials() throws Exception {
-            when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail())).thenReturn(mock(UserDetails.class));
-            when(passwordEncoder.matches(any(), any())).thenReturn(false);
+        void login_ValidNoInput_ReturnsBadRequest() throws Exception {
+            UserDetailsDTO invalidEmailDTO = new UserDetailsDTO();
+            invalidEmailDTO.setEmail("");
+            invalidEmailDTO.setPassword("ValidPassword123!");
+
+            Map<String, String> errors = new HashMap<>();
+            errors.put("email", "이메일을 입력해주세요.");
+            errors.put("password", "비밀번호를 입력해주세요.");
+            when(validationCheck.validationChecks(any())).thenReturn(
+                    new CustomOptionalResponseEntity<>(new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST)
+            );
 
             mockMvc.perform(post("/api/loginToken/login")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호를 확인해주세요."))
-                    .andExpect(jsonPath("$.responseMessage").value("비밀번호가 틀립니다."))
-                    .andExpect(jsonPath("$.status").value(401));
-        }
-
-        @Test
-        void login_NonExistingUser_ReturnsNotFound() throws Exception {
-            when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail()))
-                    .thenThrow(new UsernameNotFoundException(validUserDetailsDTO.getEmail() + "(으)로 등록된 회원이 없습니다."));
-
-            mockMvc.perform(post("/api/loginToken/login")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
-                    .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.result.errorMessage").value(validUserDetailsDTO.getEmail() + "(으)로 등록된 회원이 없습니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("해당 회원이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(401));
+                            .content(objectMapper.writeValueAsString(invalidEmailDTO)))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.result.email").value("이메일을 입력해주세요."))
+                    .andExpect(jsonPath("$.result.password").value("비밀번호를 입력해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
         @Test
@@ -184,26 +178,31 @@ public class AuthControllerTest {
         }
 
         @Test
-        void login_ValidNoInput_ReturnsBadRequest() throws Exception {
-            UserDetailsDTO invalidEmailDTO = new UserDetailsDTO();
-            invalidEmailDTO.setEmail("");
-            invalidEmailDTO.setPassword("ValidPassword123!");
-
-            Map<String, String> errors = new HashMap<>();
-            errors.put("email", "이메일을 입력해주세요.");
-            errors.put("password", "비밀번호를 입력해주세요.");
-            when(validationCheck.validationChecks(any())).thenReturn(
-                    new CustomOptionalResponseEntity<>(new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST)
-            );
+        void login_NonExistingUser_ReturnsNotFound() throws Exception {
+            when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail()))
+                    .thenThrow(new UsernameNotFoundException(validUserDetailsDTO.getEmail() + "(으)로 등록된 회원이 없습니다."));
 
             mockMvc.perform(post("/api/loginToken/login")
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(invalidEmailDTO)))
-                    .andExpect(status().isBadRequest())
-                    .andExpect(jsonPath("$.result.email").value("이메일을 입력해주세요."))
-                    .andExpect(jsonPath("$.result.password").value("비밀번호를 입력해주세요."))
-                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
-                    .andExpect(jsonPath("$.status").value(400));
+                            .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value(validUserDetailsDTO.getEmail() + "(으)로 등록된 회원이 없습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("해당 회원이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(401));
+        }
+
+        @Test
+        void login_InvalidPassword_ReturnsBadCredentials() throws Exception {
+            when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail())).thenReturn(mock(UserDetails.class));
+            when(passwordEncoder.matches(any(), any())).thenReturn(false);
+
+            mockMvc.perform(post("/api/loginToken/login")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("비밀번호를 확인해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("비밀번호가 틀립니다."))
+                    .andExpect(jsonPath("$.status").value(401));
         }
     }
 
@@ -226,7 +225,6 @@ public class AuthControllerTest {
         }
 
         @Test
-//        @WithMockUser(roles = "USER")
         void logout_NonExistingMember_ReturnsNotFound() throws Exception {
             when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
 
@@ -311,7 +309,6 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.result.content.length()").value(0))
                     .andExpect(jsonPath("$.responseMessage").value("전체 회원별 권한 목록입니다."))
                     .andExpect(jsonPath("$.status").value(200));
-
         }
 
         @Test
