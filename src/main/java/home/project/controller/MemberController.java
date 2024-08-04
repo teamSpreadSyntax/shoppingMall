@@ -120,7 +120,6 @@ public class MemberController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findMemberById(@RequestParam("memberId") Long memberId) {
-        try{
         if (memberId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
@@ -129,10 +128,6 @@ public class MemberController {
         Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
             String successMessage = memberId + "(으)로 가입된 회원정보입니다";
         return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
     }
 
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
@@ -152,7 +147,7 @@ public class MemberController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        try {
+
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
 
@@ -170,10 +165,7 @@ public class MemberController {
             long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
             int page = pagedMemberDTOWithoutPw.getNumber();
             return new CustomListResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
+
     }
 
     @Operation(summary = "회원 통합 조회 메서드", description = "이름, 이메일, 전화번호 및 일반 검색어로 회원을 조회합니다. 모든 조건을 만족하는 회원을 조회합니다. 검색어가 없으면 전체 회원을 조회합니다.")
@@ -198,7 +190,6 @@ public class MemberController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        try{
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
             Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
@@ -228,10 +219,6 @@ public class MemberController {
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
         int page = pagedMemberDTOWithoutPw.getNumber();
         return new CustomListResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
     }
 
     @Operation(summary = "본인확인 메서드", description = "본인확인 메서드입니다.")
@@ -287,7 +274,6 @@ public class MemberController {
     public ResponseEntity<?> updateMember(      @RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
                                                 BindingResult bindingResult,
                                                 @RequestHeader("Verification-Token") String verificationToken) {
-        try{
             CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
             if (validationResponse != null) {
                 return validationResponse;
@@ -314,9 +300,6 @@ public class MemberController {
             Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(memberWithoutPw -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
             String successMessage = "회원 정보가 수정되었습니다.";
         return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), "접근 권한이 없습니다.", HttpStatus.FORBIDDEN);
-        }
     }
 
     @Transactional
@@ -333,17 +316,12 @@ public class MemberController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
-        try{
+
         String email = memberService.findById(memberId).get().getEmail();
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email + "(id:" + memberId + ")님의 계정이 삭제되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "회원 삭제 성공", HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
         }
-    }
-
 
 }

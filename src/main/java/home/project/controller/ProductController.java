@@ -81,7 +81,6 @@ public class ProductController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
-        try{
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
             Long currentStock = productDTOWithoutId.getStock();
             if (currentStock < 0) {
@@ -99,10 +98,7 @@ public class ProductController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", product.getName() + "(이)가 등록되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 등록 성공", HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
+
     }
 
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")
@@ -116,17 +112,12 @@ public class ProductController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
-        try{
         if (productId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
         Optional<Product> productOptional = productService.findById(productId);
         String successMessage = productId + "에 해당하는 상품 입니다.";
         return new CustomOptionalResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
     }
 
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
@@ -144,17 +135,13 @@ public class ProductController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        try{
+
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Product> productList = productService.findAll(pageable);
         String successMessage = "전체 상품입니다.";
         long totalCount = productList.getTotalElements();
         int page = productList.getNumber();
         return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
     }
 
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
@@ -176,7 +163,6 @@ public class ProductController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        try{
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Product> productPage = productService.findProducts(brand, category, productName, content, pageable);
 
@@ -197,10 +183,7 @@ public class ProductController {
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
         return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
+
     }
 
     @Operation(summary = "전체 브랜드 조회 메서드", description = "브랜드 조회(판매량기준 오름차순정렬) 메서드입니다.")
@@ -220,17 +203,14 @@ public class ProductController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        try{
+
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Product> brandListPage = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다.";
         long totalCount = brandListPage.getTotalElements();
         int page = brandListPage.getNumber();
         return new CustomListResponseEntity<>(brandListPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
+
     }
 
     @Transactional
@@ -251,16 +231,11 @@ public class ProductController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
-        try{
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         Optional<Product> productOptional = productService.update(product);
         String successMessage = "상품 정보가 수정되었습니다.";
         return new CustomOptionalResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
     }
 
     @Transactional
@@ -277,16 +252,11 @@ public class ProductController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
-        try{
         String name = productService.findById(productId).get().getName();
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", name +"(id:" +productId + ")(이)가 삭제되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
     }
 
     @Transactional
@@ -305,14 +275,10 @@ public class ProductController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
-        try{
         Product increaseProduct = productService.increaseStock(productId, stock);
         String successMessage = increaseProduct.getName() + "상품이 " + stock + "개 증가하여 " + increaseProduct.getStock() + "개가 되었습니다.";
         return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
+
     }
 
     @Transactional
@@ -332,14 +298,9 @@ public class ProductController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
-        try{
         Product decreaseProduct = productService.decreaseStock(productId, stock);
         String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다.";
         return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
     }
 
 }

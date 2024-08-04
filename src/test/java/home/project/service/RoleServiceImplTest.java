@@ -71,7 +71,18 @@ public class RoleServiceImplTest {
             assertTrue(resultRole.isPresent());
             assertEquals("user", resultRole.get().getRole());
         }
+        @Test
+        void update_NonExistingRole_ThrowsIllegalArgumentException() {
+            Role updateRole = new Role();
+            updateRole.setId(999L);
+
+            when(roleRepository.findById(999L)).thenReturn(Optional.empty());
+            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roleService.update(updateRole));
+
+            assertEquals("999(으)로 등록된 회원이 없습니다.", exception.getMessage());
+        }
     }
+
 
     @Nested
     class JoinTests {

@@ -151,7 +151,7 @@ public class AuthController {
 
         String successMessage = "";
 
-        try {
+
             Role role = roleService.findById(memberId).get();
             String name = memberService.findById(memberId).get().getName();
                 if (authority.equals("admin")) {
@@ -166,10 +166,7 @@ public class AuthController {
                 }
             roleService.update(role);
             return new CustomOptionalResponseEntity<>(Optional.of(role), successMessage, HttpStatus.OK);
-        } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
+
     }
 
     @Operation(summary = "전체 회원별 권한 조회 메서드", description = "전체 회원별 권한 조회 메서드입니다. (center : 중앙 관리자, admin : 중간 관리자, user : 일반 사용자)")
@@ -190,7 +187,6 @@ public class AuthController {
                 @SortDefault(sort = "id", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         String successMessage = "전체 회원별 권한 목록입니다.";
-        try {
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
             Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
@@ -200,10 +196,6 @@ public class AuthController {
             int page = memberPage.getNumber();
             return new CustomListResponseEntity<>(rolesWithMemberNamesPage .getContent(), successMessage, HttpStatus.OK, totalCount, page);
 
-            } catch (AccessDeniedException e) {
-            String errorMessage = "접근 권한이 없습니다.";
-            return new CustomOptionalResponseEntity<>(Optional.of(e.getMessage()), errorMessage, HttpStatus.FORBIDDEN);
-        }
     }
 
 }
