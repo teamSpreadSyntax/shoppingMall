@@ -24,7 +24,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
         CustomOptionalResponseBody<?> responseBody = new CustomOptionalResponseBody<>(
                 Optional.of(Map.of("errorMessage", "접근 권한이 없습니다.")),
-                "접근 권한이 없습니다.",
+                "접근 권한을 확인해주세요.",
                 HttpStatus.FORBIDDEN.value()
         );
 
