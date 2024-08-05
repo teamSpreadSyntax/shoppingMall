@@ -61,15 +61,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
-//    @ExceptionHandler(ConstraintViolationException.class)
-//    public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException e) {
-//        Map<String, String> errors = new HashMap<>();
-//        for (ConstraintViolation<?> violation : e.getConstraintViolations()) {
-//            errors.put(violation.getPropertyPath().toString(), violation.getMessage());
-//        }
-//        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-//    }
-
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<?> handleAccessDeniedException(AccessDeniedException ex) {
         Map<String, Object> responseBody = new HashMap<>();

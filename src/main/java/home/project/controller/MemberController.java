@@ -45,16 +45,6 @@ import java.util.Optional;
 @Tag(name = "회원", description = "회원관련 API입니다")
 @RequestMapping(path = "/api/member")
 @ApiResponses(value = {
-        /*@ApiResponse(responseCode = "400", description = "Bad Request",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-        @ApiResponse(responseCode = "401", description = "Unauthorized",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-        @ApiResponse(responseCode = "403", description = "Forbidden",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
-        @ApiResponse(responseCode = "404", description = "Resource not found",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-        @ApiResponse(responseCode = "409", description = "Conflict",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),*/
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })

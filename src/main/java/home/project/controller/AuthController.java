@@ -48,16 +48,6 @@ import java.util.Optional;
 @Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃관련 API입니다")
 @RequestMapping(path = "/api/auth")
 @ApiResponses(value = {
-        /*@ApiResponse(responseCode = "400", description = "Bad Request",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/LoginValidationFailedResponseSchema"))),
-        @ApiResponse(responseCode = "401", description = "Unauthorized",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-        @ApiResponse(responseCode = "403", description = "Forbidden",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
-        @ApiResponse(responseCode = "404", description = "Resource not found",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-        @ApiResponse(responseCode = "409", description = "Conflict",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema"))),*/
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
@@ -96,13 +86,13 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody @Valid UserDetailsDTO userDetailsDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        //        UserDetails member = userDetailsService.loadUserByUsername(userDetailsDTO.getEmail());
-//        if (!passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())) {
-//            throw new BadCredentialsException("비밀번호를 확인해주세요.");
-//        }
+        UserDetails member = userDetailsService.loadUserByUsername(userDetailsDTO.getEmail());
+        if (!passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())) {
+            throw new BadCredentialsException("비밀번호를 확인해주세요.");
+        }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
-        String successMessage = /*member.etUsername() +*/ "(으)로 로그인에 성공했습니다.";
+        String successMessage = member.getUsername() + "(으)로 로그인에 성공했습니다.";
         return new CustomOptionalResponseEntity<>(Optional.of(tokenDto), successMessage, HttpStatus.OK);
     }
 
@@ -118,14 +108,6 @@ public class AuthController {
         Optional<Member> member = memberService.findById(memberId);
         memberService.logout(memberId);
         Optional<Role> role = roleService.findById(memberId);
-        /*String Authority = role.get().getRole();
-        if (Authority.equals("ROLE_USER")){
-            role.get().setRole("user");
-        } else if (Authority.equals("ROLE_ADMIN")) {
-            role.get().setRole("admin");
-        } else if (Authority.equals("ROLE_CENTER")) {
-            role.get().setRole("center");
-        }*/
         roleService.update(role.get());
         String email = member.get().getEmail();
         Map<String, String> responseMap = new HashMap<>();
@@ -194,7 +176,6 @@ public class AuthController {
             long totalCount = memberPage.getTotalElements();
             int page = memberPage.getNumber();
             return new CustomListResponseEntity<>(rolesWithMemberNamesPage .getContent(), successMessage, HttpStatus.OK, totalCount, page);
-
     }
 
 }

@@ -16,7 +16,6 @@ import java.util.Optional;
 
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
-    // 토큰이 없는 사용자의 요청을 처리
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override

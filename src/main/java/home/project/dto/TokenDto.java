@@ -11,9 +11,5 @@ public class TokenDto {
     private String grantType;
     private String accessToken;
     private String refreshToken;
-//    private Long accessTokenExpireln;
-//    private Long refreshTokenExpiresin;
-//    private String authority;
-//    private String info;
 }
 
