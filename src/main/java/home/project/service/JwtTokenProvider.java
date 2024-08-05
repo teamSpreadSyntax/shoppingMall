@@ -125,7 +125,6 @@ public class JwtTokenProvider {
 
             return claims.getSubject();
         } catch (JwtException e) {
-            log.error("Invalid verification token", e);
             return null;
         }
 
@@ -142,7 +141,6 @@ public class JwtTokenProvider {
 
             return claims.getId();
         } catch (JwtException e) {
-            log.error("Invalid verification token", e);
             return null;
         }
     }
