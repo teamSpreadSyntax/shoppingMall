@@ -37,11 +37,11 @@ public class MemberServiceImpl implements MemberService {
         boolean emailExists = memberRepository.existsByEmail(member.getEmail());
         boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
         if (emailExists && phoneExists) {
-            throw new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다.");
+            throw new DataIntegrityViolationException("이미 사용 중인 이메일과 전화번호입니다.");
         } else if (emailExists) {
             throw new DataIntegrityViolationException("이미 사용 중인 이메일입니다.");
         } else if (phoneExists) {
-            throw new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다.");
+            throw new DataIntegrityViolationException("이미 사용 중인 전화번호입니다.");
         }
         memberRepository.save(member);
     }
@@ -107,11 +107,11 @@ public class MemberServiceImpl implements MemberService {
         }
 
         if (isEmailDuplicate && isPhoneDuplicate) {
-            throw new DataIntegrityViolationException("이미 사용 중인 이메일과 휴대폰번호입니다.");
+            throw new DataIntegrityViolationException("이미 사용 중인 이메일과 전화번호입니다.");
         } else if (isEmailDuplicate) {
             throw new DataIntegrityViolationException("이미 사용 중인 이메일입니다.");
         } else if (isPhoneDuplicate) {
-            throw new DataIntegrityViolationException("이미 사용 중인 휴대폰번호입니다.");
+            throw new DataIntegrityViolationException("이미 사용 중인 전화번호입니다.");
         }
 
         if (!isModified) {

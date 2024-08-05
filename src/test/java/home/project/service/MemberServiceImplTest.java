@@ -120,7 +120,7 @@ class MemberServiceImplTest {
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
-            assertEquals("이미 사용 중인 휴대폰번호입니다.", exception.getMessage());
+            assertEquals("이미 사용 중인 전화번호입니다.", exception.getMessage());
         }
         @Test
         void join_DuplicateEmailAndPhone_ThrowsDataIntegrityViolationException() {
@@ -128,7 +128,7 @@ class MemberServiceImplTest {
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
-            assertEquals("이미 사용 중인 이메일과 휴대폰번호입니다.", exception.getMessage());
+            assertEquals("이미 사용 중인 이메일과 전화번호입니다.", exception.getMessage());
         }
     }
 
@@ -268,7 +268,7 @@ class MemberServiceImplTest {
             when(memberRepository.existsByPhone(updateMember.getPhone())).thenReturn(true);
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.update(updateMember));
-            assertEquals("이미 사용 중인 휴대폰번호입니다.", exception.getMessage());
+            assertEquals("이미 사용 중인 전화번호입니다.", exception.getMessage());
         }
 
         @Test
@@ -278,7 +278,7 @@ class MemberServiceImplTest {
             when(memberRepository.existsByPhone(updateMember.getPhone())).thenReturn(true);
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.update(updateMember));
-            assertEquals("이미 사용 중인 이메일과 휴대폰번호입니다.", exception.getMessage());
+            assertEquals("이미 사용 중인 이메일과 전화번호입니다.", exception.getMessage());
         }
 
         @Test
