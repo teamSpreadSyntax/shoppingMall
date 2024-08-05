@@ -263,7 +263,7 @@ public class ProductControllerTest {
     @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class SearchProductsTests {
         @Test
-        public void searchProducts_ExistingProducts_ReturnsMatchingProducts() throws Exception {
+        public void searchProducts_ExistingProducts_ReturnsMatchingProductsPage() throws Exception {
             when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class))).thenReturn(productPage);
 
             mockMvc.perform(get("/api/product/search")
@@ -330,7 +330,7 @@ public class ProductControllerTest {
         }
 
         @Test
-        public void searchProducts_OverPageRequest_ReturnsEmptyPage() throws Exception {
+        public void searchProducts_EmptyPage_ReturnsEmptyPage() throws Exception {
             when(productService.findProducts(any(), any(), any(), any(), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
             mockMvc.perform(get("/api/product/search")

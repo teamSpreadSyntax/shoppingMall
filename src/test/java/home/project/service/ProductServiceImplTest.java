@@ -100,7 +100,7 @@ public class ProductServiceImplTest {
         }
 
         @Test
-        void findById_NonExisting_ThrowsIllegalArgumentException() {
+        void findById_NonExistingProduct_ThrowsIllegalArgumentException() {
             when(productRepository.findById(3L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.findById(3L));

@@ -345,7 +345,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void findAllMembers_OverPageRequest_ReturnsEmptyPage() throws Exception {
+        public void findAllMembers_EmptyPage_ReturnsEmptyPage() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
             System.out.println(memberPage.getSize());
@@ -389,7 +389,7 @@ public class MemberControllerTest {
     @WithMockUser(roles = {"ADMIN", "CENTER"})
     class searchMembersTests {
         @Test
-        public void searchMembers_ExistingMembers_ReturnsMatchingMembers() throws Exception {
+        public void searchMembers_ExistingMembers_ReturnsMatchingMembersPage() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(member.getRole()));
 
@@ -446,7 +446,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
         }
         @Test
-        public void searchMembers_OverPageRequest_ReturnsEmptyPage() throws Exception {
+        public void searchMembers_EmptyPage_ReturnsEmptyPage() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
 

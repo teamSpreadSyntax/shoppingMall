@@ -135,7 +135,7 @@ class MemberServiceImplTest {
     @Nested
     class FindByIdTests {
         @Test
-        void findAll_ExistingMember_ReturnsMembersPage() {
+        void findById_ExistingMember_ReturnsMember() {
             when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
             Optional<Member> findMember = memberService.findById(1L);
 
@@ -144,7 +144,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void findById_NonExistingId_ThrowsIllegalArgumentException() {
+        void findById_NonExistingMember_ThrowsIllegalArgumentException() {
             when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findById(1L));
@@ -155,7 +155,7 @@ class MemberServiceImplTest {
     @Nested
     class FindAllTests {
         @Test
-        void findAll_AllMembersFound_ReturnsPageOfMembers() {
+        void findAll_AllMembersFound_ReturnsMembersPage() {
             Page<Member> page = new PageImpl<>(Arrays.asList(member, member2));
 
             when(memberRepository.findAll(pageable)).thenReturn(page);
@@ -320,7 +320,7 @@ class MemberServiceImplTest {
         }
 
         @Test
-        void deleteById_NonExistentMember_ThrowsIllegalArgumentException() {
+        void deleteById_NonExistingMember_ThrowsIllegalArgumentException() {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
 
             IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.deleteById(member.getId()));

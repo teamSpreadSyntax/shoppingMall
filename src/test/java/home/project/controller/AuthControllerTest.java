@@ -132,7 +132,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void login_ValidNoInput_ReturnsBadRequest() throws Exception {
+        void login_EmptyInput_ReturnsBadRequest() throws Exception {
             UserDetailsDTO invalidEmailDTO = new UserDetailsDTO();
             invalidEmailDTO.setEmail("");
             invalidEmailDTO.setPassword("ValidPassword123!");
@@ -155,7 +155,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        void login_InvalidEmail_ReturnsBadRequest() throws Exception {
+        void login_InvalidInput_ReturnsBadRequest() throws Exception {
             UserDetailsDTO invalidEmailDTO = new UserDetailsDTO();
             invalidEmailDTO.setEmail("invalid-email");
             invalidEmailDTO.setPassword("invalid-password");
@@ -241,7 +241,7 @@ public class AuthControllerTest {
     @WithMockUser(roles = {"CENTER"})
     class AuthorityTests {
         @Test
-        void addAuthority_ValidInput_SuccessfullyAssignsRole() throws Exception {
+        void addAuthority_ValidInput_ReturnsSuccessMessage() throws Exception {
             when(roleService.findById(1L)).thenReturn(Optional.of(testRole));
             when(memberService.findById(1L)).thenReturn(Optional.of(testMember));
             when(roleService.update(any(Role.class))).thenReturn(Optional.of(testRole));
@@ -274,7 +274,7 @@ public class AuthControllerTest {
     @WithMockUser(roles = {"CENTER"})
     class AuthoritiesTests {
         @Test
-        void checkAuthority_ReturnsPagedUserRoleList() throws Exception {
+        void checkAuthority_ValidInput_ReturnsdUserRolePage() throws Exception {
             List<Member> members = Arrays.asList(testMember);
             Page<Member> memberPage = new PageImpl<>(members, PageRequest.of(0, 5), 1);
 
@@ -295,7 +295,7 @@ public class AuthControllerTest {
         }
 
         @Test
-        public void checkAuthority_RequestOverPage_ReturnsPageOfEmpty() throws Exception {
+        public void checkAuthority_EmptyPage_ReturnsEmptyPage() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
             mockMvc.perform(get("/api/loginToken/authorities")

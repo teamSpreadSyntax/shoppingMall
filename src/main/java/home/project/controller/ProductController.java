@@ -133,7 +133,7 @@ public class ProductController {
     public ResponseEntity<?> findAllProduct(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
-                    @SortDefault(sort = "id", direction = Sort.Direction.ASC)
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
 
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
@@ -229,7 +229,7 @@ public class ProductController {
     })
     @PutMapping("update")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
@@ -302,5 +302,4 @@ public class ProductController {
         String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다.";
         return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
     }
-
 }

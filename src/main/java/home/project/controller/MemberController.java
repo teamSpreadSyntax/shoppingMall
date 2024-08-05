@@ -145,7 +145,7 @@ public class MemberController {
     public ResponseEntity<?> findAllMember(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
-                    @SortDefault(sort = "id", direction = Sort.Direction.ASC)
+                    @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
 
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
