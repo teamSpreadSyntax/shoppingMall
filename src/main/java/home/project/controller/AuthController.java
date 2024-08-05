@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃관련 API입니다")
-@RequestMapping(path = "/api/loginToken")
+@RequestMapping(path = "/api/auth")
 @ApiResponses(value = {
         /*@ApiResponse(responseCode = "400", description = "Bad Request",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/LoginValidationFailedResponseSchema"))),
