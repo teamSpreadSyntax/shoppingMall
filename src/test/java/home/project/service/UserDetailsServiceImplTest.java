@@ -60,14 +60,41 @@ class UserDetailsServiceImplTest {
             assertNotNull(userDetails);
             assertEquals(member.getEmail(), userDetails.getUsername());
             assertEquals(member.getPassword(), userDetails.getPassword());
-            assertEquals("ROLE_USER", userDetails.getAuthorities().iterator().next().getAuthority());
+            assertTrue(userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_USER")));
+        }
+
+        @Test
+        void loadUserByUsername_AdminExists_ReturnsUserDetailsWithAdminRole() {
+            role.setRole("admin");
+            when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+            when(roleRepository.findById(member.getId())).thenReturn(Optional.of(role));
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmail());
+
+            assertNotNull(userDetails);
+            assertTrue(userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN")));
+        }
+
+        @Test
+        void loadUserByUsername_CenterExists_ReturnsUserDetailsWithCenterRole() {
+            role.setRole("center");
+            when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+            when(roleRepository.findById(member.getId())).thenReturn(Optional.of(role));
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmail());
+
+            assertNotNull(userDetails);
+            assertTrue(userDetails.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER")));
         }
 
         @Test
         void loadUserByUsername_NonExistingEmail_ThrowsUsernameNotFoundException() {
             when(memberRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
 
-            UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername("test@test.com"));
+            UsernameNotFoundException exception = assertThrows(UsernameNotFoundException.class,
+                    () -> userDetailsService.loadUserByUsername("test@test.com"));
             assertEquals("test@test.com(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
