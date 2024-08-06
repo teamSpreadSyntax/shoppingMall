@@ -167,7 +167,7 @@ public class AuthController {
         @SortDefault.SortDefaults({
                 @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        String successMessage = "전체 회원별 권한 목록입니다.";
+        String successMessage = "전체 회원별 권한 목록입니다..";
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
             Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
