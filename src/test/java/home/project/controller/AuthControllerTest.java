@@ -118,7 +118,7 @@ public class AuthControllerTest {
             when(authenticationManager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken(userDetails, null));
             when(tokenProvider.generateToken(any())).thenReturn(testTokenDto);
 
-            mockMvc.perform(post("/api/loginToken/login")
+            mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
                     .andExpect(status().isOk())
@@ -144,7 +144,7 @@ public class AuthControllerTest {
                     new CustomOptionalResponseEntity<>(new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST)
             );
 
-            mockMvc.perform(post("/api/loginToken/login")
+            mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidEmailDTO)))
                     .andExpect(status().isBadRequest())
@@ -167,7 +167,7 @@ public class AuthControllerTest {
                     new CustomOptionalResponseEntity<>(new CustomOptionalResponseBody<>(Optional.of(errors), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value()), HttpStatus.BAD_REQUEST)
             );
 
-            mockMvc.perform(post("/api/loginToken/login")
+            mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(invalidEmailDTO)))
                     .andExpect(status().isBadRequest())
@@ -182,7 +182,7 @@ public class AuthControllerTest {
             when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail()))
                     .thenThrow(new UsernameNotFoundException(validUserDetailsDTO.getEmail() + "(으)로 등록된 회원이 없습니다."));
 
-            mockMvc.perform(post("/api/loginToken/login")
+            mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
                     .andExpect(status().isUnauthorized())
@@ -196,7 +196,7 @@ public class AuthControllerTest {
             when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail())).thenReturn(mock(UserDetails.class));
             when(passwordEncoder.matches(any(), any())).thenReturn(false);
 
-            mockMvc.perform(post("/api/loginToken/login")
+            mockMvc.perform(post("/api/auth/login")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
                     .andExpect(status().isUnauthorized())
@@ -213,7 +213,7 @@ public class AuthControllerTest {
             when(memberService.findById(1L)).thenReturn(Optional.of(testMember));
             when(roleService.findById(1L)).thenReturn(Optional.of(testRole));
 
-            mockMvc.perform(post("/api/loginToken/logout")
+            mockMvc.perform(post("/api/auth/logout")
                             .param("memberId", "1"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result.successMessage").value(testMember.getEmail() + "님 이용해주셔서 감사합니다."))
@@ -228,7 +228,7 @@ public class AuthControllerTest {
         void logout_NonExistingMember_ReturnsNotFound() throws Exception {
             when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
 
-            mockMvc.perform(post("/api/loginToken/logout")
+            mockMvc.perform(post("/api/auth/logout")
                             .param("memberId", "99"))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.result.errorMessage").value("99(으)로 등록된 회원이 없습니다."))
@@ -246,7 +246,7 @@ public class AuthControllerTest {
             when(memberService.findById(1L)).thenReturn(Optional.of(testMember));
             when(roleService.update(any(Role.class))).thenReturn(Optional.of(testRole));
 
-            mockMvc.perform(post("/api/loginToken/authorization")
+            mockMvc.perform(post("/api/auth/authorization")
                             .param("memberId", "1")
                             .param("authority", "admin"))
                     .andExpect(status().isOk())
@@ -260,7 +260,7 @@ public class AuthControllerTest {
             when(roleService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
             when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
 
-            mockMvc.perform(post("/api/loginToken/authorization")
+            mockMvc.perform(post("/api/auth/authorization")
                             .param("memberId", "99")
                             .param("authority", "admin"))
                     .andExpect(status().isNotFound())
@@ -281,7 +281,7 @@ public class AuthControllerTest {
             when(memberService.findAll(any(Pageable.class))).thenReturn(memberPage);
             when(roleService.findById(anyLong())).thenReturn(Optional.of(testRole));
 
-            mockMvc.perform(get("/api/loginToken/authorities")
+            mockMvc.perform(get("/api/auth/authorities")
                             .param("page", "1")
                             .param("size", "5"))
                     .andExpect(status().isOk())
@@ -298,7 +298,7 @@ public class AuthControllerTest {
         public void checkAuthority_EmptyPage_ReturnsEmptyPage() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(Collections.emptyList()));
 
-            mockMvc.perform(get("/api/loginToken/authorities")
+            mockMvc.perform(get("/api/auth/authorities")
                             .param("page", "1000")
                             .param("size", "5"))
                     .andExpect(status().isOk())
@@ -315,7 +315,7 @@ public class AuthControllerTest {
         void checkAuthority_NegativePageNumber_ReturnsBadRequest() throws Exception {
             when(memberService.findAll(any(Pageable.class))).thenThrow(new IllegalArgumentException("Page index must not be less than zero"));
 
-            mockMvc.perform(get("/api/loginToken/authorities")
+            mockMvc.perform(get("/api/auth/authorities")
                             .param("page", "-1")
                             .param("size", "5"))
                     .andExpect(status().isNotFound())
