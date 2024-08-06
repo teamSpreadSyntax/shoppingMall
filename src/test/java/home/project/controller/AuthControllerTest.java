@@ -274,7 +274,7 @@ public class AuthControllerTest {
     @WithMockUser(roles = {"CENTER"})
     class AuthoritiesTests {
         @Test
-        void checkAuthority_ValidInput_ReturnsdUserRolePage() throws Exception {
+        void checkAuthority_ValidInput_ReturnsUserRolePage() throws Exception {
             List<Member> members = Arrays.asList(testMember);
             Page<Member> memberPage = new PageImpl<>(members, PageRequest.of(0, 5), 1);
 
