@@ -115,7 +115,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/member/verify").hasAnyRole("ADMIN", "CENTER", "USER")
                                 .requestMatchers("/api/member/delete").hasAnyRole( "ADMIN", "CENTER")
                                 .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ADMIN", "CENTER", "USER")
-                                .requestMatchers("/api/product/**").hasAnyRole("ADMIN","CENTER","USER")//permitAll()
+                                .requestMatchers("/api/product/**").hasAnyRole("ADMIN","CENTER","USER")
                                 .requestMatchers("http://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:5173/**").permitAll()
                                 .requestMatchers("https://localhost:443/**").permitAll()
