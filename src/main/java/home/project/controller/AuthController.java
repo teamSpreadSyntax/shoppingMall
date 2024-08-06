@@ -127,7 +127,7 @@ public class AuthController {
     })
     @PostMapping("authorization")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") @Pattern(regexp = "^(user|admin|center)$", message = "Authority must be either 'user', 'admin', or 'center'") String authority) {
 
         String successMessage = "";
@@ -161,7 +161,7 @@ public class AuthController {
     })
     @GetMapping("authorities")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER')")
     public ResponseEntity<?> checkAuthority(
         @PageableDefault(page = 1, size = 5)
         @SortDefault.SortDefaults({
