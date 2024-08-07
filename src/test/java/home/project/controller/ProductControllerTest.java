@@ -431,7 +431,7 @@ public class ProductControllerTest {
     }
 
     @Nested
-    @WithMockUser(roles = {"ADMIN", "CENTER"})
+    @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class UpdateProductTests {
         @Test
         public void updateProduct_ExistingProduct_ReturnsUpdatedProduct() throws Exception {
@@ -541,7 +541,7 @@ public class ProductControllerTest {
 
             verify(productService).update(any(Product.class));
         }
-    }
+
     @Test
     public void updateProduct_NegativeStock_ReturnsBadRequest() throws Exception {
         Map<String, String> errors = new HashMap<>();
@@ -561,6 +561,7 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.status").value(400));
 
         verify(productService, never()).update(any(Product.class));
+    }
     }
     @Nested
     @WithMockUser(roles = {"ADMIN", "CENTER"})
