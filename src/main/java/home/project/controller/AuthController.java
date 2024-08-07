@@ -88,12 +88,12 @@ public class AuthController {
         if (validationResponse != null) return validationResponse;
         UserDetails member = userDetailsService.loadUserByUsername(userDetailsDTO.getEmail());
         if (!passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())) {
-            throw new BadCredentialsException("비밀번호를 확인해주세요");
+            throw new BadCredentialsException("비밀번호를 확인해주세요.");
         }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
-        String successMessage = member.getUsername() + "로 로그인에 성공하였습니다";
-        return new CustomOptionalResponseEntity<>(Optional.ofNullable(tokenDto), successMessage, HttpStatus.OK);
+        String successMessage = member.getUsername() + "(으)로 로그인에 성공했습니다.";
+        return new CustomOptionalResponseEntity<>(Optional.of(tokenDto), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
@@ -127,7 +127,7 @@ public class AuthController {
     })
     @PostMapping("authorization")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") @Pattern(regexp = "^(user|admin|center)$", message = "Authority must be either 'user', 'admin', or 'center'") String authority) {
 
         String successMessage = "";
@@ -161,13 +161,13 @@ public class AuthController {
     })
     @GetMapping("authorities")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> checkAuthority(
         @PageableDefault(page = 1, size = 5)
         @SortDefault.SortDefaults({
                 @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        String successMessage = "전체 회원별 권한 목록입니다..";
+        String successMessage = "전체 회원별 권한 목록입니다.";
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
             Page<Member> memberPage = memberService.findAll(pageable);
             Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {

@@ -24,7 +24,7 @@ public class Member {
     private String email;
 
     @NotEmpty(message = "비밀번호를 입력해주세요.")
-    @Column(name = "password")
+    @Column(name = "password")//, columnDefinition = ("VARCHAR(255)"))
     private String password;
 
     @NotEmpty(message = "이름을 입력해주세요.")
