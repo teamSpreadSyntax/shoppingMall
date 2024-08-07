@@ -244,7 +244,7 @@ public class MemberController {
             String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
 
             Map<String, String> response = new HashMap<>();
-            response.put("successMessage", "본인 확인이 완료되었습니다.");
+            response.put("successMessage", "본인 확인이 완료되었습니다..");
             response.put("verificationToken", verificationToken);
 
             return new CustomOptionalResponseEntity<>(Optional.of(response), "본인 확인 성공", HttpStatus.OK);
