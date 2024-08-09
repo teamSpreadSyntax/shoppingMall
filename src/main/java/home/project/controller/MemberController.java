@@ -238,7 +238,7 @@ public class MemberController {
             if (!email.equals(memberService.findById(id).get().getEmail())) {
                 throw new IllegalStateException("이메일이 일치하지 않습니다.");
             }else if (!passwordEncoder.matches(password, memberService.findById(id).get().getPassword())){
-                throw new BadCredentialsException("비밀번호가 일치하지 않습니다..");
+                throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
             }
 
             String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
