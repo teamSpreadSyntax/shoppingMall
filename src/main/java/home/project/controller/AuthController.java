@@ -41,6 +41,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
+import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -92,7 +93,10 @@ public class AuthController {
         }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
-        String role = member.getAuthorities().toString();
+//        String role = member.getAuthorities().toString();
+//        tokenDto.setRole(role);
+        Long id = memberService.findByEmail(userDetailsDTO.getEmail()).get().getId();
+        String role = roleService.findById(id).get().getRole();
         tokenDto.setRole(role);
         String successMessage = member.getUsername() + "(으)로 로그인에 성공했습니다.";
         return new CustomOptionalResponseEntity<>(Optional.of(tokenDto), successMessage, HttpStatus.OK);
