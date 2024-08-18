@@ -39,9 +39,7 @@ public class JwtTokenProvider {
         long now = getNow();
         Date accessTokenExpiresIn = getAccessTokenExpiresIn(now);
         String accessToken = getAccessToken(authentication, authorities, accessTokenExpiresIn);
-
         String refreshToken = getRefreshToken(now);
-
         return getTokenDTO(accessToken, refreshToken);
     }
 
