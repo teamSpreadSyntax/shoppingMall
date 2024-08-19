@@ -152,7 +152,7 @@ public class MemberControllerTest {
 
             doNothing().when(memberService).join(any(Member.class));
             doNothing().when(roleService).join(any(Role.class));
-            when(jwtTokenProvider.generateToken(any())).thenReturn(new TokenDto("bearer", "accessToken", "role"));
+            when(jwtTokenProvider.generateToken(any())).thenReturn(new TokenDto("bearer", "accessToken","refreshToken", "role"));
 
 
             mockMvc.perform(post("/api/member/join")

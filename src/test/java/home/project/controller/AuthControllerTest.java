@@ -100,39 +100,14 @@ public class AuthControllerTest {
 
         testRole = new Role();
         testRole.setId(1L);
-        testRole.setRole("ROLE_USER");
+        testRole.setRole("testRole");
 
-        testTokenDto = new TokenDto("Bearer", "testAccessToken", "testRefreshToken","testRole");
+        testTokenDto = new TokenDto("Bearer", "testAccessToken", "testRefreshToken", "testRole");
     }
 
 
     @Nested
     class LoginTests {
-//        @Test
-//        void login_ValidCredentials_ReturnsToken() throws Exception {
-//            UserDetails userDetails = mock(UserDetails.class);
-//            when(userDetails.getUsername()).thenReturn(validUserDetailsDTO.getEmail());
-//            when(userDetails.getPassword()).thenReturn("encodedPassword");
-//            when(userDetailsService.loadUserByUsername(validUserDetailsDTO.getEmail())).thenReturn(userDetails);
-//            when(passwordEncoder.matches(validUserDetailsDTO.getPassword(), userDetails.getPassword())).thenReturn(true);
-//            when(authenticationManager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken(userDetails, null));
-//            when(tokenProvider.generateToken(any())).thenReturn(testTokenDto);
-//            when(memberService.findByEmail(anyString())).thenReturn(any());
-//            when().thenReturn()
-//
-//            mockMvc.perform(post("/api/auth/login")
-//                            .contentType(MediaType.APPLICATION_JSON)
-//                            .content(objectMapper.writeValueAsString(validUserDetailsDTO)))
-//                    .andExpect(status().isOk())
-//                    .andExpect(jsonPath("$.result.grantType").value("Bearer"))
-//                    .andExpect(jsonPath("$.result.accessToken").value("testAccessToken"))
-////                    .andExpect(jsonPath("$.result.refreshToken").value("testRefreshToken"))
-//                    .andExpect(jsonPath("$.result.refreshToken").value("testRole"))
-//                    .andExpect(jsonPath("$.responseMessage").value(validUserDetailsDTO.getEmail() + "(으)로 로그인에 성공했습니다."))
-//                    .andExpect(jsonPath("$.status").value(200));
-//
-//            verify(passwordEncoder).matches(validUserDetailsDTO.getPassword(), userDetails.getPassword());
-//        }
 
         @Test
         void login_ValidCredentials_ReturnsToken() throws Exception {
@@ -143,8 +118,6 @@ public class AuthControllerTest {
             when(passwordEncoder.matches(validUserDetailsDTO.getPassword(), userDetails.getPassword())).thenReturn(true);
             when(authenticationManager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken(userDetails, null));
             when(tokenProvider.generateToken(any())).thenReturn(testTokenDto);
-
-            // Add these lines
             when(memberService.findByEmail(validUserDetailsDTO.getEmail())).thenReturn(Optional.of(testMember));
             when(roleService.findById(testMember.getId())).thenReturn(Optional.of(testRole));
 
@@ -154,7 +127,8 @@ public class AuthControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result.grantType").value("Bearer"))
                     .andExpect(jsonPath("$.result.accessToken").value("testAccessToken"))
-                    .andExpect(jsonPath("$.result.role").value("ROLE_USER"))  // Changed from refreshToken to role
+                    .andExpect(jsonPath("$.result.refreshToken").value("testRefreshToken"))
+                    .andExpect(jsonPath("$.result.role").value("testRole"))
                     .andExpect(jsonPath("$.responseMessage").value(validUserDetailsDTO.getEmail() + "(으)로 로그인에 성공했습니다."))
                     .andExpect(jsonPath("$.status").value(200));
 
