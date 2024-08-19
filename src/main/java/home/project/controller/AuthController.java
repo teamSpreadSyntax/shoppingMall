@@ -93,6 +93,7 @@ public class AuthController {
         }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
+
 //        String role = member.getAuthorities().toString();
 //        tokenDto.setRole(role);
         Long id = memberService.findByEmail(userDetailsDTO.getEmail()).get().getId();
@@ -185,5 +186,3 @@ public class AuthController {
     }
 
 }
-
-////......

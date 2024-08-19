@@ -102,7 +102,7 @@ public class AuthControllerTest {
         testRole.setId(1L);
         testRole.setRole("ROLE_USER");
 
-        testTokenDto = new TokenDto("Bearer", "testAccessToken", "testRole");
+        testTokenDto = new TokenDto("Bearer", "testAccessToken", "testRefreshToken","testRole");
     }
 
 
