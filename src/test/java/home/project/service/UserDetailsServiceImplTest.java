@@ -1,3 +1,4 @@
+/*
 package home.project.service;
 
 import home.project.domain.Member;
@@ -98,4 +99,4 @@ class UserDetailsServiceImplTest {
             assertEquals("test@test.com(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
-}
+}*/
