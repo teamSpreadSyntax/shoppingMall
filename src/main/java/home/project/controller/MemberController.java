@@ -90,11 +90,12 @@ public class MemberController {
         Long id = memberForAddRole.get().getId();
         role.setId(id);
         roleService.join(role);
+        String savedRole=roleService.findById(id).get().getRole();
         TokenDto tokenDto = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(member.getEmail(), member.getPassword()));
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("accessToken", tokenDto.getAccessToken());
         responseMap.put("refreshToken", tokenDto.getRefreshToken());
-        responseMap.put("role", id.toString());
+        responseMap.put("role", savedRole);
         responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK);
     }
