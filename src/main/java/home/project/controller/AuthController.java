@@ -124,7 +124,6 @@ public class AuthController {
         try {
             TokenDto newTokenDto = tokenProvider.refreshAccessToken(expiredAccessToken, refreshToken);
 
-            // role 정보 추가
             String email = tokenProvider.getEmailFromAccessToken(newTokenDto.getAccessToken());
             Optional<Member> member = memberService.findByEmail(email);
             if (!member.isPresent()) {

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,6 +25,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class JwtTokenProviderTest {
@@ -39,10 +42,13 @@ class JwtTokenProviderTest {
 
     private String invalidToken;
 
+    @MockBean
+    private UserDetailsService userDetailsService;
+
     @BeforeEach
     void setUp() {
         String secretKey = "thisisaverylongsecretkeythisisaverylongsecretkey";
-        UserDetailsService userDetailsService =
+
         jwtTokenProvider = new JwtTokenProvider(secretKey, userDetailsService);
 
         List<GrantedAuthority> authorities = new ArrayList<>();
@@ -68,34 +74,37 @@ class JwtTokenProviderTest {
 
             assertNotNull(tokenDto);
             assertNotNull(tokenDto.getAccessToken());
-//            assertNotNull(tokenDto.getRefreshToken());
+            assertNotNull(tokenDto.getRefreshToken());
             assertEquals("Bearer", tokenDto.getGrantType());
         }
     }
+
     @Nested
     class getAuthenticationTests {
 
         @Test
         void getAuthentication_ValidToken_ReturnsAuthenticationWithRoleUser() {
 
-        Authentication auth = jwtTokenProvider.getAuthentication(tokenDto.getAccessToken());
+            Authentication auth = jwtTokenProvider.getAuthentication(tokenDto.getAccessToken());
 
-        assertNotNull(auth);
-        assertEquals("ROLE_USER", auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining()));
-        assertEquals(auth.getName(), authentication.getName());
+            assertNotNull(auth);
+            assertEquals("ROLE_USER", auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining()));
+            assertEquals(auth.getName(), authentication.getName());
         }
+
         @Test
         void getAuthentication_TokenWithoutAuthority_ThrowsRuntimeException() {
-        String tokenWithoutAuth = Jwts.builder()
-                .setSubject("user")
-                .setExpiration(new Date(System.currentTimeMillis() + 10000))
-                .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
-                .compact();
+            String tokenWithoutAuth = Jwts.builder()
+                    .setSubject("user")
+                    .setExpiration(new Date(System.currentTimeMillis() + 10000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> jwtTokenProvider.getAuthentication(tokenWithoutAuth));
-        assertEquals("권한 정보가 없는 토큰입니다.", exception.getMessage());
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> jwtTokenProvider.getAuthentication(tokenWithoutAuth));
+            assertEquals("권한 정보가 없는 토큰입니다.", exception.getMessage());
         }
     }
+
     @Nested
     class validateTokenTests {
         @Test
@@ -132,6 +141,56 @@ class JwtTokenProviderTest {
             assertFalse(isValid);
         }
     }
+
+    @Nested
+    class RefreshAccessTokenTests {
+        @Test
+        void refreshAccessToken_ValidTokens_ReturnsNewTokens() {
+            String expiredAccessToken = jwtTokenProvider.generateToken(authentication).getAccessToken();
+            String refreshToken = jwtTokenProvider.generateToken(authentication).getRefreshToken();
+
+            UserDetails userDetails = new User("user", "password", authentication.getAuthorities());
+            when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
+
+            TokenDto newTokenDto = jwtTokenProvider.refreshAccessToken(expiredAccessToken, refreshToken);
+
+            assertNotNull(newTokenDto);
+            assertNotNull(newTokenDto.getAccessToken());
+            assertNotNull(newTokenDto.getRefreshToken());
+        }
+
+        @Test
+        void refreshAccessToken_InvalidRefreshToken_ThrowsException() {
+            String expiredAccessToken = jwtTokenProvider.generateToken(authentication).getAccessToken();
+            String invalidRefreshToken = "invalidRefreshToken";
+
+            assertThrows(RuntimeException.class, () ->
+                    jwtTokenProvider.refreshAccessToken(expiredAccessToken, invalidRefreshToken)
+            );
+        }
+    }
+
+    @Nested
+    class getEmailFromAccessTokenTests {
+        @Test
+        void getEmailFromAccessToken_ValidToken_ReturnsEmail() {
+           String accessToken = jwtTokenProvider.generateToken(authentication).getAccessToken();
+
+           String email = jwtTokenProvider.getEmailFromAccessToken(accessToken);
+
+           assertEquals("user", email);
+        }
+
+        @Test
+        void getEmailFromAccessToken_InvalidToken_ReturnsNull() {
+           String invalidToken = "invalidToken";
+
+           String email = jwtTokenProvider.getEmailFromAccessToken(invalidToken);
+
+            assertNull(email);
+        }
+    }
+
     @Nested
     class VerificationTokenTests {
         @Test

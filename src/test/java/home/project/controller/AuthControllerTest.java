@@ -213,6 +213,86 @@ public class AuthControllerTest {
     }
 
     @Nested
+    class RefreshTokenTests {
+
+        @Test
+        void refreshToken_ValidTokens_ReturnsNewTokens() throws Exception {
+            String expiredAccessToken = "expiredAccessToken";
+            String refreshToken = "validRefreshToken";
+            TokenDto newTokenDto = new TokenDto("Bearer", "newAccessToken", "newRefreshToken", "testRole");
+
+            when(tokenProvider.refreshAccessToken(expiredAccessToken, refreshToken)).thenReturn(newTokenDto);
+            when(tokenProvider.getEmailFromAccessToken("newAccessToken")).thenReturn("test@example.com");
+            when(memberService.findByEmail("test@example.com")).thenReturn(Optional.of(testMember));
+            when(roleService.findById(testMember.getId())).thenReturn(Optional.of(testRole));
+
+            mockMvc.perform(post("/api/auth/refresh")
+                            .param("expiredAccessToken", expiredAccessToken)
+                            .param("refreshToken", refreshToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.grantType").value("Bearer"))
+                    .andExpect(jsonPath("$.result.accessToken").value("newAccessToken"))
+                    .andExpect(jsonPath("$.result.refreshToken").value("newRefreshToken"))
+                    .andExpect(jsonPath("$.result.role").value("testRole"))
+                    .andExpect(jsonPath("$.responseMessage").value("토큰이 성공적으로 갱신되었습니다."))
+                    .andExpect(jsonPath("$.status").value(200));
+
+            verify(tokenProvider).refreshAccessToken(expiredAccessToken, refreshToken);
+            verify(tokenProvider).getEmailFromAccessToken("newAccessToken");
+            verify(memberService).findByEmail("test@example.com");
+            verify(roleService).findById(testMember.getId());
+        }
+
+        @Test
+        void refreshToken_InvalidTokens_ReturnsUnauthorized() throws Exception {
+            String expiredAccessToken = "invalidAccessToken";
+            String refreshToken = "invalidRefreshToken";
+
+            when(tokenProvider.refreshAccessToken(expiredAccessToken, refreshToken))
+                    .thenThrow(new RuntimeException("Invalid token"));
+
+            mockMvc.perform(post("/api/auth/refresh")
+                            .param("expiredAccessToken", expiredAccessToken)
+                            .param("refreshToken", refreshToken))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.responseMessage").value("Invalid token"))
+                    .andExpect(jsonPath("$.status").value(401));
+
+            verify(tokenProvider).refreshAccessToken(expiredAccessToken, refreshToken);
+        }
+
+//        @Test//수정필요
+//        void refreshToken_MissingTokens_ReturnsBadRequest() throws Exception {
+//            mockMvc.perform(post("/api/auth/refresh"))
+//                    .andExpect(status().isBadRequest())
+//                    .andExpect(jsonPath("$.responseMessage").value("토큰 정보가 누락되었습니다."))
+//                    .andExpect(jsonPath("$.status").value(400));
+//        }
+
+        @Test
+        void refreshToken_MemberNotFound_ReturnsUnauthorized() throws Exception {
+            String expiredAccessToken = "expiredAccessToken";
+            String refreshToken = "validRefreshToken";
+            TokenDto newTokenDto = new TokenDto("Bearer", "newAccessToken", "newRefreshToken", "testRole");
+
+            when(tokenProvider.refreshAccessToken(expiredAccessToken, refreshToken)).thenReturn(newTokenDto);
+            when(tokenProvider.getEmailFromAccessToken("newAccessToken")).thenReturn("test@example.com");
+            when(memberService.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
+            mockMvc.perform(post("/api/auth/refresh")
+                            .param("expiredAccessToken", expiredAccessToken)
+                            .param("refreshToken", refreshToken))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.responseMessage").value("test@example.com해당하는 회원이 존재하지 않습니다."))
+                    .andExpect(jsonPath("$.status").value(401));
+
+            verify(tokenProvider).refreshAccessToken(expiredAccessToken, refreshToken);
+            verify(tokenProvider).getEmailFromAccessToken("newAccessToken");
+            verify(memberService).findByEmail("test@example.com");
+        }
+    }
+
+    @Nested
     class LogoutTests {
         @Test
         void logout_ExistingMember_ReturnsSuccessMessage() throws Exception {
