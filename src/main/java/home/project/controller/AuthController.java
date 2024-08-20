@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,8 +115,8 @@ public class AuthController {
     })
     @PostMapping("refresh")
     public ResponseEntity<?> refreshToken(
-            @RequestParam("expiredAccessToken") @Valid String expiredAccessToken,
-            @RequestParam("refreshToken") @Valid String refreshToken) {
+            @RequestParam(value = "expiredAccessToken", required = true) String expiredAccessToken,
+            @RequestParam(value = "refreshToken", required = true) String refreshToken) {
 
         if (expiredAccessToken == null || refreshToken == null) {
             return new CustomOptionalResponseEntity<>(Optional.empty(), "토큰 정보가 누락되었습니다.", HttpStatus.BAD_REQUEST);
@@ -225,6 +226,53 @@ public class AuthController {
             long totalCount = memberPage.getTotalElements();
             int page = memberPage.getNumber();
             return new CustomListResponseEntity<>(rolesWithMemberNamesPage .getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
+    @Operation(summary = "토큰 유효성 검사 메서드", description = "새로고침할때마다 액세스토큰과 리프레쉬토큰을 검증하는 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenRefreshSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
+    })
+    @GetMapping("verify")
+    public ResponseEntity<?> verifyUser(
+            @RequestParam(value = "accessToken", required = true) String accessToken,
+            @RequestParam(value = "refreshToken", required = true)  String refreshToken) {
+        if (!tokenProvider.validateToken(accessToken)) {
+            return new CustomOptionalResponseEntity<>(Optional.empty(), "액세스 토큰이 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (!tokenProvider.validateToken(refreshToken)) {
+            return new CustomOptionalResponseEntity<>(Optional.empty(), "리프레시 토큰이 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            String email = tokenProvider.getEmailFromAccessToken(accessToken);
+            Optional<Member> member = memberService.findByEmail(email);
+            if (!member.isPresent()) {
+                throw new RuntimeException(email + "해당하는 회원이 존재하지 않습니다.");
+            }
+            Long id = member.get().getId();
+            Optional<Role> roleOptional = roleService.findById(id);
+            if (!roleOptional.isPresent()) {
+                throw new RuntimeException("사용자 권한을 찾을 수 없습니다.");
+            }
+            String role = roleOptional.get().getRole();
+            TokenDto newTokenDto = new TokenDto();
+            newTokenDto.setRole(role);
+            newTokenDto.setAccessToken(accessToken);
+            newTokenDto.setRefreshToken(refreshToken);
+            newTokenDto.setGrantType("Bearer");
+            return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증 되었습니다.", HttpStatus.OK);
+        }
+        catch (RuntimeException e) {
+            return new CustomOptionalResponseEntity<>(Optional.empty(), e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new CustomOptionalResponseEntity<>(Optional.empty(), "토큰 갱신 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }
