@@ -16,6 +16,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,8 +42,8 @@ class JwtTokenProviderTest {
     @BeforeEach
     void setUp() {
         String secretKey = "thisisaverylongsecretkeythisisaverylongsecretkey";
-
-        jwtTokenProvider = new JwtTokenProvider(secretKey);
+        UserDetailsService userDetailsService =
+        jwtTokenProvider = new JwtTokenProvider(secretKey, userDetailsService);
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));

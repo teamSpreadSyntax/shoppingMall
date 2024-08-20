@@ -46,7 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃관련 API입니다")
+@Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃, 권한 관련 API입니다.")
 @RequestMapping(path = "/api/auth")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "Internal server error",
@@ -101,6 +101,49 @@ public class AuthController {
         tokenDto.setRole(role);
         String successMessage = member.getUsername() + "(으)로 로그인에 성공했습니다.";
         return new CustomOptionalResponseEntity<>(Optional.of(tokenDto), successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "토큰 갱신 메서드", description = "만료된 액세스 토큰과 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급받는 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenRefreshSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @PostMapping("refresh")
+    public ResponseEntity<?> refreshToken(
+            @RequestParam("expiredAccessToken") @Valid String expiredAccessToken,
+            @RequestParam("refreshToken") @Valid String refreshToken) {
+
+        if (expiredAccessToken == null || refreshToken == null) {
+            return new CustomOptionalResponseEntity<>(Optional.empty(), "토큰 정보가 누락되었습니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            TokenDto newTokenDto = tokenProvider.refreshAccessToken(expiredAccessToken, refreshToken);
+
+            // role 정보 추가
+            String email = tokenProvider.getEmailFromAccessToken(newTokenDto.getAccessToken());
+            Optional<Member> member = memberService.findByEmail(email);
+            if (!member.isPresent()) {
+                throw new RuntimeException(email+"해당하는 회원이 존재하지 않습니다.");
+            }
+            Long id = member.get().getId();
+            Optional<Role> roleOptional = roleService.findById(id);
+            if (!roleOptional.isPresent()) {
+                throw new RuntimeException("사용자 권한을 찾을 수 없습니다.");
+            }
+            String role = roleOptional.get().getRole();
+            newTokenDto.setRole(role);
+
+            return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new CustomOptionalResponseEntity<>(Optional.empty(), e.getMessage(), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new CustomOptionalResponseEntity<>(Optional.empty(), "토큰 갱신 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")

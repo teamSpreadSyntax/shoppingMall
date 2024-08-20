@@ -20,14 +20,12 @@ import java.util.List;
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final MemberRepository memberRepository;
-    private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
 
 
     @Autowired
-    public UserDetailsServiceImpl(MemberRepository memberRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+    public UserDetailsServiceImpl(MemberRepository memberRepository, RoleRepository roleRepository) {
         this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
 
     }

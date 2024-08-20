@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -20,17 +21,20 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+
+
 @Service
 public class JwtTokenProvider {
     private final Key key;
     private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 1000;
     private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
     private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 5 * 1000; // 5분
+    private final UserDetailsService userDetailsService;
 
-
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, UserDetailsService userDetailsService) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.userDetailsService = userDetailsService;
     }
 
     public TokenDto generateToken(Authentication authentication) {
@@ -73,6 +77,8 @@ public class JwtTokenProvider {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
+        } catch (JwtException e) {
+            throw new RuntimeException("Invalid token", e);
         }
     }
 
@@ -100,6 +106,46 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
+
+    public TokenDto refreshAccessToken(String expiredAccessToken, String refreshToken) {
+        // 리프레시 토큰 유효성 검사
+        if (!validateToken(refreshToken)) {
+            throw new RuntimeException("Invalid refresh token");
+        }
+
+        // 만료된 액세스 토큰에서 사용자 정보 추출
+        Claims claims = parseClaims(expiredAccessToken);
+        String username = claims.getSubject();
+        String authorities = claims.get("auth", String.class);
+
+        if (username == null || authorities == null) {
+            throw new RuntimeException("Invalid access token");
+        }
+
+        // 사용자 정보와 권한 가져오기 (이 부분은 실제 구현에 맞게 수정 필요)
+        // 예를 들어, UserDetailsService를 사용하여 사용자 정보를 가져올 수 있습니다.
+        // UserDetails 로드
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        // 새로운 Authentication 객체 생성
+        Collection<? extends GrantedAuthority> grantedAuthorities =
+                Arrays.stream(authorities.split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", grantedAuthorities);
+
+        // 새로운 액세스 토큰 생성
+        long now = getNow();
+        Date accessTokenExpiresIn = getAccessTokenExpiresIn(now);
+        String newAccessToken = getAccessToken(authentication, authorities, accessTokenExpiresIn);
+
+        // 새로운 리프레시 토큰 생성 (선택적)
+        String newRefreshToken = getRefreshToken(now);
+
+        // 새로운 TokenDto 반환
+        return getTokenDTO(newAccessToken, newRefreshToken);
+    }
+
     public String generateVerificationToken(String email, Long id) {
         long now = getNow();
         Date expiresIn = new Date(now + VERIFICATION_TOKEN_VALIDATION_PERIOD);
@@ -125,8 +171,6 @@ public class JwtTokenProvider {
         } catch (JwtException e) {
             return null;
         }
-
-
     }
 
     public String getIdFromVerificationToken(String token) {
@@ -142,6 +186,20 @@ public class JwtTokenProvider {
             return null;
         }
     }
+    public String getEmailFromAccessToken(String accessToken) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(accessToken)
+                    .getBody();
+
+            return claims.getSubject();
+        } catch (JwtException e) {
+            return null;
+        }
+    }
+
     private Date getRefreshTokenExpires(long now) {
         return new Date(now + REFRESH_TOKEN_VALIDATION_PERIOD);
     }
