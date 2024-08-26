@@ -116,10 +116,9 @@ public class AuthController {
     })
     @PostMapping("refresh")
     public ResponseEntity<?> refreshToken(
-            @RequestParam(value = "expiredAccessToken", required = true) String expiredAccessToken,
             @RequestParam(value = "refreshToken", required = true) String refreshToken) {
 
-            TokenDto newTokenDto = tokenProvider.refreshAccessToken(expiredAccessToken, refreshToken);
+            TokenDto newTokenDto = tokenProvider.refreshAccessToken(refreshToken);
 
             String email = tokenProvider.getEmailFromAccessToken(newTokenDto.getAccessToken());
             Optional<Member> member = memberService.findByEmail(email);

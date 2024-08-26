@@ -43,7 +43,7 @@ public class JwtTokenProvider {
         long now = getNow();
         Date accessTokenExpiresIn = getAccessTokenExpiresIn(now);
         String accessToken = getAccessToken(authentication, authorities, accessTokenExpiresIn);
-        String refreshToken = getRefreshToken(now);
+        String refreshToken = getRefreshToken(authentication, authorities, now);
         return getTokenDTO(accessToken, refreshToken);
     }
 
@@ -116,32 +116,33 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    private String getRefreshToken(long now) {
+    private String getRefreshToken(Authentication authentication, String authorities,long now) {
         return Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim("auth", authorities)
                 .setExpiration(getRefreshTokenExpires(now))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public TokenDto refreshAccessToken(String expiredAccessToken, String refreshToken) {
+    public TokenDto refreshAccessToken(String refreshToken) {
         // 리프레시 토큰 유효성 검사
         if (!validateToken(refreshToken)) {
             throw new JwtException("유효하지 않은 Refresh token입니다.");
         }
 
         // 만료된 액세스 토큰에서 사용자 정보 추출
-        Claims claims = parseClaims(expiredAccessToken);
+        Claims claims = parseClaims(refreshToken);
         String username = claims.getSubject();
         String authorities = claims.get("auth", String.class);
-
-        if (username == null || authorities == null) {
-            throw new JwtException("유효하지 않은 Access token입니다.");
-        }
 
         // 사용자 정보와 권한 가져오기 (이 부분은 실제 구현에 맞게 수정 필요)
         // 예를 들어, UserDetailsService를 사용하여 사용자 정보를 가져올 수 있습니다.
         // UserDetails 로드
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+
+
 
         // 새로운 Authentication 객체 생성
         Collection<? extends GrantedAuthority> grantedAuthorities =
@@ -156,7 +157,7 @@ public class JwtTokenProvider {
         String newAccessToken = getAccessToken(authentication, authorities, accessTokenExpiresIn);
 
         // 새로운 리프레시 토큰 생성 (선택적)
-        String newRefreshToken = getRefreshToken(now);
+        String newRefreshToken = getRefreshToken(authentication, authorities,now);
 
         // 새로운 TokenDto 반환
         return getTokenDTO(newAccessToken, newRefreshToken);
