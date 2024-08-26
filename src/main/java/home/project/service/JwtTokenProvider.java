@@ -72,6 +72,22 @@ public class JwtTokenProvider {
         }
     }
 
+    public void validateTokenResult(String accessToken, String refreshToken) {
+        // 리프레시 토큰 유효성 검사
+        if (!validateToken(refreshToken)) {
+            throw new JwtException("유효하지 않은 Refresh token입니다.");
+        }
+
+        // 만료된 액세스 토큰에서 사용자 정보 추출
+        Claims claims = parseClaims(accessToken);
+        String username = claims.getSubject();
+        String authorities = claims.get("auth", String.class);
+
+        if (username == null || authorities == null) {
+            throw new JwtException("유효하지 않은 Access token입니다.");
+        }
+    }
+
     private Claims parseClaims(String accessToken) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();

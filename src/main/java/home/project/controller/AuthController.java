@@ -232,15 +232,7 @@ public class AuthController {
     public ResponseEntity<?> verifyUser(
             @RequestParam(value = "accessToken", required = true) String accessToken,
             @RequestParam(value = "refreshToken", required = true)  String refreshToken) {
-        if (!tokenProvider.validateToken(accessToken)) {
-            return new CustomOptionalResponseEntity<>(Optional.empty(), "액세스 토큰이 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        if (!tokenProvider.validateToken(refreshToken)) {
-            return new CustomOptionalResponseEntity<>(Optional.empty(), "리프레시 토큰이 유효하지 않습니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        try {
+        tokenProvider.validateTokenResult(accessToken,refreshToken);
             String email = tokenProvider.getEmailFromAccessToken(accessToken);
             Optional<Member> member = memberService.findByEmail(email);
             if (!member.isPresent()) {
@@ -258,12 +250,6 @@ public class AuthController {
             newTokenDto.setRefreshToken(refreshToken);
             newTokenDto.setGrantType("Bearer");
             return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증 되었습니다.", HttpStatus.OK);
-        }
-        catch (RuntimeException e) {
-            return new CustomOptionalResponseEntity<>(Optional.empty(), e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            return new CustomOptionalResponseEntity<>(Optional.empty(), "토큰 갱신 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
 }
