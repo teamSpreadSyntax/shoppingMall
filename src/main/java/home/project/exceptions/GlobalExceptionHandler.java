@@ -2,6 +2,7 @@ package home.project.exceptions;
 
 import home.project.response.CustomOptionalResponseBody;
 import home.project.response.CustomOptionalResponseEntity;
+import io.jsonwebtoken.JwtException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +77,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.UNAUTHORIZED.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<?> handleJwtException(JwtException e) {
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", e.getMessage());
+        CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
+    }
+
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException ex) {

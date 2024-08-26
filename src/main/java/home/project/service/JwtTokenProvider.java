@@ -110,7 +110,7 @@ public class JwtTokenProvider {
     public TokenDto refreshAccessToken(String expiredAccessToken, String refreshToken) {
         // 리프레시 토큰 유효성 검사
         if (!validateToken(refreshToken)) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new JwtException("유효하지 않은 Refresh token입니다.");
         }
 
         // 만료된 액세스 토큰에서 사용자 정보 추출
@@ -119,7 +119,7 @@ public class JwtTokenProvider {
         String authorities = claims.get("auth", String.class);
 
         if (username == null || authorities == null) {
-            throw new RuntimeException("Invalid access token");
+            throw new JwtException("유효하지 않은 Access token입니다.");
         }
 
         // 사용자 정보와 권한 가져오기 (이 부분은 실제 구현에 맞게 수정 필요)

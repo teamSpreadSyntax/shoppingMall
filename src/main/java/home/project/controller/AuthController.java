@@ -10,6 +10,7 @@ import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import home.project.service.RoleService;
 import home.project.util.ValidationCheck;
+import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -118,11 +119,6 @@ public class AuthController {
             @RequestParam(value = "expiredAccessToken", required = true) String expiredAccessToken,
             @RequestParam(value = "refreshToken", required = true) String refreshToken) {
 
-        if (expiredAccessToken == null || refreshToken == null) {
-            return new CustomOptionalResponseEntity<>(Optional.empty(), "토큰 정보가 누락되었습니다.", HttpStatus.BAD_REQUEST);
-        }
-
-        try {
             TokenDto newTokenDto = tokenProvider.refreshAccessToken(expiredAccessToken, refreshToken);
 
             String email = tokenProvider.getEmailFromAccessToken(newTokenDto.getAccessToken());
@@ -139,11 +135,6 @@ public class AuthController {
             newTokenDto.setRole(role);
 
             return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
-        } catch (RuntimeException e) {
-            return new CustomOptionalResponseEntity<>(Optional.empty(), e.getMessage(), HttpStatus.UNAUTHORIZED);
-        } catch (Exception e) {
-            return new CustomOptionalResponseEntity<>(Optional.empty(), "토큰 갱신 중 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
     }
 
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
