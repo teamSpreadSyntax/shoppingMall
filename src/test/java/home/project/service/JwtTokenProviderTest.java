@@ -202,7 +202,7 @@ class JwtTokenProviderTest {
         void getEmailFromVerificationToken_ValidToken_ReturnsEmail() {
             String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
 
-            String extractedEmail = jwtTokenProvider.getEmailFromVerificationToken(token);
+            String extractedEmail = jwtTokenProvider.getEmailFromToken(token);
 
             assertEquals(member.getEmail(), extractedEmail);
         }
@@ -218,7 +218,7 @@ class JwtTokenProviderTest {
 
         @Test
         void getEmailFromVerificationToken_InvalidToken_ReturnsNull() {
-            String extractedEmail = jwtTokenProvider.getEmailFromVerificationToken(invalidToken);
+            String extractedEmail = jwtTokenProvider.getEmailFromToken(invalidToken);
 
             assertNull(extractedEmail);
         }
