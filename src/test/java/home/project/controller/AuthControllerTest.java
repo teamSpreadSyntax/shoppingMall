@@ -260,6 +260,23 @@ public class AuthControllerTest {
 
             verify(tokenProvider).refreshAccessToken(refreshToken);
         }
+
+        @Test
+        void refreshToken_ExpiredTokens_ReturnsUnauthorized() throws Exception {
+            String refreshToken = "invalidRefreshToken";
+
+            when(tokenProvider.refreshAccessToken(refreshToken))
+                    .thenThrow(new JwtException("만료된 Refresh token입니다. 다시 로그인 해주세요."));
+
+            mockMvc.perform(post("/api/auth/refresh")
+                            .param("refreshToken", refreshToken))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("만료된 Refresh token입니다. 다시 로그인 해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("유효하지 않은 토큰입니다."))
+                    .andExpect(jsonPath("$.status").value(401));
+
+            verify(tokenProvider).refreshAccessToken(refreshToken);
+        }
     }
 
     @Nested
@@ -412,18 +429,18 @@ public class AuthControllerTest {
         }
 
         @Test
-        void verifyUser_InvalidAccessToken_ReturnsUnauthorized() throws Exception {
+        void verifyUser_InvalidAccessTokens_ReturnsUnauthorized() throws Exception {
             String invalidAccessToken = "invalidAccessToken";
             String validRefreshToken = "validRefreshToken";
 
-            doThrow(new JwtException("토큰을 확인해주세요."))
+            doThrow(new JwtException("유효하지 않은 Access token입니다."))
                     .when(tokenProvider).validateTokenResult(invalidAccessToken, validRefreshToken);
 
             mockMvc.perform(get("/api/auth/verify")
                             .param("accessToken", invalidAccessToken)
                             .param("refreshToken", validRefreshToken))
                     .andExpect(status().isUnauthorized())
-                    .andExpect(jsonPath("$.result.errorMessage").value("토큰을 확인해주세요."))
+                    .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 Access token입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("유효하지 않은 토큰입니다."))
                     .andExpect(jsonPath("$.status").value(401));
 
@@ -431,7 +448,26 @@ public class AuthControllerTest {
         }
 
         @Test
-        void verifyUser_InvalidRefreshToken_ReturnsUnauthorized() throws Exception {
+        void verifyUser_ExpiredAccessTokens_ReturnsUnauthorized() throws Exception {
+            String invalidAccessToken = "invalidAccessToken";
+            String validRefreshToken = "validRefreshToken";
+
+            doThrow(new JwtException("만료된 Access token입니다. 다시 로그인 해주세요."))
+                    .when(tokenProvider).validateTokenResult(invalidAccessToken, validRefreshToken);
+
+            mockMvc.perform(get("/api/auth/verify")
+                            .param("accessToken", invalidAccessToken)
+                            .param("refreshToken", validRefreshToken))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("만료된 Access token입니다. 다시 로그인 해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("유효하지 않은 토큰입니다."))
+                    .andExpect(jsonPath("$.status").value(401));
+
+            verify(tokenProvider).validateTokenResult(invalidAccessToken, validRefreshToken);
+        }
+
+        @Test
+        void verifyUser_InvalidRefreshTokens_ReturnsUnauthorized() throws Exception {
             String validAccessToken = "validAccessToken";
             String invalidRefreshToken = "invalidRefreshToken";
 
@@ -443,6 +479,25 @@ public class AuthControllerTest {
                             .param("refreshToken", invalidRefreshToken))
                     .andExpect(status().isUnauthorized())
                     .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 Refresh token입니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("유효하지 않은 토큰입니다."))
+                    .andExpect(jsonPath("$.status").value(401));
+
+            verify(tokenProvider).validateTokenResult(validAccessToken, invalidRefreshToken);
+        }
+
+        @Test
+        void verifyUser_ExpiredRefreshTokens_ReturnsUnauthorized() throws Exception {
+            String validAccessToken = "validAccessToken";
+            String invalidRefreshToken = "invalidRefreshToken";
+
+            doThrow(new JwtException("만료된 Refresh token입니다. 다시 로그인 해주세요."))
+                    .when(tokenProvider).validateTokenResult(validAccessToken, invalidRefreshToken);
+
+            mockMvc.perform(get("/api/auth/verify")
+                            .param("accessToken", validAccessToken)
+                            .param("refreshToken", invalidRefreshToken))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("만료된 Refresh token입니다. 다시 로그인 해주세요."))
                     .andExpect(jsonPath("$.responseMessage").value("유효하지 않은 토큰입니다."))
                     .andExpect(jsonPath("$.status").value(401));
 
