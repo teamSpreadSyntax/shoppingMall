@@ -96,8 +96,8 @@ public class AuthController {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
         TokenDto tokenDto = tokenProvider.generateToken(authentication);
 
-//        String role = member.getAuthorities().toString();
-//        tokenDto.setRole(role);
+//      String role = member.getAuthorities().toString();
+//      tokenDto.setRole(role);
         Long id = memberService.findByEmail(userDetailsDTO.getEmail()).get().getId();
         String role = roleService.findById(id).get().getRole();
         tokenDto.setRole(role);
@@ -108,11 +108,11 @@ public class AuthController {
     @Operation(summary = "토큰 갱신 메서드", description = "만료된 액세스 토큰과 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급받는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenRefreshSuccessResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/loginSuccessResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+            @ApiResponse(responseCode = "400", description = "Not Found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/notFoundResponseSchema")))
     })
     @PostMapping("refresh")
     public ResponseEntity<?> refreshToken(
@@ -122,14 +122,10 @@ public class AuthController {
 
             String email = tokenProvider.getEmailFromAccessToken(newTokenDto.getAccessToken());
             Optional<Member> member = memberService.findByEmail(email);
-            if (!member.isPresent()) {
-                throw new RuntimeException(email+"해당하는 회원이 존재하지 않습니다.");
-            }
+
             Long id = member.get().getId();
             Optional<Role> roleOptional = roleService.findById(id);
-            if (!roleOptional.isPresent()) {
-                throw new RuntimeException("사용자 권한을 찾을 수 없습니다.");
-            }
+
             String role = roleOptional.get().getRole();
             newTokenDto.setRole(role);
 
@@ -218,7 +214,7 @@ public class AuthController {
             return new CustomListResponseEntity<>(rolesWithMemberNamesPage .getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "토큰 유효성 검사 메서드", description = "새로고침할때마다 액세스토큰과 리프레쉬토큰을 검증하는 메서드입니다.")
+    @Operation(summary = "토큰 유효성 확인 메서드", description = "새로고침할때마다 액세스토큰과 리프레쉬토큰을 검증하는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/TokenRefreshSuccessResponseSchema"))),

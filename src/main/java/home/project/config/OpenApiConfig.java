@@ -24,7 +24,8 @@ public class OpenApiConfig {
                 .addProperty("result", new ObjectSchema()
                         .addProperty("grantType", new Schema<>().type("string"))
                         .addProperty("accessToken", new Schema<>().type("string"))
-                        .addProperty("refreshToken", new Schema<>().type("string")))
+                        .addProperty("refreshToken", new Schema<>().type("string"))
+                        .addProperty("role", new Schema<>().type("string")))
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
@@ -188,7 +189,7 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(400));
 
-        // Unauthorized 응답 스키마
+        // BadRequest 응답 스키마
         Schema<?> badRequestResponseSchema = new ObjectSchema()
                 .addProperty("result", new ObjectSchema()
                         .addProperty("errorMessage", new Schema<>().type("string")))

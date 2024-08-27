@@ -146,13 +146,12 @@ class JwtTokenProviderTest {
     class RefreshAccessTokenTests {
         @Test
         void refreshAccessToken_ValidTokens_ReturnsNewTokens() {
-            String expiredAccessToken = jwtTokenProvider.generateToken(authentication).getAccessToken();
             String refreshToken = jwtTokenProvider.generateToken(authentication).getRefreshToken();
 
             UserDetails userDetails = new User("user", "password", authentication.getAuthorities());
             when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
 
-            TokenDto newTokenDto = jwtTokenProvider.refreshAccessToken(expiredAccessToken, refreshToken);
+            TokenDto newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
 
             assertNotNull(newTokenDto);
             assertNotNull(newTokenDto.getAccessToken());
@@ -161,11 +160,10 @@ class JwtTokenProviderTest {
 
         @Test
         void refreshAccessToken_InvalidRefreshToken_ThrowsException() {
-            String expiredAccessToken = jwtTokenProvider.generateToken(authentication).getAccessToken();
             String invalidRefreshToken = "invalidRefreshToken";
 
-            assertThrows(RuntimeException.class, () ->
-                    jwtTokenProvider.refreshAccessToken(expiredAccessToken, invalidRefreshToken)
+            assertThrows(JwtException.class, () ->
+                    jwtTokenProvider.refreshAccessToken(invalidRefreshToken)
             );
         }
     }

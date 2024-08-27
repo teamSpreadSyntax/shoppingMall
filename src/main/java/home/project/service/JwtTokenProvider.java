@@ -94,7 +94,7 @@ public class JwtTokenProvider {
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         } catch (JwtException e) {
-            throw new RuntimeException("Invalid token", e);
+            throw new JwtException("토큰을 확인해주세요.", e);
         }
     }
 
