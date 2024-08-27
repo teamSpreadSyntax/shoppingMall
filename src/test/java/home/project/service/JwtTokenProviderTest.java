@@ -54,7 +54,7 @@ class JwtTokenProviderTest {
         List<GrantedAuthority> authorities = new ArrayList<>();
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
-        UserDetails userDetails = new User("user", "password", authorities);
+        UserDetails userDetails = new User("user@user.com", "password", authorities);
 
         authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
 
@@ -141,6 +141,46 @@ class JwtTokenProviderTest {
             assertFalse(isValid);
         }
     }
+    @Nested
+    class ValidateTokenResultTests {
+        @Test
+        void validateTokenResult_ValidTokens_DoesNotThrowException() {
+            assertDoesNotThrow(() -> jwtTokenProvider.validateTokenResult(
+                    tokenDto.getAccessToken(), tokenDto.getRefreshToken()));
+        }
+
+        @Test
+        void validateTokenResult_InvalidAccessToken_ThrowsException() {
+            String invalidAccessToken = "invalidAccessToken";
+
+            JwtException exception = assertThrows(JwtException.class, () ->
+                    jwtTokenProvider.validateTokenResult(invalidAccessToken, tokenDto.getRefreshToken()));
+            assertEquals("유효하지 않은 Access token입니다.", exception.getMessage());
+        }
+
+        @Test
+        void validateTokenResult_ExpiredAccessToken_ThrowsException() {
+            String expiredAccessToken = Jwts.builder()
+                    .setSubject("user")
+                    .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
+
+            JwtException exception = assertThrows(JwtException.class, () ->
+                    jwtTokenProvider.validateTokenResult(expiredAccessToken, tokenDto.getRefreshToken()));
+            assertEquals("만료된 Access token입니다. 다시 로그인 해주세요.", exception.getMessage());
+        }
+
+        @Test
+        void validateTokenResult_InvalidRefreshToken_ThrowsException() {
+            String invalidRefreshToken = "invalidRefreshToken";
+
+            JwtException exception = assertThrows(JwtException.class, () ->
+                    jwtTokenProvider.validateTokenResult(tokenDto.getAccessToken(), invalidRefreshToken));
+            assertEquals("유효하지 않은 Refresh token입니다.", exception.getMessage());
+        }
+    }
+
 
     @Nested
     class RefreshAccessTokenTests {
@@ -148,7 +188,7 @@ class JwtTokenProviderTest {
         void refreshAccessToken_ValidTokens_ReturnsNewTokens() {
             String refreshToken = jwtTokenProvider.generateToken(authentication).getRefreshToken();
 
-            UserDetails userDetails = new User("user", "password", authentication.getAuthorities());
+            UserDetails userDetails = new User("user@user.com", "password", authentication.getAuthorities());
             when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
 
             TokenDto newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
@@ -169,23 +209,35 @@ class JwtTokenProviderTest {
     }
 
     @Nested
-    class getEmailFromAccessTokenTests {
+    class GetEmailFromTokenTests {
+
         @Test
-        void getEmailFromAccessToken_ValidToken_ReturnsEmail() {
-           String accessToken = jwtTokenProvider.generateToken(authentication).getAccessToken();
+        void getEmailFromToken_ValidToken_ReturnsEmail() {
+            String accessToken = jwtTokenProvider.generateToken(authentication).getAccessToken();
 
-           String email = jwtTokenProvider.getEmailFromToken(accessToken);
+            String email = jwtTokenProvider.getEmailFromToken(accessToken);
 
-           assertEquals("user", email);
+            assertEquals("user@user.com",email);
         }
 
         @Test
-        void getEmailFromAccessToken_InvalidToken_ReturnsNull() {
-           String invalidToken = "invalidToken";
+        void getEmailFromToken_ExpiredToken_ThrowsJwtException() {
+            String expiredToken = Jwts.builder()
+                    .setSubject("user@user.com")
+                    .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
 
-           String email = jwtTokenProvider.getEmailFromToken(invalidToken);
+            JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getEmailFromToken(expiredToken));
+            assertEquals("만료된  Verification token입니다. 본인확인을 다시 진행해주세요.", exception.getMessage());
+        }
 
-            assertNull(email);
+        @Test
+        void getEmailFromToken_InvalidToken_ThrowsJwtException() {
+            String invalidToken = "invalidToken";
+
+            JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getEmailFromToken(invalidToken));
+            assertEquals("유효하지 않은 Verification token입니다.", exception.getMessage());
         }
     }
 
