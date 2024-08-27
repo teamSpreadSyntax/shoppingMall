@@ -380,4 +380,75 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.status").value(404));
         }
     }
+
+    @Nested
+    class VerifyUserTests {
+
+        @Test
+        void verifyUser_ValidTokens_ReturnsValidatedTokens() throws Exception {
+            String validAccessToken = "validAccessToken";
+            String validRefreshToken = "validRefreshToken";
+
+            doNothing().when(tokenProvider).validateTokenResult(validAccessToken, validRefreshToken);
+            when(tokenProvider.getEmailFromToken(validAccessToken)).thenReturn("test@example.com");
+            when(memberService.findByEmail("test@example.com")).thenReturn(Optional.of(testMember));
+            when(roleService.findById(testMember.getId())).thenReturn(Optional.of(testRole));
+
+            mockMvc.perform(get("/api/auth/verify")
+                            .param("accessToken", validAccessToken)
+                            .param("refreshToken", validRefreshToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.grantType").value("Bearer"))
+                    .andExpect(jsonPath("$.result.accessToken").value(validAccessToken))
+                    .andExpect(jsonPath("$.result.refreshToken").value(validRefreshToken))
+                    .andExpect(jsonPath("$.result.role").value(testRole.getRole()))
+                    .andExpect(jsonPath("$.responseMessage").value("토큰이 검증 되었습니다."))
+                    .andExpect(jsonPath("$.status").value(200));
+
+            verify(tokenProvider).validateTokenResult(validAccessToken, validRefreshToken);
+            verify(tokenProvider).getEmailFromToken(validAccessToken);
+            verify(memberService).findByEmail("test@example.com");
+            verify(roleService).findById(testMember.getId());
+        }
+
+        @Test
+        void verifyUser_InvalidAccessToken_ReturnsUnauthorized() throws Exception {
+            String invalidAccessToken = "invalidAccessToken";
+            String validRefreshToken = "validRefreshToken";
+
+            doThrow(new JwtException("토큰을 확인해주세요."))
+                    .when(tokenProvider).validateTokenResult(invalidAccessToken, validRefreshToken);
+
+            mockMvc.perform(get("/api/auth/verify")
+                            .param("accessToken", invalidAccessToken)
+                            .param("refreshToken", validRefreshToken))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("토큰을 확인해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("유효하지 않은 토큰입니다."))
+                    .andExpect(jsonPath("$.status").value(401));
+
+            verify(tokenProvider).validateTokenResult(invalidAccessToken, validRefreshToken);
+        }
+
+        @Test
+        void verifyUser_InvalidRefreshToken_ReturnsUnauthorized() throws Exception {
+            String validAccessToken = "validAccessToken";
+            String invalidRefreshToken = "invalidRefreshToken";
+
+            doThrow(new JwtException("유효하지 않은 Refresh token입니다."))
+                    .when(tokenProvider).validateTokenResult(validAccessToken, invalidRefreshToken);
+
+            mockMvc.perform(get("/api/auth/verify")
+                            .param("accessToken", validAccessToken)
+                            .param("refreshToken", invalidRefreshToken))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 Refresh token입니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("유효하지 않은 토큰입니다."))
+                    .andExpect(jsonPath("$.status").value(401));
+
+            verify(tokenProvider).validateTokenResult(validAccessToken, invalidRefreshToken);
+        }
+
+    }
+
 }

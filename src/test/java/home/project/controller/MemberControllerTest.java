@@ -617,7 +617,7 @@ public class MemberControllerTest {
         @Test
         public void updateMember_ExistingMember_ReturnsUpdatedMemberInfo() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getEmailFromToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenReturn(Optional.of(updatedMember));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
@@ -640,7 +640,7 @@ public class MemberControllerTest {
         @Test
         public void updateMember_EmptyInput_ReturnsBadRequest() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getEmailFromToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenReturn(Optional.of(updatedMember));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
@@ -705,7 +705,7 @@ public class MemberControllerTest {
         public void updateMember_PasswordMismatch_ReturnsBadRequest() throws Exception {
 
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getEmailFromToken(verificationToken)).thenReturn(updatedMember.getEmail());
 
 
             mockMvc.perform(put("/api/member/update")
@@ -720,7 +720,7 @@ public class MemberControllerTest {
         @Test
         public void updateMember_InvalidToken_ReturnsBadRequest() throws Exception {
             String invalidToken = "invalidToken";
-            when(jwtTokenProvider.getEmailFromVerificationToken(invalidToken)).thenReturn(null);
+            when(jwtTokenProvider.getEmailFromToken(invalidToken)).thenReturn(null);
 
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -735,7 +735,7 @@ public class MemberControllerTest {
         public void updateMember_DuplicateEmail_ReturnsConflict() throws Exception {
 
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getEmailFromToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일입니다."));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
@@ -753,7 +753,7 @@ public class MemberControllerTest {
         @Test
         public void updateMember_DuplicatePhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getEmailFromToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 전화번호입니다."));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
@@ -770,7 +770,7 @@ public class MemberControllerTest {
         @Test
         public void updateMember_DuplicateEmailAndPhone_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getEmailFromToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("이미 사용 중인 이메일과 전화번호입니다."));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
@@ -787,7 +787,7 @@ public class MemberControllerTest {
         @Test
         public void updateMember_NoChanges_ReturnsConflict() throws Exception {
             when(validationCheck.validationChecks(bindingResult)).thenReturn(null);
-            when(jwtTokenProvider.getEmailFromVerificationToken(verificationToken)).thenReturn(updatedMember.getEmail());
+            when(jwtTokenProvider.getEmailFromToken(verificationToken)).thenReturn(updatedMember.getEmail());
             when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn(String.valueOf(updatedMember.getId()));
             when(memberService.update(any(Member.class))).thenThrow(new DataIntegrityViolationException("변경된 회원 정보가 없습니다."));
             when(roleService.findById(anyLong())).thenReturn(Optional.of(new Role()));
