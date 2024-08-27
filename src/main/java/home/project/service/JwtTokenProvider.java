@@ -125,11 +125,32 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public TokenDto refreshAccessToken(String refreshToken) {
-        // 리프레시 토큰 유효성 검사
-        if (!validateToken(refreshToken)) {
-            throw new JwtException("유효하지 않은 Refresh token입니다.");
+    public enum TokenStatus {
+        VALID,
+        INVALID,
+        EXPIRED
+    }
+
+    public TokenStatus validateRefreshToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return TokenStatus.VALID; // 토큰 파싱에 성공하면 만료되지 않은 것
+        } catch (ExpiredJwtException e) {
+            System.out.println(1);
+            return TokenStatus.EXPIRED; // ExpiredJwtException이 발생하면 토큰이 만료된 것
+        } catch (JwtException e) {
+            System.out.println(2);
+            return TokenStatus.INVALID; // 다른 JwtException은 만료가 아닌 다른 이유로 유효하지 않은 것
         }
+    }
+
+    public TokenDto refreshAccessToken(String refreshToken) {
+
+        TokenStatus status = validateRefreshToken(refreshToken);
+
+        switch (status) {
+            case VALID:
+
 
         // 만료된 액세스 토큰에서 사용자 정보 추출
         Claims claims = parseClaims(refreshToken);
@@ -140,9 +161,6 @@ public class JwtTokenProvider {
         // 예를 들어, UserDetailsService를 사용하여 사용자 정보를 가져올 수 있습니다.
         // UserDetails 로드
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-
-
 
         // 새로운 Authentication 객체 생성
         Collection<? extends GrantedAuthority> grantedAuthorities =
@@ -161,6 +179,17 @@ public class JwtTokenProvider {
 
         // 새로운 TokenDto 반환
         return getTokenDTO(newAccessToken, newRefreshToken);
+
+            case EXPIRED:
+                System.out.println(3);
+                throw new JwtException("만료된 Refresh token입니다. 다시 로그인 해주세요.");
+
+            case INVALID:
+                System.out.println(4);
+            default:
+                throw new JwtException("유효하지 않은 Refresh token입니다.");
+
+        }
     }
 
     public String generateVerificationToken(String email, Long id) {

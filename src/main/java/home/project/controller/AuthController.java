@@ -230,14 +230,10 @@ public class AuthController {
         tokenProvider.validateTokenResult(accessToken,refreshToken);
             String email = tokenProvider.getEmailFromAccessToken(accessToken);
             Optional<Member> member = memberService.findByEmail(email);
-            if (!member.isPresent()) {
-                throw new RuntimeException(email + "해당하는 회원이 존재하지 않습니다.");
-            }
+
             Long id = member.get().getId();
             Optional<Role> roleOptional = roleService.findById(id);
-            if (!roleOptional.isPresent()) {
-                throw new RuntimeException("사용자 권한을 찾을 수 없습니다.");
-            }
+
             String role = roleOptional.get().getRole();
             TokenDto newTokenDto = new TokenDto();
             newTokenDto.setRole(role);
