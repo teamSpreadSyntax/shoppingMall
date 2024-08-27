@@ -223,7 +223,7 @@ public class AuthControllerTest {
             TokenDto newTokenDto = new TokenDto("Bearer", "newAccessToken", "newRefreshToken", "testRole");
 
             when(tokenProvider.refreshAccessToken(refreshToken)).thenReturn(newTokenDto);
-            when(tokenProvider.getEmailFromAccessToken("newAccessToken")).thenReturn("test@example.com");
+            when(tokenProvider.getEmailFromToken("newAccessToken")).thenReturn("test@example.com");
             when(memberService.findByEmail("test@example.com")).thenReturn(Optional.of(testMember));
             when(roleService.findById(testMember.getId())).thenReturn(Optional.of(testRole));
 
@@ -239,7 +239,7 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.status").value(200));
 
             verify(tokenProvider).refreshAccessToken(refreshToken);
-            verify(tokenProvider).getEmailFromAccessToken("newAccessToken");
+            verify(tokenProvider).getEmailFromToken("newAccessToken");
             verify(memberService).findByEmail("test@example.com");
             verify(roleService).findById(testMember.getId());
         }

@@ -10,7 +10,6 @@ import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import home.project.service.RoleService;
 import home.project.util.ValidationCheck;
-import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,7 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +28,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -43,7 +40,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
 
-import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -120,7 +116,7 @@ public class AuthController {
 
             TokenDto newTokenDto = tokenProvider.refreshAccessToken(refreshToken);
 
-            String email = tokenProvider.getEmailFromAccessToken(newTokenDto.getAccessToken());
+            String email = tokenProvider.getEmailFromToken(newTokenDto.getAccessToken());
             Optional<Member> member = memberService.findByEmail(email);
 
             Long id = member.get().getId();
@@ -228,8 +224,7 @@ public class AuthController {
             @RequestParam(value = "accessToken", required = true) String accessToken,
             @RequestParam(value = "refreshToken", required = true)  String refreshToken) {
         tokenProvider.validateTokenResult(accessToken,refreshToken);
-        tokenProvider.validateRefreshTokenDetail(refreshToken);
-            String email = tokenProvider.getEmailFromAccessToken(accessToken);
+            String email = tokenProvider.getEmailFromToken(accessToken);
             Optional<Member> member = memberService.findByEmail(email);
 
             Long id = member.get().getId();

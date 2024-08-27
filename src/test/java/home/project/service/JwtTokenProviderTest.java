@@ -174,7 +174,7 @@ class JwtTokenProviderTest {
         void getEmailFromAccessToken_ValidToken_ReturnsEmail() {
            String accessToken = jwtTokenProvider.generateToken(authentication).getAccessToken();
 
-           String email = jwtTokenProvider.getEmailFromAccessToken(accessToken);
+           String email = jwtTokenProvider.getEmailFromToken(accessToken);
 
            assertEquals("user", email);
         }
@@ -183,7 +183,7 @@ class JwtTokenProviderTest {
         void getEmailFromAccessToken_InvalidToken_ReturnsNull() {
            String invalidToken = "invalidToken";
 
-           String email = jwtTokenProvider.getEmailFromAccessToken(invalidToken);
+           String email = jwtTokenProvider.getEmailFromToken(invalidToken);
 
             assertNull(email);
         }

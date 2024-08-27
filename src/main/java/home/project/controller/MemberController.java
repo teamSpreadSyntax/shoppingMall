@@ -269,13 +269,13 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> updateMember(      @RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
                                                 BindingResult bindingResult,
-                                                @RequestHeader("Verification-Token") String verificationToken) {
+                                                @RequestHeader("VerificationToken") String verificationToken) {
             CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
             if (validationResponse != null) {
                 return validationResponse;
             }
 
-            String email = jwtTokenProvider.getEmailFromVerificationToken(verificationToken);
+            String email = jwtTokenProvider.getEmailFromToken(verificationToken);
             if (email == null) {
                 throw new IllegalArgumentException("유효하지 않은 검증 토큰입니다.");
             }
