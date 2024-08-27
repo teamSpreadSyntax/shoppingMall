@@ -270,21 +270,26 @@ public class MemberController {
     public ResponseEntity<?> updateMember(      @RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
                                                 BindingResult bindingResult,
                                                 @RequestHeader("VerificationToken") String verificationToken) {
-            CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
-            if (validationResponse != null) {
-                return validationResponse;
-            }
+        System.out.println(7);
+        jwtTokenProvider.getEmailFromToken(verificationToken);
+        System.out.println(8);
+//            CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+//            if (validationResponse != null) {
+//                return validationResponse;
+//            }
+
 
             String email = jwtTokenProvider.getEmailFromToken(verificationToken);
-            if (email == null) {
-                throw new IllegalArgumentException("유효하지 않은 검증 토큰입니다.");
-            }
+//            if (email == null) {
+//                throw new IllegalArgumentException("유효하지 않은 검증 토큰입니다.");
+//            }
 
         if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
-
+        System.out.println(9);
         Long id = Long.parseLong(jwtTokenProvider.getIdFromVerificationToken(verificationToken));
+        System.out.println(10);
         Member member = new Member();
         member.setId(id);
         member.setName(memberDTOWithPasswordConfirm.getName());

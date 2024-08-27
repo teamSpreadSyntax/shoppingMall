@@ -150,11 +150,14 @@ public class JwtTokenProvider {
 
     public TokenStatus validateTokenDetail(String token) {
         try {
+            System.out.println(1);
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            System.out.println(2);
             return TokenStatus.VALID;
         } catch (ExpiredJwtException e) {
             return TokenStatus.EXPIRED;
         } catch (JwtException e) {
+            System.out.println(3);
             return TokenStatus.INVALID;
         }
     }
@@ -226,12 +229,29 @@ public class JwtTokenProvider {
         }
     }
 
-    public String getEmailFromToken(String accessToken) {
+    public String getEmailFromToken(String Token) {
+        TokenStatus status = validateTokenDetail(Token);
+
+        switch (status) {
+            case VALID:
+                System.out.println(4);
+                break;
+
+        case EXPIRED:
+            System.out.println(5);
+        throw new JwtException("만료된  Verification token입니다. 본인확인을 다시 진행해주세요.");
+
+        case INVALID:
+            System.out.println(6);
+        default:
+        throw new JwtException("유효하지 않은 Verification token입니다.");
+
+    }
         try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(accessToken)
+                    .parseClaimsJws(Token)
                     .getBody();
 
             return claims.getSubject();
