@@ -17,7 +17,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name")
+    @Column(name = "product_name")
     @NotBlank(message = "상품의 이름을 입력해주세요.")
     private String name;
 

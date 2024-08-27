@@ -28,7 +28,7 @@ public class Member {
     private String password;
 
     @NotEmpty(message = "이름을 입력해주세요.")
-    @Column(name = "name")
+    @Column(name = "member_name")
     private String name;
 
     @NotEmpty(message = "전화번호를 입력해주세요.")

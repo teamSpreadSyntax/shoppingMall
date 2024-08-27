@@ -236,7 +236,7 @@ public class AuthController {
             newTokenDto.setAccessToken(accessToken);
             newTokenDto.setRefreshToken(refreshToken);
             newTokenDto.setGrantType("Bearer");
-            return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증 되었습니다.", HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증되었습니다.", HttpStatus.OK);
     }
 
 }

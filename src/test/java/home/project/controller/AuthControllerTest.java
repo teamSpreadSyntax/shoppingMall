@@ -419,7 +419,7 @@ public class AuthControllerTest {
                     .andExpect(jsonPath("$.result.accessToken").value(validAccessToken))
                     .andExpect(jsonPath("$.result.refreshToken").value(validRefreshToken))
                     .andExpect(jsonPath("$.result.role").value(testRole.getRole()))
-                    .andExpect(jsonPath("$.responseMessage").value("토큰이 검증 되었습니다."))
+                    .andExpect(jsonPath("$.responseMessage").value("토큰이 검증되었습니다."))
                     .andExpect(jsonPath("$.status").value(200));
 
             verify(tokenProvider).validateTokenResult(validAccessToken, validRefreshToken);

@@ -94,11 +94,9 @@ public class JwtTokenProvider {
                 break;
 
             case EXPIRED:
-        System.out.println(3);
         throw new JwtException("만료된 Refresh token입니다. 다시 로그인 해주세요.");
 
         case INVALID:
-        System.out.println(4);
         default:
         throw new JwtException("유효하지 않은 Refresh token입니다.");
 
@@ -241,7 +239,6 @@ public class JwtTokenProvider {
         throw new JwtException("유효하지 않은 Verification token입니다.");
 
     }
-        try {
             Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
@@ -249,9 +246,6 @@ public class JwtTokenProvider {
                     .getBody();
 
             return claims.getSubject();
-        } catch (JwtException e) {
-            return null;
-        }
     }
 
     private Date getRefreshTokenExpires(long now) {

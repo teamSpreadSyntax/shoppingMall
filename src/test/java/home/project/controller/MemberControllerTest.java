@@ -62,7 +62,7 @@ public class MemberControllerTest {
     private ValidationCheck validationCheck;
 
     @MockBean
-    private UserDetailsService userDetailsService; //이걸 지우면 왜 안될까
+    private UserDetailsService userDetailsService;
 
     @MockBean
     private PasswordEncoder passwordEncoder;
@@ -626,7 +626,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
-                            .header("Verification-Token", verificationToken))
+                            .header("Verification_Token", verificationToken))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.result").exists())
                     .andExpect(jsonPath("$.result.id").value(updatedMember.getId()))
@@ -660,7 +660,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"name\": \"\", \"email\": \"\", \"password\": \"\", \"passwordConfirm\": \"\", \"phone\": \"\"}")
-                            .header("Verification-Token", verificationToken))
+                            .header("Verification_Token", verificationToken))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result").exists())
                     .andExpect(jsonPath("$.result.name").value("이름을 입력해주세요."))
@@ -691,7 +691,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{\"email\": \"invalid-email\", \"password\": \"weakPassword\", \"passwordConfirm\": \"weakPassword\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }")
-                            .header("Verification-Token", verificationToken))
+                            .header("Verification_Token", verificationToken))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.email").value("이메일 형식이 올바르지 않습니다."))
                     .andExpect(jsonPath("$.result.password").value("비밀번호는 대문자, 소문자, 숫자, 특수문자를 포함한 12자 이상이어야 합니다."))
@@ -711,7 +711,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"email\": \"test@example.com\", \"password\": \"1111\", \"passwordConfirm\": \"wrong\", \"name\": \"홍길동\", \"phone\": \"010-1111-1111\" }")
-                            .header("Verification-Token", verificationToken))
+                            .header("Verification_Token", verificationToken))
                     .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.errorMessage").value("비밀번호와 비밀번호 확인이 일치하지 않습니다."))
                     .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
@@ -725,7 +725,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
-                            .header("Verification-Token", invalidToken))
+                            .header("Verification_Token", invalidToken))
                     .andExpect(status().isNotFound())
                     .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 검증 토큰입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
@@ -743,7 +743,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
-                            .header("Verification-Token", verificationToken))
+                            .header("Verification_Token", verificationToken))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
@@ -761,7 +761,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
-                            .header("Verification-Token", verificationToken))
+                            .header("Verification_Token", verificationToken))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 전화번호입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
@@ -778,7 +778,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
-                            .header("Verification-Token", verificationToken))
+                            .header("Verification_Token", verificationToken))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result.errorMessage").value("이미 사용 중인 이메일과 전화번호입니다."))
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
@@ -796,7 +796,7 @@ public class MemberControllerTest {
             mockMvc.perform(put("/api/member/update")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
-                            .header("Verification-Token", verificationToken))
+                            .header("Verification_Token", verificationToken))
                     .andExpect(status().isConflict())
                     .andExpect(jsonPath("$.result").exists())
                     .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
