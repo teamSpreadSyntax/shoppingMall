@@ -4,7 +4,6 @@ import home.project.dto.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -74,18 +73,50 @@ public class JwtTokenProvider {
 
     public void validateTokenResult(String accessToken, String refreshToken) {
         // 리프레시 토큰 유효성 검사
-        if (!validateToken(refreshToken)) {
-            throw new JwtException("유효하지 않은 Refresh token입니다.");
+//        if (!validateToken(refreshToken)) {
+//            throw new JwtException("유효하지 않은 Refresh token입니다.");
+//        }
+//
+//        // 만료된 액세스 토큰에서 사용자 정보 추출
+//        Claims claims = parseClaims(accessToken);
+//        String username = claims.getSubject();
+//        String authorities = claims.get("auth", String.class);
+//
+//        if (username == null || authorities == null) {
+//            throw new JwtException("유효하지 않은 Access token입니다.");
+//        }
+        TokenStatus statusForAccess = validateRefreshTokenDetail(accessToken);
+        TokenStatus statusForRefresh = validateRefreshTokenDetail(refreshToken);
+
+        switch (statusForAccess) {
+            case VALID:
+                // 리프레시 토큰이 유효하므로, 액세스 토큰 검증을 수행합니다.
+                break;
+            case EXPIRED:
+                System.out.println(3);
+                throw new JwtException("만료된 Access token입니다. 다시 로그인 해주세요.");
+
+            case INVALID:
+                System.out.println(4);
+            default:
+                throw new JwtException("유효하지 않은 Access token입니다.");
+
         }
 
-        // 만료된 액세스 토큰에서 사용자 정보 추출
-        Claims claims = parseClaims(accessToken);
-        String username = claims.getSubject();
-        String authorities = claims.get("auth", String.class);
+        switch (statusForRefresh) {
+            case VALID:
+                // 리프레시 토큰이 유효하므로, 액세스 토큰 검증을 수행합니다.
+                break;
+            case EXPIRED:
+        System.out.println(3);
+        throw new JwtException("만료된 Refresh token입니다. 다시 로그인 해주세요.");
 
-        if (username == null || authorities == null) {
-            throw new JwtException("유효하지 않은 Access token입니다.");
-        }
+        case INVALID:
+        System.out.println(4);
+        default:
+        throw new JwtException("유효하지 않은 Refresh token입니다.");
+
+    }
     }
 
     private Claims parseClaims(String accessToken) {
@@ -131,7 +162,7 @@ public class JwtTokenProvider {
         EXPIRED
     }
 
-    public TokenStatus validateRefreshToken(String token) {
+    public TokenStatus validateRefreshTokenDetail(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return TokenStatus.VALID; // 토큰 파싱에 성공하면 만료되지 않은 것
@@ -146,7 +177,7 @@ public class JwtTokenProvider {
 
     public TokenDto refreshAccessToken(String refreshToken) {
 
-        TokenStatus status = validateRefreshToken(refreshToken);
+        TokenStatus status = validateRefreshTokenDetail(refreshToken);
 
         switch (status) {
             case VALID:

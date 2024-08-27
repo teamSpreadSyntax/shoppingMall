@@ -228,6 +228,7 @@ public class AuthController {
             @RequestParam(value = "accessToken", required = true) String accessToken,
             @RequestParam(value = "refreshToken", required = true)  String refreshToken) {
         tokenProvider.validateTokenResult(accessToken,refreshToken);
+        tokenProvider.validateRefreshTokenDetail(refreshToken);
             String email = tokenProvider.getEmailFromAccessToken(accessToken);
             Optional<Member> member = memberService.findByEmail(email);
 
