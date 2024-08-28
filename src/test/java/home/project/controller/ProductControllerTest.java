@@ -147,15 +147,15 @@ public class ProductControllerTest {
 
         @Test
         public void createProduct_NegativeStock_ReturnsConflict() throws Exception {
-            doThrow(new DataIntegrityViolationException("재고가 음수일 수 없습니다.")).when(productService).join(any(Product.class));
+            doThrow(new IllegalStateException("재고가 음수일 수 없습니다.")).when(productService).join(any(Product.class));
 
             mockMvc.perform(post("/api/product/create")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{ \"brand\": \"TestBrand\", \"category\": \"TestCategory\", \"name\": \"TestProduct\", \"stock\": -50, \"soldQuantity\": 0, \"image\": \"test.jpg\" }"))
-                    .andExpect(status().isConflict())
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.errorMessage").value("재고가 음수일 수 없습니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("데이터 무결성 위반 오류입니다."))
-                    .andExpect(jsonPath("$.status").value(409));
+                    .andExpect(jsonPath("$.responseMessage").value("입력값을 확인해주세요."))
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
     }

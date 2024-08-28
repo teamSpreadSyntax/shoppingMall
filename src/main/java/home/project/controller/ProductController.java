@@ -72,7 +72,7 @@ public class ProductController {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
             Long currentStock = productDTOWithoutId.getStock();
             if (currentStock < 0) {
-                throw new DataIntegrityViolationException("재고가 음수일 수 없습니다.");
+                throw new IllegalStateException("재고가 음수일 수 없습니다.");
             }
         if (validationResponse != null) return validationResponse;
         Product product = new Product();
