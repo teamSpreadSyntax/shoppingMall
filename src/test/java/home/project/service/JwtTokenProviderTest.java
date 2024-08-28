@@ -42,6 +42,8 @@ class JwtTokenProviderTest {
 
     private String invalidToken;
 
+    private JwtTokenProvider.TokenStatus tokenStatus;
+
     @MockBean
     private UserDetailsService userDetailsService;
 
@@ -65,6 +67,9 @@ class JwtTokenProviderTest {
         member.setEmail("test@test.com");
 
         invalidToken = "invalidToken";
+
+        tokenStatus = JwtTokenProvider.TokenStatus.VALID;
+
     }
 
     @Nested
@@ -157,13 +162,62 @@ class JwtTokenProviderTest {
 
         @Test
         void validateTokenResult_InvalidRefreshToken_ThrowsJwtException() {
-            String invalidRefreshToken = "invalidRefreshToken";
+            String invalidRefreshToken = "invalid RefreshToken";
 
             JwtException exception = assertThrows(JwtException.class, () ->
                     jwtTokenProvider.validateTokenResult(tokenDto.getAccessToken(), invalidRefreshToken));
             assertEquals("유효하지 않은 Refresh token입니다.", exception.getMessage());
         }
+        @Test
+        void validateTokenResult_ExpiredRefreshToken_ThrowsJwtException() {
+            String expiredRefreshToken = Jwts.builder()
+                    .setSubject("user")
+                    .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
+
+            JwtException exception = assertThrows(JwtException.class, () ->
+                    jwtTokenProvider.validateTokenResult(tokenDto.getAccessToken(), expiredRefreshToken));
+            assertEquals("만료된 Refresh token입니다. 다시 로그인 해주세요.", exception.getMessage());
+        }
     }
+
+    @Nested
+    class ValidateTokenDetailTests {
+
+        @Test
+        void validateTokenDetail_ValidToken_ReturnsValidStatus() {
+            String accessToken = tokenDto.getAccessToken();
+
+            tokenStatus = jwtTokenProvider.validateTokenDetail(accessToken);
+
+            assertEquals(JwtTokenProvider.TokenStatus.VALID, tokenStatus);
+        }
+
+        @Test
+        void validateTokenDetail_ExpiredToken_ReturnsExpiredStatus() {
+            String expiredToken = Jwts.builder()
+                    .setSubject("user")
+                    .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
+
+            tokenStatus = jwtTokenProvider.validateTokenDetail(expiredToken);
+
+            assertEquals(JwtTokenProvider.TokenStatus.EXPIRED, tokenStatus);
+        }
+
+        @Test
+        void validateTokenDetail_InvalidToken_ReturnsInvalidStatus() {
+            String invalidToken = "invalidToken";
+
+            tokenStatus = jwtTokenProvider.validateTokenDetail(invalidToken);
+
+            assertEquals(JwtTokenProvider.TokenStatus.INVALID, tokenStatus);
+        }
+    }
+
+
 
     @Nested
     class RefreshAccessTokenTests {
@@ -185,9 +239,23 @@ class JwtTokenProviderTest {
         void refreshAccessToken_InvalidRefreshToken_ThrowsJwtException() {
             String invalidRefreshToken = "invalidRefreshToken";
 
-            assertThrows(JwtException.class, () ->
-                    jwtTokenProvider.refreshAccessToken(invalidRefreshToken)
-            );
+            JwtException exception = assertThrows(JwtException.class,
+                    () -> jwtTokenProvider.refreshAccessToken(invalidRefreshToken));
+            assertEquals("유효하지 않은 Refresh token입니다.", exception.getMessage());
+        }
+
+        @Test
+        void refreshAccessToken_ExpiredRefreshToken_ThrowsJwtException() {
+            String expiredToken = Jwts.builder()
+                    .setSubject("user@user.com")
+                    .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
+
+            JwtException exception = assertThrows(JwtException.class,
+                    () -> jwtTokenProvider.refreshAccessToken(expiredToken));
+            assertEquals("만료된 Refresh token입니다. 다시 로그인 해주세요.", exception.getMessage());
+
         }
     }
 
@@ -214,6 +282,20 @@ class JwtTokenProviderTest {
             RuntimeException exception = assertThrows(RuntimeException.class, () -> jwtTokenProvider.getAuthentication(tokenWithoutAuth));
             assertEquals("권한 정보가 없는 토큰입니다.", exception.getMessage());
         }
+        @Test
+        void getEmailFromToken_ExpiredVerificationToken_ThrowsJwtException() {
+            String expiredToken = Jwts.builder()
+                    .setSubject("test@example.com")
+                    .setId("1")
+                    .setIssuedAt(new Date(System.currentTimeMillis() - 10000))
+                    .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
+
+            JwtException exception = assertThrows(JwtException.class,
+                    () -> jwtTokenProvider.getEmailFromToken(expiredToken));
+            assertEquals("만료된  token입니다. 다시 로그인 해주세요.", exception.getMessage());
+        }
     }
 
     @Nested
@@ -229,10 +311,23 @@ class JwtTokenProviderTest {
         }
 
         @Test
-        void getIdFromVerificationToken_InvalidToken_ReturnsNull() {
-            String extractedId = jwtTokenProvider.getIdFromVerificationToken(invalidToken);
+        void getIdFromVerificationToken_InvalidToken_ThrowsJwtException() {
+            String invalidToken = "invalidToken";
 
-            assertNull(extractedId);
+            JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getIdFromVerificationToken(invalidToken));
+            assertEquals("유효하지 않은 Verification token입니다.", exception.getMessage());
+        }
+
+        @Test
+        void getIdFromVerificationToken_ExpiredToken_ThrowsJwtException() {
+            String expiredToken = Jwts.builder()
+                    .setSubject("user@user.com")
+                    .setExpiration(new Date(System.currentTimeMillis() - 1000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
+
+            JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getIdFromVerificationToken(expiredToken));
+            assertEquals("만료된 Verification token입니다. 다시 로그인 해주세요.", exception.getMessage());
         }
     }
 
@@ -254,7 +349,7 @@ class JwtTokenProviderTest {
             String invalidToken = "invalidToken";
 
             JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getEmailFromToken(invalidToken));
-            assertEquals("유효하지 않은 Verification token입니다.", exception.getMessage());
+            assertEquals("유효하지 않은  token입니다.", exception.getMessage());
         }
 
         @Test
@@ -266,8 +361,7 @@ class JwtTokenProviderTest {
                     .compact();
 
             JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getEmailFromToken(expiredToken));
-            assertEquals("만료된  Verification token입니다. 본인확인을 다시 진행해주세요.", exception.getMessage());
+            assertEquals("만료된  token입니다. 다시 로그인 해주세요.", exception.getMessage());
         }
     }
-
 }
