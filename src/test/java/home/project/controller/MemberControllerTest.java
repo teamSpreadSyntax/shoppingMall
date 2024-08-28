@@ -306,7 +306,7 @@ public class MemberControllerTest {
         public void findMemberById_NonExistingMember_ReturnsNotFound() throws Exception {
             long nonExistingMemberId = 99L;
 
-            when(memberService.findById(nonExistingMemberId)).thenThrow(new IllegalArgumentException(nonExistingMemberId + "(으)로 등록된 회원이 없습니다."));
+            when(memberService.findById(nonExistingMemberId)).thenThrow(new IdNotFoundException(nonExistingMemberId + "(으)로 등록된 회원이 없습니다."));
 
             mockMvc.perform(get("/api/member/member")
                             .param("memberId", String.valueOf(nonExistingMemberId)))
@@ -378,10 +378,10 @@ public class MemberControllerTest {
                             .param("content", "search content")
                             .param("page", "-1")
                             .param("size", "5"))
-                    .andExpect(status().isNotFound())
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
     }
@@ -494,10 +494,10 @@ public class MemberControllerTest {
                             .param("content", "search content")
                             .param("page", "-1")
                             .param("size", "5"))
-                    .andExpect(status().isNotFound())
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
     }
@@ -727,10 +727,10 @@ public class MemberControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(new ObjectMapper().writeValueAsString(memberDTOWithPasswordConfirm))
                             .header("Verification_Token", invalidToken))
-                    .andExpect(status().isNotFound())
-                    .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 검증 토큰입니다."))
-                    .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.result.errorMessage").value("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요."))
+                    .andExpect(jsonPath("$.responseMessage").value("유효하지 않은 토큰입니다."))
+                    .andExpect(jsonPath("$.status").value(401));
         }
         @Test
         public void updateMember_DuplicateEmail_ReturnsConflict() throws Exception {

@@ -5,6 +5,7 @@ import home.project.config.SecurityConfig;
 import home.project.domain.*;
 import home.project.dto.TokenDto;
 import home.project.dto.UserDetailsDTO;
+import home.project.exceptions.IdNotFoundException;
 import home.project.response.CustomOptionalResponseBody;
 import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
@@ -299,7 +300,7 @@ public class AuthControllerTest {
 
         @Test
         void logout_NonExistingMember_ReturnsNotFound() throws Exception {
-            when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
+            when(memberService.findById(99L)).thenThrow(new IdNotFoundException("99(으)로 등록된 회원이 없습니다."));
 
             mockMvc.perform(post("/api/auth/logout")
                             .param("memberId", "99"))
@@ -330,8 +331,8 @@ public class AuthControllerTest {
 
         @Test
         void addAuthority_NonExistingMember_ReturnsNotFound() throws Exception {
-            when(roleService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
-            when(memberService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 회원이 없습니다."));
+            when(roleService.findById(99L)).thenThrow(new IdNotFoundException("99(으)로 등록된 회원이 없습니다."));
+            when(memberService.findById(99L)).thenThrow(new IdNotFoundException("99(으)로 등록된 회원이 없습니다."));
 
             mockMvc.perform(post("/api/auth/authorization")
                             .param("memberId", "99")

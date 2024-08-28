@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Role;
+import home.project.exceptions.IdNotFoundException;
 import home.project.repository.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -52,7 +53,7 @@ public class RoleServiceImplTest {
         void findById_NonExistingRole_ThrowsIllegalArgumentException() {
             when(roleRepository.findById(1L)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roleService.findById(1L));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> roleService.findById(1L));
             assertEquals("1(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
@@ -77,7 +78,7 @@ public class RoleServiceImplTest {
             updateRole.setId(999L);
 
             when(roleRepository.findById(999L)).thenReturn(Optional.empty());
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> roleService.update(updateRole));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> roleService.update(updateRole));
 
             assertEquals("999(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }

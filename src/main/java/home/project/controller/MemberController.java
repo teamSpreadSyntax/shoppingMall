@@ -9,6 +9,7 @@ import home.project.service.JwtTokenProvider;
 import home.project.service.MemberService;
 import home.project.service.RoleService;
 import home.project.util.ValidationCheck;
+import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -282,7 +283,7 @@ public class MemberController {
 
             String email = jwtTokenProvider.getEmailFromToken(verificationToken);
             if (email == null) {
-                throw new IllegalArgumentException("유효하지 않은 검증 토큰입니다.");
+                throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
             }
 
         if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){

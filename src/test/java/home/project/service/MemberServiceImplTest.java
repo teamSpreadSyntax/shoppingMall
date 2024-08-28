@@ -3,6 +3,8 @@ package home.project.service;
 import home.project.domain.Member;
 import home.project.domain.Product;
 import home.project.dto.MemberDTOWithoutId;
+import home.project.exceptions.IdNotFoundException;
+import home.project.exceptions.NoChangeException;
 import home.project.repository.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -147,7 +149,7 @@ class MemberServiceImplTest {
         void findById_NonExistingMember_ThrowsIllegalArgumentException() {
             when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findById(1L));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> memberService.findById(1L));
             assertEquals("1(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
@@ -194,7 +196,7 @@ class MemberServiceImplTest {
 
             when(memberRepository.findMembers("1", "2", "3", null, "null", pageable)).thenReturn(emptyPage);
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.findMembers("1", "2", "3", null, "null", pageable));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> memberService.findMembers("1", "2", "3", null, "null", pageable));
             assertEquals("해당하는 회원이 없습니다.", exception.getMessage());
         }
 
@@ -288,7 +290,7 @@ class MemberServiceImplTest {
 
             when(memberRepository.findById(999L)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.update(nonExistingUpdateMember));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> memberService.update(nonExistingUpdateMember));
             assertEquals("999(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
 
@@ -300,7 +302,7 @@ class MemberServiceImplTest {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
             when(passwordEncoder.matches("samePassword", member.getPassword())).thenReturn(true);
 
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.update(noChangeMember));
+            NoChangeException exception = assertThrows(NoChangeException.class, () -> memberService.update(noChangeMember));
             assertEquals("변경된 회원 정보가 없습니다.", exception.getMessage());
 
         }
@@ -323,7 +325,7 @@ class MemberServiceImplTest {
         void deleteById_NonExistingMember_ThrowsIllegalArgumentException() {
             when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> memberService.deleteById(member.getId()));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> memberService.deleteById(member.getId()));
             assertEquals(member.getId() + "(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }

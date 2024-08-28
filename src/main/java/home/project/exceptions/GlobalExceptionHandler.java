@@ -46,6 +46,16 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
 
+
+    @ExceptionHandler(IdNotFoundException.class)
+    public ResponseEntity<?> handleIdNotFoundException(IdNotFoundException e) {
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("errorMessage", e.getMessage());
+        CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "검색내용이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         Map<String, String> responseMap = new HashMap<>();

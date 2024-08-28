@@ -252,10 +252,10 @@ public class ProductControllerTest {
             mockMvc.perform(get("/api/product/products")
                             .param("page", "-1")
                             .param("size", "5"))
-                    .andExpect(status().isNotFound())
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
+                    .andExpect(jsonPath("$.status").value(400));
         }
 
     }
@@ -373,10 +373,10 @@ public class ProductControllerTest {
                             .param("content", "TestContent")
                             .param("page", "-1")
                             .param("size", "5"))
-                    .andExpect(status().isNotFound())
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
+                    .andExpect(jsonPath("$.status").value(400));
         }
     }
 
@@ -424,10 +424,10 @@ public class ProductControllerTest {
             mockMvc.perform(get("/api/product/brands")
                             .param("page", "-1")
                             .param("size", "5"))
-                    .andExpect(status().isNotFound())
+                    .andExpect(status().isBadRequest())
                     .andExpect(jsonPath("$.result.errorMessage").value("Page index must not be less than zero"))
                     .andExpect(jsonPath("$.responseMessage").value("검색내용이 존재하지 않습니다."))
-                    .andExpect(jsonPath("$.status").value(404));
+                    .andExpect(jsonPath("$.status").value(400));
         }
     }
 

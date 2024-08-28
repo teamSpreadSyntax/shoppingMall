@@ -2,6 +2,8 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Product;
+import home.project.exceptions.IdNotFoundException;
+import home.project.exceptions.NoChangeException;
 import home.project.repository.ProductRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -103,7 +105,7 @@ public class ProductServiceImplTest {
         void findById_NonExistingProduct_ThrowsIllegalArgumentException() {
             when(productRepository.findById(3L)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.findById(3L));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> productService.findById(3L));
             assertEquals("3(으)로 등록된 상품이 없습니다.", exception.getMessage());
         }
     }
@@ -148,7 +150,7 @@ public class ProductServiceImplTest {
 
             when(productRepository.findProducts("1", "2", "3", null, pageable)).thenReturn(emptyPage);
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.findProducts("1", "2", "3", null, pageable));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> productService.findProducts("1", "2", "3", null, pageable));
             assertEquals("해당하는 상품이 없습니다.", exception.getMessage());
         }
     }
@@ -215,7 +217,7 @@ public class ProductServiceImplTest {
 
             when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.update(noChangeProduct));
+            NoChangeException exception = assertThrows(NoChangeException.class, () -> productService.update(noChangeProduct));
             assertEquals("변경된 상품 정보가 없습니다.", exception.getMessage());
         }
 
@@ -225,7 +227,7 @@ public class ProductServiceImplTest {
 
             when(productRepository.findById(999L)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.update(updateProduct));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> productService.update(updateProduct));
             assertEquals("999(으)로 등록된 상품이 없습니다.", exception.getMessage());
         }
 
@@ -235,7 +237,7 @@ public class ProductServiceImplTest {
 
             when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.update(updateProduct));
+            IllegalStateException exception = assertThrows(IllegalStateException.class, () -> productService.update(updateProduct));
             assertEquals("재고가 음수일 수 없습니다.", exception.getMessage());
         }
     }
@@ -255,7 +257,7 @@ public class ProductServiceImplTest {
         void deleteById_NonExistingProduct_ThrowsIllegalArgumentException() {
             when(productRepository.findById(234L)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.deleteById(234L));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> productService.deleteById(234L));
             assertEquals("234(으)로 등록된 상품이 없습니다.", exception.getMessage());
         }
     }
@@ -278,7 +280,7 @@ public class ProductServiceImplTest {
 
         @Test
         void increaseStock_NegativeInput_ThrowsDataIntegrityViolationException() {
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> productService.increaseStock(1L, -5L));
+            IllegalStateException exception = assertThrows(IllegalStateException.class, () -> productService.increaseStock(1L, -5L));
             assertEquals("재고가 음수일 수 없습니다.", exception.getMessage());
         }
 
@@ -286,7 +288,7 @@ public class ProductServiceImplTest {
         void increaseStock_NonExistingProduct_ThrowsIllegalArgumentException() {
             when(productRepository.findById(123L)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.increaseStock(123L, 14L));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> productService.increaseStock(123L, 14L));
             assertEquals("123(으)로 등록된 상품이 없습니다.", exception.getMessage());
         }
     }
@@ -319,7 +321,7 @@ public class ProductServiceImplTest {
         void decreaseStock_NonExistingProduct_ThrowsIllegalArgumentException() {
             when(productRepository.findById(123L)).thenReturn(Optional.empty());
 
-            IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> productService.decreaseStock(123L, 14L));
+            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> productService.decreaseStock(123L, 14L));
             assertEquals("123(으)로 등록된 상품이 없습니다.", exception.getMessage());
         }
     }
