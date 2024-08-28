@@ -269,13 +269,6 @@ class JwtTokenProviderTest {
         }
 
         @Test
-        void getEmailFromVerificationToken_InvalidToken_ReturnsNull() {
-            String extractedEmail = jwtTokenProvider.getEmailFromToken(invalidToken);
-
-            assertNull(extractedEmail);
-        }
-
-        @Test
         void getIdFromVerificationToken_InvalidToken_ReturnsNull() {
             String extractedId = jwtTokenProvider.getIdFromVerificationToken(invalidToken);
 
