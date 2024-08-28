@@ -95,6 +95,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.UNAUTHORIZED);
     }
 
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception e) {
         Map<String, String> responseBody = new HashMap<>();

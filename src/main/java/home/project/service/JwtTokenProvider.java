@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 @Service
 public class JwtTokenProvider {
     private final Key key;
-    private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 1000;
-    private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
+    private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 30L * 60 * 1000; //30분
+    private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주
     private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 5 * 1000; // 5분
     private final UserDetailsService userDetailsService;
 
@@ -40,28 +40,9 @@ public class JwtTokenProvider {
         String authorities = getAuthorities(authentication);
 
         long now = getNow();
-        Date accessTokenExpiresIn = getAccessTokenExpiresIn(now);
-        String accessToken = getAccessToken(authentication, authorities, accessTokenExpiresIn);
-        String refreshToken = getRefreshToken(authentication, authorities, now);
+        String accessToken = buildToken(authentication.getName(), authorities, now, ACCESS_TOKEN_VALIDATION_PERIOD);
+        String refreshToken = buildToken(authentication.getName(), authorities, now, REFRESH_TOKEN_VALIDATION_PERIOD);
         return getTokenDTO(accessToken, refreshToken);
-    }
-
-    private String getAccessToken(Authentication authentication, String authorities, Date accessTokenExpiresIn) {
-        return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    private String getRefreshToken(Authentication authentication, String authorities,long now) {
-        return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
-                .setExpiration(getRefreshTokenExpires(now))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
     }
 
     public String generateVerificationToken(String email, Long id) {
@@ -103,30 +84,16 @@ public class JwtTokenProvider {
     }
 
     public TokenDto refreshAccessToken(String refreshToken) {
-
         throwExceptionForInvalidToken(validateTokenDetail(refreshToken), "Refresh");
 
-                Claims claims = parseClaims(refreshToken);
-                String username = claims.getSubject();
-                String authorities = claims.get("auth", String.class);
+        Claims claims = parseClaims(refreshToken);
+        String username = claims.getSubject();
+        String authorities = claims.get("auth", String.class);
 
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        Authentication authentication = createAuthentication(userDetails, authorities);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                Collection<? extends GrantedAuthority> grantedAuthorities =
-                        Arrays.stream(authorities.split(","))
-                                .map(SimpleGrantedAuthority::new)
-                                .collect(Collectors.toList());
-                Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", grantedAuthorities);
-
-                long now = getNow();
-                Date accessTokenExpiresIn = getAccessTokenExpiresIn(now);
-                String newAccessToken = getAccessToken(authentication, authorities, accessTokenExpiresIn);
-
-                String newRefreshToken = getRefreshToken(authentication, authorities,now);
-
-                return getTokenDTO(newAccessToken, newRefreshToken);
-
+        return generateToken(authentication);
     }
 
     public Authentication getAuthentication(String accessToken) {
@@ -177,6 +144,16 @@ public class JwtTokenProvider {
         return (new Date()).getTime();
     }
 
+    private String buildToken(String subject, String authorities, long now, long validityPeriod) {
+        return Jwts.builder()
+                .setSubject(subject)
+                .claim("auth", authorities)
+                .setIssuedAt(new Date(now))
+                .setExpiration(new Date(now + validityPeriod))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     private static String getAuthorities(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -191,14 +168,6 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    private Date getRefreshTokenExpires(long now) {
-        return new Date(now + REFRESH_TOKEN_VALIDATION_PERIOD);
-    }
-
-    private Date getAccessTokenExpiresIn(long now) {
-        return new Date(now + ACCESS_TOKEN_VALIDATION_PERIOD);
-    }
-
     private void throwExceptionForInvalidToken(TokenStatus status, String tokenType) {
         switch (status) {
             case VALID:
@@ -209,6 +178,14 @@ public class JwtTokenProvider {
             default:
                 throw new JwtException("유효하지 않은 " + tokenType + " token입니다.");
         }
+    }
+
+    private Authentication createAuthentication(UserDetails userDetails, String authorities) {
+        Collection<? extends GrantedAuthority> grantedAuthorities =
+                Arrays.stream(authorities.split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+        return new UsernamePasswordAuthenticationToken(userDetails, "", grantedAuthorities);
     }
 
     public enum TokenStatus {
