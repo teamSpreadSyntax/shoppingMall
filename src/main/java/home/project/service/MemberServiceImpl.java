@@ -2,6 +2,7 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.dto.MemberDTOWithoutId;
+import home.project.exceptions.NoChangeException;
 import home.project.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -115,7 +116,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         if (!isModified) {
-            throw new DataIntegrityViolationException("변경된 회원 정보가 없습니다.");
+            throw new NoChangeException("변경된 상품 정보가 없습니다.");
         }
 
         return Optional.of(memberRepository.save(existingMember));

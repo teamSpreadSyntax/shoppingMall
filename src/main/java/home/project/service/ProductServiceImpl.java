@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Product;
+import home.project.exceptions.NoChangeException;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -76,7 +77,7 @@ public class ProductServiceImpl implements ProductService {
 
         if (product.getStock() != null && !Objects.equals(existingProduct.getStock(), product.getStock())) {
             if (product.getStock() < 0) {
-                throw new DataIntegrityViolationException("재고가 음수일 수 없습니다.");
+                throw new IllegalStateException("재고가 음수일 수 없습니다.");
             }
             existingProduct.setStock(product.getStock());
             isModified = true;
@@ -88,7 +89,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (!isModified) {
-            throw new DataIntegrityViolationException("변경된 상품 정보가 없습니다.");
+            throw new NoChangeException("변경된 상품 정보가 없습니다.");
         }
 
         return Optional.of(productRepository.save(existingProduct));
@@ -101,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
 
     public Product increaseStock(Long productId, Long stock) {
         if (stock < 0) {
-            throw new DataIntegrityViolationException("재고가 음수일 수 없습니다.");
+            throw new IllegalStateException("재고가 음수일 수 없습니다.");
         }
         Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다."));
         Long currentStock = product.getStock();

@@ -32,9 +32,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException e) {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "검색내용이 존재하지 않습니다.", HttpStatus.NOT_FOUND.value());
+        CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "검색내용이 존재하지 않습니다.", HttpStatus.BAD_REQUEST.value());
 
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(IllegalStateException.class)
@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("errorMessage", e.getMessage());
         CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "데이터 무결성 위반 오류입니다.", HttpStatus.CONFLICT.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.CONFLICT);
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
@@ -101,6 +101,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         responseBody.put("errorMessage", e.getMessage());
         CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "서버 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR.value());
         return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(NoChangeException.class)
+    public ResponseEntity<?> noChangeException(NoChangeException e) {
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", e.getMessage());
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "변경된 정보가 없습니다", HttpStatus.OK.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.OK);
     }
 
 }
