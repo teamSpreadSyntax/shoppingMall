@@ -106,9 +106,7 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/loginSuccessResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Not Found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/notFoundResponseSchema")))
+            content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
     @PostMapping("refresh")
     public ResponseEntity<?> refreshToken(
@@ -214,8 +212,6 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/TokenRefreshSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
