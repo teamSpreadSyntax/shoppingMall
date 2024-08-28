@@ -144,13 +144,13 @@ class JwtTokenProviderTest {
     @Nested
     class ValidateTokenResultTests {
         @Test
-        void validateTokenResult_ValidTokens_DoesNotThrowException() {
+        void validateTokenResult_ValidTokens_DoesNotThrowJwtException() {
             assertDoesNotThrow(() -> jwtTokenProvider.validateTokenResult(
                     tokenDto.getAccessToken(), tokenDto.getRefreshToken()));
         }
 
         @Test
-        void validateTokenResult_InvalidAccessToken_ThrowsException() {
+        void validateTokenResult_InvalidAccessToken_ThrowsJwtException() {
             String invalidAccessToken = "invalidAccessToken";
 
             JwtException exception = assertThrows(JwtException.class, () ->
@@ -159,7 +159,7 @@ class JwtTokenProviderTest {
         }
 
         @Test
-        void validateTokenResult_ExpiredAccessToken_ThrowsException() {
+        void validateTokenResult_ExpiredAccessToken_ThrowsJwtException() {
             String expiredAccessToken = Jwts.builder()
                     .setSubject("user")
                     .setExpiration(new Date(System.currentTimeMillis() - 1000))
@@ -172,7 +172,7 @@ class JwtTokenProviderTest {
         }
 
         @Test
-        void validateTokenResult_InvalidRefreshToken_ThrowsException() {
+        void validateTokenResult_InvalidRefreshToken_ThrowsJwtException() {
             String invalidRefreshToken = "invalidRefreshToken";
 
             JwtException exception = assertThrows(JwtException.class, () ->
@@ -199,7 +199,7 @@ class JwtTokenProviderTest {
         }
 
         @Test
-        void refreshAccessToken_InvalidRefreshToken_ThrowsException() {
+        void refreshAccessToken_InvalidRefreshToken_ThrowsJwtException() {
             String invalidRefreshToken = "invalidRefreshToken";
 
             assertThrows(JwtException.class, () ->
@@ -220,6 +220,15 @@ class JwtTokenProviderTest {
             assertEquals("user@user.com",email);
         }
 
+
+        @Test
+        void getEmailFromToken_InvalidToken_ThrowsJwtException() {
+            String invalidToken = "invalidToken";
+
+            JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getEmailFromToken(invalidToken));
+            assertEquals("유효하지 않은 Verification token입니다.", exception.getMessage());
+        }
+
         @Test
         void getEmailFromToken_ExpiredToken_ThrowsJwtException() {
             String expiredToken = Jwts.builder()
@@ -231,33 +240,20 @@ class JwtTokenProviderTest {
             JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getEmailFromToken(expiredToken));
             assertEquals("만료된  Verification token입니다. 본인확인을 다시 진행해주세요.", exception.getMessage());
         }
-
-        @Test
-        void getEmailFromToken_InvalidToken_ThrowsJwtException() {
-            String invalidToken = "invalidToken";
-
-            JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getEmailFromToken(invalidToken));
-            assertEquals("유효하지 않은 Verification token입니다.", exception.getMessage());
-        }
     }
 
     @Nested
-    class VerificationTokenTests {
+    class generateVerificationTokenTest {
         @Test
         void generateVerificationToken_ValidInput_ReturnsToken() {
             String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
 
             assertNotNull(token);
         }
+    }
 
-        @Test
-        void getEmailFromVerificationToken_ValidToken_ReturnsEmail() {
-            String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
-
-            String extractedEmail = jwtTokenProvider.getEmailFromToken(token);
-
-            assertEquals(member.getEmail(), extractedEmail);
-        }
+    @Nested
+    class GetIdFromVerificationTokenTests {
 
         @Test
         void getIdFromVerificationToken_ValidToken_ReturnsId() {
@@ -275,5 +271,4 @@ class JwtTokenProviderTest {
             assertNull(extractedId);
         }
     }
-
 }
