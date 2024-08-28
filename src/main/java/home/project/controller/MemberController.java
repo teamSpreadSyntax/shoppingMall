@@ -217,7 +217,7 @@ public class MemberController {
     @Operation(summary = "본인확인 메서드", description = "본인확인 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
