@@ -119,6 +119,13 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
+        //변경 정보 없음 스키마
+        Schema<?> nochangeResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("errorMessage", new Schema<>().type("string")))
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(204));
+
         // 상품 유효성 검사 실패 응답 스키마
         Schema<?> productValidationFailedResponseSchema = new ObjectSchema()
                 .addProperty("result", new ObjectSchema()
@@ -260,6 +267,7 @@ public class OpenApiConfig {
                         .addSchemas("ProductSchema", productSchema)
                         .addSchemas("ProductResponseSchema", productResponseSchema)
                         .addSchemas("PagedProductListResponseSchema", pagedProductListResponseSchema)
+                        .addSchemas("NochangeResponseSchema", nochangeResponseSchema)
                         .addSchemas("BrandListResponseSchema", brandListResponseSchema)
                         .addSchemas("ProductValidationFailedResponseSchema", productValidationFailedResponseSchema)
                         .addSchemas("LoginSuccessResponseSchema", loginSuccessResponseSchema)

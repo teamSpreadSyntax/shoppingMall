@@ -108,10 +108,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> noChangeException(NoChangeException e) {
         Map<String, String> responseBody = new HashMap<>();
         responseBody.put("errorMessage", e.getMessage());
-        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "변경된 정보가 없습니다", HttpStatus.OK.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.OK);
+        CustomOptionalResponseBody<?> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseBody), "변경된 정보가 없습니다", HttpStatus.NO_CONTENT.value());
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.NO_CONTENT);
     }
-
 }
 
 
