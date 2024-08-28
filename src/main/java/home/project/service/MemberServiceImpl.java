@@ -116,7 +116,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         if (!isModified) {
-            throw new NoChangeException("변경된 상품 정보가 없습니다.");
+            throw new NoChangeException("변경된 회원 정보가 없습니다.");
         }
 
         return Optional.of(memberRepository.save(existingMember));
