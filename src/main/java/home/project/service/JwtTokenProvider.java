@@ -46,20 +46,35 @@ public class JwtTokenProvider {
         return getTokenDTO(accessToken, refreshToken);
     }
 
-    public Authentication getAuthentication(String accessToken) {
-        Claims claims = parseClaims(accessToken);
+    private String getAccessToken(Authentication authentication, String authorities, Date accessTokenExpiresIn) {
+        return Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim("auth", authorities)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
 
-        if (claims.get("auth") == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
-        }
+    private String getRefreshToken(Authentication authentication, String authorities,long now) {
+        return Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim("auth", authorities)
+                .setExpiration(getRefreshTokenExpires(now))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
 
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get("auth").toString().split(","))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toList());
+    public String generateVerificationToken(String email, Long id) {
+        long now = getNow();
+        Date expiresIn = new Date(now + VERIFICATION_TOKEN_VALIDATION_PERIOD);
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
-        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+        return Jwts.builder()
+                .setSubject(email)
+                .setId(id.toString())
+                .setIssuedAt(new Date())
+                .setExpiration(expiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public boolean validateToken(String token) {
@@ -72,43 +87,24 @@ public class JwtTokenProvider {
     }
 
     public void validateTokenResult(String accessToken, String refreshToken) {
-
-        TokenStatus statusForAccess = validateTokenDetail(accessToken);
-        TokenStatus statusForRefresh = validateTokenDetail(refreshToken);
-
-        switch (statusForAccess) {
-            case VALID:
-                break;
-
-            case EXPIRED:
-                throw new JwtException("만료된 Access token입니다. 다시 로그인 해주세요.");
-
-            case INVALID:
-            default:
-                throw new JwtException("유효하지 않은 Access token입니다.");
-
-        }
-
-        switch (statusForRefresh) {
-            case VALID:
-                break;
-
-            case EXPIRED:
-        throw new JwtException("만료된 Refresh token입니다. 다시 로그인 해주세요.");
-
-        case INVALID:
-        default:
-        throw new JwtException("유효하지 않은 Refresh token입니다.");
-
+        throwExceptionForInvalidToken(validateTokenDetail(accessToken), "Access");
+        throwExceptionForInvalidToken(validateTokenDetail(refreshToken), "Refresh");
     }
+
+    public TokenStatus validateTokenDetail(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return TokenStatus.VALID;
+        } catch (ExpiredJwtException e) {
+            return TokenStatus.EXPIRED;
+        } catch (JwtException e) {
+            return TokenStatus.INVALID;
+        }
     }
 
     public TokenDto refreshAccessToken(String refreshToken) {
 
-        TokenStatus status = validateTokenDetail(refreshToken);
-
-        switch (status) {
-            case VALID:
+        throwExceptionForInvalidToken(validateTokenDetail(refreshToken), "Refresh");
 
                 Claims claims = parseClaims(refreshToken);
                 String username = claims.getSubject();
@@ -131,24 +127,50 @@ public class JwtTokenProvider {
 
                 return getTokenDTO(newAccessToken, newRefreshToken);
 
-            case EXPIRED:
-                throw new JwtException("만료된 Refresh token입니다. 다시 로그인 해주세요.");
+    }
 
-            case INVALID:
-            default:
-                throw new JwtException("유효하지 않은 Refresh token입니다.");
+    public Authentication getAuthentication(String accessToken) {
+        Claims claims = parseClaims(accessToken);
 
+        if (claims.get("auth") == null) {
+            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
+
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get("auth").toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
+
+        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+    }
+
+    public String getIdFromVerificationToken(String token) {
+        throwExceptionForInvalidToken(validateTokenDetail(token), "Verification");
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getId();
+    }
+
+    public String getEmailFromToken(String token) {
+        throwExceptionForInvalidToken(validateTokenDetail(token), "");
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
     }
 
     private Claims parseClaims(String accessToken) {
-        try {
+        throwExceptionForInvalidToken(validateTokenDetail(accessToken), "");
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
-        } catch (ExpiredJwtException e) {
-            return e.getClaims();
-        } catch (JwtException e) {
-            throw new JwtException("토큰을 확인해주세요.", e);
-        }
+
     }
 
     private static long getNow() {
@@ -169,96 +191,6 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    private String getRefreshToken(Authentication authentication, String authorities,long now) {
-        return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
-                .setExpiration(getRefreshTokenExpires(now))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    public enum TokenStatus {
-        VALID,
-        INVALID,
-        EXPIRED
-    }
-
-    public TokenStatus validateTokenDetail(String token) {
-        try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return TokenStatus.VALID;
-        } catch (ExpiredJwtException e) {
-            return TokenStatus.EXPIRED;
-        } catch (JwtException e) {
-            return TokenStatus.INVALID;
-        }
-    }
-
-
-
-    public String generateVerificationToken(String email, Long id) {
-        long now = getNow();
-        Date expiresIn = new Date(now + VERIFICATION_TOKEN_VALIDATION_PERIOD);
-
-        return Jwts.builder()
-                .setSubject(email)
-                .setId(id.toString())
-                .setIssuedAt(new Date())
-                .setExpiration(expiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-
-    public String getIdFromVerificationToken(String token) {
-        TokenStatus status = validateTokenDetail(token);
-
-        switch (status) {
-            case VALID:
-                break;
-
-            case EXPIRED:
-                throw new JwtException("만료된 Verification token입니다. 본인확인을 다시 진행해주세요.");
-
-            case INVALID:
-            default:
-                throw new JwtException("유효하지 않은 Verification token입니다.");
-
-        }
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-
-            return claims.getId();
-    }
-
-    public String getEmailFromToken(String Token) {
-        TokenStatus status = validateTokenDetail(Token);
-
-        switch (status) {
-            case VALID:
-                break;
-
-        case EXPIRED:
-        throw new JwtException("만료된  token입니다. 본인확인을 다시 진행해주세요.");
-
-        case INVALID:
-        default:
-        throw new JwtException("유효하지 않은 token입니다.");
-
-    }
-            Claims claims = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(Token)
-                    .getBody();
-
-            return claims.getSubject();
-    }
-
     private Date getRefreshTokenExpires(long now) {
         return new Date(now + REFRESH_TOKEN_VALIDATION_PERIOD);
     }
@@ -267,12 +199,22 @@ public class JwtTokenProvider {
         return new Date(now + ACCESS_TOKEN_VALIDATION_PERIOD);
     }
 
-    private String getAccessToken(Authentication authentication, String authorities, Date accessTokenExpiresIn) {
-        return Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+    private void throwExceptionForInvalidToken(TokenStatus status, String tokenType) {
+        switch (status) {
+            case VALID:
+                return;
+            case EXPIRED:
+                throw new JwtException("만료된 " + tokenType + " token입니다. 다시 로그인 해주세요.");
+            case INVALID:
+            default:
+                throw new JwtException("유효하지 않은 " + tokenType + " token입니다.");
+        }
     }
+
+    public enum TokenStatus {
+        VALID,
+        INVALID,
+        EXPIRED
+    }
+
 }

@@ -80,28 +80,12 @@ class JwtTokenProviderTest {
     }
 
     @Nested
-    class getAuthenticationTests {
-
+    class generateVerificationTokenTest {
         @Test
-        void getAuthentication_ValidToken_ReturnsAuthenticationWithRoleUser() {
+        void generateVerificationToken_ValidInput_ReturnsToken() {
+            String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
 
-            Authentication auth = jwtTokenProvider.getAuthentication(tokenDto.getAccessToken());
-
-            assertNotNull(auth);
-            assertEquals("ROLE_USER", auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining()));
-            assertEquals(auth.getName(), authentication.getName());
-        }
-
-        @Test
-        void getAuthentication_TokenWithoutAuthority_ThrowsRuntimeException() {
-            String tokenWithoutAuth = Jwts.builder()
-                    .setSubject("user")
-                    .setExpiration(new Date(System.currentTimeMillis() + 10000))
-                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
-                    .compact();
-
-            RuntimeException exception = assertThrows(RuntimeException.class, () -> jwtTokenProvider.getAuthentication(tokenWithoutAuth));
-            assertEquals("권한 정보가 없는 토큰입니다.", exception.getMessage());
+            assertNotNull(token);
         }
     }
 
@@ -181,7 +165,6 @@ class JwtTokenProviderTest {
         }
     }
 
-
     @Nested
     class RefreshAccessTokenTests {
         @Test
@@ -205,6 +188,51 @@ class JwtTokenProviderTest {
             assertThrows(JwtException.class, () ->
                     jwtTokenProvider.refreshAccessToken(invalidRefreshToken)
             );
+        }
+    }
+
+    @Nested
+    class getAuthenticationTests {
+
+        @Test
+        void getAuthentication_ValidToken_ReturnsAuthenticationWithRoleUser() {
+
+            Authentication auth = jwtTokenProvider.getAuthentication(tokenDto.getAccessToken());
+
+            assertNotNull(auth);
+            assertEquals("ROLE_USER", auth.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.joining()));
+            assertEquals(auth.getName(), authentication.getName());
+        }
+        @Test
+        void getAuthentication_TokenWithoutAuthority_ThrowsRuntimeException() {
+            String tokenWithoutAuth = Jwts.builder()
+                    .setSubject("user")
+                    .setExpiration(new Date(System.currentTimeMillis() + 10000))
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode("thisisaverylongsecretkeythisisaverylongsecretkey")), SignatureAlgorithm.HS256)
+                    .compact();
+
+            RuntimeException exception = assertThrows(RuntimeException.class, () -> jwtTokenProvider.getAuthentication(tokenWithoutAuth));
+            assertEquals("권한 정보가 없는 토큰입니다.", exception.getMessage());
+        }
+    }
+
+    @Nested
+    class GetIdFromVerificationTokenTests {
+
+        @Test
+        void getIdFromVerificationToken_ValidToken_ReturnsId() {
+            String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
+
+            String extractedId = jwtTokenProvider.getIdFromVerificationToken(token);
+
+            assertEquals(member.getId().toString(), extractedId);
+        }
+
+        @Test
+        void getIdFromVerificationToken_InvalidToken_ReturnsNull() {
+            String extractedId = jwtTokenProvider.getIdFromVerificationToken(invalidToken);
+
+            assertNull(extractedId);
         }
     }
 
@@ -242,33 +270,4 @@ class JwtTokenProviderTest {
         }
     }
 
-    @Nested
-    class generateVerificationTokenTest {
-        @Test
-        void generateVerificationToken_ValidInput_ReturnsToken() {
-            String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
-
-            assertNotNull(token);
-        }
-    }
-
-    @Nested
-    class GetIdFromVerificationTokenTests {
-
-        @Test
-        void getIdFromVerificationToken_ValidToken_ReturnsId() {
-            String token = jwtTokenProvider.generateVerificationToken(member.getEmail(), member.getId());
-
-            String extractedId = jwtTokenProvider.getIdFromVerificationToken(token);
-
-            assertEquals(member.getId().toString(), extractedId);
-        }
-
-        @Test
-        void getIdFromVerificationToken_InvalidToken_ReturnsNull() {
-            String extractedId = jwtTokenProvider.getIdFromVerificationToken(invalidToken);
-
-            assertNull(extractedId);
-        }
-    }
 }
