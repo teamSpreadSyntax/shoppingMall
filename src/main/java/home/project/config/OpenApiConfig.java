@@ -159,6 +159,14 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
+        // 본인확인 스키마
+        Schema<?> verifyResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("verificationToken", new Schema<>().type("string"))
+                        .addProperty("successMessage", new Schema<>().type("string")))
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(200));
+
         // 페이지네이션된 회원 목록 스키마
         Schema<?> pagedMemberListResponseSchema = new ObjectSchema()
                 .addProperty("result", new ObjectSchema()
@@ -261,6 +269,7 @@ public class OpenApiConfig {
                         .addSchemas("MemberWithoutPwSchema", memberWithoutPwSchema)
                         .addSchemas("MemberResponseSchema", memberResponseSchema)
                         .addSchemas("MemberWithoutPasswordResponseSchema", memberWithoutPasswordResponseSchema)
+                        .addSchemas("VerifyResponseSchema", verifyResponseSchema)
                         .addSchemas("PagedMemberListResponseSchema", pagedMemberListResponseSchema)
                         .addSchemas("MemberJoinSuccessResponseSchema", memberJoinSuccessResponseSchema)
                         .addSchemas("MemberValidationFailedResponseSchema", memberValidationFailedResponseSchema)
