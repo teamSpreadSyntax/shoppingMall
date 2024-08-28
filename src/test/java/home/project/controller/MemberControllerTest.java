@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.config.SecurityConfig;
 import home.project.domain.*;
 import home.project.dto.*;
+import home.project.exceptions.IdNotFoundException;
 import home.project.response.CustomOptionalResponseBody;
 import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
@@ -466,7 +467,7 @@ public class MemberControllerTest {
         @Test
         public void searchMembers_NoResults_ReturnsNotFound() throws Exception {
             when(memberService.findMembers(any(), any(), any(), any(), any(), any(Pageable.class)))
-                    .thenThrow(new IllegalArgumentException("해당하는 회원이 없습니다."));
+                    .thenThrow(new IdNotFoundException("해당하는 회원이 없습니다."));
 
             mockMvc.perform(get("/api/member/search")
                             .param("name", "NonExistingName")
@@ -567,7 +568,7 @@ public class MemberControllerTest {
         @Test
         public void verifyUser_NonExistingMember_ReturnsNotFound() throws Exception {
             when(validationCheck.validationChecks(any())).thenReturn(null);
-            when(memberService.findById(anyLong())).thenThrow(new IllegalArgumentException("0(으)로 등록된 회원이 없습니다."));
+            when(memberService.findById(anyLong())).thenThrow(new IdNotFoundException("0(으)로 등록된 회원이 없습니다."));
 
             mockMvc.perform(post("/api/member/verify")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -831,7 +832,7 @@ public class MemberControllerTest {
         public void deleteMember_NonExistingMember_ReturnsNotFound() throws Exception {
             long memberId = 99L;
 
-            when(memberService.findById(memberId)).thenThrow(new IllegalArgumentException(memberId + "(으)로 등록된 회원이 없습니다."));
+            when(memberService.findById(memberId)).thenThrow(new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다."));
 
             mockMvc.perform(delete("/api/member/delete")
                             .param("memberId", String.valueOf(memberId)))

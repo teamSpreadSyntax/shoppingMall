@@ -51,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("errorMessage", e.getMessage());
         CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "데이터 무결성 위반 오류입니다.", HttpStatus.CONFLICT.value());
-        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+        return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)

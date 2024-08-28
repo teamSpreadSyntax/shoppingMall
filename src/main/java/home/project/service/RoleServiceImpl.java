@@ -2,6 +2,7 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Role;
+import home.project.exceptions.IdNotFoundException;
 import home.project.repository.RoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -22,7 +23,7 @@ public class RoleServiceImpl implements RoleService {
 
     public Optional<Role> findById(Long memberId) {
         Role role = roleRepository.findById(memberId).orElseThrow(() -> {
-            throw new IllegalArgumentException(memberId + "(으)로 등록된 회원이 없습니다.");
+            throw new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다.");
         });
         return Optional.ofNullable(role);
     }
@@ -30,7 +31,7 @@ public class RoleServiceImpl implements RoleService {
     public Optional<Role> update(Role role) {
 
         Role existsMember = roleRepository.findById(role.getId())
-                .orElseThrow(() -> new IllegalArgumentException(role.getId() + "(으)로 등록된 회원이 없습니다."));
+                .orElseThrow(() -> new IdNotFoundException(role.getId() + "(으)로 등록된 회원이 없습니다."));
         Role existsRole = roleRepository.findById(existsMember.getId()).get();
         existsRole.setRole(role.getRole());
         roleRepository.save(existsRole);

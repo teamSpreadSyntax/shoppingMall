@@ -2,6 +2,7 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.dto.MemberDTOWithoutId;
+import home.project.exceptions.IdNotFoundException;
 import home.project.exceptions.NoChangeException;
 import home.project.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +50,13 @@ public class MemberServiceImpl implements MemberService {
 
     public Optional<Member> findById(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            throw new IllegalArgumentException(memberId + "(으)로 등록된 회원이 없습니다.");
+            throw new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다.");
         });
         return Optional.ofNullable(member);
     }
 
     public Optional<Member> findByEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IllegalArgumentException(email+"(으)로 등록된 회원이 없습니다."); });
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IdNotFoundException(email+"(으)로 등록된 회원이 없습니다."); });
         return Optional.ofNullable(member);
     }
 
@@ -66,14 +67,14 @@ public class MemberServiceImpl implements MemberService {
     public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
         Page<Member> memberPage = memberRepository.findMembers(name, email, phone, role, content, pageable);
         if (memberPage.getSize() == 0 || memberPage.getTotalElements() == 0) {
-            throw new IllegalArgumentException("해당하는 회원이 없습니다.");
+            throw new IdNotFoundException("해당하는 회원이 없습니다.");
         }
         return memberPage;
     }
 
     public Optional<Member> update(Member member) {
         Member existingMember = memberRepository.findById(member.getId())
-                .orElseThrow(() -> new IllegalArgumentException(member.getId() + "(으)로 등록된 회원이 없습니다."));
+                .orElseThrow(() -> new IdNotFoundException(member.getId() + "(으)로 등록된 회원이 없습니다."));
 
         boolean isModified = false;
         boolean isEmailDuplicate = false;
@@ -116,14 +117,14 @@ public class MemberServiceImpl implements MemberService {
         }
 
         if (!isModified) {
-            throw new NoChangeException("변경된 상품 정보가 없습니다.");
+            throw new NoChangeException("변경된 회원 정보가 없습니다.");
         }
 
         return Optional.of(memberRepository.save(existingMember));
     }
 
     public void deleteById(Long memberId) {
-        memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException(memberId + "(으)로 등록된 회원이 없습니다."));
+        memberRepository.findById(memberId).orElseThrow(() -> new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다."));
         memberRepository.deleteById(memberId);
     }
 

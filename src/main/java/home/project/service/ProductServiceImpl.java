@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Product;
+import home.project.exceptions.IdNotFoundException;
 import home.project.exceptions.NoChangeException;
 import home.project.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
 
     public Optional<Product> findById(Long productId) {
         return Optional.ofNullable(productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다.")));
+                .orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다.")));
     }
 
     public Page<Product> findAll(Pageable pageable) {
@@ -39,7 +40,7 @@ public class ProductServiceImpl implements ProductService {
     public Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
         Page<Product> productPage = productRepository.findProducts(brand, category, productName, content, pageable);
         if (productPage.getSize() == 0 || productPage.getTotalElements() == 0) {
-            throw new IllegalArgumentException("해당하는 상품이 없습니다.");
+            throw new IdNotFoundException("해당하는 상품이 없습니다.");
         }
         return productPage;
     }
@@ -51,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
 
     public Optional<Product> update(Product product) {
         Product existingProduct = productRepository.findById(product.getId())
-                .orElseThrow(() -> new IllegalArgumentException(product.getId() + "(으)로 등록된 상품이 없습니다."));
+                .orElseThrow(() -> new IdNotFoundException(product.getId() + "(으)로 등록된 상품이 없습니다."));
 
         boolean isModified = false;
 
@@ -96,7 +97,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void deleteById(Long productId) {
-        productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다."));
+        productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
         productRepository.deleteById(productId);
     }
 
@@ -104,7 +105,7 @@ public class ProductServiceImpl implements ProductService {
         if (stock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
         }
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다."));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
         Long currentStock = product.getStock();
         Long newStock = currentStock + stock;
         product.setStock(newStock);
@@ -112,7 +113,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Product decreaseStock(Long productId, Long stock) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IllegalArgumentException(productId + "(으)로 등록된 상품이 없습니다."));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
         Long currentStock = product.getStock();
         Long newStock = Math.max(currentStock - stock, 0);
         if (currentStock <= 0 || stock > currentStock) {

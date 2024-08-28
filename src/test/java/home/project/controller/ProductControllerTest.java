@@ -4,6 +4,7 @@ import home.project.config.SecurityConfig;
 import home.project.domain.*;
 import home.project.dto.ProductDTOWithoutId;
 import home.project.exceptions.GlobalExceptionHandler;
+import home.project.exceptions.IdNotFoundException;
 import home.project.response.CustomOptionalResponseBody;
 import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;
@@ -183,7 +184,7 @@ public class ProductControllerTest {
 
         @Test
         public void findProductById_NonExistingProduct_ReturnsNotFound() throws Exception {
-            when(productService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
+            when(productService.findById(99L)).thenThrow(new IdNotFoundException("99(으)로 등록된 상품이 없습니다."));
 
             mockMvc.perform(get("/api/product/product")
                             .param("productId", "99"))
@@ -347,7 +348,7 @@ public class ProductControllerTest {
         @Test
         public void searchProducts_NoResults_ReturnsNotFound() throws Exception {
             when(productService.findProducts(anyString(), anyString(), anyString(), anyString(), any(Pageable.class)))
-                    .thenThrow(new IllegalArgumentException("해당하는 상품이 없습니다."));
+                    .thenThrow(new IdNotFoundException("해당하는 상품이 없습니다."));
 
             mockMvc.perform(get("/api/product/search")
                     .param("brand", "TestBrand")
@@ -511,7 +512,7 @@ public class ProductControllerTest {
             );
 
             when(validationCheck.validationChecks(any(BindingResult.class))).thenReturn(null);
-            when(productService.update(any(Product.class))).thenThrow(new IllegalArgumentException(nonExistingId + "(으)로 등록된 상품이 없습니다."));
+            when(productService.update(any(Product.class))).thenThrow(new IdNotFoundException(nonExistingId + "(으)로 등록된 상품이 없습니다."));
 
             mockMvc.perform(put("/api/product/update")
                             .contentType(MediaType.APPLICATION_JSON)
@@ -581,7 +582,7 @@ public class ProductControllerTest {
 
         @Test
         public void deleteProduct_NonExistingProduct_ReturnsNotFound() throws Exception {
-            when(productService.findById(99L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
+            when(productService.findById(99L)).thenThrow(new IdNotFoundException("99(으)로 등록된 상품이 없습니다."));
 
             mockMvc.perform(delete("/api/product/delete")
                             .param("productId", "99"))
@@ -614,7 +615,7 @@ public class ProductControllerTest {
         }
         @Test
         void increaseStock_NonExistingProduct_ReturnsNotFound() throws Exception {
-            when(productService.increaseStock(99L, 50L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
+            when(productService.increaseStock(99L, 50L)).thenThrow(new IdNotFoundException("99(으)로 등록된 상품이 없습니다."));
 
             mockMvc.perform(put("/api/product/increase_stock")
                             .param("productId", "99")
@@ -661,7 +662,7 @@ public class ProductControllerTest {
 
         @Test
         void decreaseStock_NonExistingProduct_ReturnsNotFound() throws Exception {
-            when(productService.decreaseStock(99L, 50L)).thenThrow(new IllegalArgumentException("99(으)로 등록된 상품이 없습니다."));
+            when(productService.decreaseStock(99L, 50L)).thenThrow(new IdNotFoundException("99(으)로 등록된 상품이 없습니다."));
 
             mockMvc.perform(put("/api/product/decrease_stock")
                             .param("productId", "99")
