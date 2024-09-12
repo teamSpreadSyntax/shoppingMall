@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
+import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
 @Table(name = "product")
@@ -28,6 +29,10 @@ public class Product {
     @Column(name = "category")
     @NotBlank(message = "상품의 카테고리를 입력해주세요.")
     private String category;
+
+    @Column(name = "product_num", unique = true)
+    @NotNull(message = "상품의 품번을 입력해주세요.")
+    private String productNum;
 
     @Check(name = "stock", constraints = "stock >= 0")
     @Column(name = "stock")

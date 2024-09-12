@@ -78,6 +78,7 @@ public class ProductController {
         Product product = new Product();
         product.setBrand(productDTOWithoutId.getBrand());
         product.setCategory(productDTOWithoutId.getCategory());
+        product.setProductNum(productDTOWithoutId.getBrand().substring(0,1)+productDTOWithoutId.getName().substring(0,1)+productDTOWithoutId.getCategory());
         product.setSoldQuantity(productDTOWithoutId.getSoldQuantity());
         product.setName(productDTOWithoutId.getName());
         product.setStock(productDTOWithoutId.getStock());

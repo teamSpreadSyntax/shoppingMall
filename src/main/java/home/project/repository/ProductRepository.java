@@ -26,4 +26,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                @Param("productName") String productName,
                                @Param("content") String content,
                                Pageable pageable);
+
+    boolean existsByProductNum(String productNum);
 }

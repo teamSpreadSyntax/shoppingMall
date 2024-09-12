@@ -25,6 +25,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void join(Product product) {
+        boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
+        if (productNumExists) {
+            throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
+        }
         productRepository.save(product);
     }
 
@@ -55,6 +59,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new IdNotFoundException(product.getId() + "(으)로 등록된 상품이 없습니다."));
 
         boolean isModified = false;
+        boolean isProductNumDuplicate = false;
 
         if (product.getBrand() != null && !Objects.equals(existingProduct.getBrand(), product.getBrand())) {
             existingProduct.setBrand(product.getBrand());
@@ -69,6 +74,15 @@ public class ProductServiceImpl implements ProductService {
         if (product.getSoldQuantity() != null && !Objects.equals(existingProduct.getSoldQuantity(), product.getSoldQuantity())) {
             existingProduct.setSoldQuantity(product.getSoldQuantity());
             isModified = true;
+        }
+
+        if (product.getProductNum() != null && !Objects.equals(existingProduct.getProductNum(), product.getProductNum())) {
+            if (productRepository.existsByProductNum(product.getProductNum())) {
+                isProductNumDuplicate = true;
+            } else {
+                existingProduct.setProductNum(product.getProductNum());
+                isModified = true;
+            }
         }
 
         if (product.getImage() != null && !Objects.equals(existingProduct.getImage(), product.getImage())) {
@@ -87,6 +101,10 @@ public class ProductServiceImpl implements ProductService {
         if (product.getCategory() != null && !Objects.equals(existingProduct.getCategory(), product.getCategory())) {
             existingProduct.setCategory(product.getCategory());
             isModified = true;
+        }
+
+        if (isProductNumDuplicate) {
+            throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
         }
 
         if (!isModified) {
