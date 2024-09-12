@@ -71,8 +71,12 @@ public class ProductController {
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
             Long currentStock = productDTOWithoutId.getStock();
+            Long soldQuantity = productDTOWithoutId.getSoldQuantity();
             if (currentStock < 0) {
                 throw new IllegalStateException("재고가 음수일 수 없습니다.");
+            }else if(soldQuantity < 0){
+                throw new IllegalStateException("판매량이 음수일 수 없습니다.");
+
             }
         if (validationResponse != null) return validationResponse;
         Product product = new Product();

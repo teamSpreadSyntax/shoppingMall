@@ -48,6 +48,7 @@ public class ProductServiceImplTest {
         product.setBrand("nike");
         product.setName("에어맥스");
         product.setCategory("신발");
+        product.setProductNum(product.getBrand().substring(0,1) + product.getName().substring(0,1) + product.getCategory());
         product.setStock(0L);
         product.setImage("nike.jpg");
 
@@ -56,6 +57,7 @@ public class ProductServiceImplTest {
         product2.setBrand("adidas");
         product2.setName("트레이닝");
         product2.setCategory("바지");
+        product2.setProductNum(product2.getBrand().substring(0,1) + product2.getName().substring(0,1) + product2.getCategory());
         product2.setStock(0L);
         product2.setImage("adidas.jpg");
 
@@ -64,6 +66,7 @@ public class ProductServiceImplTest {
         product3.setBrand("puma");
         product3.setName("트레이닝 트랙");
         product3.setCategory("바지");
+        product3.setProductNum(product3.getBrand().substring(0,1) + product3.getName().substring(0,1) + product3.getCategory());
         product3.setStock(4L);
         product3.setImage("puma.jpg");
 
@@ -74,6 +77,7 @@ public class ProductServiceImplTest {
         updateProduct.setName("트레이닝");
         updateProduct.setSoldQuantity(5L);
         updateProduct.setCategory("바지");
+        updateProduct.setProductNum(updateProduct.getBrand().substring(0,1) + updateProduct.getName().substring(0,1) + updateProduct.getCategory());
         updateProduct.setImage("adidas.jpg");
 
         pageable = PageRequest.of(0, 10);
@@ -81,11 +85,20 @@ public class ProductServiceImplTest {
 
     @Nested
     class JoinTests {
+
         @Test
         void join_ValidInput_SavesProduct() {
+            when(productRepository.existsByProductNum(product3.getProductNum())).thenReturn(false);
             productService.join(product3);
             verify(productRepository).save(product3);
             assertEquals("puma", product3.getBrand());
+            assertEquals("p트바지", product3.getProductNum());
+        }
+
+        @Test
+        void join_DuplicateProductNum_ThrowsDataIntegrityViolationException() {
+            when(productRepository.existsByProductNum(product3.getProductNum())).thenReturn(true);
+            assertThrows(DataIntegrityViolationException.class, () -> productService.join(product3));
         }
     }
 
@@ -239,6 +252,34 @@ public class ProductServiceImplTest {
 
             IllegalStateException exception = assertThrows(IllegalStateException.class, () -> productService.update(updateProduct));
             assertEquals("재고가 음수일 수 없습니다.", exception.getMessage());
+        }
+
+        @Test
+        void update_ChangeProductNum_ReturnsUpdatedProduct() {
+            Product productToUpdate = new Product();
+            productToUpdate.setId(product.getId());
+            productToUpdate.setProductNum("N002");
+
+            when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+            when(productRepository.existsByProductNum("N002")).thenReturn(false);
+            when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+            Optional<Product> result = productService.update(productToUpdate);
+
+            assertTrue(result.isPresent());
+            assertEquals("N002", result.get().getProductNum());
+        }
+
+        @Test
+        void update_DuplicateProductNum_ThrowsDataIntegrityViolationException() {
+            Product productToUpdate = new Product();
+            productToUpdate.setId(product.getId());
+            productToUpdate.setProductNum(product2.getProductNum());
+
+            when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+            when(productRepository.existsByProductNum(product2.getProductNum())).thenReturn(true);
+
+            assertThrows(DataIntegrityViolationException.class, () -> productService.update(productToUpdate));
         }
     }
 

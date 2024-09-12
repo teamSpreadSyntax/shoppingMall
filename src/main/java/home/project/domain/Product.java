@@ -39,6 +39,7 @@ public class Product {
     @NotNull(message = "상품의 현재 재고를 입력해주세요.")
     private Long stock;
 
+    @Check(name = "soldQuantity", constraints = "soldQuantity >= 0")
     @Column(name = "soldQuantity")
     private Long soldQuantity = 0L;
 

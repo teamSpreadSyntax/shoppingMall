@@ -72,6 +72,9 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (product.getSoldQuantity() != null && !Objects.equals(existingProduct.getSoldQuantity(), product.getSoldQuantity())) {
+            if(product.getSoldQuantity() < 0){
+                throw new IllegalStateException("판매량이 음수일 수 없습니다.");
+            }
             existingProduct.setSoldQuantity(product.getSoldQuantity());
             isModified = true;
         }
