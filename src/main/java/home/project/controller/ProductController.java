@@ -6,6 +6,7 @@ import home.project.dto.ProductDTOWithoutId;
 import home.project.response.CustomListResponseEntity;
 import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.ProductService;
+import home.project.util.CategoryCode;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -70,14 +71,10 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
-            Long currentStock = productDTOWithoutId.getStock();
-            Long soldQuantity = productDTOWithoutId.getSoldQuantity();
-            if (currentStock < 0) {
-                throw new IllegalStateException("재고가 음수일 수 없습니다.");
-            }else if(soldQuantity < 0){
-                throw new IllegalStateException("판매량이 음수일 수 없습니다.");
-
-            }
+        Long currentStock = productDTOWithoutId.getStock();
+        if (currentStock < 0) {
+            throw new IllegalStateException("재고가 음수일 수 없습니다.");
+        }
         if (validationResponse != null) return validationResponse;
         Product product = new Product();
         product.setBrand(productDTOWithoutId.getBrand());
@@ -159,21 +156,24 @@ public class ProductController {
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
-        Page<Product> productPage = productService.findProducts(brand, category, productName, content, pageable);
 
-            StringBuilder searchCriteria = new StringBuilder();
-            if (brand != null) searchCriteria.append(brand).append(", ");
-            if (category != null) searchCriteria.append(category).append(", ");
-            if (productName != null) searchCriteria.append(productName).append(", ");
-            if (content != null) searchCriteria.append(content).append(", ");
+        String categoryCode = CategoryCode.generateCategoryCode(category, content);
 
-            String successMessage;
-            if (!searchCriteria.isEmpty()) {
-                searchCriteria.setLength(searchCriteria.length() - 2);
-                successMessage = "검색 키워드 : " + searchCriteria;
-            } else {
-                successMessage = "전체 상품입니다.";
-            }
+        Page<Product> productPage = productService.findProducts(brand, categoryCode, productName, content, pageable);
+
+        StringBuilder searchCriteria = new StringBuilder();
+        if (brand != null) searchCriteria.append(brand).append(", ");
+        if (category != null) searchCriteria.append(category).append(", ");
+        if (productName != null) searchCriteria.append(productName).append(", ");
+        if (content != null) searchCriteria.append(content).append(", ");
+
+        String successMessage;
+        if (!searchCriteria.isEmpty()) {
+            searchCriteria.setLength(searchCriteria.length() - 2);
+            successMessage = "검색 키워드 : " + searchCriteria;
+        } else {
+            successMessage = "전체 상품입니다.";
+        }
 
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
