@@ -510,7 +510,7 @@ public class MemberControllerTest {
             when(validationCheck.validationChecks(any())).thenReturn(null);
             when(memberService.findById(anyLong())).thenReturn(Optional.of(member));
             when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-            when(jwtTokenProvider.generateVerificationToken(anyString(), anyLong())).thenReturn(verificationToken);
+            when(jwtTokenProvider.generateVerificationToken(anyString(), anyString())).thenReturn(verificationToken);
 
             mockMvc.perform(post("/api/member/verify")
                             .contentType(MediaType.APPLICATION_JSON)

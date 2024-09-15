@@ -72,8 +72,11 @@ public class ProductController {
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         Long currentStock = productDTOWithoutId.getStock();
+        Long currentSoldQuantity = productDTOWithoutId.getSoldQuantity();
         if (currentStock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
+        }else if(currentSoldQuantity < 0){
+            throw new IllegalStateException("판매량이 음수일 수 없습니다.");
         }
         if (validationResponse != null) return validationResponse;
         Product product = new Product();
@@ -83,7 +86,6 @@ public class ProductController {
         product.setSoldQuantity(productDTOWithoutId.getSoldQuantity());
         product.setName(productDTOWithoutId.getName());
         product.setStock(productDTOWithoutId.getStock());
-        product.setImage(productDTOWithoutId.getImage());
         productService.join(product);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", product.getName() + "(이)가 등록되었습니다.");

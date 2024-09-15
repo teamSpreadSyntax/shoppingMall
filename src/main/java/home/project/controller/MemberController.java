@@ -113,7 +113,9 @@ public class MemberController {
     @GetMapping("member")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
-    public ResponseEntity<?> findMemberById(@RequestParam("memberId") Long memberId) {
+    public ResponseEntity<?> findMemberById(@RequestHeader("Access_Token") String accessToken) {
+        String email = jwtTokenProvider.getEmailFromToken(accessToken);
+        Long memberId = memberService.findByEmail(email).get().getId();
         if (memberId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
@@ -233,22 +235,21 @@ public class MemberController {
     @PostMapping("verify")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
-    public ResponseEntity<?> verifyUser(@RequestBody @Valid UserDetailsDTO userDetailsDTO, BindingResult bindingResult, @RequestHeader("id") Long id) {
+    public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult, @RequestHeader("Access_Token") String accessToken) {
+
 
             CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
             if (validationResponse != null) {
                 return validationResponse;
             }
 
-            String email = userDetailsDTO.getEmail();
-            String password = userDetailsDTO.getPassword();
-            if (!email.equals(memberService.findById(id).get().getEmail())) {
-                throw new IllegalStateException("이메일이 일치하지 않습니다.");
-            }else if (!passwordEncoder.matches(password, memberService.findById(id).get().getPassword())){
+            String emailFromToken = jwtTokenProvider.getEmailFromToken(accessToken);
+            Long id = memberService.findByEmail(emailFromToken).get().getId();
+          if (!passwordEncoder.matches(password.getPassword(), memberService.findByEmail(emailFromToken).get().getPassword())){
                 throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
             }
 
-            String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
+            String verificationToken = jwtTokenProvider.generateVerificationToken(emailFromToken, id);
 
             Map<String, String> response = new HashMap<>();
             response.put("successMessage", "본인 확인이 완료되었습니다.");

@@ -88,11 +88,6 @@ public class ProductServiceImpl implements ProductService {
             }
         }
 
-        if (product.getImage() != null && !Objects.equals(existingProduct.getImage(), product.getImage())) {
-            existingProduct.setImage(product.getImage());
-            isModified = true;
-        }
-
         if (product.getStock() != null && !Objects.equals(existingProduct.getStock(), product.getStock())) {
             if (product.getStock() < 0) {
                 throw new IllegalStateException("재고가 음수일 수 없습니다.");

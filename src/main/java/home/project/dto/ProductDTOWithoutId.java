@@ -26,6 +26,4 @@ public class ProductDTOWithoutId {
     @NotNull(message = "상품의 현재재고를 입력해주세요.")
     private Long stock;
 
-    @NotBlank(message = "상품의 이미지를 입력해주세요.")
-    private String image;
 }

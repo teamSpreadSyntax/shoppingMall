@@ -43,7 +43,4 @@ public class Product {
     @Column(name = "soldQuantity")
     private Long soldQuantity = 0L;
 
-    @Column(name = "image")
-    @NotBlank(message = "상품의 이미지를 입력해주세요.")
-    private String image;
 }
