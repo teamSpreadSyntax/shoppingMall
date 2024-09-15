@@ -49,7 +49,7 @@ public class CategoryCode {
 
     private static String handleAllCategories(String content) {
         if (content == null || content.isEmpty()) {
-            return "00"; // 기본값 반환
+            return null; // 기본값 반환
         }
         content = content.toLowerCase();
         if (content.contains("셔츠") || content.contains("t-shirt") ||

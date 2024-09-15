@@ -1,6 +1,7 @@
 package home.project.util;
 
 public class SearchUtil {
+
     public static String handleShirts(String contents) {
         if (contents == null || contents.isEmpty()) {
             return "0101"; // 기본값 반환
@@ -23,7 +24,7 @@ public class SearchUtil {
                 return "0102";
             }
         } else {
-            return "0102"; // 기본값 설정
+            return "0101"; // 일치하지 않을 때도 셔츠 기본값
         }
     }
 
@@ -158,5 +159,4 @@ public class SearchUtil {
             return "10"; // 기본값 설정
         }
     }
-
 }
