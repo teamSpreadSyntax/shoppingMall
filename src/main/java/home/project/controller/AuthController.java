@@ -81,7 +81,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
     })
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid UserDetailsDTO userDetailsDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
@@ -108,7 +108,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized",
             content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
-    @PostMapping("refresh")
+    @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(
             @RequestParam(value = "refreshToken", required = true) String refreshToken) {
 
@@ -133,7 +133,7 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
             content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PostMapping("logout")
+    @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestParam("memberId") Long memberId) {
         Optional<Member> member = memberService.findById(memberId);
         memberService.logout(memberId);
@@ -155,13 +155,12 @@ public class AuthController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PostMapping("authorization")
+    @PostMapping("/authorization")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") @Pattern(regexp = "^(user|admin|center)$", message = "Authority must be either 'user', 'admin', or 'center'") String authority) {
 
         String successMessage = "";
-
 
             Role role = roleService.findById(memberId).get();
             String name = memberService.findById(memberId).get().getName();
@@ -189,7 +188,7 @@ public class AuthController {
             @ApiResponse(responseCode = "403", description = "Forbidden",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
     })
-    @GetMapping("authorities")
+    @GetMapping("/authorities")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> checkAuthority(
@@ -215,7 +214,7 @@ public class AuthController {
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
-    @GetMapping("verify")
+    @GetMapping("/verify")
     public ResponseEntity<?> verifyUser(
             @RequestParam(value = "accessToken", required = true) String accessToken,
             @RequestParam(value = "refreshToken", required = true)  String refreshToken) {

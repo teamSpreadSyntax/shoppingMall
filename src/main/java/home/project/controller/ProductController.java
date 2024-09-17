@@ -66,7 +66,7 @@ public class ProductController {
 
     })
     @Transactional
-    @PostMapping("create")
+    @PostMapping("/create")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
@@ -100,7 +100,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @GetMapping("product")
+    @GetMapping("/product")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
@@ -119,7 +119,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("products")
+    @GetMapping("/products")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findAllProduct(
@@ -145,7 +145,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @GetMapping("search")
+    @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> searchProducts(
@@ -179,6 +179,11 @@ public class ProductController {
 
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
+
+        if (totalCount == 0) {
+            successMessage = "검색 결과가 없습니다. 검색 키워드 : " + searchCriteria;
+        }
+
         return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
 
     }
@@ -190,7 +195,7 @@ public class ProductController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("brands")
+    @GetMapping("/brands")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> brandList(
@@ -222,7 +227,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
     })
-    @PutMapping("update")
+    @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
@@ -243,7 +248,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @DeleteMapping("delete")
+    @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
@@ -266,7 +271,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PutMapping("increase_stock")
+    @PutMapping("/increase_stock")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
@@ -289,7 +294,7 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
 
     })
-    @PutMapping("decrease_stock")
+    @PutMapping("/decrease_stock")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {

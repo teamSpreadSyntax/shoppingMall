@@ -77,7 +77,7 @@ public class MemberController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @Transactional
-    @PostMapping("join")
+    @PostMapping("/join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
@@ -110,7 +110,7 @@ public class MemberController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @GetMapping("member")
+    @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findMemberById(@RequestHeader("Access_Token") String accessToken) {
@@ -136,7 +136,7 @@ public class MemberController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema")))
 
     })
-    @GetMapping("members")
+    @GetMapping("/members")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findAllMember(
@@ -176,7 +176,7 @@ public class MemberController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @GetMapping("search")
+    @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> searchMembers(
@@ -191,15 +191,12 @@ public class MemberController {
             }) @ParameterObject Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
-            Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
-                Long roleId = member.getId();
-                String roleName = "No Role";
-                if (roleId != null) {
-                    Optional<Role> role2 = roleService.findById(roleId);
-                    roleName = role2.get().getRole();
-                }
-                return new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
-            });
+        Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
+            String roleName = Optional.ofNullable(member.getRole())
+                    .map(Role::getRole)
+                    .orElse("No Role");
+            return new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
+        });
             StringBuilder searchCriteria = new StringBuilder();
             if (name != null) searchCriteria.append(name).append(", ");
             if (email != null) searchCriteria.append(email).append(", ");
@@ -217,6 +214,11 @@ public class MemberController {
 
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
         int page = pagedMemberDTOWithoutPw.getNumber();
+
+        if (totalCount == 0) {
+            successMessage = "검색 결과가 없습니다. 검색 키워드 : " + searchCriteria;
+        }
+
         return new CustomListResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
@@ -232,7 +234,7 @@ public class MemberController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 
     })
-    @PostMapping("verify")
+    @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult, @RequestHeader("Access_Token") String accessToken) {
@@ -271,7 +273,7 @@ public class MemberController {
             @ApiResponse(responseCode = "409", description = "Conflict",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
-    @PutMapping("update")
+    @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> updateMember(      @RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
@@ -281,16 +283,14 @@ public class MemberController {
             if (validationResponse != null) {
                 return validationResponse;
             }
-
             String email = jwtTokenProvider.getEmailFromToken(verificationToken);
+
             if (email == null) {
                 throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
             }
-
         if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
-
         Long id = Long.parseLong(jwtTokenProvider.getIdFromVerificationToken(verificationToken));
         Member member = new Member();
         member.setId(id);
@@ -315,7 +315,7 @@ public class MemberController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @DeleteMapping("delete")
+    @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {

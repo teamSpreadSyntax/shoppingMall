@@ -66,16 +66,12 @@ public class MemberServiceImpl implements MemberService {
 
     public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
         Page<Member> memberPage = memberRepository.findMembers(name, email, phone, role, content, pageable);
-        if (memberPage.getSize() == 0 || memberPage.getTotalElements() == 0) {
-            throw new IdNotFoundException("해당하는 회원이 없습니다.");
-        }
         return memberPage;
     }
 
     public Optional<Member> update(Member member) {
         Member existingMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new IdNotFoundException(member.getId() + "(으)로 등록된 회원이 없습니다."));
-
         boolean isModified = false;
         boolean isEmailDuplicate = false;
         boolean isPhoneDuplicate = false;
@@ -84,7 +80,6 @@ public class MemberServiceImpl implements MemberService {
             existingMember.setName(member.getName());
             isModified = true;
         }
-
         if (member.getEmail() != null && !Objects.equals(existingMember.getEmail(), member.getEmail())) {
             if (memberRepository.existsByEmail(member.getEmail())) {
                 isEmailDuplicate = true;

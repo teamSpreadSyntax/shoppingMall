@@ -43,9 +43,6 @@ public class ProductServiceImpl implements ProductService {
 
     public Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
         Page<Product> productPage = productRepository.findProducts(brand, category, productName, content, pageable);
-        if (productPage.getSize() == 0 || productPage.getTotalElements() == 0) {
-            throw new IdNotFoundException("해당하는 상품이 없습니다.");
-        }
         return productPage;
     }
 

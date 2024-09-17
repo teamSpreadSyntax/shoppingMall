@@ -25,9 +25,9 @@ import java.util.stream.Collectors;
 @Service
 public class JwtTokenProvider {
     private final Key key;
-    private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 30L * 60 * 1000; //30분
+    private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주-30분
     private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주
-    private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 5 * 1000; // 5분
+    private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;; // 2주 - 5분
     private final UserDetailsService userDetailsService;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, UserDetailsService userDetailsService) {
