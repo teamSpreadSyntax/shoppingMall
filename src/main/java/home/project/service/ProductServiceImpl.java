@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Product;
+import home.project.dto.CategoryDTOWithoutId;
 import home.project.exceptions.IdNotFoundException;
 import home.project.exceptions.NoChangeException;
 import home.project.repository.ProductRepository;
@@ -31,6 +32,8 @@ public class ProductServiceImpl implements ProductService {
         }
         productRepository.save(product);
     }
+
+
 
     public Optional<Product> findById(Long productId) {
         return Optional.ofNullable(productRepository.findById(productId)

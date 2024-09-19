@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Product;
+import home.project.dto.CategoryDTOWithoutId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,6 +11,8 @@ import java.util.Optional;
 public interface ProductService {
 
     void join(Product product);
+
+
 
     Optional<Product> findById(Long productId);
 

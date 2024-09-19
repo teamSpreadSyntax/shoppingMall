@@ -2,9 +2,12 @@ package home.project.controller;
 
 
 import home.project.domain.*;
+import home.project.dto.Category2DTOWithoutId;
+import home.project.dto.CategoryDTOWithoutId;
 import home.project.dto.ProductDTOWithoutId;
 import home.project.response.CustomListResponseEntity;
 import home.project.response.CustomOptionalResponseEntity;
+import home.project.service.CategoryService;
 import home.project.service.ProductService;
 import home.project.util.CategoryCode;
 import home.project.util.ValidationCheck;
@@ -19,7 +22,6 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +30,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -47,11 +48,13 @@ public class ProductController {
 
     private final ProductService productService;
     private final ValidationCheck validationCheck;
+    private final CategoryService categoryService;
 
     @Autowired
-    public ProductController(ProductService productService, ValidationCheck validationCheck) {
+    public ProductController(ProductService productService, ValidationCheck validationCheck, CategoryService categoryService) {
         this.productService = productService;
         this.validationCheck = validationCheck;
+        this.categoryService = categoryService;
     }
 
 
@@ -91,6 +94,29 @@ public class ProductController {
         responseMap.put("successMessage", product.getName() + "(이)가 등록되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 등록 성공", HttpStatus.OK);
 
+    }
+
+    @Operation(summary = "카테고리 등록 메서드", description = "카테고리 등록 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+
+    })
+    @Transactional
+    @PostMapping("/createCategory")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
+    public ResponseEntity<?> createCategory(@RequestBody @Valid Category2DTOWithoutId category, BindingResult bindingResult) {
+        CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
+        categoryService.save(category);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", category.getName() + "(이)가 등록되었습니다.");
+        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 등록 성공", HttpStatus.OK);
     }
 
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")
