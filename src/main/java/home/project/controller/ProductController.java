@@ -2,7 +2,6 @@ package home.project.controller;
 
 
 import home.project.domain.*;
-import home.project.dto.Category2DTOWithoutId;
 import home.project.dto.CategoryDTOWithoutId;
 import home.project.dto.ProductDTOWithoutId;
 import home.project.response.CustomListResponseEntity;
@@ -110,7 +109,7 @@ public class ProductController {
     @PostMapping("/createCategory")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
-    public ResponseEntity<?> createCategory(@RequestBody @Valid Category2DTOWithoutId category, BindingResult bindingResult) {
+    public ResponseEntity<?> createCategory(@RequestBody @Valid CategoryDTOWithoutId category, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         categoryService.save(category);
