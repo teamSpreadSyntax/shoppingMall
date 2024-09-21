@@ -4,6 +4,7 @@ import home.project.domain.Member;
 import home.project.domain.Role;
 import home.project.repository.MemberRepository;
 import home.project.repository.RoleRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -17,18 +18,11 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
-
-
-    @Autowired
-    public UserDetailsServiceImpl(MemberRepository memberRepository, RoleRepository roleRepository) {
-        this.memberRepository = memberRepository;
-        this.roleRepository = roleRepository;
-
-    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

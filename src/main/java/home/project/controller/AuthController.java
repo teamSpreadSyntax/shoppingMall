@@ -28,7 +28,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -157,7 +156,6 @@ public class AuthController {
     })
     @PostMapping("/authorization")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") @Pattern(regexp = "^(user|admin|center)$", message = "Authority must be either 'user', 'admin', or 'center'") String authority) {
 
         String successMessage = "";
@@ -190,7 +188,6 @@ public class AuthController {
     })
     @GetMapping("/authorities")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> checkAuthority(
         @PageableDefault(page = 1, size = 5)
         @SortDefault.SortDefaults({

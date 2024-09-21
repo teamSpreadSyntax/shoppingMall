@@ -1,6 +1,5 @@
 package home.project.config;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import home.project.util.CustomOptionalSerializer;
@@ -9,9 +8,9 @@ import home.project.exceptions.CustomAccessDeniedHandler;
 import home.project.service.JwtTokenProvider;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -35,6 +34,7 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 @SecurityScheme(
         name = "bearerAuth",
         type = SecuritySchemeType.HTTP,
@@ -44,11 +44,8 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final SecurityPermissionsConfig securityPermissions;
 
-    @Autowired
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
 
     @Bean
     public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
@@ -58,10 +55,9 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://localhost:5173", "https://projectkkk.vercel.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://localhost:5173", "https://projectkkk.vercel.app"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
@@ -103,45 +99,32 @@ public class SecurityConfig {
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(requests -> requests
-                                .requestMatchers("/home/**").permitAll()
-                                .requestMatchers("/swagger-ui/**").permitAll()
-                                .requestMatchers("https://localhost/swagger-ui/**").permitAll()
-                                .requestMatchers("/api/member/join").permitAll()
-                                .requestMatchers("/api/member/member").hasAnyRole("ADMIN","CENTER")
-                                .requestMatchers("/api/member/members").hasAnyRole("ADMIN","CENTER")
-                                .requestMatchers("/api/member/search").hasAnyRole("ADMIN","CENTER")
-                                .requestMatchers("/api/member/update").hasAnyRole("ADMIN", "CENTER", "USER")
-                                .requestMatchers("/api/member/verify").hasAnyRole("ADMIN", "CENTER", "USER")
-                                .requestMatchers("/api/member/delete").hasAnyRole( "ADMIN", "CENTER")
-                                .requestMatchers(HttpMethod.GET, "/api/product/**").hasAnyRole("ADMIN", "CENTER", "USER")
-                                .requestMatchers("/api/product/**").hasAnyRole("ADMIN","CENTER","USER")//permitAll()
-                                .requestMatchers("http://localhost:5173/**").permitAll()
-                                .requestMatchers("https://localhost:5173/**").permitAll()
-                                .requestMatchers("https://localhost:443/**").permitAll()
-                                .requestMatchers("https://projectkkk.vercel.app/products").permitAll()
-                                .requestMatchers("/api/auth/login").permitAll()
-                                .requestMatchers("/api/auth/authorization").hasRole("CENTER")
-                                .requestMatchers("/api/auth/authorities").hasRole("CENTER")
-                        .anyRequest().permitAll()
-                )
-                .formLogin(formLogin -> formLogin
-                        .loginPage("/login")
-                        .permitAll())
+                .authorizeHttpRequests(requests -> {
+                    securityPermissions.getPermitAll().forEach(pattern ->
+                            requests.requestMatchers(pattern).permitAll()
+                    );
+
+                    securityPermissions.getHasAnyRole().forEach((roles, patterns) ->
+                            patterns.forEach(pattern ->
+                                    requests.requestMatchers(pattern).hasAnyRole(roles.split("_"))
+                            )
+                    );
+
+                    securityPermissions.getHasRole().forEach((role, patterns) ->
+                            patterns.forEach(pattern ->
+                                    requests.requestMatchers(pattern).hasRole(role)
+                            )
+                    );
+
+                    requests.anyRequest().authenticated();
+                })
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling
                                 .authenticationEntryPoint(jwtAuthenticationEntryPoint())
                                 .accessDeniedHandler(accessDeniedHandler(objectMapper()))
-                )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .logout(logout -> logout
-                        .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-
                 );
+
         return http.build();
     }
-
 }

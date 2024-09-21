@@ -32,7 +32,6 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -112,7 +111,6 @@ public class MemberController {
     })
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findMemberById(@RequestHeader("Access_Token") String accessToken) {
         String email = jwtTokenProvider.getEmailFromToken(accessToken);
         Long memberId = memberService.findByEmail(email).get().getId();
@@ -138,7 +136,6 @@ public class MemberController {
     })
     @GetMapping("/members")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findAllMember(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -178,7 +175,6 @@ public class MemberController {
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> searchMembers(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
@@ -236,7 +232,6 @@ public class MemberController {
     })
     @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult, @RequestHeader("Access_Token") String accessToken) {
 
 
@@ -275,7 +270,6 @@ public class MemberController {
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> updateMember(      @RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
                                                 BindingResult bindingResult,
                                                 @RequestHeader("Verification_Token") String verificationToken) {
@@ -317,7 +311,6 @@ public class MemberController {
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
 
         String email = memberService.findById(memberId).get().getEmail();
