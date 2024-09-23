@@ -123,7 +123,4 @@ public class MemberServiceImpl implements MemberService {
         memberRepository.deleteById(memberId);
     }
 
-    public void logout(Long memberId) {
-    }
-
 }

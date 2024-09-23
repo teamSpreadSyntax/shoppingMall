@@ -4,11 +4,10 @@ import home.project.domain.*;
 import home.project.dto.RoleDTOWithMemberName;
 import home.project.dto.TokenDto;
 import home.project.dto.UserDetailsDTO;
+import home.project.repository.MemberRepository;
 import home.project.response.CustomListResponseEntity;
 import home.project.response.CustomOptionalResponseEntity;
-import home.project.service.JwtTokenProvider;
-import home.project.service.MemberService;
-import home.project.service.RoleService;
+import home.project.service.*;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -19,7 +18,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,15 +27,12 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +44,7 @@ import java.util.Optional;
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
+@RequiredArgsConstructor
 @RestController
 public class AuthController {
 
@@ -59,17 +55,9 @@ public class AuthController {
     private final MemberService memberService;
     private final ValidationCheck validationCheck;
     private final RoleService roleService;
+    private final AuthService authService;
+    private final MemberRepository memberRepository;
 
-    @Autowired
-    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider tokenProvider, UserDetailsService userDetailsService, PasswordEncoder passwordEncoder, MemberService memberService, ValidationCheck validationCheck, RoleService roleService) {
-        this.authenticationManager = authenticationManager;
-        this.tokenProvider = tokenProvider;
-        this.userDetailsService = userDetailsService;
-        this.passwordEncoder = passwordEncoder;
-        this.memberService = memberService;
-        this.validationCheck = validationCheck;
-        this.roleService = roleService;
-    }
 
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
     @ApiResponses(value = {
@@ -84,19 +72,11 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody @Valid UserDetailsDTO userDetailsDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        UserDetails member = userDetailsService.loadUserByUsername(userDetailsDTO.getEmail());
-        if (!passwordEncoder.matches(userDetailsDTO.getPassword(), member.getPassword())) {
-            throw new BadCredentialsException("비밀번호를 확인해주세요.");
-        }
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDetailsDTO.getEmail(), userDetailsDTO.getPassword()));
-        TokenDto tokenDto = tokenProvider.generateToken(authentication);
 
-//      String role = member.getAuthorities().toString();
-//      tokenDto.setRole(role);
-        Long id = memberService.findByEmail(userDetailsDTO.getEmail()).get().getId();
-        String role = roleService.findById(id).get().getRole();
-        tokenDto.setRole(role);
-        String successMessage = member.getUsername() + "(으)로 로그인에 성공했습니다.";
+        TokenDto tokenDto = authService.login(userDetailsDTO);
+
+        String successMessage = userDetailsDTO.getEmail() + "(으)로 로그인에 성공했습니다.";
+
         return new CustomOptionalResponseEntity<>(Optional.of(tokenDto), successMessage, HttpStatus.OK);
     }
 
@@ -111,16 +91,7 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(
             @RequestParam(value = "refreshToken", required = true) String refreshToken) {
 
-            TokenDto newTokenDto = tokenProvider.refreshAccessToken(refreshToken);
-
-            String email = tokenProvider.getEmailFromToken(newTokenDto.getAccessToken());
-            Optional<Member> member = memberService.findByEmail(email);
-
-            Long id = member.get().getId();
-            Optional<Role> roleOptional = roleService.findById(id);
-
-            String role = roleOptional.get().getRole();
-            newTokenDto.setRole(role);
+            TokenDto newTokenDto = authService.refreshToken(refreshToken);
 
             return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
     }
@@ -134,11 +105,8 @@ public class AuthController {
     })
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestParam("memberId") Long memberId) {
-        Optional<Member> member = memberService.findById(memberId);
-        memberService.logout(memberId);
-        Optional<Role> role = roleService.findById(memberId);
-        roleService.update(role.get());
-        String email = member.get().getEmail();
+
+        String email = authService.logout(memberId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email+"님 이용해주셔서 감사합니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "로그아웃되었습니다.", HttpStatus.OK);
@@ -158,22 +126,10 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") @Pattern(regexp = "^(user|admin|center)$", message = "Authority must be either 'user', 'admin', or 'center'") String authority) {
 
-        String successMessage = "";
+            Optional<Role> role = authService.addAuthority(memberId,authority);
+            String successMessage = authService.RoleMessage(memberId,authority);
 
-            Role role = roleService.findById(memberId).get();
-            String name = memberService.findById(memberId).get().getName();
-                if (authority.equals("admin")) {
-                    role.setRole("admin");
-                    successMessage = name + "(id : " + memberId + ")" + "님에게 중간 관리자 권한을 부여했습니다.";
-                } else if (authority.equals("center")) {
-                    role.setRole("center");
-                    successMessage = name + "(id : " + memberId + ")" + "님에게 중앙 관리자 권한을 부여했습니다.";
-                } else if (authority.equals("user")) {
-                    role.setRole("user");
-                    successMessage = name + "(id : " + memberId + ")" + "님에게 일반 사용자 권한을 부여했습니다.";
-                }
-            roleService.update(role);
-            return new CustomOptionalResponseEntity<>(Optional.of(role), successMessage, HttpStatus.OK);
+            return new CustomOptionalResponseEntity<>(Optional.of(role),successMessage, HttpStatus.OK);
 
     }
 

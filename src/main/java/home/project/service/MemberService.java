@@ -24,7 +24,4 @@ public interface MemberService {
     Optional<Member> update(Member member);
 
     void deleteById(Long memberId);
-
-    void logout(Long memberId);
-
 }

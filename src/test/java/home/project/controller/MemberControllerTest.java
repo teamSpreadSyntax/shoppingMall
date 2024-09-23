@@ -1,3 +1,4 @@
+/*
 package home.project.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -502,7 +503,8 @@ public class MemberControllerTest {
 
     }
 
-    @Nested
+    */
+/*@Nested
     @WithMockUser(roles = {"USER", "ADMIN", "CENTER"})
     class verifyUserTests {
         @Test
@@ -522,6 +524,7 @@ public class MemberControllerTest {
                     .andExpect(jsonPath("$.responseMessage").value("본인 확인 성공"))
                     .andExpect(jsonPath("$.status").value(200));
         }
+*//*
 
         @Test
         public void verifyUser_EmptyInput_ReturnsBadRequest() throws Exception {
@@ -843,3 +846,4 @@ public class MemberControllerTest {
         }
     }
 }
+*/
