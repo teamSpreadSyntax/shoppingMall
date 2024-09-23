@@ -117,7 +117,7 @@ public class SecurityConfig {
                             )
                     );
 
-                    requests.anyRequest().authenticated();
+                    requests.anyRequest().permitAll();
                 })
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")
