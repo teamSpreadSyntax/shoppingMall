@@ -115,7 +115,7 @@ public class MemberController {
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
-    public ResponseEntity<?> findMemberById(@RequestHeader("Access_Token") String accessToken) {
+    public ResponseEntity<?> findMemberById() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = memberService.findByEmail(email).get().getId();
@@ -240,7 +240,7 @@ public class MemberController {
     @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
-    public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult, @RequestHeader("Access_Token") String accessToken) {
+    public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult) {
 
 
             CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
