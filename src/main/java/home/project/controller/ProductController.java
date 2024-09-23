@@ -29,6 +29,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,6 +70,7 @@ public class ProductController {
     @Transactional
     @PostMapping("/create")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         Long currentStock = productDTOWithoutId.getStock();
@@ -106,6 +108,7 @@ public class ProductController {
     @Transactional
     @PostMapping("/createCategory")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createCategory(@RequestBody @Valid CategoryDTOWithoutId category, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
@@ -124,6 +127,7 @@ public class ProductController {
     })
     @GetMapping("/product")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
         if (productId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
@@ -142,6 +146,7 @@ public class ProductController {
     })
     @GetMapping("/products")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findAllProduct(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -167,6 +172,7 @@ public class ProductController {
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> searchProducts(
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
@@ -216,6 +222,7 @@ public class ProductController {
     })
     @GetMapping("/brands")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> brandList(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -247,6 +254,7 @@ public class ProductController {
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
@@ -267,6 +275,7 @@ public class ProductController {
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
         String name = productService.findById(productId).get().getName();
         productService.deleteById(productId);
@@ -289,6 +298,7 @@ public class ProductController {
     })
     @PutMapping("/increase_stock")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product increaseProduct = productService.increaseStock(productId, stock);
         String successMessage = increaseProduct.getName() + "상품이 " + stock + "개 증가하여 " + increaseProduct.getStock() + "개가 되었습니다.";
@@ -311,6 +321,7 @@ public class ProductController {
     })
     @PutMapping("/decrease_stock")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product decreaseProduct = productService.decreaseStock(productId, stock);
         String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다.";

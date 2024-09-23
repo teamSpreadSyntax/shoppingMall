@@ -4,7 +4,6 @@ import home.project.domain.Member;
 import home.project.domain.Role;
 import home.project.exceptions.IdNotFoundException;
 import home.project.repository.RoleRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -12,11 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-@RequiredArgsConstructor
 @Service
 @Transactional
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
+
+    @Autowired
+    public RoleServiceImpl (RoleRepository roleRepository){
+        this.roleRepository = roleRepository;
+    }
 
     public Optional<Role> findById(Long memberId) {
         Role role = roleRepository.findById(memberId).orElseThrow(() -> {

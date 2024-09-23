@@ -32,8 +32,11 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -111,8 +114,10 @@ public class MemberController {
     })
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findMemberById(@RequestHeader("Access_Token") String accessToken) {
-        String email = jwtTokenProvider.getEmailFromToken(accessToken);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
         Long memberId = memberService.findByEmail(email).get().getId();
         if (memberId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
@@ -136,6 +141,7 @@ public class MemberController {
     })
     @GetMapping("/members")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findAllMember(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
@@ -175,6 +181,7 @@ public class MemberController {
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> searchMembers(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
@@ -232,6 +239,7 @@ public class MemberController {
     })
     @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult, @RequestHeader("Access_Token") String accessToken) {
 
 
@@ -240,13 +248,15 @@ public class MemberController {
                 return validationResponse;
             }
 
-            String emailFromToken = jwtTokenProvider.getEmailFromToken(accessToken);
-            Long id = memberService.findByEmail(emailFromToken).get().getId();
-          if (!passwordEncoder.matches(password.getPassword(), memberService.findByEmail(emailFromToken).get().getPassword())){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+            Long id = memberService.findByEmail(email).get().getId();
+          if (!passwordEncoder.matches(password.getPassword(), memberService.findByEmail(email).get().getPassword())){
                 throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
             }
 
-            String verificationToken = jwtTokenProvider.generateVerificationToken(emailFromToken, id);
+            String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
 
             Map<String, String> response = new HashMap<>();
             response.put("successMessage", "본인 확인이 완료되었습니다.");
@@ -270,6 +280,7 @@ public class MemberController {
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> updateMember(      @RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
                                                 BindingResult bindingResult,
                                                 @RequestHeader("Verification_Token") String verificationToken) {
@@ -311,6 +322,7 @@ public class MemberController {
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
 
         String email = memberService.findById(memberId).get().getEmail();
