@@ -73,24 +73,12 @@ public class ProductController {
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
-        Long currentStock = productDTOWithoutId.getStock();
-        Long currentSoldQuantity = productDTOWithoutId.getSoldQuantity();
-        if (currentStock < 0) {
-            throw new IllegalStateException("재고가 음수일 수 없습니다.");
-        }else if(currentSoldQuantity < 0){
-            throw new IllegalStateException("판매량이 음수일 수 없습니다.");
-        }
+
         if (validationResponse != null) return validationResponse;
-        Product product = new Product();
-        product.setBrand(productDTOWithoutId.getBrand());
-        product.setCategory(productDTOWithoutId.getCategory());
-        product.setProductNum(productDTOWithoutId.getBrand().substring(0,1)+productDTOWithoutId.getName().substring(0,1)+productDTOWithoutId.getCategory());
-        product.setSoldQuantity(productDTOWithoutId.getSoldQuantity());
-        product.setName(productDTOWithoutId.getName());
-        product.setStock(productDTOWithoutId.getStock());
-        productService.join(product);
+
+        productService.join(productDTOWithoutId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", product.getName() + "(이)가 등록되었습니다.");
+        responseMap.put("successMessage", productDTOWithoutId.getName() + "(이)가 등록되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 등록 성공", HttpStatus.OK);
 
     }
@@ -129,9 +117,6 @@ public class ProductController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
-        if (productId == null) {
-            throw new IllegalStateException("id가 입력되지 않았습니다.");
-        }
         Optional<Product> productOptional = productService.findById(productId);
         String successMessage = productId + "에 해당하는 상품 입니다.";
         return new CustomOptionalResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
@@ -185,29 +170,11 @@ public class ProductController {
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
 
         String categoryCode = CategoryCode.generateCategoryCode(category, content);
-
         Page<Product> productPage = productService.findProducts(brand, categoryCode, productName, content, pageable);
-
-        StringBuilder searchCriteria = new StringBuilder();
-        if (brand != null) searchCriteria.append(brand).append(", ");
-        if (category != null) searchCriteria.append(category).append(", ");
-        if (productName != null) searchCriteria.append(productName).append(", ");
-        if (content != null) searchCriteria.append(content).append(", ");
-
-        String successMessage;
-        if (!searchCriteria.isEmpty()) {
-            searchCriteria.setLength(searchCriteria.length() - 2);
-            successMessage = "검색 키워드 : " + searchCriteria;
-        } else {
-            successMessage = "전체 상품입니다.";
-        }
+        String successMessage = productService.stringBuilder(brand, category, productName, content, productPage);
 
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
-
-        if (totalCount == 0) {
-            successMessage = "검색 결과가 없습니다. 검색 키워드 : " + searchCriteria;
-        }
 
         return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
 

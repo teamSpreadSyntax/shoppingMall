@@ -204,7 +204,10 @@ public class MemberController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-        Map<String,String> response = memberService.verifyUser(email, password);
+        String verificationToken = memberService.verifyUser(email, password);
+        Map<String, String> response = new HashMap<>();
+        response.put("successMessage", "본인 확인이 완료되었습니다.");
+        response.put("verificationToken", verificationToken);
 
             return new CustomOptionalResponseEntity<>(Optional.of(response), "본인 확인 성공", HttpStatus.OK);
 

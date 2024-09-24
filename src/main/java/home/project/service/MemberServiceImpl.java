@@ -152,7 +152,7 @@ public class MemberServiceImpl implements MemberService {
         return successMessage;
     }
 
-    public Map<String,String> verifyUser(String email, PasswordDTO password){
+    public String verifyUser(String email, PasswordDTO password){
 
         Long id = findByEmail(email).get().getId();
         if (!passwordEncoder.matches(password.getPassword(), findByEmail(email).get().getPassword())){
@@ -161,25 +161,8 @@ public class MemberServiceImpl implements MemberService {
 
         String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
 
-        Map<String, String> response = new HashMap<>();
-        response.put("successMessage", "본인 확인이 완료되었습니다.");
-        response.put("verificationToken", verificationToken);
-        return response;
+        return verificationToken;
     }
-
-    /*public Long getIdFromVerificationToken(MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, String verificationToken){
-        String email = jwtTokenProvider.getEmailFromToken(verificationToken);
-
-        if (email == null) {
-            throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
-        }
-        if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
-            throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-        }
-
-        Long id = Long.parseLong(jwtTokenProvider.getIdFromVerificationToken(verificationToken));
-
-    }*/
 
     public Optional<MemberDTOWithoutPw> update(MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, String verificationToken) {
         String email = jwtTokenProvider.getEmailFromToken(verificationToken);

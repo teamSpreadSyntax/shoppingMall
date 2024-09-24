@@ -28,7 +28,7 @@ public interface MemberService {
 
     Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable);
 
-    Map<String, String> verifyUser(String email, PasswordDTO password);
+    String verifyUser(String email, PasswordDTO password);
 
     Optional<MemberDTOWithoutPw> update(MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, String verificationToken);
 
