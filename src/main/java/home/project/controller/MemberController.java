@@ -271,7 +271,7 @@ public class MemberController {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> updateMember(      @RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
                                                 BindingResult bindingResult,
-                                                @RequestHeader("Verification_Token") String verificationToken) {
+                                                @RequestParam("verificationToken") String verificationToken) {
             CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
             if (validationResponse != null) {
                 return validationResponse;
