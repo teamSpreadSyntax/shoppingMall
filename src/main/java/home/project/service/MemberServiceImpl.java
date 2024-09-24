@@ -1,7 +1,9 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.Role;
 import home.project.dto.MemberDTOWithoutId;
+import home.project.dto.TokenDto;
 import home.project.exceptions.IdNotFoundException;
 import home.project.exceptions.NoChangeException;
 import home.project.repository.MemberRepository;
@@ -9,6 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +24,17 @@ import java.util.Optional;
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public MemberServiceImpl(MemberRepository memberRepository, PasswordEncoder passwordEncoder/*, AuthenticationManagerBuilder authenticationManagerBuilder, OAuth2ResourceServerProperties.Jwt jwt*/) {
+    public MemberServiceImpl(MemberRepository memberRepository, PasswordEncoder passwordEncoder, RoleService roleService, AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider/*, AuthenticationManagerBuilder authenticationManagerBuilder, OAuth2ResourceServerProperties.Jwt jwt*/) {
         this.memberRepository = memberRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public Member convertToEntity(MemberDTOWithoutId memberDTOWithoutId) {
@@ -35,9 +46,14 @@ public class MemberServiceImpl implements MemberService {
         return member;
     }
 
-    public void join(Member member) {
-        boolean emailExists = memberRepository.existsByEmail(member.getEmail());
-        boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
+    public TokenDto join(MemberDTOWithoutId memberDTO) {
+
+        if(!memberDTO.getPassword().equals(memberDTO.getPasswordConfirm())){
+            throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        }
+
+        boolean emailExists = memberRepository.existsByEmail(memberDTO.getEmail());
+        boolean phoneExists = memberRepository.existsByPhone(memberDTO.getPhone());
         if (emailExists && phoneExists) {
             throw new DataIntegrityViolationException("이미 사용 중인 이메일과 전화번호입니다.");
         } else if (emailExists) {
@@ -45,8 +61,26 @@ public class MemberServiceImpl implements MemberService {
         } else if (phoneExists) {
             throw new DataIntegrityViolationException("이미 사용 중인 전화번호입니다.");
         }
+
+        Member member = convertToEntity(memberDTO);
         memberRepository.save(member);
+        Optional<Member> memberForAddRole = findByEmail(member.getEmail());
+        Long id = memberForAddRole.get().getId();
+
+        Role role = new Role();
+        role.setId(id);
+        roleService.join(role);
+
+        String savedRole = roleService.findById(id).get().getRole();
+
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(memberDTO.getEmail(), memberDTO.getPassword()));
+        TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
+
+        tokenDto.setRole(savedRole);
+
+        return tokenDto;
     }
+
 
     public Optional<Member> findById(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
