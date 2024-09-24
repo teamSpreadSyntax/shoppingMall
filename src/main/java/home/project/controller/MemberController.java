@@ -61,7 +61,7 @@ public class MemberController {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, ValidationCheck validationCheck, RoleService roleService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public MemberController(MemberService memberService, JwtTokenProvider jwtTokenProvider, ValidationCheck validationCheck, RoleService roleService, PasswordEncoder passwordEncoder) {
         this.memberService = memberService;
         this.jwtTokenProvider = jwtTokenProvider;
         this.validationCheck = validationCheck;
