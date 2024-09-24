@@ -106,13 +106,9 @@ public class MemberController {
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
-    public ResponseEntity<?> findMemberById() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Long memberId = memberService.findByEmail(email).get().getId();
-        Optional<Member> memberOptional = memberService.findById(memberId);
-        String role = roleService.findById(memberId).get().getRole();
-        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
+    public ResponseEntity<?> memberInfo() {
+            Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberService.memberInfo();
+            Long memberId = memberDTOWithoutPw.get().getId();
             String successMessage = memberId + "(으)로 가입된 회원정보입니다";
         return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
     }
@@ -137,17 +133,10 @@ public class MemberController {
             }) @ParameterObject Pageable pageable) {
 
             pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+
             Page<Member> memberPage = memberService.findAll(pageable);
 
-            Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
-                Long roleId = member.getId();
-                String roleName = "No Role";
-                if (roleId != null) {
-                    Optional<Role> role = roleService.findById(roleId);
-                    roleName = role.get().getRole();
-                }
-                return new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
-            });
+            Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
 
             String successMessage = "전체 회원입니다.";
             long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
@@ -181,34 +170,13 @@ public class MemberController {
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
-        Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
-        Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
-            String roleName = Optional.ofNullable(member.getRole())
-                    .map(Role::getRole)
-                    .orElse("No Role");
-            return new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
-        });
-            StringBuilder searchCriteria = new StringBuilder();
-            if (name != null) searchCriteria.append(name).append(", ");
-            if (email != null) searchCriteria.append(email).append(", ");
-            if (phone != null) searchCriteria.append(phone).append(", ");
-            if (role != null) searchCriteria.append(role).append(", ");
-            if (content != null) searchCriteria.append(content).append(", ");
 
-            String successMessage;
-            if (!searchCriteria.isEmpty()) {
-                searchCriteria.setLength(searchCriteria.length() - 2);
-                successMessage = "검색 키워드 : " + searchCriteria;
-            } else {
-                successMessage = "전체 회원입니다.";
-            }
+        Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
+        Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
+        String successMessage = memberService.StringBuilder(name, email, phone, role, content, pagedMemberDTOWithoutPw);
 
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
         int page = pagedMemberDTOWithoutPw.getNumber();
-
-        if (totalCount == 0) {
-            successMessage = "검색 결과가 없습니다. 검색 키워드 : " + searchCriteria;
-        }
 
         return new CustomListResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
@@ -229,26 +197,14 @@ public class MemberController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult) {
-
-
             CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
             if (validationResponse != null) {
                 return validationResponse;
             }
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
-            Long id = memberService.findByEmail(email).get().getId();
-          if (!passwordEncoder.matches(password.getPassword(), memberService.findByEmail(email).get().getPassword())){
-                throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
-            }
-
-            String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("successMessage", "본인 확인이 완료되었습니다.");
-            response.put("verificationToken", verificationToken);
+        Map<String,String> response = memberService.verifyUser(email, password);
 
             return new CustomOptionalResponseEntity<>(Optional.of(response), "본인 확인 성공", HttpStatus.OK);
 
@@ -276,24 +232,9 @@ public class MemberController {
             if (validationResponse != null) {
                 return validationResponse;
             }
-            String email = jwtTokenProvider.getEmailFromToken(verificationToken);
 
-            if (email == null) {
-                throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
-            }
-        if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
-            throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
-        }
-        Long id = Long.parseLong(jwtTokenProvider.getIdFromVerificationToken(verificationToken));
-        Member member = new Member();
-        member.setId(id);
-        member.setName(memberDTOWithPasswordConfirm.getName());
-        member.setPhone(memberDTOWithPasswordConfirm.getPhone());
-        member.setEmail(memberDTOWithPasswordConfirm.getEmail());
-        member.setPassword(memberDTOWithPasswordConfirm.getPassword());
-        member.setRole(roleService.findById(id).get());
-        Optional<Member> memberOptional = memberService.update(member);
-            Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(memberWithoutPw -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
+        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberService.update(memberDTOWithPasswordConfirm, verificationToken);
+
             String successMessage = "회원 정보가 수정되었습니다.";
         return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
     }
@@ -312,7 +253,6 @@ public class MemberController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
-
         String email = memberService.findById(memberId).get().getEmail();
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();

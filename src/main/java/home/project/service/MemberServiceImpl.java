@@ -2,21 +2,25 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Role;
-import home.project.dto.MemberDTOWithoutId;
-import home.project.dto.TokenDto;
+import home.project.dto.*;
 import home.project.exceptions.IdNotFoundException;
 import home.project.exceptions.NoChangeException;
 import home.project.repository.MemberRepository;
+import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -81,6 +85,15 @@ public class MemberServiceImpl implements MemberService {
         return tokenDto;
     }
 
+    public Optional<MemberDTOWithoutPw> memberInfo(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Long memberId = findByEmail(email).get().getId();
+        Optional<Member> memberOptional = findById(memberId);
+        String role = roleService.findById(memberId).get().getRole();
+        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
+        return memberDTOWithoutPw;
+    }
 
     public Optional<Member> findById(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
@@ -98,12 +111,96 @@ public class MemberServiceImpl implements MemberService {
         return memberRepository.findAll(pageable);
     }
 
+    public Page<MemberDTOWithoutPw> convertToMemberDTOWithoutPW(Page<Member> memberPage) {
+        Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
+            Long roleId = member.getId();
+            String roleName = "No Role";
+            if (roleId != null) {
+                Optional<Role> role = roleService.findById(roleId);
+                roleName = role.get().getRole();
+            }
+            return new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
+        });
+        return pagedMemberDTOWithoutPw;
+    }
+
     public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
         Page<Member> memberPage = memberRepository.findMembers(name, email, phone, role, content, pageable);
         return memberPage;
     }
 
-    public Optional<Member> update(Member member) {
+    public String StringBuilder(String name, String email, String phone, String role, String content, Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw){
+        StringBuilder searchCriteria = new StringBuilder();
+        if (name != null) searchCriteria.append(name).append(", ");
+        if (email != null) searchCriteria.append(email).append(", ");
+        if (phone != null) searchCriteria.append(phone).append(", ");
+        if (role != null) searchCriteria.append(role).append(", ");
+        if (content != null) searchCriteria.append(content).append(", ");
+
+        String successMessage;
+        if (!searchCriteria.isEmpty()) {
+            searchCriteria.setLength(searchCriteria.length() - 2);
+            successMessage = "검색 키워드 : " + searchCriteria;
+        } else {
+            successMessage = "전체 회원입니다.";
+        }
+        long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
+        if (totalCount == 0) {
+            successMessage = "검색 결과가 없습니다. 검색 키워드 : " + searchCriteria;
+        }
+
+        return successMessage;
+    }
+
+    public Map<String,String> verifyUser(String email, PasswordDTO password){
+
+        Long id = findByEmail(email).get().getId();
+        if (!passwordEncoder.matches(password.getPassword(), findByEmail(email).get().getPassword())){
+            throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
+        }
+
+        String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("successMessage", "본인 확인이 완료되었습니다.");
+        response.put("verificationToken", verificationToken);
+        return response;
+    }
+
+    /*public Long getIdFromVerificationToken(MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, String verificationToken){
+        String email = jwtTokenProvider.getEmailFromToken(verificationToken);
+
+        if (email == null) {
+            throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
+        }
+        if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
+            throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        }
+
+        Long id = Long.parseLong(jwtTokenProvider.getIdFromVerificationToken(verificationToken));
+
+    }*/
+
+    public Optional<MemberDTOWithoutPw> update(MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, String verificationToken) {
+        String email = jwtTokenProvider.getEmailFromToken(verificationToken);
+
+        if (email == null) {
+            throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
+        }
+        if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
+            throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
+        }
+
+        Long id = Long.parseLong(jwtTokenProvider.getIdFromVerificationToken(verificationToken));
+
+        Member member = new Member();
+        member.setId(id);
+        member.setName(memberDTOWithPasswordConfirm.getName());
+        member.setPhone(memberDTOWithPasswordConfirm.getPhone());
+        member.setEmail(memberDTOWithPasswordConfirm.getEmail());
+        member.setPassword(memberDTOWithPasswordConfirm.getPassword());
+        member.setRole(roleService.findById(id).get());
+
         Member existingMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new IdNotFoundException(member.getId() + "(으)로 등록된 회원이 없습니다."));
         boolean isModified = false;
@@ -148,9 +245,14 @@ public class MemberServiceImpl implements MemberService {
         if (!isModified) {
             throw new NoChangeException("변경된 회원 정보가 없습니다.");
         }
+        memberRepository.save(existingMember);
 
-        return Optional.of(memberRepository.save(existingMember));
+        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = Optional.of(existingMember).map(memberWithoutPw -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
+
+        return memberDTOWithoutPw;
+
     }
+
 
     public void deleteById(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(() -> new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다."));

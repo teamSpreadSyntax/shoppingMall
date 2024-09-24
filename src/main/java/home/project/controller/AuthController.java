@@ -146,6 +146,7 @@ public class AuthController {
         @SortDefault.SortDefaults({
                 @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         String successMessage = "전체 회원별 권한 목록입니다.";
             Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = authService.checkAuthority(pageable);
             long totalCount = rolesWithMemberNamesPage.getTotalElements();

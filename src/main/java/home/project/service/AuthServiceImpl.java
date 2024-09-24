@@ -99,7 +99,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Page<RoleDTOWithMemberName> checkAuthority(Pageable pageable) {
-        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         Page<Member> memberPage = memberService.findAll(pageable);
         Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
             String role = roleService.findById(member.getId()).get().getRole();
