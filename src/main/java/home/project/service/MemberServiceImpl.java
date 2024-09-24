@@ -1,30 +1,34 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.Role;
 import home.project.dto.MemberDTOWithoutId;
+import home.project.dto.TokenDto;
 import home.project.exceptions.IdNotFoundException;
 import home.project.exceptions.NoChangeException;
 import home.project.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleService roleService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    @Autowired
-    public MemberServiceImpl(MemberRepository memberRepository, PasswordEncoder passwordEncoder/*, AuthenticationManagerBuilder authenticationManagerBuilder, OAuth2ResourceServerProperties.Jwt jwt*/) {
-        this.memberRepository = memberRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public Member convertToEntity(MemberDTOWithoutId memberDTOWithoutId) {
         Member member = new Member();
@@ -34,8 +38,9 @@ public class MemberServiceImpl implements MemberService {
         member.setPhone(memberDTOWithoutId.getPhone());
         return member;
     }
-
-    public void join(Member member) {
+    @Transactional
+    public Optional<Map<String, String>> join(MemberDTOWithoutId memberDTO) {
+        Member member = convertToEntity(memberDTO);
         boolean emailExists = memberRepository.existsByEmail(member.getEmail());
         boolean phoneExists = memberRepository.existsByPhone(member.getPhone());
         if (emailExists && phoneExists) {
@@ -46,12 +51,29 @@ public class MemberServiceImpl implements MemberService {
             throw new DataIntegrityViolationException("이미 사용 중인 전화번호입니다.");
         }
         memberRepository.save(member);
+        Optional<Member> memberForAddRole = memberRepository.findByEmail(member.getEmail());
+        Role role = new Role();
+        Long id = memberForAddRole.get().getId();
+        role.setId(id);
+        roleService.join(role);
+        TokenDto tokenDto = generateToken(member.getEmail(),member.getPassword());
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("accessToken", tokenDto.getAccessToken());
+        responseMap.put("refreshToken", tokenDto.getRefreshToken());
+        responseMap.put("role", role.getRole());
+        responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
+        return Optional.of(responseMap);
+    }
+
+    public TokenDto generateToken(String email, String password){
+        return jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(email,password));
     }
 
     public Optional<Member> findById(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
             throw new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다.");
         });
+
         return Optional.ofNullable(member);
     }
 
@@ -65,8 +87,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
-        Page<Member> memberPage = memberRepository.findMembers(name, email, phone, role, content, pageable);
-        return memberPage;
+        return memberRepository.findMembers(name, email, phone, role, content, pageable);
     }
 
     public Optional<Member> update(Member member) {

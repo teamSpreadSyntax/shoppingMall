@@ -49,15 +49,9 @@ import java.util.Optional;
 @RestController
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider tokenProvider;
-    private final UserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
-    private final MemberService memberService;
+
     private final ValidationCheck validationCheck;
-    private final RoleService roleService;
     private final AuthService authService;
-    private final MemberRepository memberRepository;
 
 
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
@@ -153,14 +147,10 @@ public class AuthController {
                 @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         String successMessage = "전체 회원별 권한 목록입니다.";
-            pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
-            Page<Member> memberPage = memberService.findAll(pageable);
-            Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
-                        String role = roleService.findById(member.getId()).get().getRole();
-                        return new RoleDTOWithMemberName(member.getId(), role, member.getName());});
-            long totalCount = memberPage.getTotalElements();
-            int page = memberPage.getNumber();
-            return new CustomListResponseEntity<>(rolesWithMemberNamesPage .getContent(), successMessage, HttpStatus.OK, totalCount, page);
+            Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = authService.checkAuthority(pageable);
+            long totalCount = rolesWithMemberNamesPage.getTotalElements();
+            int page = rolesWithMemberNamesPage.getNumber();
+            return new CustomListResponseEntity<>(rolesWithMemberNamesPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "토큰 유효성 확인 메서드", description = "새로고침할때마다 액세스토큰과 리프레쉬토큰을 검증하는 메서드입니다.")
@@ -174,19 +164,7 @@ public class AuthController {
     public ResponseEntity<?> verifyUser(
             @RequestParam(value = "accessToken", required = true) String accessToken,
             @RequestParam(value = "refreshToken", required = true)  String refreshToken) {
-        tokenProvider.validateTokenResult(accessToken,refreshToken);
-            String email = tokenProvider.getEmailFromToken(accessToken);
-            Optional<Member> member = memberService.findByEmail(email);
-
-            Long id = member.get().getId();
-            Optional<Role> roleOptional = roleService.findById(id);
-
-            String role = roleOptional.get().getRole();
-            TokenDto newTokenDto = new TokenDto();
-            newTokenDto.setRole(role);
-            newTokenDto.setAccessToken(accessToken);
-            newTokenDto.setRefreshToken(refreshToken);
-            newTokenDto.setGrantType("Bearer");
+            TokenDto newTokenDto = authService.verifyUser(accessToken,refreshToken);
             return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증되었습니다.", HttpStatus.OK);
     }
 

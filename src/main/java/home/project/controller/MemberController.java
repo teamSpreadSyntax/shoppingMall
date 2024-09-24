@@ -11,7 +11,6 @@ import home.project.service.RoleService;
 import home.project.util.ValidationCheck;
 import io.jsonwebtoken.JwtException;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -31,10 +30,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -78,7 +75,6 @@ public class MemberController {
             @ApiResponse(responseCode = "409", description = "Conflict",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
-    @Transactional
     @PostMapping("/join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -86,20 +82,9 @@ public class MemberController {
         if(!memberDTO.getPassword().equals(memberDTO.getPasswordConfirm())){
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
-        Member member = memberService.convertToEntity(memberDTO);
-        memberService.join(member);
-        Optional<Member> memberForAddRole = memberService.findByEmail(member.getEmail());
-        Role role = new Role();
-        Long id = memberForAddRole.get().getId();
-        role.setId(id);
-        roleService.join(role);
-        String savedRole=roleService.findById(id).get().getRole();
-        TokenDto tokenDto = jwtTokenProvider.generateToken(new UsernamePasswordAuthenticationToken(member.getEmail(), member.getPassword()));
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("accessToken", tokenDto.getAccessToken());
-        responseMap.put("refreshToken", tokenDto.getRefreshToken());
-        responseMap.put("role", savedRole);
-        responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
+
+        Optional<Map<String, String>> responseMap = memberService.join(memberDTO);
+
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK);
     }
 
@@ -115,13 +100,10 @@ public class MemberController {
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
-    public ResponseEntity<?> findMemberById(@RequestHeader("Access_Token") String accessToken) {
+    public ResponseEntity<?> findMemberById() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = memberService.findByEmail(email).get().getId();
-        if (memberId == null) {
-            throw new IllegalStateException("id가 입력되지 않았습니다.");
-        }
         Optional<Member> memberOptional = memberService.findById(memberId);
         String role = roleService.findById(memberId).get().getRole();
         Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
@@ -240,7 +222,7 @@ public class MemberController {
     @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
-    public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult, @RequestHeader("Access_Token") String accessToken) {
+    public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult) {
 
 
             CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);

@@ -2,10 +2,13 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Role;
+import home.project.dto.RoleDTOWithMemberName;
 import home.project.dto.TokenDto;
 import home.project.dto.UserDetailsDTO;
-import home.project.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,7 +29,6 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberService memberService;
     private final RoleService roleService;
-    private final MemberRepository memberRepository;
 
     @Override
     public TokenDto login(UserDetailsDTO userDetailsDTO) {
@@ -93,5 +95,33 @@ public class AuthServiceImpl implements AuthService {
             successMessage = name + "(id : " + id + ")" + "님에게 일반 사용자 권한을 부여했습니다.";
         }
         return successMessage;
+    }
+
+    @Override
+    public Page<RoleDTOWithMemberName> checkAuthority(Pageable pageable) {
+        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+        Page<Member> memberPage = memberService.findAll(pageable);
+        Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
+            String role = roleService.findById(member.getId()).get().getRole();
+            return new RoleDTOWithMemberName(member.getId(), role, member.getName());});
+        return rolesWithMemberNamesPage;
+    }
+
+    @Override
+    public TokenDto verifyUser(String accessToken, String refreshToken) {
+        jwtTokenProvider.validateTokenResult(accessToken,refreshToken);
+        String email = jwtTokenProvider.getEmailFromToken(accessToken);
+        Optional<Member> member = memberService.findByEmail(email);
+
+        Long id = member.get().getId();
+        Optional<Role> roleOptional = roleService.findById(id);
+
+        String role = roleOptional.get().getRole();
+        TokenDto newTokenDto = new TokenDto();
+        newTokenDto.setRole(role);
+        newTokenDto.setAccessToken(accessToken);
+        newTokenDto.setRefreshToken(refreshToken);
+        newTokenDto.setGrantType("Bearer");
+        return newTokenDto;
     }
 }
