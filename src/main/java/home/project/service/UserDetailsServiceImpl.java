@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,10 +36,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         });
         Role role = roleRepository.findById(member.getId()).get();
         List<GrantedAuthority> authorities = new ArrayList<>();
-        if(role.getRole().equals("admin")){
+        if (role.getRole().equals("admin")) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
         } else if (role.getRole().equals("user")) {
-        authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
         } else if (role.getRole().equals("center")) {
             authorities.add(new SimpleGrantedAuthority("ROLE_CENTER"));
         }

@@ -13,7 +13,7 @@ public class RoleDTOWithMemberName {
 
     private String name;
 
-    public RoleDTOWithMemberName(Long id, String role, String name){
+    public RoleDTOWithMemberName(Long id, String role, String name) {
         this.id = id;
         this.name = name;
         this.role = role;

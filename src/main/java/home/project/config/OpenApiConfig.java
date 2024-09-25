@@ -46,13 +46,13 @@ public class OpenApiConfig {
 
         // 사용자별 권한 목록 응답 스키마
         Schema<?> pagedUserRoleListResponseSchema = new ObjectSchema()
-            .addProperty("result", new ObjectSchema()
-                .addProperty("totalCount", new Schema<>().type("integer").format("int64"))
-                .addProperty("page", new Schema<>().type("integer"))
-                .addProperty("content", new ArraySchema().items(userRoleSchema)
-                        .addProperty("id", new Schema<>().type("integer").format("int64"))
-                        .addProperty("role", new Schema<>().type("string"))
-                        .addProperty("name", new Schema<>().type("string"))))
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("totalCount", new Schema<>().type("integer").format("int64"))
+                        .addProperty("page", new Schema<>().type("integer"))
+                        .addProperty("content", new ArraySchema().items(userRoleSchema)
+                                .addProperty("id", new Schema<>().type("integer").format("int64"))
+                                .addProperty("role", new Schema<>().type("string"))
+                                .addProperty("name", new Schema<>().type("string"))))
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 

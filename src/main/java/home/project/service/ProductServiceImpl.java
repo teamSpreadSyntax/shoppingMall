@@ -1,7 +1,6 @@
 package home.project.service;
 
 import home.project.domain.Product;
-import home.project.dto.CategoryDTOWithoutId;
 import home.project.dto.ProductDTOWithoutId;
 import home.project.exceptions.IdNotFoundException;
 import home.project.exceptions.NoChangeException;
@@ -32,14 +31,14 @@ public class ProductServiceImpl implements ProductService {
         Long currentSoldQuantity = productDTOWithoutId.getSoldQuantity();
         if (currentStock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
-        }else if(currentSoldQuantity < 0){
+        } else if (currentSoldQuantity < 0) {
             throw new IllegalStateException("판매량이 음수일 수 없습니다.");
         }
 
         Product product = new Product();
         product.setBrand(productDTOWithoutId.getBrand());
         product.setCategory(productDTOWithoutId.getCategory());
-        product.setProductNum(productDTOWithoutId.getBrand().substring(0,1)+productDTOWithoutId.getName().substring(0,1)+productDTOWithoutId.getCategory());
+        product.setProductNum(productDTOWithoutId.getBrand().substring(0, 1) + productDTOWithoutId.getName().substring(0, 1) + productDTOWithoutId.getCategory());
         product.setSoldQuantity(productDTOWithoutId.getSoldQuantity());
         product.setName(productDTOWithoutId.getName());
         product.setStock(productDTOWithoutId.getStock());
@@ -69,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
         return productPage;
     }
 
-    public String stringBuilder(String brand, String category, String productName, String content, Page<Product> productPage){
+    public String stringBuilder(String brand, String category, String productName, String content, Page<Product> productPage) {
         StringBuilder searchCriteria = new StringBuilder();
         if (brand != null) searchCriteria.append(brand).append(", ");
         if (category != null) searchCriteria.append(category).append(", ");
@@ -114,7 +113,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (product.getSoldQuantity() != null && !Objects.equals(existingProduct.getSoldQuantity(), product.getSoldQuantity())) {
-            if(product.getSoldQuantity() < 0){
+            if (product.getSoldQuantity() < 0) {
                 throw new IllegalStateException("판매량이 음수일 수 없습니다.");
             }
             existingProduct.setSoldQuantity(product.getSoldQuantity());

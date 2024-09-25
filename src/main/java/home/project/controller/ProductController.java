@@ -247,7 +247,7 @@ public class ProductController {
         String name = productService.findById(productId).get().getName();
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", name +"(id:" +productId + ")(이)가 삭제되었습니다.");
+        responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
     }
 

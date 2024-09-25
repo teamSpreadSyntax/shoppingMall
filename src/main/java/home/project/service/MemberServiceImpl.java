@@ -19,8 +19,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -52,7 +50,7 @@ public class MemberServiceImpl implements MemberService {
 
     public TokenDto join(MemberDTOWithoutId memberDTO) {
 
-        if(!memberDTO.getPassword().equals(memberDTO.getPasswordConfirm())){
+        if (!memberDTO.getPassword().equals(memberDTO.getPasswordConfirm())) {
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
 
@@ -85,7 +83,7 @@ public class MemberServiceImpl implements MemberService {
         return tokenDto;
     }
 
-    public Optional<MemberDTOWithoutPw> memberInfo(){
+    public Optional<MemberDTOWithoutPw> memberInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = findByEmail(email).get().getId();
@@ -103,7 +101,9 @@ public class MemberServiceImpl implements MemberService {
     }
 
     public Optional<Member> findByEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> { throw new IdNotFoundException(email+"(으)로 등록된 회원이 없습니다."); });
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
+            throw new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다.");
+        });
         return Optional.ofNullable(member);
     }
 
@@ -129,7 +129,7 @@ public class MemberServiceImpl implements MemberService {
         return memberPage;
     }
 
-    public String StringBuilder(String name, String email, String phone, String role, String content, Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw){
+    public String StringBuilder(String name, String email, String phone, String role, String content, Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw) {
         StringBuilder searchCriteria = new StringBuilder();
         if (name != null) searchCriteria.append(name).append(", ");
         if (email != null) searchCriteria.append(email).append(", ");
@@ -152,10 +152,10 @@ public class MemberServiceImpl implements MemberService {
         return successMessage;
     }
 
-    public String verifyUser(String email, PasswordDTO password){
+    public String verifyUser(String email, PasswordDTO password) {
 
         Long id = findByEmail(email).get().getId();
-        if (!passwordEncoder.matches(password.getPassword(), findByEmail(email).get().getPassword())){
+        if (!passwordEncoder.matches(password.getPassword(), findByEmail(email).get().getPassword())) {
             throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
         }
 
@@ -170,7 +170,7 @@ public class MemberServiceImpl implements MemberService {
         if (email == null) {
             throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
         }
-        if(!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())){
+        if (!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())) {
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
 

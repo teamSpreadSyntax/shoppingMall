@@ -1,6 +1,5 @@
 package home.project.repository;
 
-import home.project.domain.Product;
 import home.project.domain.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 

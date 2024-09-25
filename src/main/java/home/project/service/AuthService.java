@@ -17,11 +17,11 @@ public interface AuthService {
 
     String logout(Long id);
 
-    Optional<Role> addAuthority(Long id,String authority);
+    Optional<Role> addAuthority(Long id, String authority);
 
-    String RoleMessage(Long id,String authority);
+    String RoleMessage(Long id, String authority);
 
     Page<RoleDTOWithMemberName> checkAuthority(Pageable pageable);
 
-    TokenDto verifyUser(String accessToken,String refreshToken);
+    TokenDto verifyUser(String accessToken, String refreshToken);
 }

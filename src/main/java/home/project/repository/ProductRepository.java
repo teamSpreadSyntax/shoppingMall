@@ -10,8 +10,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Optional;
-
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT DISTINCT p.brand FROM Product p ORDER BY p.brand ASC")

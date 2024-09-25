@@ -10,7 +10,7 @@ public class MemberDTOWithoutPw {
     private String email;
     private String name;
     private String phone;
-    private  String role;
+    private String role;
 
     public MemberDTOWithoutPw(Long id, String email, String name, String phone, String role) {
         this.id = id;

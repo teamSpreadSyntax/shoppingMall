@@ -21,13 +21,13 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 
-
 @Service
 public class JwtTokenProvider {
     private final Key key;
     private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주-30분
     private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주
-    private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;; // 2주 - 5분
+    private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
+    ; // 2주 - 5분
     private final UserDetailsService userDetailsService;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, UserDetailsService userDetailsService) {
@@ -136,7 +136,7 @@ public class JwtTokenProvider {
 
     private Claims parseClaims(String accessToken) {
         throwExceptionForInvalidToken(validateTokenDetail(accessToken), "");
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
 
     }
 

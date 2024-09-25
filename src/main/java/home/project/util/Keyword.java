@@ -3,24 +3,24 @@ package home.project.util;
 public class Keyword {
     // 키워드 배열
     private static final String[][] SHIRT_KEYWORDS = {
-            {"셔츠", "0101"},
-            {"블라우스", "와이셔츠", "0102"}
+            {"셔츠", "0101" },
+            {"블라우스", "와이셔츠", "0102" }
     };
     private static final String[][] SLEEVE_KEYWORDS = {
-            {"반팔", "01"},
-            {"긴팔", "02"}
+            {"반팔", "01" },
+            {"긴팔", "02" }
     };
     private static final String[][] CATEGORY_KEYWORDS = {
-            {"니트", "0103"},
-            {"바지", "02"},
-            {"장갑", "03"},
-            {"모자", "04"},
-            {"후드", "05"},
-            {"재킷", "06"},
-            {"신발", "07"},
-            {"반바지", "08"},
-            {"양말", "09"},
-            {"스웨터", "10"}
+            {"니트", "0103" },
+            {"바지", "02" },
+            {"장갑", "03" },
+            {"모자", "04" },
+            {"후드", "05" },
+            {"재킷", "06" },
+            {"신발", "07" },
+            {"반바지", "08" },
+            {"양말", "09" },
+            {"스웨터", "10" }
     };
 
     public static String handleShirts(String contents) {
@@ -28,14 +28,14 @@ public class Keyword {
     }
 
     public static String handleKnit(String contents) {
-        return handleCategory(contents, new String[][]{{"니트", "0103"}}, SLEEVE_KEYWORDS, "0103");
+        return handleCategory(contents, new String[][]{{"니트", "0103" }}, SLEEVE_KEYWORDS, "0103");
     }
 
     public static String handlePants(String contents) {
         return handleCategory(contents, new String[][]{
-                {"바지", "02"},
-                {"면", "0201"},
-                {"청", "0203"}
+                {"바지", "02" },
+                {"면", "0201" },
+                {"청", "0203" }
         }, null, "02");
     }
 

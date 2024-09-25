@@ -10,7 +10,7 @@ import org.hibernate.annotations.Check;
 import org.hibernate.validator.constraints.UniqueElements;
 
 @Entity
-@Table(name = "product", uniqueConstraints = {@UniqueConstraint(columnNames = {"product_num"})})
+@Table(name = "product", uniqueConstraints = {@UniqueConstraint(columnNames = {"product_num" })})
 @Getter
 @Setter
 public class Product {
@@ -34,7 +34,7 @@ public class Product {
     @NotNull(message = "상품의 품번을 입력해주세요.")
     private String productNum;
 
-    @Check( constraints = "stock >= 0")
+    @Check(constraints = "stock >= 0")
     @Column(name = "stock")
     @NotNull(message = "상품의 현재 재고를 입력해주세요.")
     private Long stock;

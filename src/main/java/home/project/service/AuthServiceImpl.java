@@ -7,7 +7,6 @@ import home.project.dto.TokenDto;
 import home.project.dto.UserDetailsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -102,13 +101,14 @@ public class AuthServiceImpl implements AuthService {
         Page<Member> memberPage = memberService.findAll(pageable);
         Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = memberPage.map(member -> {
             String role = roleService.findById(member.getId()).get().getRole();
-            return new RoleDTOWithMemberName(member.getId(), role, member.getName());});
+            return new RoleDTOWithMemberName(member.getId(), role, member.getName());
+        });
         return rolesWithMemberNamesPage;
     }
 
     @Override
     public TokenDto verifyUser(String accessToken, String refreshToken) {
-        jwtTokenProvider.validateTokenResult(accessToken,refreshToken);
+        jwtTokenProvider.validateTokenResult(accessToken, refreshToken);
         String email = jwtTokenProvider.getEmailFromToken(accessToken);
         Optional<Member> member = memberService.findByEmail(email);
 

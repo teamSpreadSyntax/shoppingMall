@@ -14,6 +14,7 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryServiceImpl(CategoryRepository categoryRepository) {
         this.categoryRepository = categoryRepository;
     }
+
     public void save(CategoryDTOWithoutId categoryDTO) {
         Category category = new Category();
         category.setCode(categoryDTO.getCode());

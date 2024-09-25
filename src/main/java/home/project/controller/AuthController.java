@@ -4,7 +4,6 @@ import home.project.domain.*;
 import home.project.dto.RoleDTOWithMemberName;
 import home.project.dto.TokenDto;
 import home.project.dto.UserDetailsDTO;
-import home.project.repository.MemberRepository;
 import home.project.response.CustomListResponseEntity;
 import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.*;
@@ -27,9 +26,6 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -49,10 +45,8 @@ import java.util.Optional;
 @RestController
 public class AuthController {
 
-
     private final ValidationCheck validationCheck;
     private final AuthService authService;
-
 
     @Operation(summary = "로그인 메서드", description = "로그인 메서드입니다.")
     @ApiResponses(value = {
@@ -80,15 +74,15 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/LoginSuccessResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
-            content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(
             @RequestParam(value = "refreshToken", required = true) String refreshToken) {
 
-            TokenDto newTokenDto = authService.refreshToken(refreshToken);
+        TokenDto newTokenDto = authService.refreshToken(refreshToken);
 
-            return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
+        return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
     }
 
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
@@ -96,14 +90,14 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
-            content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestParam("memberId") Long memberId) {
 
         String email = authService.logout(memberId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", email+"님 이용해주셔서 감사합니다.");
+        responseMap.put("successMessage", email + "님 이용해주셔서 감사합니다.");
         return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "로그아웃되었습니다.", HttpStatus.OK);
 
     }
@@ -122,10 +116,10 @@ public class AuthController {
     @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") @Pattern(regexp = "^(user|admin|center)$", message = "Authority must be either 'user', 'admin', or 'center'") String authority) {
 
-            Optional<Role> role = authService.addAuthority(memberId,authority);
-            String successMessage = authService.RoleMessage(memberId,authority);
+        Optional<Role> role = authService.addAuthority(memberId, authority);
+        String successMessage = authService.RoleMessage(memberId, authority);
 
-            return new CustomOptionalResponseEntity<>(Optional.of(role),successMessage, HttpStatus.OK);
+        return new CustomOptionalResponseEntity<>(Optional.of(role), successMessage, HttpStatus.OK);
 
     }
 
@@ -142,16 +136,16 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("hasRole('ROLE_CENTER')")
     public ResponseEntity<?> checkAuthority(
-        @PageableDefault(page = 1, size = 5)
-        @SortDefault.SortDefaults({
-                @SortDefault(sort = "name", direction = Sort.Direction.ASC)
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
         String successMessage = "전체 회원별 권한 목록입니다.";
-            Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = authService.checkAuthority(pageable);
-            long totalCount = rolesWithMemberNamesPage.getTotalElements();
-            int page = rolesWithMemberNamesPage.getNumber();
-            return new CustomListResponseEntity<>(rolesWithMemberNamesPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        Page<RoleDTOWithMemberName> rolesWithMemberNamesPage = authService.checkAuthority(pageable);
+        long totalCount = rolesWithMemberNamesPage.getTotalElements();
+        int page = rolesWithMemberNamesPage.getNumber();
+        return new CustomListResponseEntity<>(rolesWithMemberNamesPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "토큰 유효성 확인 메서드", description = "새로고침할때마다 액세스토큰과 리프레쉬토큰을 검증하는 메서드입니다.")
@@ -164,9 +158,9 @@ public class AuthController {
     @GetMapping("/verify")
     public ResponseEntity<?> verifyUser(
             @RequestParam(value = "accessToken", required = true) String accessToken,
-            @RequestParam(value = "refreshToken", required = true)  String refreshToken) {
-            TokenDto newTokenDto = authService.verifyUser(accessToken,refreshToken);
-            return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증되었습니다.", HttpStatus.OK);
+            @RequestParam(value = "refreshToken", required = true) String refreshToken) {
+        TokenDto newTokenDto = authService.verifyUser(accessToken, refreshToken);
+        return new CustomOptionalResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증되었습니다.", HttpStatus.OK);
     }
 
 }
