@@ -3,8 +3,6 @@ package home.project.controller;
 
 import home.project.domain.*;
 import home.project.dto.*;
-import home.project.response.CustomListResponseEntity;
-import home.project.response.CustomOptionalResponseEntity;
 import home.project.response.CustomResponseEntity;
 import home.project.service.MemberService;
 
@@ -65,7 +63,7 @@ public class MemberController {
     })
     @PostMapping("/join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
-        CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
+        CustomResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
         TokenDto tokenDto = memberService.join(memberDTO);
@@ -75,7 +73,7 @@ public class MemberController {
         responseMap.put("refreshToken", tokenDto.getRefreshToken());
         responseMap.put("role", tokenDto.getRole());
         responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
-        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK);
+        return new CustomResponseEntity<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK);
     }
 
     @Operation(summary = "id로 회원 조회 메서드", description = "id로 회원 조회 메서드입니다.")
@@ -93,7 +91,7 @@ public class MemberController {
         Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberService.memberInfo();
         Long memberId = memberDTOWithoutPw.get().getId();
         String successMessage = memberId + "(으)로 가입된 회원정보입니다";
-        return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
@@ -123,7 +121,7 @@ public class MemberController {
         String successMessage = "전체 회원입니다.";
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
         int page = pagedMemberDTOWithoutPw.getNumber();
-        return new CustomListResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        return new CustomResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
 
     }
 
@@ -177,7 +175,7 @@ public class MemberController {
     @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult) {
-        CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) {
             return validationResponse;
         }
@@ -209,7 +207,7 @@ public class MemberController {
     public ResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
                                           BindingResult bindingResult,
                                           @RequestParam("verificationToken") String verificationToken) {
-        CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) {
             return validationResponse;
         }

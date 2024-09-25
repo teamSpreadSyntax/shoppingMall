@@ -1,7 +1,7 @@
 package home.project.util;
 
-import home.project.response.CustomOptionalResponseBody;
-import home.project.response.CustomOptionalResponseEntity;
+import home.project.response.CustomResponseBody;
+import home.project.response.CustomResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Service
 public class ValidationCheck {
-    public CustomOptionalResponseEntity<Map<String, String>> validationChecks(BindingResult bindingResult) {
+    public CustomResponseEntity<Map<String, String>> validationChecks(BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> responseMap = new HashMap<>();
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -25,8 +25,8 @@ public class ValidationCheck {
                     responseMap.put(fieldName, errorMessage);
                 }
             }
-            CustomOptionalResponseBody<Map<String, String>> errorBody = new CustomOptionalResponseBody<>(Optional.of(responseMap), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value());
-            return new CustomOptionalResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+            CustomResponseBody<Map<String, String>> errorBody = new CustomResponseBody<>(Optional.of(responseMap), "입력값을 확인해주세요.", HttpStatus.BAD_REQUEST.value());
+            return new CustomResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
         }
         return null;
     }

@@ -4,8 +4,6 @@ import home.project.domain.*;
 import home.project.dto.RoleDTOWithMemberName;
 import home.project.dto.TokenDto;
 import home.project.dto.UserDetailsDTO;
-import home.project.response.CustomListResponseEntity;
-import home.project.response.CustomOptionalResponseEntity;
 import home.project.response.CustomResponseEntity;
 import home.project.service.*;
 import home.project.util.PageUtil;
@@ -60,7 +58,7 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid UserDetailsDTO userDetailsDTO, BindingResult bindingResult) {
-        CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
         TokenDto tokenDto = authService.login(userDetailsDTO);
