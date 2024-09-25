@@ -19,8 +19,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,19 +42,13 @@ import java.util.*;
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
+@RequiredArgsConstructor
 @RestController
 public class ProductController {
 
     private final ProductService productService;
     private final ValidationCheck validationCheck;
     private final CategoryService categoryService;
-
-    @Autowired
-    public ProductController(ProductService productService, ValidationCheck validationCheck, CategoryService categoryService) {
-        this.productService = productService;
-        this.validationCheck = validationCheck;
-        this.categoryService = categoryService;
-    }
 
 
     @Operation(summary = "상품 등록 메서드", description = "상품 등록 메서드입니다.")

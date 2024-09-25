@@ -3,21 +3,18 @@ package home.project.service;
 import home.project.domain.Role;
 import home.project.exceptions.IdNotFoundException;
 import home.project.repository.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 @Transactional
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
 
-    @Autowired
-    public RoleServiceImpl(RoleRepository roleRepository) {
-        this.roleRepository = roleRepository;
-    }
 
     public Optional<Role> findById(Long memberId) {
         Role role = roleRepository.findById(memberId).orElseThrow(() -> {
