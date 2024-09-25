@@ -16,11 +16,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
@@ -61,6 +63,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
+    @Transactional
     public String logout(Long memberId) {
         Optional<Member> member = memberService.findById(memberId);
         Optional<Role> role = roleService.findById(memberId);

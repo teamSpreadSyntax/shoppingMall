@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -61,7 +60,6 @@ public class MemberController {
             @ApiResponse(responseCode = "409", description = "Conflict",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
-    @Transactional
     @PostMapping("/join")
     public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
         CustomOptionalResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -196,7 +194,6 @@ public class MemberController {
 
     }
 
-    @Transactional
     @Operation(summary = "회원 정보 업데이트(수정) 메서드", description = "회원 정보 업데이트(수정) 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -225,7 +222,6 @@ public class MemberController {
         return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
     }
 
-    @Transactional
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",

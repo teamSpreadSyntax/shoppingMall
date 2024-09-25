@@ -18,12 +18,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -40,6 +42,7 @@ public class MemberServiceImpl implements MemberService {
         return member;
     }
 
+    @Transactional
     public TokenDto join(MemberDTOWithoutId memberDTO) {
 
         if (!memberDTO.getPassword().equals(memberDTO.getPasswordConfirm())) {
@@ -156,6 +159,7 @@ public class MemberServiceImpl implements MemberService {
         return verificationToken;
     }
 
+    @Transactional
     public Optional<MemberDTOWithoutPw> update(MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, String verificationToken) {
         String email = jwtTokenProvider.getEmailFromToken(verificationToken);
 
@@ -228,7 +232,7 @@ public class MemberServiceImpl implements MemberService {
 
     }
 
-
+    @Transactional
     public void deleteById(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(() -> new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다."));
         memberRepository.deleteById(memberId);

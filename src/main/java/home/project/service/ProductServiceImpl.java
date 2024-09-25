@@ -6,7 +6,6 @@ import home.project.exceptions.IdNotFoundException;
 import home.project.exceptions.NoChangeException;
 import home.project.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,10 +17,11 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
+    @Transactional
     public void join(ProductDTOWithoutId productDTOWithoutId) {
 
         Long currentStock = productDTOWithoutId.getStock();
@@ -92,6 +92,7 @@ public class ProductServiceImpl implements ProductService {
         return brandList;
     }
 
+    @Transactional
     public Optional<Product> update(Product product) {
         Product existingProduct = productRepository.findById(product.getId())
                 .orElseThrow(() -> new IdNotFoundException(product.getId() + "(으)로 등록된 상품이 없습니다."));
@@ -150,11 +151,13 @@ public class ProductServiceImpl implements ProductService {
         return Optional.of(productRepository.save(existingProduct));
     }
 
+    @Transactional
     public void deleteById(Long productId) {
         productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
         productRepository.deleteById(productId);
     }
 
+    @Transactional
     public Product increaseStock(Long productId, Long stock) {
         if (stock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
@@ -166,6 +169,7 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.save(product);
     }
 
+    @Transactional
     public Product decreaseStock(Long productId, Long stock) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
         Long currentStock = product.getStock();

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
 
@@ -23,6 +23,7 @@ public class RoleServiceImpl implements RoleService {
         return Optional.ofNullable(role);
     }
 
+    @Transactional
     public Optional<Role> update(Role role) {
 
         Role existsMember = roleRepository.findById(role.getId())
@@ -34,6 +35,7 @@ public class RoleServiceImpl implements RoleService {
         return Optional.of(existsRole);
     }
 
+    @Transactional
     public void join(Role role) {
         roleRepository.save(role);
     }
