@@ -1,3 +1,4 @@
+/*
 package home.project.response;
 
 import org.springframework.http.HttpHeaders;
@@ -15,3 +16,4 @@ public class CustomListResponseEntity<T> extends ResponseEntity<CustomListRespon
         super(new CustomListResponseBody<>(new CustomListResponseBody.Result<>(totalCount, page, content), responseMessage, status.value()), new HttpHeaders(), status);
     }
 }
+*/

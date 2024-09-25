@@ -6,9 +6,11 @@ import home.project.dto.CategoryDTOWithoutId;
 import home.project.dto.ProductDTOWithoutId;
 import home.project.response.CustomListResponseEntity;
 import home.project.response.CustomOptionalResponseEntity;
+import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.service.ProductService;
 import home.project.util.CategoryCode;
+import home.project.util.PageUtil;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,14 +24,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,6 +46,7 @@ import java.util.*;
 @RestController
 public class ProductController {
 
+    private final PageUtil pageUtil;
     private final ProductService productService;
     private final ValidationCheck validationCheck;
     private final CategoryService categoryService;
@@ -64,7 +65,6 @@ public class ProductController {
     @Transactional
     @PostMapping("/create")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
 
@@ -87,10 +87,9 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
 
     })
-    @Transactional
+
     @PostMapping("/createCategory")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> createCategory(@RequestBody @Valid CategoryDTOWithoutId category, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
@@ -109,35 +108,26 @@ public class ProductController {
     })
     @GetMapping("/product")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
         Optional<Product> productOptional = productService.findById(productId);
         String successMessage = productId + "에 해당하는 상품 입니다.";
-        return new CustomOptionalResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-    })
     @GetMapping("/products")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
-    public ResponseEntity<?> findAllProduct(
-            @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults({
-                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
-            }) @ParameterObject Pageable pageable) {
+    public ResponseEntity<?> findAllProduct(@ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<Product> productPage = productService.findAll(pageable);
 
-        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
-        Page<Product> productList = productService.findAll(pageable);
-        String successMessage = "전체 상품입니다.";
-        long totalCount = productList.getTotalElements();
-        int page = productList.getNumber();
-        return new CustomListResponseEntity<>(productList.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        long totalCount = productPage.getTotalElements();
+
+        int page = productPage.getNumber();
+
+        String successMessage ="성공했습니다";
+
+        return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
@@ -151,7 +141,6 @@ public class ProductController {
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> searchProducts(
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
@@ -161,7 +150,7 @@ public class ProductController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+        pageable = pageUtil.pageable(pageable);
 
         String categoryCode = CategoryCode.generateCategoryCode(category, content);
         Page<Product> productPage = productService.findProducts(brand, categoryCode, productName, content, pageable);
@@ -170,7 +159,7 @@ public class ProductController {
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();
 
-        return new CustomListResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
 
     }
 
@@ -183,23 +172,20 @@ public class ProductController {
     })
     @GetMapping("/brands")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> brandList(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
 
-        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+        pageable = pageUtil.pageable(pageable);
         Page<Product> brandListPage = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다.";
         long totalCount = brandListPage.getTotalElements();
         int page = brandListPage.getNumber();
-        return new CustomListResponseEntity<>(brandListPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-
+        return new CustomResponseEntity<>(brandListPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Transactional
     @Operation(summary = "상품 업데이트(수정) 메서드", description = "상품 업데이트(수정) 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -215,13 +201,12 @@ public class ProductController {
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER', 'ROLE_USER')")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
         Optional<Product> productOptional = productService.update(product);
         String successMessage = "상품 정보가 수정되었습니다.";
-        return new CustomOptionalResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
     }
 
     @Transactional
@@ -236,13 +221,12 @@ public class ProductController {
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
         String name = productService.findById(productId).get().getName();
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");
-        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
+        return new CustomResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
     }
 
     @Transactional
@@ -259,11 +243,10 @@ public class ProductController {
     })
     @PutMapping("/increase_stock")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product increaseProduct = productService.increaseStock(productId, stock);
         String successMessage = increaseProduct.getName() + "상품이 " + stock + "개 증가하여 " + increaseProduct.getStock() + "개가 되었습니다.";
-        return new CustomOptionalResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
 
     }
 
@@ -282,10 +265,9 @@ public class ProductController {
     })
     @PutMapping("/decrease_stock")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
         Product decreaseProduct = productService.decreaseStock(productId, stock);
         String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다.";
-        return new CustomOptionalResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
     }
 }

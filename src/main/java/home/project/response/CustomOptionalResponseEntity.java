@@ -1,3 +1,4 @@
+/*
 package home.project.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -21,4 +22,4 @@ public class CustomOptionalResponseEntity<T> extends ResponseEntity<CustomOption
     public CustomOptionalResponseEntity(Optional<T> content, String responseMessage, HttpStatus status) {
         super(new CustomOptionalResponseBody<>(content, responseMessage, status.value()), new HttpHeaders(), status);
     }
-}
+}*/

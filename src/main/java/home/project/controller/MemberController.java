@@ -5,8 +5,10 @@ import home.project.domain.*;
 import home.project.dto.*;
 import home.project.response.CustomListResponseEntity;
 import home.project.response.CustomOptionalResponseEntity;
+import home.project.response.CustomResponseEntity;
 import home.project.service.MemberService;
 
+import home.project.util.PageUtil;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -49,6 +51,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final ValidationCheck validationCheck;
+    private final PageUtil pageUtil;
 
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
@@ -86,7 +89,6 @@ public class MemberController {
     })
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> memberInfo() {
         Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberService.memberInfo();
         Long memberId = memberDTOWithoutPw.get().getId();
@@ -106,14 +108,13 @@ public class MemberController {
     })
     @GetMapping("/members")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> findAllMember(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
 
-        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+        pageable = pageUtil.pageable(pageable);
 
         Page<Member> memberPage = memberService.findAll(pageable);
 
@@ -139,7 +140,6 @@ public class MemberController {
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> searchMembers(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "email", required = false) String email,
@@ -150,7 +150,7 @@ public class MemberController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "name", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
-        pageable = PageRequest.of(pageable.getPageNumber() - 1, pageable.getPageSize());
+        pageable = pageUtil.pageable(pageable);
 
         Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
         Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
@@ -159,7 +159,7 @@ public class MemberController {
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
         int page = pagedMemberDTOWithoutPw.getNumber();
 
-        return new CustomListResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        return new CustomResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "본인확인 메서드", description = "본인확인 메서드입니다.")
@@ -176,7 +176,6 @@ public class MemberController {
     })
     @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult) {
         CustomOptionalResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) {
@@ -190,7 +189,7 @@ public class MemberController {
         response.put("successMessage", "본인 확인이 완료되었습니다.");
         response.put("verificationToken", verificationToken);
 
-        return new CustomOptionalResponseEntity<>(Optional.of(response), "본인 확인 성공", HttpStatus.OK);
+        return new CustomResponseEntity<>(Optional.of(response), "본인 확인 성공", HttpStatus.OK);
 
     }
 
@@ -207,7 +206,6 @@ public class MemberController {
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN','ROLE_CENTER')")
     public ResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
                                           BindingResult bindingResult,
                                           @RequestParam("verificationToken") String verificationToken) {
@@ -219,7 +217,7 @@ public class MemberController {
         Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberService.update(memberDTOWithPasswordConfirm, verificationToken);
 
         String successMessage = "회원 정보가 수정되었습니다.";
-        return new CustomOptionalResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")
@@ -233,13 +231,12 @@ public class MemberController {
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_CENTER')")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
         String email = memberService.findById(memberId).get().getEmail();
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email + "(id:" + memberId + ")님의 계정이 삭제되었습니다.");
-        return new CustomOptionalResponseEntity<>(Optional.of(responseMap), "회원 삭제 성공", HttpStatus.OK);
+        return new CustomResponseEntity<>(Optional.of(responseMap), "회원 삭제 성공", HttpStatus.OK);
     }
 
 }

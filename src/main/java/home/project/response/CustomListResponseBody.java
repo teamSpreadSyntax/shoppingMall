@@ -1,3 +1,4 @@
+/*
 package home.project.response;
 
 import java.util.List;
@@ -25,3 +26,4 @@ public class CustomListResponseBody<T> {
         }
     }
 }
+*/
