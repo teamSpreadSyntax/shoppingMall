@@ -1,10 +1,12 @@
 package home.project.service;
 
 import home.project.domain.Product;
-import home.project.dto.ProductDTOWithoutId;
-import home.project.exceptions.IdNotFoundException;
-import home.project.exceptions.NoChangeException;
+import home.project.dto.requestDTO.CreateProductRequestDTO;
+import home.project.dto.requestDTO.UpdateProductRequestDTO;
+import home.project.exceptions.exception.IdNotFoundException;
+import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.ProductRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -23,30 +25,30 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void join(ProductDTOWithoutId productDTOWithoutId) {
+    public void join(CreateProductRequestDTO createProductRequestDTO) {
 
-        Long currentStock = productDTOWithoutId.getStock();
-        Long currentSoldQuantity = productDTOWithoutId.getSoldQuantity();
+        Long currentStock = createProductRequestDTO.getStock();
+        Long currentSoldQuantity = createProductRequestDTO.getSoldQuantity();
         if (currentStock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
         } else if (currentSoldQuantity < 0) {
             throw new IllegalStateException("판매량이 음수일 수 없습니다.");
         }
 
-        Product product = new Product();
-        product.setBrand(productDTOWithoutId.getBrand());
-        product.setCategory(productDTOWithoutId.getCategory());
-        product.setProductNum(productDTOWithoutId.getBrand().substring(0, 1) + productDTOWithoutId.getName().substring(0, 1) + productDTOWithoutId.getCategory());
-        product.setSoldQuantity(productDTOWithoutId.getSoldQuantity());
-        product.setName(productDTOWithoutId.getName());
-        product.setStock(productDTOWithoutId.getStock());
+        Product updateProductRequestDTO = new Product();
+        updateProductRequestDTO.setBrand(createProductRequestDTO.getBrand());
+        updateProductRequestDTO.setCategory(createProductRequestDTO.getCategory());
+        updateProductRequestDTO.setProductNum(createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory());
+        updateProductRequestDTO.setSoldQuantity(createProductRequestDTO.getSoldQuantity());
+        updateProductRequestDTO.setName(createProductRequestDTO.getName());
+        updateProductRequestDTO.setStock(createProductRequestDTO.getStock());
 
-        boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
+        boolean productNumExists = productRepository.existsByProductNum(updateProductRequestDTO.getProductNum());
         if (productNumExists) {
             throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
         }
 
-        productRepository.save(product);
+        productRepository.save(updateProductRequestDTO);
     }
 
     @Override
@@ -100,50 +102,50 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public Optional<Product> update(Product product) {
-        Product existingProduct = productRepository.findById(product.getId())
-                .orElseThrow(() -> new IdNotFoundException(product.getId() + "(으)로 등록된 상품이 없습니다."));
+    public Optional<Product> update(@Valid UpdateProductRequestDTO updateProductRequestDTO) {
+        Product existingProduct = productRepository.findById(updateProductRequestDTO.getId())
+                .orElseThrow(() -> new IdNotFoundException(updateProductRequestDTO.getId() + "(으)로 등록된 상품이 없습니다."));
 
         boolean isModified = false;
         boolean isProductNumDuplicate = false;
 
-        if (product.getBrand() != null && !Objects.equals(existingProduct.getBrand(), product.getBrand())) {
-            existingProduct.setBrand(product.getBrand());
+        if (updateProductRequestDTO.getBrand() != null && !Objects.equals(existingProduct.getBrand(), updateProductRequestDTO.getBrand())) {
+            existingProduct.setBrand(updateProductRequestDTO.getBrand());
             isModified = true;
         }
 
-        if (product.getName() != null && !Objects.equals(existingProduct.getName(), product.getName())) {
-            existingProduct.setName(product.getName());
+        if (updateProductRequestDTO.getName() != null && !Objects.equals(existingProduct.getName(), updateProductRequestDTO.getName())) {
+            existingProduct.setName(updateProductRequestDTO.getName());
             isModified = true;
         }
 
-        if (product.getSoldQuantity() != null && !Objects.equals(existingProduct.getSoldQuantity(), product.getSoldQuantity())) {
-            if (product.getSoldQuantity() < 0) {
+        if (updateProductRequestDTO.getSoldQuantity() != null && !Objects.equals(existingProduct.getSoldQuantity(), updateProductRequestDTO.getSoldQuantity())) {
+            if (updateProductRequestDTO.getSoldQuantity() < 0) {
                 throw new IllegalStateException("판매량이 음수일 수 없습니다.");
             }
-            existingProduct.setSoldQuantity(product.getSoldQuantity());
+            existingProduct.setSoldQuantity(updateProductRequestDTO.getSoldQuantity());
             isModified = true;
         }
 
-        if (product.getProductNum() != null && !Objects.equals(existingProduct.getProductNum(), product.getProductNum())) {
-            if (productRepository.existsByProductNum(product.getProductNum())) {
+        if (updateProductRequestDTO.getProductNum() != null && !Objects.equals(existingProduct.getProductNum(), updateProductRequestDTO.getProductNum())) {
+            if (productRepository.existsByProductNum(updateProductRequestDTO.getProductNum())) {
                 isProductNumDuplicate = true;
             } else {
-                existingProduct.setProductNum(product.getProductNum());
+                existingProduct.setProductNum(updateProductRequestDTO.getProductNum());
                 isModified = true;
             }
         }
 
-        if (product.getStock() != null && !Objects.equals(existingProduct.getStock(), product.getStock())) {
-            if (product.getStock() < 0) {
+        if (updateProductRequestDTO.getStock() != null && !Objects.equals(existingProduct.getStock(), updateProductRequestDTO.getStock())) {
+            if (updateProductRequestDTO.getStock() < 0) {
                 throw new IllegalStateException("재고가 음수일 수 없습니다.");
             }
-            existingProduct.setStock(product.getStock());
+            existingProduct.setStock(updateProductRequestDTO.getStock());
             isModified = true;
         }
 
-        if (product.getCategory() != null && !Objects.equals(existingProduct.getCategory(), product.getCategory())) {
-            existingProduct.setCategory(product.getCategory());
+        if (updateProductRequestDTO.getCategory() != null && !Objects.equals(existingProduct.getCategory(), updateProductRequestDTO.getCategory())) {
+            existingProduct.setCategory(updateProductRequestDTO.getCategory());
             isModified = true;
         }
 
@@ -171,24 +173,24 @@ public class ProductServiceImpl implements ProductService {
         if (stock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
         }
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
-        Long currentStock = product.getStock();
+        Product updateProductRequestDTO = productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
+        Long currentStock = updateProductRequestDTO.getStock();
         Long newStock = currentStock + stock;
-        product.setStock(newStock);
-        return productRepository.save(product);
+        updateProductRequestDTO.setStock(newStock);
+        return productRepository.save(updateProductRequestDTO);
     }
 
     @Override
     @Transactional
     public Product decreaseStock(Long productId, Long stock) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
-        Long currentStock = product.getStock();
+        Product updateProductRequestDTO = productRepository.findById(productId).orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
+        Long currentStock = updateProductRequestDTO.getStock();
         Long newStock = Math.max(currentStock - stock, 0);
         if (currentStock <= 0 || stock > currentStock) {
             throw new DataIntegrityViolationException("재고가 부족합니다.");
         }
-        product.setStock(newStock);
-        return productRepository.save(product);
+        updateProductRequestDTO.setStock(newStock);
+        return productRepository.save(updateProductRequestDTO);
     }
 
 

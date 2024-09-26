@@ -2,9 +2,14 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Role;
-import home.project.dto.*;
-import home.project.exceptions.IdNotFoundException;
-import home.project.exceptions.NoChangeException;
+import home.project.domain.RoleType;
+import home.project.dto.requestDTO.CreateMemberRequestDTO;
+import home.project.dto.requestDTO.UpdateMemberRequestDTO;
+import home.project.dto.requestDTO.VerifyUserRequestDTO;
+import home.project.dto.responseDTO.MemberResponseDTO;
+import home.project.dto.responseDTO.TokenResponseDTO;
+import home.project.exceptions.exception.IdNotFoundException;
+import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.MemberRepository;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +39,7 @@ public class MemberServiceImpl implements MemberService {
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
-    public Member convertToEntity(MemberDTOWithoutId memberDTOWithoutId) {
+    public Member convertToEntity(CreateMemberRequestDTO memberDTOWithoutId) {
         Member member = new Member();
         member.setEmail(memberDTOWithoutId.getEmail());
         member.setPassword(passwordEncoder.encode(memberDTOWithoutId.getPassword()));
@@ -45,14 +50,14 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public TokenDto join(MemberDTOWithoutId memberDTO) {
+    public TokenResponseDTO join(CreateMemberRequestDTO createMemberRequestDTO) {
 
-        if (!memberDTO.getPassword().equals(memberDTO.getPasswordConfirm())) {
+        if (!createMemberRequestDTO.getPassword().equals(createMemberRequestDTO.getPasswordConfirm())) {
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
 
-        boolean emailExists = memberRepository.existsByEmail(memberDTO.getEmail());
-        boolean phoneExists = memberRepository.existsByPhone(memberDTO.getPhone());
+        boolean emailExists = memberRepository.existsByEmail(createMemberRequestDTO.getEmail());
+        boolean phoneExists = memberRepository.existsByPhone(createMemberRequestDTO.getPhone());
         if (emailExists && phoneExists) {
             throw new DataIntegrityViolationException("이미 사용 중인 이메일과 전화번호입니다.");
         } else if (emailExists) {
@@ -61,7 +66,7 @@ public class MemberServiceImpl implements MemberService {
             throw new DataIntegrityViolationException("이미 사용 중인 전화번호입니다.");
         }
 
-        Member member = convertToEntity(memberDTO);
+        Member member = convertToEntity(createMemberRequestDTO);
         memberRepository.save(member);
         Optional<Member> memberForAddRole = findByEmail(member.getEmail());
         Long id = memberForAddRole.get().getId();
@@ -70,25 +75,25 @@ public class MemberServiceImpl implements MemberService {
         role.setId(id);
         roleService.join(role);
 
-        String savedRole = roleService.findById(id).get().getRole();
+        RoleType savedRole = roleService.findById(id).get().getRole();
 
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(memberDTO.getEmail(), memberDTO.getPassword()));
-        TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
+        TokenResponseDTO tokenResponseDTO = jwtTokenProvider.generateToken(authentication);
 
-        tokenDto.setRole(savedRole);
+        tokenResponseDTO.setRole(savedRole);
 
-        return tokenDto;
+        return tokenResponseDTO;
     }
 
     @Override
-    public Optional<MemberDTOWithoutPw> memberInfo() {
+    public Optional<MemberResponseDTO> memberInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = findByEmail(email).get().getId();
         Optional<Member> memberOptional = findById(memberId);
-        String role = roleService.findById(memberId).get().getRole();
-        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberOptional.map(member -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
-        return memberDTOWithoutPw;
+        RoleType role = roleService.findById(memberId).get().getRole();
+        Optional<MemberResponseDTO> memberResponseDTO = memberOptional.map(member -> new MemberResponseDTO(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
+        return memberResponseDTO;
     }
 
     @Override
@@ -113,15 +118,15 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Page<MemberDTOWithoutPw> convertToMemberDTOWithoutPW(Page<Member> memberPage) {
-        Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
+    public Page<MemberResponseDTO> convertToMemberDTOWithoutPW(Page<Member> memberPage) {
+        Page<MemberResponseDTO> pagedMemberDTOWithoutPw = memberPage.map(member -> {
             Long roleId = member.getId();
-            String roleName = "No Role";
+            RoleType roleName = RoleType.valueOf("No Role");
             if (roleId != null) {
                 Optional<Role> role = roleService.findById(roleId);
                 roleName = role.get().getRole();
             }
-            return new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
+            return new MemberResponseDTO(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
         });
         return pagedMemberDTOWithoutPw;
     }
@@ -133,7 +138,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public String StringBuilder(String name, String email, String phone, String role, String content, Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw) {
+    public String stringBuilder(String name, String email, String phone, String role, String content, Page<MemberResponseDTO> pagedMemberDTOWithoutPw) {
         StringBuilder searchCriteria = new StringBuilder();
         if (name != null) searchCriteria.append(name).append(", ");
         if (email != null) searchCriteria.append(email).append(", ");
@@ -157,7 +162,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public String verifyUser(String email, PasswordDTO password) {
+    public String verifyUser(String email, VerifyUserRequestDTO password) {
 
         Long id = findByEmail(email).get().getId();
         if (!passwordEncoder.matches(password.getPassword(), findByEmail(email).get().getPassword())) {
@@ -171,13 +176,13 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Optional<MemberDTOWithoutPw> update(MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, String verificationToken) {
+    public Optional<MemberResponseDTO> update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken) {
         String email = jwtTokenProvider.getEmailFromToken(verificationToken);
 
         if (email == null) {
             throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
         }
-        if (!memberDTOWithPasswordConfirm.getPassword().equals(memberDTOWithPasswordConfirm.getPasswordConfirm())) {
+        if (!updateMemberRequestDTO.getPassword().equals(updateMemberRequestDTO.getPasswordConfirm())) {
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
         }
 
@@ -185,10 +190,10 @@ public class MemberServiceImpl implements MemberService {
 
         Member member = new Member();
         member.setId(id);
-        member.setName(memberDTOWithPasswordConfirm.getName());
-        member.setPhone(memberDTOWithPasswordConfirm.getPhone());
-        member.setEmail(memberDTOWithPasswordConfirm.getEmail());
-        member.setPassword(memberDTOWithPasswordConfirm.getPassword());
+        member.setName(updateMemberRequestDTO.getName());
+        member.setPhone(updateMemberRequestDTO.getPhone());
+        member.setEmail(updateMemberRequestDTO.getEmail());
+        member.setPassword(updateMemberRequestDTO.getPassword());
         member.setRole(roleService.findById(id).get());
 
         Member existingMember = memberRepository.findById(member.getId())
@@ -237,9 +242,9 @@ public class MemberServiceImpl implements MemberService {
         }
         memberRepository.save(existingMember);
 
-        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = Optional.of(existingMember).map(memberWithoutPw -> new MemberDTOWithoutPw(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
+        Optional<MemberResponseDTO> memberResponseDTO = Optional.of(existingMember).map(memberWithoutPw -> new MemberResponseDTO(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
 
-        return memberDTOWithoutPw;
+        return memberResponseDTO;
 
     }
 

@@ -1,4 +1,4 @@
-package home.project.exceptions;
+package home.project.exceptions.exception;
 
 public class JwtAuthenticationException extends RuntimeException {
 

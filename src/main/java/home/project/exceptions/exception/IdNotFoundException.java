@@ -1,4 +1,4 @@
-package home.project.exceptions;
+package home.project.exceptions.exception;
 
 public class IdNotFoundException extends RuntimeException {
     public IdNotFoundException(String message) {

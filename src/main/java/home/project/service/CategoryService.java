@@ -1,7 +1,7 @@
 package home.project.service;
 
-import home.project.dto.CategoryDTOWithoutId;
+import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 
 public interface CategoryService {
-    void save(CategoryDTOWithoutId product);
+    void save(CreateCategoryRequestDTO createCategoryRequestDTO);
 }

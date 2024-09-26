@@ -1,5 +1,6 @@
-package home.project.dto;
+package home.project.dto.responseDTO;
 
+import home.project.domain.RoleType;
 import lombok.*;
 
 @Getter
@@ -7,10 +8,10 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TokenDto {
+public class TokenResponseDTO {
     private String grantType;
     private String accessToken;
     private String refreshToken;
-    private String role;
+    private RoleType role;
 }
 

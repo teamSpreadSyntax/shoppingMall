@@ -1,6 +1,6 @@
 package home.project.service;
 
-import home.project.dto.TokenDto;
+import home.project.dto.responseDTO.TokenResponseDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -27,7 +27,7 @@ public class JwtTokenProvider {
     private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주-30분
     private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주
     private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
-    ; // 2주 - 5분
+    // 2주 - 5분
     private final UserDetailsService userDetailsService;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, UserDetailsService userDetailsService) {
@@ -36,7 +36,7 @@ public class JwtTokenProvider {
         this.userDetailsService = userDetailsService;
     }
 
-    public TokenDto generateToken(Authentication authentication) {
+    public TokenResponseDTO generateToken(Authentication authentication) {
         String authorities = getAuthorities(authentication);
 
         long now = getNow();
@@ -83,7 +83,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public TokenDto refreshAccessToken(String refreshToken) {
+    public TokenResponseDTO refreshAccessToken(String refreshToken) {
         throwExceptionForInvalidToken(validateTokenDetail(refreshToken), "Refresh");
 
         Claims claims = parseClaims(refreshToken);
@@ -160,8 +160,8 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
     }
 
-    private static TokenDto getTokenDTO(String accessToken, String refreshToken) {
-        return TokenDto.builder()
+    private static TokenResponseDTO getTokenDTO(String accessToken, String refreshToken) {
+        return TokenResponseDTO.builder()
                 .grantType("Bearer")
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

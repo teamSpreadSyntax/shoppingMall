@@ -1,4 +1,4 @@
-package home.project.dto;
+package home.project.dto.requestDTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,7 +8,7 @@ import org.hibernate.annotations.Check;
 
 @Getter
 @Setter
-public class ProductDTOWithoutId {
+public class CreateProductRequestDTO {
 
     @NotBlank(message = "상품의 이름을 입력해주세요.")
     private String name;

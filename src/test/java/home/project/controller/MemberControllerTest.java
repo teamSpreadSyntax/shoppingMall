@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.config.SecurityConfig;
 import home.project.domain.*;
 import home.project.dto.*;
-import home.project.exceptions.IdNotFoundException;
+import home.project.exceptions.exception.IdNotFoundException;
 import home.project.response.CustomOptionalResponseBody;
 import home.project.response.CustomOptionalResponseEntity;
 import home.project.service.JwtTokenProvider;

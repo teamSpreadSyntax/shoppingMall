@@ -2,8 +2,9 @@ package home.project.controller;
 
 
 import home.project.domain.*;
-import home.project.dto.CategoryDTOWithoutId;
-import home.project.dto.ProductDTOWithoutId;
+import home.project.dto.requestDTO.CreateCategoryRequestDTO;
+import home.project.dto.requestDTO.CreateProductRequestDTO;
+import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.service.ProductService;
@@ -63,14 +64,14 @@ public class ProductController {
     @Transactional
     @PostMapping("/create")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createProduct(@RequestBody @Valid ProductDTOWithoutId productDTOWithoutId, BindingResult bindingResult) {
+    public ResponseEntity<?> createProduct(@RequestBody @Valid CreateProductRequestDTO createProductRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
 
         if (validationResponse != null) return validationResponse;
 
-        productService.join(productDTOWithoutId);
+        productService.join(createProductRequestDTO);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", productDTOWithoutId.getName() + "(이)가 등록되었습니다.");
+        responseMap.put("successMessage", createProductRequestDTO.getName() + "(이)가 등록되었습니다.");
         return new CustomResponseEntity<>(Optional.of(responseMap), "상품 등록 성공", HttpStatus.OK);
 
     }
@@ -88,12 +89,12 @@ public class ProductController {
 
     @PostMapping("/createCategory")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createCategory(@RequestBody @Valid CategoryDTOWithoutId category, BindingResult bindingResult) {
+    public ResponseEntity<?> createCategory(@RequestBody @Valid CreateCategoryRequestDTO createCategoryRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        categoryService.save(category);
+        categoryService.save(createCategoryRequestDTO);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", category.getName() + "(이)가 등록되었습니다.");
+        responseMap.put("successMessage", createCategoryRequestDTO.getName() + "(이)가 등록되었습니다.");
         return new CustomResponseEntity<>(Optional.of(responseMap), "상품 등록 성공", HttpStatus.OK);
     }
 
@@ -199,10 +200,10 @@ public class ProductController {
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> updateProduct(@RequestBody @Valid Product product, BindingResult bindingResult) {
+    public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequestDTO updateProductRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        Optional<Product> productOptional = productService.update(product);
+        Optional<Product> productOptional = productService.update(updateProductRequestDTO);
         String successMessage = "상품 정보가 수정되었습니다.";
         return new CustomResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
     }

@@ -1,4 +1,4 @@
-package home.project.dto;
+package home.project.dto.requestDTO;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CategoryDTOWithoutId {
+public class CreateCategoryRequestDTO {
 
     @NotNull(message = "코드를 입력해주세요.")
     private String code;

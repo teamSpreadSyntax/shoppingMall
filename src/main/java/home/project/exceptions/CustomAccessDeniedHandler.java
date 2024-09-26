@@ -1,7 +1,7 @@
 package home.project.exceptions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.project.response.CustomOptionalResponseBody;
+import home.project.response.CustomResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,7 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
-        CustomOptionalResponseBody<?> responseBody = new CustomOptionalResponseBody<>(
+        CustomResponseBody<?> responseBody = new CustomResponseBody<>(
                 Optional.of(Map.of("errorMessage", "접근 권한이 없습니다.")),
                 "접근 권한을 확인해주세요.",
                 HttpStatus.FORBIDDEN.value()

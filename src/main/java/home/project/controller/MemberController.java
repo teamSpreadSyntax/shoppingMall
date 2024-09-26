@@ -2,7 +2,11 @@ package home.project.controller;
 
 
 import home.project.domain.*;
-import home.project.dto.*;
+import home.project.dto.requestDTO.CreateMemberRequestDTO;
+import home.project.dto.requestDTO.UpdateMemberRequestDTO;
+import home.project.dto.requestDTO.VerifyUserRequestDTO;
+import home.project.dto.responseDTO.MemberResponseDTO;
+import home.project.dto.responseDTO.TokenResponseDTO;
 import home.project.response.CustomResponseEntity;
 import home.project.service.MemberService;
 
@@ -20,14 +24,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
@@ -62,16 +64,16 @@ public class MemberController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @PostMapping("/join")
-    public ResponseEntity<?> createMember(@RequestBody @Valid MemberDTOWithoutId memberDTO, BindingResult bindingResult) {
+    public ResponseEntity<?> createMember(@RequestBody @Valid CreateMemberRequestDTO createMemberRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
-        TokenDto tokenDto = memberService.join(memberDTO);
+        TokenResponseDTO tokenResponseDTO = memberService.join(createMemberRequestDTO);
 
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("accessToken", tokenDto.getAccessToken());
-        responseMap.put("refreshToken", tokenDto.getRefreshToken());
-        responseMap.put("role", tokenDto.getRole());
+        responseMap.put("accessToken", tokenResponseDTO.getAccessToken());
+        responseMap.put("refreshToken", tokenResponseDTO.getRefreshToken());
+        responseMap.put("role", String.valueOf(tokenResponseDTO.getRole()));
         responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
         return new CustomResponseEntity<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK);
     }
@@ -88,10 +90,10 @@ public class MemberController {
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> memberInfo() {
-        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberService.memberInfo();
-        Long memberId = memberDTOWithoutPw.get().getId();
+        Optional<MemberResponseDTO> memberResponseDTO = memberService.memberInfo();
+        Long memberId = memberResponseDTO.get().getId();
         String successMessage = memberId + "(으)로 가입된 회원정보입니다";
-        return new CustomResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(memberResponseDTO, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
@@ -116,7 +118,7 @@ public class MemberController {
 
         Page<Member> memberPage = memberService.findAll(pageable);
 
-        Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
+        Page<MemberResponseDTO> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
 
         String successMessage = "전체 회원입니다.";
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
@@ -151,8 +153,8 @@ public class MemberController {
         pageable = pageUtil.pageable(pageable);
 
         Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
-        Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
-        String successMessage = memberService.StringBuilder(name, email, phone, role, content, pagedMemberDTOWithoutPw);
+        Page<MemberResponseDTO> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
+        String successMessage = memberService.stringBuilder(name, email, phone, role, content, pagedMemberDTOWithoutPw);
 
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
         int page = pagedMemberDTOWithoutPw.getNumber();
@@ -174,7 +176,7 @@ public class MemberController {
     })
     @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> verifyUser(@RequestBody @Valid PasswordDTO password, BindingResult bindingResult) {
+    public ResponseEntity<?> verifyUser(@RequestBody @Valid VerifyUserRequestDTO password, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) {
             return validationResponse;
@@ -204,7 +206,7 @@ public class MemberController {
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> updateMember(@RequestBody @Valid MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm,
+    public ResponseEntity<?> updateMember(@RequestBody @Valid UpdateMemberRequestDTO updateMemberRequestDTO,
                                           BindingResult bindingResult,
                                           @RequestParam("verificationToken") String verificationToken) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
@@ -212,10 +214,10 @@ public class MemberController {
             return validationResponse;
         }
 
-        Optional<MemberDTOWithoutPw> memberDTOWithoutPw = memberService.update(memberDTOWithPasswordConfirm, verificationToken);
+        Optional<MemberResponseDTO> memberResponseDTO = memberService.update(updateMemberRequestDTO, verificationToken);
 
         String successMessage = "회원 정보가 수정되었습니다.";
-        return new CustomResponseEntity<>(memberDTOWithoutPw, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(memberResponseDTO, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")

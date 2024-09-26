@@ -1,7 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Role;
-import home.project.exceptions.IdNotFoundException;
+import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -2,26 +2,27 @@ package home.project.service;
 
 
 import home.project.domain.Role;
-import home.project.dto.RoleDTOWithMemberName;
-import home.project.dto.TokenDto;
-import home.project.dto.UserDetailsDTO;
+import home.project.domain.RoleType;
+import home.project.dto.responseDTO.RoleResponseDTO;
+import home.project.dto.responseDTO.TokenResponseDTO;
+import home.project.dto.requestDTO.LoginRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
 public interface AuthService {
-    TokenDto login(UserDetailsDTO userDetailsDTO);
+    TokenResponseDTO login(LoginRequestDTO loginRequestDTO);
 
-    TokenDto refreshToken(String refreshToken);
+    TokenResponseDTO refreshToken(String refreshToken);
 
     String logout(Long id);
 
-    Optional<Role> addAuthority(Long id, String authority);
+    Optional<Role> addAuthority(Long id, RoleType authority);
 
-    String RoleMessage(Long id, String authority);
+    String roleMessage(Long id, RoleType authority);
 
-    Page<RoleDTOWithMemberName> checkAuthority(Pageable pageable);
+    Page<RoleResponseDTO> checkAuthority(Pageable pageable);
 
-    TokenDto verifyUser(String accessToken, String refreshToken);
+    TokenResponseDTO verifyUser(String accessToken, String refreshToken);
 }

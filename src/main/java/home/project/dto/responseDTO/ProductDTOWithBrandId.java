@@ -1,4 +1,5 @@
-package home.project.dto;
+/*
+package home.project.dto.responseDTO;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -16,3 +17,4 @@ public class ProductDTOWithBrandId {
     }
 
 }
+*/

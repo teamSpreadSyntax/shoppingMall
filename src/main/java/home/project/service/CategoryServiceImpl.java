@@ -1,7 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Category;
-import home.project.dto.CategoryDTOWithoutId;
+import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -12,20 +12,20 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public void save(CategoryDTOWithoutId categoryDTO) {
+    public void save(CreateCategoryRequestDTO createCategoryRequestDTO) {
         Category category = new Category();
-        category.setCode(categoryDTO.getCode());
-        category.setName(categoryDTO.getName());
-        category.setLevel(categoryDTO.getLevel());
+        category.setCode(createCategoryRequestDTO.getCode());
+        category.setName(createCategoryRequestDTO.getName());
+        category.setLevel(createCategoryRequestDTO.getLevel());
 
-        if (categoryDTO.getLevel() <= 0) {
+        if (createCategoryRequestDTO.getLevel() <= 0) {
             throw new IllegalArgumentException("Category level must be greater than 0");
-        } else if (categoryDTO.getLevel() == 1) {
+        } else if (createCategoryRequestDTO.getLevel() == 1) {
             // 최상위 카테고리인 경우 부모를 null로 설정
             category.setParent(null);
         } else {
             // 레벨이 2 이상인 경우 부모 카테고리를 찾아 설정
-            String parentCode = categoryDTO.getCode().substring(0, categoryDTO.getCode().length() - 2);
+            String parentCode = createCategoryRequestDTO.getCode().substring(0, createCategoryRequestDTO.getCode().length() - 2);
             Category parentCategory = categoryRepository.findByCode(parentCode);
             if (parentCategory == null) {
                 throw new IllegalArgumentException("Parent category not found for code: " + parentCode);

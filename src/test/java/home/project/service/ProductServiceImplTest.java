@@ -2,8 +2,8 @@
 //
 //import home.project.domain.Member;
 //import home.project.domain.Product;
-//import home.project.exceptions.IdNotFoundException;
-//import home.project.exceptions.NoChangeException;
+//import home.project.exceptions.exception.IdNotFoundException;
+//import home.project.exceptions.exception.NoChangeException;
 //import home.project.repository.ProductRepository;
 //import org.assertj.core.api.Assertions;
 //import org.junit.jupiter.api.BeforeEach;

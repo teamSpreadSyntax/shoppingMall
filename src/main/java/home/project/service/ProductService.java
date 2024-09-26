@@ -1,7 +1,9 @@
 package home.project.service;
 
 import home.project.domain.Product;
-import home.project.dto.ProductDTOWithoutId;
+import home.project.dto.requestDTO.CreateProductRequestDTO;
+import home.project.dto.requestDTO.UpdateProductRequestDTO;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -10,7 +12,7 @@ import java.util.Optional;
 
 public interface ProductService {
 
-    void join(ProductDTOWithoutId productDTOWithoutId);
+    void join(CreateProductRequestDTO createProductRequestDTO);
 
     Optional<Product> findById(Long productId);
 
@@ -20,12 +22,9 @@ public interface ProductService {
 
     String stringBuilder(String brand, String category, String productName, String content, Page<Product> productPage);
 
-/*
-    Page<Product> brandList(Pageable pageable);
-*/
 Page<Product> brandList(Pageable pageable);
 
-    Optional<Product> update(Product product);
+    Optional<Product> update(@Valid UpdateProductRequestDTO updateProductRequestDTO);
 
     void deleteById(Long productId);
 

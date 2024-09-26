@@ -1,4 +1,4 @@
-package home.project.exceptions;
+package home.project.exceptions.exception;
 
 public class PageNotFoundException extends RuntimeException {
     public PageNotFoundException(String message) {

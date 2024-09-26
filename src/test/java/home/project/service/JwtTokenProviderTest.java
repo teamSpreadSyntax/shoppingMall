@@ -1,7 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.dto.TokenDto;
+import home.project.dto.responseDTO.TokenResponseDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -36,7 +36,7 @@ class JwtTokenProviderTest {
 
     private Authentication authentication;
 
-    private TokenDto tokenDto;
+    private TokenResponseDTO tokenDto;
 
     private Member member;
 
@@ -228,7 +228,7 @@ class JwtTokenProviderTest {
             UserDetails userDetails = new User("user@user.com", "password", authentication.getAuthorities());
             when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
 
-            TokenDto newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
+            TokenResponseDTO newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
 
             assertNotNull(newTokenDto);
             assertNotNull(newTokenDto.getAccessToken());

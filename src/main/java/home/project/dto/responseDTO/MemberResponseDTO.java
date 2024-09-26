@@ -1,18 +1,19 @@
-package home.project.dto;
+package home.project.dto.responseDTO;
 
+import home.project.domain.RoleType;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
-public class MemberDTOWithoutPw {
+public class MemberResponseDTO {
     private Long id;
     private String email;
     private String name;
     private String phone;
-    private String role;
+    private RoleType role;
 
-    public MemberDTOWithoutPw(Long id, String email, String name, String phone, String role) {
+    public MemberResponseDTO(Long id, String email, String name, String phone, RoleType role) {
         this.id = id;
         this.email = email;
         this.name = name;
