@@ -12,23 +12,15 @@ import java.util.Optional;
 public class CustomResponseBody<T> {
 
 
-        @JsonSerialize(using = CustomOptionalSerializer.class)
-        public Optional<T> optionalResult;
-        public ListResult<T> listResult;
-        public String responseMessage;
-        public int status;
+    private Object result;
+    private String responseMessage;
+    private int status;
 
-        public CustomResponseBody(ListResult<T> listResult, String responseMessage, int status) {
-            this.listResult = listResult;
-            this.responseMessage = responseMessage;
-            this.status = status;
-        }
-
-        public CustomResponseBody(Optional<T> optionalResult, String responseMessage, int status) {
-            this.optionalResult = optionalResult;
-            this.responseMessage = responseMessage;
-            this.status = status;
-        }
+    public CustomResponseBody(Object result, String responseMessage, int status) {
+        this.result = result;
+        this.responseMessage = responseMessage;
+        this.status = status;
+    }
 
 
     public static class ListResult<T> {

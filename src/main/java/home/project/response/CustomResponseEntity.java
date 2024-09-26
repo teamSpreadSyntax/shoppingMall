@@ -17,17 +17,17 @@ public class CustomResponseEntity<T> extends ResponseEntity<CustomResponseBody<T
         ), new HttpHeaders(), status);
     }
 
-    public CustomResponseEntity(Optional<T> content, String responseMessage, HttpStatus status) {
-        super(new CustomResponseBody<>(
-                content,
-                responseMessage,
-                status.value()
-        ), new HttpHeaders(), status);
-    }
+//    public CustomResponseEntity(Optional<T> content, String responseMessage, HttpStatus status) {
+//        super(new CustomResponseBody<>(
+//                content,
+//                responseMessage,
+//                status.value()
+//        ), new HttpHeaders(), status);
+//    }
 
     public CustomResponseEntity(T content, String responseMessage, HttpStatus status) {
         super(new CustomResponseBody<>(
-                Optional.ofNullable(content),
+                content,
                 responseMessage,
                 status.value()
         ), new HttpHeaders(), status);

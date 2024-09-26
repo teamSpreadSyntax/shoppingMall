@@ -119,6 +119,31 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
+        // 카테고리 생성 성공 응답 스키마
+        Schema<?> categoryCreateSuccessResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("successMessage", new Schema<>().type("string")))
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(200));
+
+// 카테고리 스키마
+        Schema<?> categorySchema = new ObjectSchema()
+                .addProperty("id", new Schema<>().type("integer").format("int64"))
+                .addProperty("code", new Schema<>().type("string"))
+                .addProperty("name", new Schema<>().type("string"))
+                .addProperty("level", new Schema<>().type("integer"))
+                .addProperty("parent", new Schema<>().type("object"))
+                .addProperty("children", new ArraySchema().items(new Schema<>().type("object")));
+
+// 페이지네이션된 카테고리 목록 스키마
+        Schema<?> pagedCategoryListResponseSchema = new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("totalCount", new Schema<>().type("integer").format("int64"))
+                        .addProperty("page", new Schema<>().type("integer"))
+                        .addProperty("content", new ArraySchema().items(categorySchema)))
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(200));
+
         //변경 정보 없음 스키마
         Schema<?> nochangeResponseSchema = new ObjectSchema()
                 .addProperty("result", new ObjectSchema()
@@ -287,6 +312,9 @@ public class OpenApiConfig {
                         .addSchemas("NotFoundResponseSchema", notFoundResponseSchema)
                         .addSchemas("ConflictResponseSchema", conflictResponseSchema)
                         .addSchemas("InternalServerErrorResponseSchema", internalServerErrorResponseSchema)
+                        .addSchemas("CategoryCreateSuccessResponseSchema", categoryCreateSuccessResponseSchema)
+                        .addSchemas("CategorySchema", categorySchema)
+                        .addSchemas("PagedCategoryListResponseSchema", pagedCategoryListResponseSchema)
                         .addSecuritySchemes("bearerAuth", apiKey))
                 .addSecurityItem(securityRequirement);
     }
