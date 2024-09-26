@@ -33,6 +33,7 @@ public class MemberServiceImpl implements MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Override
     public Member convertToEntity(MemberDTOWithoutId memberDTOWithoutId) {
         Member member = new Member();
         member.setEmail(memberDTOWithoutId.getEmail());
@@ -42,6 +43,7 @@ public class MemberServiceImpl implements MemberService {
         return member;
     }
 
+    @Override
     @Transactional
     public TokenDto join(MemberDTOWithoutId memberDTO) {
 
@@ -78,6 +80,7 @@ public class MemberServiceImpl implements MemberService {
         return tokenDto;
     }
 
+    @Override
     public Optional<MemberDTOWithoutPw> memberInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -88,6 +91,7 @@ public class MemberServiceImpl implements MemberService {
         return memberDTOWithoutPw;
     }
 
+    @Override
     public Optional<Member> findById(Long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(() -> {
             throw new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다.");
@@ -95,6 +99,7 @@ public class MemberServiceImpl implements MemberService {
         return Optional.ofNullable(member);
     }
 
+    @Override
     public Optional<Member> findByEmail(String email) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
             throw new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다.");
@@ -102,10 +107,12 @@ public class MemberServiceImpl implements MemberService {
         return Optional.ofNullable(member);
     }
 
+    @Override
     public Page<Member> findAll(Pageable pageable) {
         return memberRepository.findAll(pageable);
     }
 
+    @Override
     public Page<MemberDTOWithoutPw> convertToMemberDTOWithoutPW(Page<Member> memberPage) {
         Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw = memberPage.map(member -> {
             Long roleId = member.getId();
@@ -119,11 +126,13 @@ public class MemberServiceImpl implements MemberService {
         return pagedMemberDTOWithoutPw;
     }
 
+    @Override
     public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
         Page<Member> memberPage = memberRepository.findMembers(name, email, phone, role, content, pageable);
         return memberPage;
     }
 
+    @Override
     public String StringBuilder(String name, String email, String phone, String role, String content, Page<MemberDTOWithoutPw> pagedMemberDTOWithoutPw) {
         StringBuilder searchCriteria = new StringBuilder();
         if (name != null) searchCriteria.append(name).append(", ");
@@ -147,6 +156,7 @@ public class MemberServiceImpl implements MemberService {
         return successMessage;
     }
 
+    @Override
     public String verifyUser(String email, PasswordDTO password) {
 
         Long id = findByEmail(email).get().getId();
@@ -159,6 +169,7 @@ public class MemberServiceImpl implements MemberService {
         return verificationToken;
     }
 
+    @Override
     @Transactional
     public Optional<MemberDTOWithoutPw> update(MemberDTOWithPasswordConfirm memberDTOWithPasswordConfirm, String verificationToken) {
         String email = jwtTokenProvider.getEmailFromToken(verificationToken);
@@ -232,6 +243,7 @@ public class MemberServiceImpl implements MemberService {
 
     }
 
+    @Override
     @Transactional
     public void deleteById(Long memberId) {
         memberRepository.findById(memberId).orElseThrow(() -> new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다."));

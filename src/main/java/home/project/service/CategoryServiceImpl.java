@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
+    @Override
     public void save(CategoryDTOWithoutId categoryDTO) {
         Category category = new Category();
         category.setCode(categoryDTO.getCode());

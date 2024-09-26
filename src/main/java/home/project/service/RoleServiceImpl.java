@@ -15,7 +15,7 @@ import java.util.Optional;
 public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
 
-
+    @Override
     public Optional<Role> findById(Long memberId) {
         Role role = roleRepository.findById(memberId).orElseThrow(() -> {
             throw new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다.");
@@ -23,6 +23,7 @@ public class RoleServiceImpl implements RoleService {
         return Optional.ofNullable(role);
     }
 
+    @Override
     @Transactional
     public Optional<Role> update(Role role) {
 
@@ -35,6 +36,7 @@ public class RoleServiceImpl implements RoleService {
         return Optional.of(existsRole);
     }
 
+    @Override
     @Transactional
     public void join(Role role) {
         roleRepository.save(role);
