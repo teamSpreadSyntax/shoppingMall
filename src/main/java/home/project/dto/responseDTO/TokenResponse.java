@@ -12,7 +12,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class TokenResponseDTO {
+public class TokenResponse {
 
     /**
      * 인증 부여 유형입니다. 일반적으로 "Bearer"가 사용됩니다.

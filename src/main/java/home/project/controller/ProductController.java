@@ -97,33 +97,7 @@ public class ProductController {
     }
 
 
-    @Operation(summary = "전체 카테고리 조회 메서드", description = "전체 카테고리 조회 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCategoryListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-    })
-    @GetMapping("/categories")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findAllCategory(
-            @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults({
-            @SortDefault(sort = "category_code", direction = Sort.Direction.ASC)
-            }) @ParameterObject Pageable pageable) {
 
-        pageable = pageUtil.pageable(pageable);
-
-        Page<Category> categoryPage = categoryService.findAllCategory(pageable);
-
-        long totalCount = categoryPage.getTotalElements();
-
-        int page = categoryPage.getNumber();
-
-        String successMessage ="전체 카테고리입니다.";
-
-        return new CustomResponseEntity<>(categoryPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-    }
 
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")
     @ApiResponses(value = {

@@ -1,8 +1,8 @@
 package home.project.controller;
 
 import home.project.domain.*;
-import home.project.dto.responseDTO.RoleResponseDTO;
-import home.project.dto.responseDTO.TokenResponseDTO;
+import home.project.dto.responseDTO.RoleResponse;
+import home.project.dto.responseDTO.TokenResponse;
 import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.response.CustomResponseEntity;
 import home.project.service.*;
@@ -60,11 +60,11 @@ public class AuthController {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
-        TokenResponseDTO tokenResponseDTO = authService.login(loginRequestDTO);
+        TokenResponse TokenResponse = authService.login(loginRequestDTO);
 
         String successMessage = loginRequestDTO.getEmail() + "(으)로 로그인에 성공했습니다.";
 
-        return new CustomResponseEntity<>(Optional.of(tokenResponseDTO), successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(Optional.of(TokenResponse), successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "토큰 갱신 메서드", description = "만료된 액세스 토큰과 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급받는 메서드입니다.")
@@ -78,7 +78,7 @@ public class AuthController {
     public ResponseEntity<?> refreshToken(
             @RequestParam(value = "refreshToken", required = true) String refreshToken) {
 
-        TokenResponseDTO newTokenDto = authService.refreshToken(refreshToken);
+        TokenResponse newTokenDto = authService.refreshToken(refreshToken);
 
         return new CustomResponseEntity<>(Optional.of(newTokenDto), "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
     }
@@ -138,7 +138,7 @@ public class AuthController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
         String successMessage = "전체 회원별 권한 목록입니다.";
-        Page<RoleResponseDTO> rolesWithMemberNamesPage = authService.checkAuthority(pageable);
+        Page<RoleResponse> rolesWithMemberNamesPage = authService.checkAuthority(pageable);
         long totalCount = rolesWithMemberNamesPage.getTotalElements();
         int page = rolesWithMemberNamesPage.getNumber();
         return new CustomResponseEntity<>(rolesWithMemberNamesPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
@@ -155,7 +155,7 @@ public class AuthController {
     public ResponseEntity<?> verifyUser(
             @RequestParam(value = "accessToken", required = true) String accessToken,
             @RequestParam(value = "refreshToken", required = true) String refreshToken) {
-        TokenResponseDTO newTokenDto = authService.verifyUser(accessToken, refreshToken);
+        TokenResponse newTokenDto = authService.verifyUser(accessToken, refreshToken);
         return new CustomResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증되었습니다.", HttpStatus.OK);
     }
 

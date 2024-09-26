@@ -1,6 +1,6 @@
 package home.project.service;
 
-import home.project.dto.responseDTO.TokenResponseDTO;
+import home.project.dto.responseDTO.TokenResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -36,7 +36,7 @@ public class JwtTokenProvider {
         this.userDetailsService = userDetailsService;
     }
 
-    public TokenResponseDTO generateToken(Authentication authentication) {
+    public TokenResponse generateToken(Authentication authentication) {
         String authorities = getAuthorities(authentication);
 
         long now = getNow();
@@ -83,7 +83,7 @@ public class JwtTokenProvider {
         }
     }
 
-    public TokenResponseDTO refreshAccessToken(String refreshToken) {
+    public TokenResponse refreshAccessToken(String refreshToken) {
         throwExceptionForInvalidToken(validateTokenDetail(refreshToken), "Refresh");
 
         Claims claims = parseClaims(refreshToken);
@@ -160,8 +160,8 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
     }
 
-    private static TokenResponseDTO getTokenDTO(String accessToken, String refreshToken) {
-        return TokenResponseDTO.builder()
+    private static TokenResponse getTokenDTO(String accessToken, String refreshToken) {
+        return TokenResponse.builder()
                 .grantType("Bearer")
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

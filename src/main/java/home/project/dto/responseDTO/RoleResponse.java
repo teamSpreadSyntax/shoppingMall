@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class RoleResponseDTO {
+public class RoleResponse {
 
     /**
      * 역할의 고유 식별자입니다.
@@ -34,7 +34,7 @@ public class RoleResponseDTO {
      * @param role 사용자의 권한 유형
      * @param name 역할과 연관된 사용자의 이름
      */
-    public RoleResponseDTO(Long id, RoleType role, String name) {
+    public RoleResponse(Long id, RoleType role, String name) {
         this.id = id;
         this.name = name;
         this.role = role;

@@ -5,8 +5,8 @@ import home.project.domain.*;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
-import home.project.dto.responseDTO.MemberResponseDTO;
-import home.project.dto.responseDTO.TokenResponseDTO;
+import home.project.dto.responseDTO.MemberResponse;
+import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.MemberService;
 
@@ -68,12 +68,12 @@ public class MemberController {
         CustomResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
-        TokenResponseDTO tokenResponseDTO = memberService.join(createMemberRequestDTO);
+        TokenResponse TokenResponse = memberService.join(createMemberRequestDTO);
 
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("accessToken", tokenResponseDTO.getAccessToken());
-        responseMap.put("refreshToken", tokenResponseDTO.getRefreshToken());
-        responseMap.put("role", String.valueOf(tokenResponseDTO.getRole()));
+        responseMap.put("accessToken", TokenResponse.getAccessToken());
+        responseMap.put("refreshToken", TokenResponse.getRefreshToken());
+        responseMap.put("role", String.valueOf(TokenResponse.getRole()));
         responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
         return new CustomResponseEntity<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK);
     }
@@ -90,10 +90,10 @@ public class MemberController {
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> memberInfo() {
-        Optional<MemberResponseDTO> memberResponseDTO = memberService.memberInfo();
-        Long memberId = memberResponseDTO.get().getId();
+        Optional<MemberResponse> MemberResponse = memberService.memberInfo();
+        Long memberId = MemberResponse.get().getId();
         String successMessage = memberId + "(으)로 가입된 회원정보입니다";
-        return new CustomResponseEntity<>(memberResponseDTO, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(MemberResponse, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
@@ -118,7 +118,7 @@ public class MemberController {
 
         Page<Member> memberPage = memberService.findAll(pageable);
 
-        Page<MemberResponseDTO> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
+        Page<MemberResponse> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
 
         String successMessage = "전체 회원입니다.";
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
@@ -153,7 +153,7 @@ public class MemberController {
         pageable = pageUtil.pageable(pageable);
 
         Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
-        Page<MemberResponseDTO> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
+        Page<MemberResponse> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
         String successMessage = memberService.stringBuilder(name, email, phone, role, content, pagedMemberDTOWithoutPw);
 
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
@@ -214,10 +214,10 @@ public class MemberController {
             return validationResponse;
         }
 
-        Optional<MemberResponseDTO> memberResponseDTO = memberService.update(updateMemberRequestDTO, verificationToken);
+        Optional<MemberResponse> MemberResponse = memberService.update(updateMemberRequestDTO, verificationToken);
 
         String successMessage = "회원 정보가 수정되었습니다.";
-        return new CustomResponseEntity<>(memberResponseDTO, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(MemberResponse, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")

@@ -6,8 +6,8 @@ import home.project.domain.RoleType;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
-import home.project.dto.responseDTO.MemberResponseDTO;
-import home.project.dto.responseDTO.TokenResponseDTO;
+import home.project.dto.responseDTO.MemberResponse;
+import home.project.dto.responseDTO.TokenResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.MemberRepository;
@@ -50,7 +50,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public TokenResponseDTO join(CreateMemberRequestDTO createMemberRequestDTO) {
+    public TokenResponse join(CreateMemberRequestDTO createMemberRequestDTO) {
 
         if (!createMemberRequestDTO.getPassword().equals(createMemberRequestDTO.getPasswordConfirm())) {
             throw new IllegalStateException("비밀번호와 비밀번호 확인이 일치하지 않습니다.");
@@ -78,22 +78,22 @@ public class MemberServiceImpl implements MemberService {
         RoleType savedRole = roleService.findById(id).get().getRole();
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
-        TokenResponseDTO tokenResponseDTO = jwtTokenProvider.generateToken(authentication);
+        TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
 
-        tokenResponseDTO.setRole(savedRole);
+        TokenResponse.setRole(savedRole);
 
-        return tokenResponseDTO;
+        return TokenResponse;
     }
 
     @Override
-    public Optional<MemberResponseDTO> memberInfo() {
+    public Optional<MemberResponse> memberInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = findByEmail(email).get().getId();
         Optional<Member> memberOptional = findById(memberId);
         RoleType role = roleService.findById(memberId).get().getRole();
-        Optional<MemberResponseDTO> memberResponseDTO = memberOptional.map(member -> new MemberResponseDTO(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
-        return memberResponseDTO;
+        Optional<MemberResponse> MemberResponse = memberOptional.map(member -> new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
+        return MemberResponse;
     }
 
     @Override
@@ -118,15 +118,15 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Page<MemberResponseDTO> convertToMemberDTOWithoutPW(Page<Member> memberPage) {
-        Page<MemberResponseDTO> pagedMemberDTOWithoutPw = memberPage.map(member -> {
+    public Page<MemberResponse> convertToMemberDTOWithoutPW(Page<Member> memberPage) {
+        Page<MemberResponse> pagedMemberDTOWithoutPw = memberPage.map(member -> {
             Long roleId = member.getId();
             RoleType roleName = RoleType.valueOf("No Role");
             if (roleId != null) {
                 Optional<Role> role = roleService.findById(roleId);
                 roleName = role.get().getRole();
             }
-            return new MemberResponseDTO(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
+            return new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
         });
         return pagedMemberDTOWithoutPw;
     }
@@ -138,7 +138,7 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public String stringBuilder(String name, String email, String phone, String role, String content, Page<MemberResponseDTO> pagedMemberDTOWithoutPw) {
+    public String stringBuilder(String name, String email, String phone, String role, String content, Page<MemberResponse> pagedMemberDTOWithoutPw) {
         StringBuilder searchCriteria = new StringBuilder();
         if (name != null) searchCriteria.append(name).append(", ");
         if (email != null) searchCriteria.append(email).append(", ");
@@ -176,7 +176,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public Optional<MemberResponseDTO> update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken) {
+    public Optional<MemberResponse> update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken) {
         String email = jwtTokenProvider.getEmailFromToken(verificationToken);
 
         if (email == null) {
@@ -242,9 +242,9 @@ public class MemberServiceImpl implements MemberService {
         }
         memberRepository.save(existingMember);
 
-        Optional<MemberResponseDTO> memberResponseDTO = Optional.of(existingMember).map(memberWithoutPw -> new MemberResponseDTO(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
+        Optional<MemberResponse> MemberResponse = Optional.of(existingMember).map(memberWithoutPw -> new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
 
-        return memberResponseDTO;
+        return MemberResponse;
 
     }
 

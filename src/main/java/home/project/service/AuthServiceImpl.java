@@ -3,8 +3,8 @@ package home.project.service;
 import home.project.domain.Member;
 import home.project.domain.Role;
 import home.project.domain.RoleType;
-import home.project.dto.responseDTO.RoleResponseDTO;
-import home.project.dto.responseDTO.TokenResponseDTO;
+import home.project.dto.responseDTO.RoleResponse;
+import home.project.dto.responseDTO.TokenResponse;
 import home.project.dto.requestDTO.LoginRequestDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,23 +36,23 @@ public class AuthServiceImpl implements AuthService {
     private final RoleService roleService;
 
     @Override
-    public TokenResponseDTO login(LoginRequestDTO loginRequestDTO) {
+    public TokenResponse login(LoginRequestDTO loginRequestDTO) {
         UserDetails member = userDetailsService.loadUserByUsername(loginRequestDTO.getEmail());
         if (!passwordEncoder.matches(loginRequestDTO.getPassword(), member.getPassword())) {
             throw new BadCredentialsException("비밀번호를 확인해주세요.");
         }
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword()));
-        TokenResponseDTO tokenResponseDTO = jwtTokenProvider.generateToken(authentication);
+        TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
 
         Long id = memberService.findByEmail(loginRequestDTO.getEmail()).get().getId();
         RoleType role = roleService.findById(id).get().getRole();
-        tokenResponseDTO.setRole(role);
-        return tokenResponseDTO;
+        TokenResponse.setRole(role);
+        return TokenResponse;
     }
 
     @Override
-    public TokenResponseDTO refreshToken(String refreshToken) {
-        TokenResponseDTO newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
+    public TokenResponse refreshToken(String refreshToken) {
+        TokenResponse newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
 
         String email = jwtTokenProvider.getEmailFromToken(newTokenDto.getAccessToken());
         Optional<Member> member = memberService.findByEmail(email);
@@ -104,17 +104,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public Page<RoleResponseDTO> checkAuthority(Pageable pageable) {
+    public Page<RoleResponse> checkAuthority(Pageable pageable) {
         Page<Member> memberPage = memberService.findAll(pageable);
-        Page<RoleResponseDTO> rolesWithMemberNamesPage = memberPage.map(member -> {
+        Page<RoleResponse> rolesWithMemberNamesPage = memberPage.map(member -> {
             RoleType role = roleService.findById(member.getId()).get().getRole();
-            return new RoleResponseDTO(member.getId(), role, member.getName());
+            return new RoleResponse(member.getId(), role, member.getName());
         });
         return rolesWithMemberNamesPage;
     }
 
     @Override
-    public TokenResponseDTO verifyUser(String accessToken, String refreshToken) {
+    public TokenResponse verifyUser(String accessToken, String refreshToken) {
         jwtTokenProvider.validateTokenResult(accessToken, refreshToken);
         String email = jwtTokenProvider.getEmailFromToken(accessToken);
         Optional<Member> member = memberService.findByEmail(email);
@@ -123,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
         Optional<Role> roleOptional = roleService.findById(id);
 
         RoleType role = roleOptional.get().getRole();
-        TokenResponseDTO newTokenDto = new TokenResponseDTO();
+        TokenResponse newTokenDto = new TokenResponse();
         newTokenDto.setRole(role);
         newTokenDto.setAccessToken(accessToken);
         newTokenDto.setRefreshToken(refreshToken);

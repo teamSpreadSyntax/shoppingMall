@@ -10,7 +10,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class MemberResponseDTO {
+public class MemberResponse {
 
     /**
      * 회원의 고유 식별자입니다.
@@ -46,7 +46,7 @@ public class MemberResponseDTO {
      * @param phone 회원의 전화번호
      * @param role  회원의 권한 유형
      */
-    public MemberResponseDTO(Long id, String email, String name, String phone, RoleType role) {
+    public MemberResponse(Long id, String email, String name, String phone, RoleType role) {
         this.id = id;
         this.email = email;
         this.name = name;
