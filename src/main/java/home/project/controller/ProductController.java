@@ -141,9 +141,21 @@ public class ProductController {
     }
 
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
-    @GetMapping("/products")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("products")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findAllProduct(@ParameterObject Pageable pageable) {
+    public ResponseEntity<?> findAllProduct(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
         Page<Product> productPage = productService.findAll(pageable);
 
@@ -151,7 +163,7 @@ public class ProductController {
 
         int page = productPage.getNumber();
 
-        String successMessage ="성공했습니다";
+        String successMessage = "전체 상품입니다.";
 
         return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
