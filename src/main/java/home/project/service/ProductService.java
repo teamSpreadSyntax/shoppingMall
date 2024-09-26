@@ -22,7 +22,7 @@ public interface ProductService {
 
     String stringBuilder(String brand, String category, String productName, String content, Page<Product> productPage);
 
-Page<Product> brandList(Pageable pageable);
+    Page<Product> brandList(Pageable pageable);
 
     Optional<Product> update(@Valid UpdateProductRequestDTO updateProductRequestDTO);
 

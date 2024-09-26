@@ -7,28 +7,29 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Optional;
+
 @Getter
 @Setter
 public class CustomResponseBody<T> {
 
 
-        @JsonSerialize(using = CustomOptionalSerializer.class)
-        public Optional<T> optionalResult;
-        public ListResult<T> listResult;
-        public String responseMessage;
-        public int status;
+    @JsonSerialize(using = CustomOptionalSerializer.class)
+    public Optional<T> optionalResult;
+    public ListResult<T> listResult;
+    public String responseMessage;
+    public int status;
 
-        public CustomResponseBody(ListResult<T> listResult, String responseMessage, int status) {
-            this.listResult = listResult;
-            this.responseMessage = responseMessage;
-            this.status = status;
-        }
+    public CustomResponseBody(ListResult<T> listResult, String responseMessage, int status) {
+        this.listResult = listResult;
+        this.responseMessage = responseMessage;
+        this.status = status;
+    }
 
-        public CustomResponseBody(Optional<T> optionalResult, String responseMessage, int status) {
-            this.optionalResult = optionalResult;
-            this.responseMessage = responseMessage;
-            this.status = status;
-        }
+    public CustomResponseBody(Optional<T> optionalResult, String responseMessage, int status) {
+        this.optionalResult = optionalResult;
+        this.responseMessage = responseMessage;
+        this.status = status;
+    }
 
 
     public static class ListResult<T> {
