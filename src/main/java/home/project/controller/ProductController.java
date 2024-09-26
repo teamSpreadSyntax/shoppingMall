@@ -76,29 +76,6 @@ public class ProductController {
 
     }
 
-    @Operation(summary = "카테고리 등록 메서드", description = "카테고리 등록 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryCreateSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema")))
-    })
-    @PostMapping("/createCategory")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createCategory(@RequestBody @Valid CreateCategoryRequestDTO createCategoryRequestDTO, BindingResult bindingResult) {
-        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
-        if (validationResponse != null) return validationResponse;
-        categoryService.save(createCategoryRequestDTO);
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", createCategoryRequestDTO.getName() + "(이)가 등록되었습니다.");
-        return new CustomResponseEntity<>(Optional.of(responseMap), "카테고리 등록 성공", HttpStatus.OK);
-    }
-
-
-
-
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
