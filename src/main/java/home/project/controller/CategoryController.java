@@ -136,4 +136,23 @@ public class CategoryController {
         Optional<Category> updatedCategory = categoryService.findById(updatecategoryRequestDTO.getId());
         return new CustomResponseEntity<>(updatedCategory, successMessage, HttpStatus.OK);
     }
+
+    @Operation(summary = "카테고리 삭제 메서드", description = "카테고리 삭제 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @DeleteMapping("/delete")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> deleteProduct(@RequestParam("categoryId") Long categoryId) {
+        String name = categoryService.findById(categoryId).get().getName();
+        categoryService.delete(categoryId);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", name + "(id:" + categoryId + ")(이)가 삭제되었습니다.");
+        return new CustomResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
+    }
 }

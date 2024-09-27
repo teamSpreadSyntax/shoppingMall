@@ -109,6 +109,13 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(existingCategory);
     }
 
+    @Transactional
+    @Override
+    public void delete(Long categoryId) {
+        findById(categoryId);
+        categoryRepository.deleteById(categoryId);
+    }
+
     private void validateCategoryLevel(int level) {
         if (level <= 0) {
             throw new IllegalStateException("카테고리 레벨은 0보다 작을 수 없습니다. 최상위 카테고리라면 레벨을 1로 설정해주세요.");
