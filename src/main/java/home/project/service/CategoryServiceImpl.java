@@ -91,12 +91,27 @@ public class CategoryServiceImpl implements CategoryService {
             isModified = true;
         }
 
+        if (isCodeDuplicate && isNameDuplicate) {
+            throw new DataIntegrityViolationException("이미 사용 중인 코드와 카테고리명 입니다.");
+        } else if (isCodeDuplicate) {
+            throw new DataIntegrityViolationException("이미 사용 중인 코드입니다.");
+        } else if (isNameDuplicate) {
+            throw new DataIntegrityViolationException("이미 사용 중인 카테고리명 입니다.");
+        }
+
         if (!isModified) {
             throw new NoChangeException("변경된 카테고리 정보가 없습니다.");
         }
 
         setCategoryParent(existingCategory, updateCategoryRequestDTO.getCode(), updateCategoryRequestDTO.getLevel());
         categoryRepository.save(existingCategory);
+    }
+
+    @Transactional
+    @Override
+    public void delete(Long categoryId) {
+        findById(categoryId);
+        categoryRepository.deleteById(categoryId);
     }
 
     private void validateCategoryLevel(int level) {

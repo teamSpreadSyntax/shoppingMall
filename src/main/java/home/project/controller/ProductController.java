@@ -61,7 +61,7 @@ public class ProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
 
     })
-    @Transactional
+
     @PostMapping("/create")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> createProduct(@RequestBody @Valid CreateProductRequestDTO createProductRequestDTO, BindingResult bindingResult) {
@@ -198,7 +198,6 @@ public class ProductController {
         return new CustomResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
     }
 
-    @Transactional
     @Operation(summary = "상품 삭제 메서드", description = "상품 삭제 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -218,7 +217,6 @@ public class ProductController {
         return new CustomResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
     }
 
-    @Transactional
     @Operation(summary = "재고 수량 증가 메서드", description = "재고 수량 증가 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
