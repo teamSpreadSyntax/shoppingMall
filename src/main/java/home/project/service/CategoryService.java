@@ -18,4 +18,6 @@ public interface CategoryService {
     void validateCategoryCode(String code, int level);
 
     void update(UpdateCategoryRequestDTO updateCategoryRequestDTO);
+
+    void delete(Long categoryId);
 }
