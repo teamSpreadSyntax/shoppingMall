@@ -16,24 +16,18 @@ public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
 
     @Override
-    public Optional<Role> findById(Long memberId) {
-        Role role = roleRepository.findById(memberId).orElseThrow(() -> {
-            throw new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다.");
-        });
-        return Optional.ofNullable(role);
+    public Role findById(Long memberId) {
+        return roleRepository.findById(memberId)
+                .orElseThrow(() -> new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다."));
     }
 
     @Override
     @Transactional
-    public Optional<Role> update(Role role) {
+    public Role update(Role role) {
 
-        Role existsMember = roleRepository.findById(role.getId())
-                .orElseThrow(() -> new IdNotFoundException(role.getId() + "(으)로 등록된 회원이 없습니다."));
-        Role existsRole = roleRepository.findById(existsMember.getId()).get();
-        existsRole.setRole(role.getRole());
-        roleRepository.save(existsRole);
-
-        return Optional.of(existsRole);
+        Role existingRole = findById(role.getId());
+        existingRole.setRole(role.getRole());
+        return roleRepository.save(existingRole);
     }
 
     @Override

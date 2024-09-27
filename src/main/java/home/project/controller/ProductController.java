@@ -86,7 +86,7 @@ public class ProductController {
     @GetMapping("/product")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
-        Optional<Product> productOptional = productService.findById(productId);
+        Product productOptional = productService.findById(productId);
         String successMessage = productId + "에 해당하는 상품 입니다.";
         return new CustomResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
     }
@@ -193,7 +193,7 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequestDTO updateProductRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        Optional<Product> productOptional = productService.update(updateProductRequestDTO);
+        Product productOptional = productService.update(updateProductRequestDTO);
         String successMessage = "상품 정보가 수정되었습니다.";
         return new CustomResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
     }
@@ -211,7 +211,7 @@ public class ProductController {
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
-        String name = productService.findById(productId).get().getName();
+        String name = productService.findById(productId).getName();
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");

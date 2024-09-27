@@ -90,10 +90,10 @@ public class MemberController {
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> memberInfo() {
-        Optional<MemberResponse> MemberResponse = memberService.memberInfo();
-        Long memberId = MemberResponse.get().getId();
+        MemberResponse memberResponse = memberService.memberInfo();
+        Long memberId = memberResponse.getId();
         String successMessage = memberId + "(으)로 가입된 회원정보입니다";
-        return new CustomResponseEntity<>(MemberResponse, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(memberResponse, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
@@ -214,7 +214,7 @@ public class MemberController {
             return validationResponse;
         }
 
-        Optional<MemberResponse> MemberResponse = memberService.update(updateMemberRequestDTO, verificationToken);
+        MemberResponse MemberResponse = memberService.update(updateMemberRequestDTO, verificationToken);
 
         String successMessage = "회원 정보가 수정되었습니다.";
         return new CustomResponseEntity<>(MemberResponse, successMessage, HttpStatus.OK);
@@ -232,7 +232,7 @@ public class MemberController {
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
-        String email = memberService.findById(memberId).get().getEmail();
+        String email = memberService.findById(memberId).getEmail();
         memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email + "(id:" + memberId + ")님의 계정이 삭제되었습니다.");

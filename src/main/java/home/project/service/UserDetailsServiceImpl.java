@@ -2,6 +2,7 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.Role;
+import home.project.domain.RoleType;
 import home.project.repository.MemberRepository;
 import home.project.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import java.util.List;
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final MemberRepository memberRepository;
     private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
 
     @Override
@@ -28,13 +30,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
             throw new UsernameNotFoundException(email + "(으)로 등록된 회원이 없습니다.");
         });
-        Role role = roleRepository.findById(member.getId()).get();
+        Role role = roleService.findById(member.getId());
         List<GrantedAuthority> authorities = new ArrayList<>();
-        if (role.getRole().equals("admin")) {
+        if (role.getRole() == RoleType.admin) {
             authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
-        } else if (role.getRole().equals("user")) {
+        } else if (role.getRole() == RoleType.user) {
             authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-        } else if (role.getRole().equals("center")) {
+        } else if (role.getRole() == RoleType.center) {
             authorities.add(new SimpleGrantedAuthority("ROLE_CENTER"));
         }
         User userDetails = new User(member.getEmail(), member.getPassword(), authorities);

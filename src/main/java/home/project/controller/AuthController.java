@@ -23,6 +23,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -64,7 +65,7 @@ public class AuthController {
 
         String successMessage = loginRequestDTO.getEmail() + "(으)로 로그인에 성공했습니다.";
 
-        return new CustomResponseEntity<>(Optional.of(TokenResponse), successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(TokenResponse, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "토큰 갱신 메서드", description = "만료된 액세스 토큰과 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급받는 메서드입니다.")
@@ -80,7 +81,7 @@ public class AuthController {
 
         TokenResponse newTokenDto = authService.refreshToken(refreshToken);
 
-        return new CustomResponseEntity<>(Optional.of(newTokenDto), "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
+        return new CustomResponseEntity<>(newTokenDto, "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
     }
 
     @Operation(summary = "로그아웃 메서드", description = "로그아웃 메서드입니다.")
@@ -96,7 +97,7 @@ public class AuthController {
         String email = authService.logout(memberId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email + "님 이용해주셔서 감사합니다.");
-        return new CustomResponseEntity<>(Optional.of(responseMap), "로그아웃되었습니다.", HttpStatus.OK);
+        return new CustomResponseEntity<>(responseMap, "로그아웃되었습니다.", HttpStatus.OK);
 
     }
 
@@ -113,10 +114,10 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") RoleType authority) {
 
-        Optional<Role> role = authService.addAuthority(memberId, authority);
+        Role role = authService.addAuthority(memberId, authority);
         String successMessage = authService.roleMessage(memberId, authority);
 
-        return new CustomResponseEntity<>(Optional.of(role), successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(role, successMessage, HttpStatus.OK);
 
     }
 
@@ -156,7 +157,7 @@ public class AuthController {
             @RequestParam(value = "accessToken", required = true) String accessToken,
             @RequestParam(value = "refreshToken", required = true) String refreshToken) {
         TokenResponse newTokenDto = authService.verifyUser(accessToken, refreshToken);
-        return new CustomResponseEntity<>(Optional.of(newTokenDto), "토큰이 검증되었습니다.", HttpStatus.OK);
+        return new CustomResponseEntity<>(newTokenDto, "토큰이 검증되었습니다.", HttpStatus.OK);
     }
 
 }

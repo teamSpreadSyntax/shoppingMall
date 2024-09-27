@@ -18,7 +18,7 @@ public interface AuthService {
 
     String logout(Long id);
 
-    Optional<Role> addAuthority(Long id, RoleType authority);
+    Role addAuthority(Long id, RoleType authority);
 
     String roleMessage(Long id, RoleType authority);
 

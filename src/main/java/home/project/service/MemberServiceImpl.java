@@ -68,14 +68,14 @@ public class MemberServiceImpl implements MemberService {
 
         Member member = convertToEntity(createMemberRequestDTO);
         memberRepository.save(member);
-        Optional<Member> memberForAddRole = findByEmail(member.getEmail());
-        Long id = memberForAddRole.get().getId();
+        Member memberForAddRole = findByEmail(member.getEmail());
+        Long id = memberForAddRole.getId();
 
         Role role = new Role();
         role.setId(id);
         roleService.join(role);
 
-        RoleType savedRole = roleService.findById(id).get().getRole();
+        RoleType savedRole = roleService.findById(id).getRole();
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
         TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
@@ -86,30 +86,26 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Optional<MemberResponse> memberInfo() {
+    public MemberResponse memberInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        Long memberId = findByEmail(email).get().getId();
-        Optional<Member> memberOptional = findById(memberId);
-        RoleType role = roleService.findById(memberId).get().getRole();
-        Optional<MemberResponse> MemberResponse = memberOptional.map(member -> new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role));
-        return MemberResponse;
+        Long memberId = findByEmail(email).getId();
+        Member member = findById(memberId);
+        RoleType role = roleService.findById(memberId).getRole();
+        MemberResponse memberResponse = new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role);
+        return memberResponse;
     }
 
     @Override
-    public Optional<Member> findById(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> {
-            throw new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다.");
-        });
-        return Optional.ofNullable(member);
+    public Member findById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다."));
     }
 
     @Override
-    public Optional<Member> findByEmail(String email) {
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> {
-            throw new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다.");
-        });
-        return Optional.ofNullable(member);
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다."));
     }
 
     @Override
@@ -119,22 +115,22 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Page<MemberResponse> convertToMemberDTOWithoutPW(Page<Member> memberPage) {
-        Page<MemberResponse> pagedMemberDTOWithoutPw = memberPage.map(member -> {
+        Page<MemberResponse> pagedMemberResponse = memberPage.map(member -> {
             Long roleId = member.getId();
             RoleType roleName = RoleType.valueOf("No Role");
             if (roleId != null) {
-                Optional<Role> role = roleService.findById(roleId);
-                roleName = role.get().getRole();
+                Role role = roleService.findById(roleId);
+                roleName = role.getRole();
             }
             return new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
         });
-        return pagedMemberDTOWithoutPw;
+        return pagedMemberResponse;
     }
 
     @Override
     public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
-        Page<Member> memberPage = memberRepository.findMembers(name, email, phone, role, content, pageable);
-        return memberPage;
+        Page<Member> pagedMember = memberRepository.findMembers(name, email, phone, role, content, pageable);
+        return pagedMember;
     }
 
     @Override
@@ -164,19 +160,17 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public String verifyUser(String email, VerifyUserRequestDTO password) {
 
-        Long id = findByEmail(email).get().getId();
-        if (!passwordEncoder.matches(password.getPassword(), findByEmail(email).get().getPassword())) {
+        Long id = findByEmail(email).getId();
+        if (!passwordEncoder.matches(password.getPassword(), findByEmail(email).getPassword())) {
             throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
         }
 
-        String verificationToken = jwtTokenProvider.generateVerificationToken(email, id);
-
-        return verificationToken;
+        return jwtTokenProvider.generateVerificationToken(email, id);
     }
 
     @Override
     @Transactional
-    public Optional<MemberResponse> update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken) {
+    public MemberResponse update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken) {
         String email = jwtTokenProvider.getEmailFromToken(verificationToken);
 
         if (email == null) {
@@ -194,10 +188,9 @@ public class MemberServiceImpl implements MemberService {
         member.setPhone(updateMemberRequestDTO.getPhone());
         member.setEmail(updateMemberRequestDTO.getEmail());
         member.setPassword(updateMemberRequestDTO.getPassword());
-        member.setRole(roleService.findById(id).get());
+        member.setRole(roleService.findById(id));
 
-        Member existingMember = memberRepository.findById(member.getId())
-                .orElseThrow(() -> new IdNotFoundException(member.getId() + "(으)로 등록된 회원이 없습니다."));
+        Member existingMember = findById(member.getId());
         boolean isModified = false;
         boolean isEmailDuplicate = false;
         boolean isPhoneDuplicate = false;
@@ -242,16 +235,17 @@ public class MemberServiceImpl implements MemberService {
         }
         memberRepository.save(existingMember);
 
-        Optional<MemberResponse> MemberResponse = Optional.of(existingMember).map(memberWithoutPw -> new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole()));
+        MemberResponse MemberResponse = new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole());
 
         return MemberResponse;
+
 
     }
 
     @Override
     @Transactional
     public void deleteById(Long memberId) {
-        memberRepository.findById(memberId).orElseThrow(() -> new IdNotFoundException(memberId + "(으)로 등록된 회원이 없습니다."));
+        findById(memberId);
         memberRepository.deleteById(memberId);
     }
 

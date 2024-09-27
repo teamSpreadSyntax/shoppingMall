@@ -17,11 +17,11 @@ public interface MemberService {
 
     TokenResponse join(CreateMemberRequestDTO member);
 
-    Optional<MemberResponse> memberInfo();
+    MemberResponse memberInfo();
 
-    Optional<Member> findById(Long memberId);
+    Member findById(Long memberId);
 
-    Optional<Member> findByEmail(String email);
+    Member findByEmail(String email);
 
     Page<Member> findAll(Pageable pageable);
 
@@ -33,7 +33,7 @@ public interface MemberService {
 
     String verifyUser(String email, VerifyUserRequestDTO password);
 
-    Optional<MemberResponse> update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken);
+    MemberResponse update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken);
 
     void deleteById(Long memberId);
 }

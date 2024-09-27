@@ -14,7 +14,7 @@ public interface ProductService {
 
     void join(CreateProductRequestDTO createProductRequestDTO);
 
-    Optional<Product> findById(Long productId);
+    Product findById(Long productId);
 
     Page<Product> findAll(Pageable pageable);
 
@@ -24,7 +24,7 @@ public interface ProductService {
 
     Page<Product> brandList(Pageable pageable);
 
-    Optional<Product> update(@Valid UpdateProductRequestDTO updateProductRequestDTO);
+    Product update(UpdateProductRequestDTO updateProductRequestDTO);
 
     void deleteById(Long productId);
 

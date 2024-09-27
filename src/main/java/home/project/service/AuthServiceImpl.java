@@ -44,8 +44,8 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequestDTO.getEmail(), loginRequestDTO.getPassword()));
         TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
 
-        Long id = memberService.findByEmail(loginRequestDTO.getEmail()).get().getId();
-        RoleType role = roleService.findById(id).get().getRole();
+        Long id = memberService.findByEmail(loginRequestDTO.getEmail()).getId();
+        RoleType role = roleService.findById(id).getRole();
         TokenResponse.setRole(role);
         return TokenResponse;
     }
@@ -55,13 +55,13 @@ public class AuthServiceImpl implements AuthService {
         TokenResponse newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
 
         String email = jwtTokenProvider.getEmailFromToken(newTokenDto.getAccessToken());
-        Optional<Member> member = memberService.findByEmail(email);
+        Member member = memberService.findByEmail(email);
 
-        Long id = member.get().getId();
-        Optional<Role> roleOptional = roleService.findById(id);
+        Long id = member.getId();
+        Role role = roleService.findById(id);
 
-        RoleType role = roleOptional.get().getRole();
-        newTokenDto.setRole(role);
+        RoleType roleType = role.getRole();
+        newTokenDto.setRole(roleType);
         return newTokenDto;
     }
 
@@ -69,27 +69,26 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public String logout(Long memberId) {
-        Optional<Member> member = memberService.findById(memberId);
-        Optional<Role> role = roleService.findById(memberId);
+        Member member = memberService.findById(memberId);
+        Role role = roleService.findById(memberId);
 
-        roleService.update(role.get());
-        String email = member.get().getEmail();
-        return email;
+        roleService.update(role);
+
+        return member.getEmail();
     }
 
     @Override
-    public Optional<Role> addAuthority(Long id, RoleType authority) {
-        Role role = roleService.findById(id).get();
+    public Role addAuthority(Long id, RoleType authority) {
+        Role role = roleService.findById(id);
         role.setId(id);
         role.setRole(authority);
-        roleService.update(role);
-        return Optional.of(role);
+        return roleService.update(role);
     }
 
     public String roleMessage(Long id, RoleType authority) {
+        Role role = roleService.findById(id);
+        String name = memberService.findById(id).getName();
         String successMessage = "";
-        Role role = roleService.findById(id).get();
-        String name = memberService.findById(id).get().getName();
         if (authority.equals(admin)) {
             role.setRole(admin);
             successMessage = name + "(id : " + id + ")" + "님에게 중간 관리자 권한을 부여했습니다.";
@@ -106,25 +105,25 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Page<RoleResponse> checkAuthority(Pageable pageable) {
         Page<Member> memberPage = memberService.findAll(pageable);
-        Page<RoleResponse> rolesWithMemberNamesPage = memberPage.map(member -> {
-            RoleType role = roleService.findById(member.getId()).get().getRole();
+        Page<RoleResponse> pagedRoleResponse = memberPage.map(member -> {
+            RoleType role = roleService.findById(member.getId()).getRole();
             return new RoleResponse(member.getId(), role, member.getName());
         });
-        return rolesWithMemberNamesPage;
+        return pagedRoleResponse;
     }
 
     @Override
     public TokenResponse verifyUser(String accessToken, String refreshToken) {
         jwtTokenProvider.validateTokenResult(accessToken, refreshToken);
         String email = jwtTokenProvider.getEmailFromToken(accessToken);
-        Optional<Member> member = memberService.findByEmail(email);
+        Member member = memberService.findByEmail(email);
 
-        Long id = member.get().getId();
-        Optional<Role> roleOptional = roleService.findById(id);
+        Long id = member.getId();
+        Role role = roleService.findById(id);
 
-        RoleType role = roleOptional.get().getRole();
+        RoleType roleType = role.getRole();
         TokenResponse newTokenDto = new TokenResponse();
-        newTokenDto.setRole(role);
+        newTokenDto.setRole(roleType);
         newTokenDto.setAccessToken(accessToken);
         newTokenDto.setRefreshToken(refreshToken);
         newTokenDto.setGrantType("Bearer");
