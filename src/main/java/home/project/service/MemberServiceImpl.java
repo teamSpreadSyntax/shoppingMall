@@ -114,8 +114,8 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Page<MemberResponse> convertToMemberDTOWithoutPW(Page<Member> memberPage) {
-        Page<MemberResponse> pagedMemberResponse = memberPage.map(member -> {
+    public Page<MemberResponse> convertToMemberDTOWithoutPW(Page<Member> pagedMember) {
+        Page<MemberResponse> pagedMemberResponse = pagedMember.map(member -> {
             Long roleId = member.getId();
             RoleType roleName = RoleType.valueOf("No Role");
             if (roleId != null) {
@@ -129,8 +129,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
-        Page<Member> pagedMember = memberRepository.findMembers(name, email, phone, role, content, pageable);
-        return pagedMember;
+        return memberRepository.findMembers(name, email, phone, role, content, pageable);
     }
 
     @Override
@@ -172,7 +171,6 @@ public class MemberServiceImpl implements MemberService {
     @Transactional
     public MemberResponse update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken) {
         String email = jwtTokenProvider.getEmailFromToken(verificationToken);
-
         if (email == null) {
             throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
         }
@@ -181,44 +179,37 @@ public class MemberServiceImpl implements MemberService {
         }
 
         Long id = Long.parseLong(jwtTokenProvider.getIdFromVerificationToken(verificationToken));
+        Member existingMember = findById(id);
 
-        Member member = new Member();
-        member.setId(id);
-        member.setName(updateMemberRequestDTO.getName());
-        member.setPhone(updateMemberRequestDTO.getPhone());
-        member.setEmail(updateMemberRequestDTO.getEmail());
-        member.setPassword(updateMemberRequestDTO.getPassword());
-        member.setRole(roleService.findById(id));
-
-        Member existingMember = findById(member.getId());
         boolean isModified = false;
         boolean isEmailDuplicate = false;
         boolean isPhoneDuplicate = false;
 
-        if (member.getName() != null && !Objects.equals(existingMember.getName(), member.getName())) {
-            existingMember.setName(member.getName());
+        if (updateMemberRequestDTO.getName() != null && !updateMemberRequestDTO.getName().equals(existingMember.getName())) {
+            existingMember.setName(updateMemberRequestDTO.getName());
             isModified = true;
         }
-        if (member.getEmail() != null && !Objects.equals(existingMember.getEmail(), member.getEmail())) {
-            if (memberRepository.existsByEmail(member.getEmail())) {
+
+        if (updateMemberRequestDTO.getEmail() != null && !updateMemberRequestDTO.getEmail().equals(existingMember.getEmail())) {
+            if (memberRepository.existsByEmail(updateMemberRequestDTO.getEmail())) {
                 isEmailDuplicate = true;
             } else {
-                existingMember.setEmail(member.getEmail());
+                existingMember.setEmail(updateMemberRequestDTO.getEmail());
                 isModified = true;
             }
         }
 
-        if (member.getPhone() != null && !Objects.equals(existingMember.getPhone(), member.getPhone())) {
-            if (memberRepository.existsByPhone(member.getPhone())) {
+        if (updateMemberRequestDTO.getPhone() != null && !updateMemberRequestDTO.getPhone().equals(existingMember.getPhone())) {
+            if (memberRepository.existsByPhone(updateMemberRequestDTO.getPhone())) {
                 isPhoneDuplicate = true;
             } else {
-                existingMember.setPhone(member.getPhone());
+                existingMember.setPhone(updateMemberRequestDTO.getPhone());
                 isModified = true;
             }
         }
 
-        if (member.getPassword() != null && !passwordEncoder.matches(member.getPassword(), existingMember.getPassword())) {
-            existingMember.setPassword(passwordEncoder.encode(member.getPassword()));
+        if (updateMemberRequestDTO.getPassword() != null && !passwordEncoder.matches(updateMemberRequestDTO.getPassword(), existingMember.getPassword())) {
+            existingMember.setPassword(passwordEncoder.encode(updateMemberRequestDTO.getPassword()));
             isModified = true;
         }
 
@@ -233,13 +224,9 @@ public class MemberServiceImpl implements MemberService {
         if (!isModified) {
             throw new NoChangeException("변경된 회원 정보가 없습니다.");
         }
-        memberRepository.save(existingMember);
 
-        MemberResponse MemberResponse = new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), member.getRole().getRole());
-
-        return MemberResponse;
-
-
+        Member updatedMember = memberRepository.save(existingMember);
+        return new MemberResponse(updatedMember.getId(), updatedMember.getEmail(), updatedMember.getName(), updatedMember.getPhone(), updatedMember.getRole().getRole());
     }
 
     @Override

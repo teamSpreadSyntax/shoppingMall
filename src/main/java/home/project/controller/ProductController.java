@@ -180,7 +180,7 @@ public class ProductController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
             @ApiResponse(responseCode = "204", description = "NO_CONTENT",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NochangeResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "403", description = "Forbidden",

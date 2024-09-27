@@ -32,12 +32,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<Category> findById(Long categoryId) {
+    public Category findById(Long categoryId) {
         if (categoryId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
-        return Optional.ofNullable(categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new IdNotFoundException(categoryId + "(으)로 등록된 카테고리가 없습니다.")));
+        return categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IdNotFoundException(categoryId + "(으)로 등록된 카테고리가 없습니다."));
     }
 
     @Override
@@ -54,10 +54,8 @@ public class CategoryServiceImpl implements CategoryService {
 
         if (level > 1) {
             String parentCode = code.substring(0, expectedLength - 2);
-            Category parent = categoryRepository.findByCode(parentCode);
-            if (parent == null) {
-                throw new IllegalArgumentException("상위 카테고리 코드를 찾을 수 없습니다. 상위 카테고리를 먼저 생성하고 다시 시도해주세요.");
-            }
+            categoryRepository.findByCode(parentCode)
+                    .orElseThrow(() -> new IllegalArgumentException("상위 카테고리 코드를 찾을 수 없습니다. 상위 카테고리를 먼저 생성하고 다시 시도해주세요."));
         }
     }
 
@@ -128,10 +126,8 @@ public class CategoryServiceImpl implements CategoryService {
             category.setParent(null);
         } else {
             String parentCode = code.substring(0, code.length() - 2);
-            Category parentCategory = categoryRepository.findByCode(parentCode);
-            if (parentCategory == null) {
-                throw new IllegalArgumentException("상위 카테고리 코드를 찾을 수 없습니다. 상위 카테고리를 먼저 생성하고 다시 시도해주세요.");
-            }
+            Category parentCategory = categoryRepository.findByCode(parentCode)
+                    .orElseThrow(() -> new IllegalArgumentException("상위 카테고리 코드를 찾을 수 없습니다. 상위 카테고리를 먼저 생성하고 다시 시도해주세요."));
             category.setParent(parentCategory);
             parentCategory.getChildren().add(category);
             categoryRepository.save(parentCategory);

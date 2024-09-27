@@ -116,9 +116,9 @@ public class MemberController {
 
         pageable = pageUtil.pageable(pageable);
 
-        Page<Member> memberPage = memberService.findAll(pageable);
+        Page<Member> pagedMember = memberService.findAll(pageable);
 
-        Page<MemberResponse> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
+        Page<MemberResponse> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(pagedMember);
 
         String successMessage = "전체 회원입니다.";
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
@@ -152,8 +152,8 @@ public class MemberController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<Member> memberPage = memberService.findMembers(name, email, phone, role, content, pageable);
-        Page<MemberResponse> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(memberPage);
+        Page<Member> pagedMember = memberService.findMembers(name, email, phone, role, content, pageable);
+        Page<MemberResponse> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(pagedMember);
         String successMessage = memberService.stringBuilder(name, email, phone, role, content, pagedMemberDTOWithoutPw);
 
         long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
@@ -198,7 +198,7 @@ public class MemberController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema"))),
             @ApiResponse(responseCode = "204", description = "NO_CONTENT",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NochangeResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "409", description = "Conflict",

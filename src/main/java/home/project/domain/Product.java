@@ -1,6 +1,7 @@
 package home.project.domain;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
@@ -13,6 +14,7 @@ import org.hibernate.annotations.Check;
 @Table(name = "product", uniqueConstraints = {@UniqueConstraint(columnNames = {"product_num" })})
 @Getter
 @Setter
+@EqualsAndHashCode(of = {"id", "productNum", "name", "brand", "category", "stock", "soldQuantity"})
 public class Product {
 
     /**

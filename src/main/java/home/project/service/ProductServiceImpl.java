@@ -8,6 +8,7 @@ import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.ProductRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -105,55 +106,44 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Product update(@Valid UpdateProductRequestDTO updateProductRequestDTO) {
         Product existingProduct = findById(updateProductRequestDTO.getId());
+        Product beforeUpdate = new Product();
+        BeanUtils.copyProperties(existingProduct, beforeUpdate);
 
-        boolean isModified = false;
-        boolean isProductNumDuplicate = false;
-
-        if (updateProductRequestDTO.getBrand() != null && !Objects.equals(existingProduct.getBrand(), updateProductRequestDTO.getBrand())) {
-            existingProduct.setBrand(updateProductRequestDTO.getBrand());
-            isModified = true;
-        }
-
-        if (updateProductRequestDTO.getName() != null && !Objects.equals(existingProduct.getName(), updateProductRequestDTO.getName())) {
-            existingProduct.setName(updateProductRequestDTO.getName());
-            isModified = true;
-        }
-
-        if (updateProductRequestDTO.getSoldQuantity() != null && !Objects.equals(existingProduct.getSoldQuantity(), updateProductRequestDTO.getSoldQuantity())) {
-            if (updateProductRequestDTO.getSoldQuantity() < 0) {
-                throw new IllegalStateException("판매량이 음수일 수 없습니다.");
-            }
-            existingProduct.setSoldQuantity(updateProductRequestDTO.getSoldQuantity());
-            isModified = true;
-        }
-
-        if (updateProductRequestDTO.getProductNum() != null && !Objects.equals(existingProduct.getProductNum(), updateProductRequestDTO.getProductNum())) {
+        if (!updateProductRequestDTO.getProductNum().equals(existingProduct.getProductNum())) {
+//            if (productRepository.existsByProductNumAndIdNot(updateProductRequestDTO.getProductNum(), existingProduct.getId())) {
             if (productRepository.existsByProductNum(updateProductRequestDTO.getProductNum())) {
-                isProductNumDuplicate = true;
-            } else {
-                existingProduct.setProductNum(updateProductRequestDTO.getProductNum());
-                isModified = true;
+                throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
             }
+            existingProduct.setProductNum(updateProductRequestDTO.getProductNum());
         }
 
-        if (updateProductRequestDTO.getStock() != null && !Objects.equals(existingProduct.getStock(), updateProductRequestDTO.getStock())) {
+        if (updateProductRequestDTO.getStock() != null) {
             if (updateProductRequestDTO.getStock() < 0) {
                 throw new IllegalStateException("재고가 음수일 수 없습니다.");
             }
             existingProduct.setStock(updateProductRequestDTO.getStock());
-            isModified = true;
         }
 
-        if (updateProductRequestDTO.getCategory() != null && !Objects.equals(existingProduct.getCategory(), updateProductRequestDTO.getCategory())) {
+        if (updateProductRequestDTO.getSoldQuantity() != null) {
+            if (updateProductRequestDTO.getSoldQuantity() < 0) {
+                throw new IllegalStateException("판매량이 음수일 수 없습니다.");
+            }
+            existingProduct.setSoldQuantity(updateProductRequestDTO.getSoldQuantity());
+        }
+
+        if (updateProductRequestDTO.getName() != null) {
+            existingProduct.setName(updateProductRequestDTO.getName());
+        }
+
+        if (updateProductRequestDTO.getBrand() != null) {
+            existingProduct.setBrand(updateProductRequestDTO.getBrand());
+        }
+
+        if (updateProductRequestDTO.getCategory() != null) {
             existingProduct.setCategory(updateProductRequestDTO.getCategory());
-            isModified = true;
         }
 
-        if (isProductNumDuplicate) {
-            throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
-        }
-
-        if (!isModified) {
+        if (existingProduct.equals(beforeUpdate)) {
             throw new NoChangeException("변경된 상품 정보가 없습니다.");
         }
 

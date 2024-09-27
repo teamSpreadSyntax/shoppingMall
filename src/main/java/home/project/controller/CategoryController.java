@@ -78,9 +78,9 @@ public class CategoryController {
     @GetMapping("/category")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findCategoryById(@RequestParam("categoryId") Long categoryId) {
-        Optional<Category> categoryOptional = categoryService.findById(categoryId);
+        Category category = categoryService.findById(categoryId);
         String successMessage = categoryId + "에 해당하는 카테고리 입니다.";
-        return new CustomResponseEntity<>(categoryOptional, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(category, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 카테고리 조회 메서드", description = "전체 카테고리 조회 메서드입니다.")
@@ -118,7 +118,7 @@ public class CategoryController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
             @ApiResponse(responseCode = "204", description = "NO_CONTENT",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NochangeResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
@@ -133,7 +133,7 @@ public class CategoryController {
         if (validationResponse != null) return validationResponse;
         categoryService.update(updatecategoryRequestDTO);
         String successMessage = "카테고리 정보가 수정되었습니다.";
-        Optional<Category> updatedCategory = categoryService.findById(updatecategoryRequestDTO.getId());
+        Category updatedCategory = categoryService.findById(updatecategoryRequestDTO.getId());
         return new CustomResponseEntity<>(updatedCategory, successMessage, HttpStatus.OK);
     }
 }

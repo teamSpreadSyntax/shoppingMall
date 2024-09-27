@@ -25,7 +25,7 @@ public interface MemberService {
 
     Page<Member> findAll(Pageable pageable);
 
-    Page<MemberResponse> convertToMemberDTOWithoutPW(Page<Member> memberPage);
+    Page<MemberResponse> convertToMemberDTOWithoutPW(Page<Member> pagedMember);
 
     String stringBuilder(String name, String email, String phone, String role, String content, Page<MemberResponse> pagedMemberDTOWithoutPw);
 

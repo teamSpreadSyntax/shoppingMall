@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface CategoryService {
     void join(CreateCategoryRequestDTO createCategoryRequestDTO);
 
-    Optional<Category> findById(Long categoryId);
+    Category findById(Long categoryId);
 
     Page<Category> findAllCategory(Pageable pageable);
 

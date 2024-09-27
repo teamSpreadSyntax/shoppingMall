@@ -104,8 +104,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Page<RoleResponse> checkAuthority(Pageable pageable) {
-        Page<Member> memberPage = memberService.findAll(pageable);
-        Page<RoleResponse> pagedRoleResponse = memberPage.map(member -> {
+        Page<Member> pagedMember = memberService.findAll(pageable);
+        Page<RoleResponse> pagedRoleResponse = pagedMember.map(member -> {
             RoleType role = roleService.findById(member.getId()).getRole();
             return new RoleResponse(member.getId(), role, member.getName());
         });
