@@ -1,5 +1,7 @@
 package home.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -51,6 +53,7 @@ public class Category {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonBackReference
     private Category parent;
 
     /**
@@ -58,6 +61,7 @@ public class Category {
      * 양방향 관계로, 부모 카테고리가 삭제될 때 모든 자식 카테고리도 함께 삭제됩니다.
      */
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Category> children = new ArrayList<>();
 
 }

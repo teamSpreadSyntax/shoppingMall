@@ -1,7 +1,10 @@
 package home.project.controller;
 
 import home.project.domain.Category;
+import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateCategoryRequestDTO;
+import home.project.dto.requestDTO.UpdateCategoryRequestDTO;
+import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.util.PageUtil;
@@ -12,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -24,21 +28,60 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Tag(name = "카테고리", description = "카테고리 관련 API입니다")
+@RequestMapping(path = "/api/category")
+@ApiResponses(value = {
+        @ApiResponse(responseCode = "500", description = "Internal server error",
+                content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
+})
 @RequiredArgsConstructor
-@Controller
+@RestController
 
 public class CategoryController {
     private final PageUtil pageUtil;
     private final CategoryService categoryService;
     private final ValidationCheck validationCheck;
+
+    @Operation(summary = "카테고리 등록 메서드", description = "카테고리 등록 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryCreateSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema")))
+    })
+    @PostMapping("/createCategory")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> createCategory(@RequestBody @Valid CreateCategoryRequestDTO createCategoryRequestDTO, BindingResult bindingResult) {
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
+        categoryService.join(createCategoryRequestDTO);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", createCategoryRequestDTO.getName() + "(이)가 등록되었습니다.");
+        return new CustomResponseEntity<>(Optional.of(responseMap), "카테고리 등록 성공", HttpStatus.OK);
+    }
+
+    @Operation(summary = "id로 카테고리 조회 메서드", description = "id로 카테고리 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @GetMapping("/category")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findCategoryById(@RequestParam("categoryId") Long categoryId) {
+        Optional<Category> categoryOptional = categoryService.findById(categoryId);
+        String successMessage = categoryId + "에 해당하는 카테고리 입니다.";
+        return new CustomResponseEntity<>(categoryOptional, successMessage, HttpStatus.OK);
+    }
 
     @Operation(summary = "전체 카테고리 조회 메서드", description = "전체 카테고리 조회 메서드입니다.")
     @ApiResponses(value = {
@@ -65,28 +108,32 @@ public class CategoryController {
 
         int page = categoryPage.getNumber();
 
-        String successMessage ="전체 카테고리입니다.";
+        String successMessage = "전체 카테고리입니다.";
 
         return new CustomResponseEntity<>(categoryPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "카테고리 등록 메서드", description = "카테고리 등록 메서드입니다.")
+    @Operation(summary = "카테고리(수정) 메서드", description = "카테고리(수정) 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryCreateSuccessResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "204", description = "NO_CONTENT",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NochangeResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
     })
-    @PostMapping("/createCategory")
+    @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createCategory(@RequestBody @Valid CreateCategoryRequestDTO createCategoryRequestDTO, BindingResult bindingResult) {
+    public ResponseEntity<?> updateCategory(@RequestBody @Valid UpdateCategoryRequestDTO updatecategoryRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        categoryService.save(createCategoryRequestDTO);
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", createCategoryRequestDTO.getName() + "(이)가 등록되었습니다.");
-        return new CustomResponseEntity<>(Optional.of(responseMap), "카테고리 등록 성공", HttpStatus.OK);
+        categoryService.update(updatecategoryRequestDTO);
+        String successMessage = "카테고리 정보가 수정되었습니다.";
+        Optional<Category> updatedCategory = categoryService.findById(updatecategoryRequestDTO.getId());
+        return new CustomResponseEntity<>(updatedCategory, successMessage, HttpStatus.OK);
     }
 }
