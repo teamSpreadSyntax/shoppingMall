@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT DISTINCT p.brand FROM Product p ORDER BY p.brand ASC")
@@ -26,4 +28,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
                                Pageable pageable);
 
     boolean existsByProductNum(String productNum);
+
+    List<Product> findAllByCategory(String category);
+
+    List<Product> findAllByCategoryStartingWith(String category);
+
+
+
 }

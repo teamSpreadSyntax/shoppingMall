@@ -149,7 +149,7 @@ public class CategoryController {
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteProduct(@RequestParam("categoryId") Long categoryId) {
-        String name = categoryService.findById(categoryId).get().getName();
+        String name = categoryService.findById(categoryId).getName();
         categoryService.delete(categoryId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", name + "(id:" + categoryId + ")(이)가 삭제되었습니다.");

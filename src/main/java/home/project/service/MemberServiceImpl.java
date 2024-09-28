@@ -91,9 +91,8 @@ public class MemberServiceImpl implements MemberService {
         String email = authentication.getName();
         Long memberId = findByEmail(email).getId();
         Member member = findById(memberId);
-        RoleType role = roleService.findById(memberId).getRole();
-        MemberResponse memberResponse = new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role);
-        return memberResponse;
+        RoleType role = member.getRole().getRole();
+        return new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role);
     }
 
     @Override
@@ -160,6 +159,7 @@ public class MemberServiceImpl implements MemberService {
     public String verifyUser(String email, VerifyUserRequestDTO password) {
 
         Long id = findByEmail(email).getId();
+
         if (!passwordEncoder.matches(password.getPassword(), findByEmail(email).getPassword())) {
             throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
         }

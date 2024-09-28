@@ -14,7 +14,7 @@ import java.util.List;
  * 이 클래스는 계층적 카테고리 구조를 표현하며, 자기 참조 관계를 가집니다.
  */
 @Entity
-@Table(name = "category", uniqueConstraints = {@UniqueConstraint(columnNames = {"category_code", "category_name" })})
+@Table(name = "category")
 @Getter
 @Setter
 public class Category {
@@ -37,7 +37,7 @@ public class Category {
      * 카테고리의 이름입니다.
      * null이 될 수 없습니다.
      */
-    @Column(name = "category_name", nullable = false)
+    @Column(name = "category_name", nullable = false, unique = true)
     private String name;
 
     /**

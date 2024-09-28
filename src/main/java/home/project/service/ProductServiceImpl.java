@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -36,10 +38,14 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalStateException("판매량이 음수일 수 없습니다.");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyMMddHHmmss");
+        String timeStamp = now.format(formatter);
+
         Product product = new Product();
         product.setBrand(createProductRequestDTO.getBrand());
         product.setCategory(createProductRequestDTO.getCategory());
-        product.setProductNum(createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory());
+        product.setProductNum(timeStamp + createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory().toString());
         product.setSoldQuantity(createProductRequestDTO.getSoldQuantity());
         product.setName(createProductRequestDTO.getName());
         product.setStock(createProductRequestDTO.getStock());
