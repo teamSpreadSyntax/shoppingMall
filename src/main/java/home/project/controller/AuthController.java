@@ -23,7 +23,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -31,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Tag(name = "로그인, 로그아웃", description = "로그인, 로그아웃, 권한 관련 API입니다.")
 @RequestMapping(path = "/api/auth")
@@ -114,10 +112,10 @@ public class AuthController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") RoleType authority) {
 
-        Role role = authService.addAuthority(memberId, authority);
+        authService.addAuthority(memberId, authority);
         String successMessage = authService.roleMessage(memberId, authority);
 
-        return new CustomResponseEntity<>(role, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(authority, successMessage, HttpStatus.OK);
 
     }
 
