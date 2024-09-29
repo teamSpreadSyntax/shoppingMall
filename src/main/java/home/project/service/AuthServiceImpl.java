@@ -1,11 +1,12 @@
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.domain.Role;
 import home.project.domain.RoleType;
 import home.project.dto.responseDTO.RoleResponse;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.dto.requestDTO.LoginRequestDTO;
+import home.project.repository.MemberRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 import static home.project.domain.RoleType.*;
 
 
@@ -33,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberService memberService;
-    private final RoleService roleService;
+    private final MemberRepository memberRepository;
 
     @Override
     public TokenResponse login(LoginRequestDTO loginRequestDTO) {
@@ -45,7 +44,7 @@ public class AuthServiceImpl implements AuthService {
         TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
 
         Long id = memberService.findByEmail(loginRequestDTO.getEmail()).getId();
-        RoleType role = roleService.findById(id).getRole();
+        RoleType role = memberService.findById(id).getRole();
         TokenResponse.setRole(role);
         return TokenResponse;
     }
@@ -58,45 +57,36 @@ public class AuthServiceImpl implements AuthService {
         Member member = memberService.findByEmail(email);
 
         Long id = member.getId();
-        Role role = roleService.findById(id);
+        RoleType role = memberService.findById(id).getRole();
 
-        RoleType roleType = role.getRole();
-        newTokenDto.setRole(roleType);
+        newTokenDto.setRole(role);
         return newTokenDto;
     }
-
 
     @Override
     @Transactional
     public String logout(Long memberId) {
         Member member = memberService.findById(memberId);
-        Role role = roleService.findById(memberId);
-
-        roleService.update(role);
 
         return member.getEmail();
     }
 
     @Override
-    public Role addAuthority(Long id, RoleType authority) {
-        Role role = roleService.findById(id);
-        role.setId(id);
-        role.setRole(authority);
-        return roleService.update(role);
+    public void addAuthority(Long id, RoleType authority) {
+        Member member = memberService.findById(id);
+        member.setRole(authority);
+
+        memberRepository.save(member);
     }
 
     public String roleMessage(Long id, RoleType authority) {
-        Role role = roleService.findById(id);
         String name = memberService.findById(id).getName();
         String successMessage = "";
         if (authority.equals(admin)) {
-            role.setRole(admin);
             successMessage = name + "(id : " + id + ")" + "님에게 중간 관리자 권한을 부여했습니다.";
         } else if (authority.equals(center)) {
-            role.setRole(center);
             successMessage = name + "(id : " + id + ")" + "님에게 중앙 관리자 권한을 부여했습니다.";
         } else if (authority.equals(user)) {
-            role.setRole(user);
             successMessage = name + "(id : " + id + ")" + "님에게 일반 사용자 권한을 부여했습니다.";
         }
         return successMessage;
@@ -105,11 +95,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Page<RoleResponse> checkAuthority(Pageable pageable) {
         Page<Member> pagedMember = memberService.findAll(pageable);
-        Page<RoleResponse> pagedRoleResponse = pagedMember.map(member -> {
-            RoleType role = roleService.findById(member.getId()).getRole();
-            return new RoleResponse(member.getId(), role, member.getName());
-        });
-        return pagedRoleResponse;
+        return pagedMember.map(member -> new RoleResponse(member.getId(), member.getRole(), member.getName()));
     }
 
     @Override
@@ -119,11 +105,10 @@ public class AuthServiceImpl implements AuthService {
         Member member = memberService.findByEmail(email);
 
         Long id = member.getId();
-        Role role = roleService.findById(id);
+        RoleType role = memberService.findById(id).getRole();
 
-        RoleType roleType = role.getRole();
         TokenResponse newTokenDto = new TokenResponse();
-        newTokenDto.setRole(roleType);
+        newTokenDto.setRole(role);
         newTokenDto.setAccessToken(accessToken);
         newTokenDto.setRefreshToken(refreshToken);
         newTokenDto.setGrantType("Bearer");

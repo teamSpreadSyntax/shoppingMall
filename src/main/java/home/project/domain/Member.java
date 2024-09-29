@@ -62,13 +62,11 @@ public class Member {
 
     /**
      * 회원의 권한 정보입니다.
-     * Role 엔티티와 1:1 관계를 가집니다.
-     * 데이터베이스 관계 정보:
-     * - 관계: ONE-TO-ONE
-     * - 캐스케이드: 모든 작업(ALL)
-     * - 조인 방식: PRIMARY KEY JOIN
+     * Role enum을 사용하여 권한을 관리합니다.
+     * 데이터베이스 컬럼 정보:
+     * - 타입: VARCHAR(255) (EnumType.STRING 사용)
      */
-    @OneToOne(cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
-    private Role role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private RoleType role = RoleType.user;
 }

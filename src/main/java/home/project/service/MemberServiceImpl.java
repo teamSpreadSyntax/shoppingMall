@@ -1,7 +1,6 @@
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.domain.Role;
 import home.project.domain.RoleType;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
@@ -25,16 +24,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.Optional;
-
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
 public class MemberServiceImpl implements MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RoleService roleService;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -68,18 +63,11 @@ public class MemberServiceImpl implements MemberService {
 
         Member member = convertToEntity(createMemberRequestDTO);
         memberRepository.save(member);
-        Member memberForAddRole = findByEmail(member.getEmail());
-        Long id = memberForAddRole.getId();
-
-        Role role = new Role();
-        role.setId(id);
-        roleService.join(role);
-
-        RoleType savedRole = roleService.findById(id).getRole();
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
         TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
 
+        RoleType savedRole = findById(member.getId()).getRole();
         TokenResponse.setRole(savedRole);
 
         return TokenResponse;
@@ -91,7 +79,7 @@ public class MemberServiceImpl implements MemberService {
         String email = authentication.getName();
         Long memberId = findByEmail(email).getId();
         Member member = findById(memberId);
-        RoleType role = member.getRole().getRole();
+        RoleType role = member.getRole();
         return new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role);
     }
 
@@ -114,16 +102,13 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Page<MemberResponse> convertToMemberDTOWithoutPW(Page<Member> pagedMember) {
-        Page<MemberResponse> pagedMemberResponse = pagedMember.map(member -> {
-            Long roleId = member.getId();
-            RoleType roleName = RoleType.valueOf("No Role");
-            if (roleId != null) {
-                Role role = roleService.findById(roleId);
-                roleName = role.getRole();
-            }
-            return new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), roleName);
-        });
-        return pagedMemberResponse;
+        return pagedMember.map(member -> new MemberResponse(
+                member.getId(),
+                member.getEmail(),
+                member.getName(),
+                member.getPhone(),
+                member.getRole()
+        ));
     }
 
     @Override
@@ -226,7 +211,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         Member updatedMember = memberRepository.save(existingMember);
-        return new MemberResponse(updatedMember.getId(), updatedMember.getEmail(), updatedMember.getName(), updatedMember.getPhone(), updatedMember.getRole().getRole());
+        return new MemberResponse(updatedMember.getId(), updatedMember.getEmail(), updatedMember.getName(), updatedMember.getPhone(), updatedMember.getRole());
     }
 
     @Override
