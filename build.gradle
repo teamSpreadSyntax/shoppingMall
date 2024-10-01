@@ -11,6 +11,13 @@ java {
     sourceCompatibility = '17'
 }
 
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    querydsl.extendsFrom compileClasspath
+}
+
 repositories {
     mavenCentral()
 }
@@ -31,8 +38,31 @@ dependencies {
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
     runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
-
+    implementation 'com.querydsl:querydsl-jpa:5.1.0:jakarta'
+    annotationProcessor "com.querydsl:querydsl-apt:5.1.0:jakarta"
+    implementation 'org.hibernate:hibernate-core:6.1.7.Final'
+    annotationProcessor "jakarta.annotation:jakarta.annotation-api"
+    annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 }
+
+def querydslSrcDir = 'src/main/generated'
+def querydslDir = "$buildDir/generated/querydsl"
+
+sourceSets {
+    main.java.srcDir querydslSrcDir
+}
+
+tasks.withType(JavaCompile) {
+    options.annotationProcessorPath = configurations.annotationProcessor
+    options.generatedSourceOutputDirectory = file(querydslSrcDir)
+}
+
+
+clean {
+    delete file(querydslSrcDir)
+}
+
+
 wrapper {
     gradleVersion = '8.5'
     distributionType = Wrapper.DistributionType.BIN

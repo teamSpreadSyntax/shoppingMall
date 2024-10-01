@@ -10,28 +10,28 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, ProductRepositoryCustom {
 
-    @Query("SELECT DISTINCT p.brand FROM Product p ORDER BY p.brand ASC")
-    Page<Product> findAllByOrderByBrandAsc(Pageable pageable);
-
-    @Query("SELECT p FROM Product p WHERE " +
-            "(:brand IS NULL OR :brand = '' OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :brand, '%'))) AND " +
-            "(:category IS NULL OR :category = '' OR LOWER(p.category) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
-            "(:productName IS NULL OR :productName = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :productName, '%'))) AND " +
-            "(:content IS NULL OR :content = '' OR " +
-            "LOWER(CONCAT(p.brand, ' ', p.category, ' ', p.name)) LIKE LOWER(CONCAT('%', :content, '%')))")
-    Page<Product> findProducts(@Param("brand") String brand,
-                               @Param("category") String category,
-                               @Param("productName") String productName,
-                               @Param("content") String content,
-                               Pageable pageable);
+//    @Query("SELECT DISTINCT p.brand FROM Product p ORDER BY p.brand ASC")
+//    Page<Product> findAllByOrderByBrandAsc(Pageable pageable);
+//
+//    @Query("SELECT p FROM Product p WHERE " +
+//            "(:brand IS NULL OR :brand = '' OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :brand, '%'))) AND " +
+//            "(:category IS NULL OR :category = '' OR LOWER(p.category) LIKE LOWER(CONCAT('%', :category, '%'))) AND " +
+//            "(:productName IS NULL OR :productName = '' OR LOWER(p.name) LIKE LOWER(CONCAT('%', :productName, '%'))) AND " +
+//            "(:content IS NULL OR :content = '' OR " +
+//            "LOWER(CONCAT(p.brand, ' ', p.category, ' ', p.name)) LIKE LOWER(CONCAT('%', :content, '%')))")
+//    Page<Product> findProducts(@Param("brand") String brand,
+//                               @Param("category") String category,
+//                               @Param("productName") String productName,
+//                               @Param("content") String content,
+//                               Pageable pageable);
 
     boolean existsByProductNum(String productNum);
 
-    List<Product> findAllByCategory(String category);
-
-    List<Product> findAllByCategoryStartingWith(String category);
+//    List<Product> findAllByCategory(String category);
+//
+//    List<Product> findAllByCategoryStartingWith(String category);
 
 
 
