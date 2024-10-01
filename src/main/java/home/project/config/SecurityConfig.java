@@ -2,6 +2,7 @@ package home.project.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import home.project.exceptions.CustomLogoutSuccessHandler;
 import home.project.util.CustomOptionalSerializer;
 import home.project.util.JwtAuthenticationFilter;
 import home.project.exceptions.CustomAccessDeniedHandler;
@@ -128,7 +129,8 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
-                        .logoutUrl("/logout")
+                        .logoutUrl("/api/logout")
+                        .logoutSuccessHandler(new CustomLogoutSuccessHandler())
                         .logoutSuccessUrl("/login?logout")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID")

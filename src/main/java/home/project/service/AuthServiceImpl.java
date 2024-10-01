@@ -63,13 +63,6 @@ public class AuthServiceImpl implements AuthService {
         return newTokenDto;
     }
 
-    @Override
-    @Transactional
-    public String logout(Long memberId) {
-        Member member = memberService.findById(memberId);
-
-        return member.getEmail();
-    }
 
     @Override
     public void addAuthority(Long id, RoleType authority) {
