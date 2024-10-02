@@ -11,6 +11,5 @@ public interface ProductRepositoryCustom {
     Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable);
     Page<Product> findAllByOrderByBrandAsc(Pageable pageable);
     List<Product> findAllByCategory(Category category);
-    List<Product> findAllByCategoryStartingWith(String category);
 
 }

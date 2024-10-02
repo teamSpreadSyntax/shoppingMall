@@ -79,9 +79,9 @@ public class CategoryController {
     @GetMapping("/category")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findCategoryById(@RequestParam("categoryId") Long categoryId) {
-        Category category = categoryService.findById(categoryId);
+        CategoryResponse categoryResponse = categoryService.findByIdReturnCategoryResponse(categoryId);
         String successMessage = categoryId + "에 해당하는 카테고리 입니다.";
-        return new CustomResponseEntity<>(category, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(categoryResponse, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 카테고리 조회 메서드", description = "전체 카테고리 조회 메서드입니다.")
@@ -103,7 +103,7 @@ public class CategoryController {
 
         pageable = pageUtil.pageable(pageable);
 
-        Page<Category> categoryPage = categoryService.findAllCategory(pageable);
+        Page<CategoryResponse> categoryPage = categoryService.findAllCategory(pageable);
 
         long totalCount = categoryPage.getTotalElements();
 
@@ -149,7 +149,7 @@ public class CategoryController {
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteProduct(@RequestParam("categoryId") Long categoryId) {
-        String name = categoryService.findById(categoryId).getName();
+        String name = categoryService.findByIdReturnCategoryResponse(categoryId).getName();
         categoryService.delete(categoryId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", name + "(id:" + categoryId + ")(이)가 삭제되었습니다.");

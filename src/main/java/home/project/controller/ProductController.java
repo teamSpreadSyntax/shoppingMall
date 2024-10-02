@@ -5,6 +5,7 @@ import home.project.domain.*;
 import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
+import home.project.dto.responseDTO.ProductResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.service.ProductService;
@@ -86,9 +87,9 @@ public class ProductController {
     @GetMapping("/product")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
-        Product productOptional = productService.findById(productId);
+        ProductResponse productResponse = productService.findByIdReturnProductResponse(productId);
         String successMessage = productId + "에 해당하는 상품 입니다.";
-        return new CustomResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
@@ -108,7 +109,7 @@ public class ProductController {
                     {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<Product> productPage = productService.findAll(pageable);
+        Page<ProductResponse> productPage = productService.findAll(pageable);
 
         long totalCount = productPage.getTotalElements();
 
@@ -142,7 +143,7 @@ public class ProductController {
         pageable = pageUtil.pageable(pageable);
 
         String categoryCode = CategoryCode.generateCategoryCode(category, content);
-        Page<Product> productPage = productService.findProducts(brand, categoryCode, productName, content, pageable);
+        Page<ProductResponse> productPage = productService.findProducts(brand, categoryCode, productName, content, pageable);
         String successMessage = productService.stringBuilder(brand, category, productName, content, productPage);
 
         long totalCount = productPage.getTotalElements();
@@ -168,11 +169,11 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
 
         pageable = pageUtil.pageable(pageable);
-        Page<Product> brandListPage = productService.brandList(pageable);
+        Page<ProductResponse> pagedBrands = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다.";
-        long totalCount = brandListPage.getTotalElements();
-        int page = brandListPage.getNumber();
-        return new CustomResponseEntity<>(brandListPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        long totalCount = pagedBrands.getTotalElements();
+        int page = pagedBrands.getNumber();
+        return new CustomResponseEntity<>(pagedBrands.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "상품 업데이트(수정) 메서드", description = "상품 업데이트(수정) 메서드입니다.")
@@ -193,9 +194,9 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequestDTO updateProductRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        Product productOptional = productService.update(updateProductRequestDTO);
+        ProductResponse productResponse = productService.update(updateProductRequestDTO);
         String successMessage = "상품 정보가 수정되었습니다.";
-        return new CustomResponseEntity<>(productOptional, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "상품 삭제 메서드", description = "상품 삭제 메서드입니다.")
@@ -210,7 +211,7 @@ public class ProductController {
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
-        String name = productService.findById(productId).getName();
+        String name = productService.findByIdReturnProductResponse(productId).getName();
         productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");
@@ -231,7 +232,7 @@ public class ProductController {
     @PutMapping("/increase_stock")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
-        Product increaseProduct = productService.increaseStock(productId, stock);
+        ProductResponse increaseProduct = productService.increaseStock(productId, stock);
         String successMessage = increaseProduct.getName() + "상품이 " + stock + "개 증가하여 " + increaseProduct.getStock() + "개가 되었습니다.";
         return new CustomResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
 
@@ -253,7 +254,7 @@ public class ProductController {
     @PutMapping("/decrease_stock")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
-        Product decreaseProduct = productService.decreaseStock(productId, stock);
+        ProductResponse decreaseProduct = productService.decreaseStock(productId, stock);
         String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다.";
         return new CustomResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
     }

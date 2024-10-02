@@ -1,7 +1,6 @@
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.domain.RoleType;
 import home.project.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

@@ -5,6 +5,7 @@ import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.dto.requestDTO.UpdateCategoryRequestDTO;
 import home.project.dto.responseDTO.CategoryResponse;
+import home.project.dto.responseDTO.ProductResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
@@ -46,8 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
     }
 
-    @Override
-    public Category findById(Long categoryId) {
+    private Category findById(Long categoryId) {
         if (categoryId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
@@ -56,8 +56,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Page<Category> findAllCategory(Pageable pageable) {
-        return categoryRepository.findAll(pageable);
+    public CategoryResponse findByIdReturnCategoryResponse(Long categoryId) {
+        Category category = findById(categoryId);
+        return convertFromCategoryToCategoryResponse(category);
+
+    }
+
+    @Override
+    public Page<CategoryResponse> findAllCategory(Pageable pageable) {
+        Page<Category> pagedCategory = categoryRepository.findAll(pageable);
+        return convertFromPagedCategoryToPagedCategoryResponse(pagedCategory);
     }
 
     @Override
@@ -81,8 +89,6 @@ public class CategoryServiceImpl implements CategoryService {
 
         boolean isModified = false;
         boolean isCategoryCodeModified = false;
-        boolean isCodeDuplicate = false;
-        boolean isNameDuplicate = false;
 
         String oldCategoryCode = existingCategory.getCode();
         String newCategoryCode = updateCategoryRequestDTO.getCode();
@@ -116,12 +122,6 @@ public class CategoryServiceImpl implements CategoryService {
             isModified = true;
         }
 
-//        if (updateCategoryRequestDTO.getLevel() != null && !updateCategoryRequestDTO.getLevel().equals(existingCategory.getLevel())) {
-//            validateCategoryLevel(updateCategoryRequestDTO.getLevel());
-//            existingCategory.setLevel(updateCategoryRequestDTO.getLevel());
-//            isModified = true;
-//        }
-
 
         if (!isModified) {
             throw new NoChangeException("변경된 카테고리 정보가 없습니다.");
@@ -146,10 +146,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         categoryRepository.save(existingCategory);
 
-        CategoryResponse categoryResponse = new CategoryResponse(existingCategory.getId(), existingCategory.getCode(),existingCategory.getName(), existingCategory.getLevel(), updatedCategory.getParent() != null ? updatedCategory.getParent().getId() : null
-        );
-
-        return categoryResponse;
+        return convertFromCategoryToCategoryResponse(existingCategory);
     }
 
     private void updateCategoryAndProductCodes(String oldCode, String newCode) {
@@ -218,5 +215,24 @@ public class CategoryServiceImpl implements CategoryService {
 
             category.setParent(parentCategory);
         }
+    }
+
+    private Page<CategoryResponse> convertFromPagedCategoryToPagedCategoryResponse(Page<Category> pagedCategory){
+        return pagedCategory.map(categoryResponse -> new CategoryResponse(
+                categoryResponse.getId(),
+                categoryResponse.getName(),
+                categoryResponse.getCode(),
+                categoryResponse.getLevel(),
+                categoryResponse.getParent() != null ? categoryResponse.getParent().getId() : null
+        ));
+    }
+    private CategoryResponse convertFromCategoryToCategoryResponse(Category category){
+        return new CategoryResponse(
+                category.getId(),
+                category.getName(),
+                category.getCode(),
+                category.getLevel(),
+                category.getParent() != null ? category.getParent().getId() : null
+        );
     }
 }

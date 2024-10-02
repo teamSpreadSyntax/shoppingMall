@@ -13,9 +13,6 @@ import java.util.Optional;
 
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
-    @Query("SELECT c FROM Category c WHERE c.code LIKE :code% AND LENGTH(c.code) = :length")
-    List<Category> findDirectChildCategories(@Param("code") String code, @Param("length") int length);
-
     Optional<Category> findByCode(String categoryCode);
 
     boolean existsByName(String name);
@@ -23,4 +20,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByCode(String categoryCode);
 
     List<Category> findAllByCodeStartingWith(String category);
+
 }
