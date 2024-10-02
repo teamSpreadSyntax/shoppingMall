@@ -1,9 +1,11 @@
-/*
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.domain.Product;
-import home.project.dto.MemberDTOWithoutId;
+import home.project.domain.RoleType;
+import home.project.dto.requestDTO.CreateMemberRequestDTO;
+import home.project.dto.requestDTO.UpdateMemberRequestDTO;
+import home.project.dto.responseDTO.MemberResponse;
+import home.project.dto.responseDTO.TokenResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.MemberRepository;
@@ -18,6 +20,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
@@ -38,12 +44,18 @@ class MemberServiceImplTest {
     @MockBean
     private PasswordEncoder passwordEncoder;
 
+    @MockBean
+    private AuthenticationManager authenticationManager;
+
+    @MockBean
+    private JwtTokenProvider jwtTokenProvider;
+
     private Member member;
     private Member member2;
     private Member member3;
-    private MemberDTOWithoutId memberDTOWithoutId;
+    private CreateMemberRequestDTO createMemberRequestDTO;
     private Pageable pageable;
-    private Member updateMember;
+    private UpdateMemberRequestDTO updateMemberRequestDTO;
 
     @BeforeEach
     void setUp() {
@@ -53,6 +65,7 @@ class MemberServiceImplTest {
         member.setPhone("010-1111-1111");
         member.setPassword("password");
         member.setName("김길동");
+        member.setRole(RoleType.user);
 
         member2 = new Member();
         member2.setId(2L);
@@ -60,6 +73,7 @@ class MemberServiceImplTest {
         member2.setPhone("010-2222-2222");
         member2.setPassword("otherPassword");
         member2.setName("홍길동");
+        member2.setRole(RoleType.user);
 
         member3 = new Member();
         member3.setId(3L);
@@ -67,21 +81,23 @@ class MemberServiceImplTest {
         member3.setPhone("010-3333-3333");
         member3.setPassword("anotherPassword");
         member3.setName("박길동");
+        member3.setRole(RoleType.user);
 
-        memberDTOWithoutId = new MemberDTOWithoutId();
-        memberDTOWithoutId.setEmail("test@example.com");
-        memberDTOWithoutId.setPassword("password");
-        memberDTOWithoutId.setName("Test User");
-        memberDTOWithoutId.setPhone("010-1234-5678");
+        createMemberRequestDTO = new CreateMemberRequestDTO();
+        createMemberRequestDTO.setEmail("test@example.com");
+        createMemberRequestDTO.setPassword("password");
+        createMemberRequestDTO.setPasswordConfirm("password");
+        createMemberRequestDTO.setName("Test User");
+        createMemberRequestDTO.setPhone("010-1234-5678");
 
-        pageable = PageRequest.of(0, 10);
+        pageable = PageRequest.of(0, 5);
 
-        updateMember = new Member();
-        updateMember.setId(member.getId());
-        updateMember.setEmail("test4@example.com");
-        updateMember.setPhone("010-2345-5678");
-        updateMember.setPassword("newPassword");
-        updateMember.setName("강길동");
+        updateMemberRequestDTO = new UpdateMemberRequestDTO();
+        updateMemberRequestDTO.setEmail("test4@example.com");
+        updateMemberRequestDTO.setPhone("010-2345-5678");
+        updateMemberRequestDTO.setPassword("newPassword");
+        updateMemberRequestDTO.setPasswordConfirm("newPassword");
+        updateMemberRequestDTO.setName("강길동");
     }
 
     @Nested
@@ -90,7 +106,7 @@ class MemberServiceImplTest {
         void convertToEntity_ValidInput_ReturnsEncodedMember() {
             when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
 
-            Member member = memberService.convertToEntity(memberDTOWithoutId);
+            Member member = memberService.convertToEntity(createMemberRequestDTO);
 
             assertEquals("encodedPassword", member.getPassword());
             verify(passwordEncoder).encode("password");
@@ -100,29 +116,41 @@ class MemberServiceImplTest {
     @Nested
     class JoinTests {
         @Test
-        void join_ValidInput_SavesMember() {
-            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
-            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
+        void join_ValidInput_SavesMemberAndReturnsToken() {
+            when(memberRepository.existsByEmail(anyString())).thenReturn(false);
+            when(memberRepository.existsByPhone(anyString())).thenReturn(false);
             when(memberRepository.save(any(Member.class))).thenReturn(member);
+            when(authenticationManager.authenticate(any())).thenReturn(mock(Authentication.class));
+            when(jwtTokenProvider.generateToken(any())).thenReturn(new TokenResponse("Bearer","token", "refreshToken", RoleType.user));
 
-            memberService.join(member);
+            TokenResponse result = memberService.join(createMemberRequestDTO);
 
-            verify(memberRepository).save(member);
+            assertNotNull(result);
+            assertEquals(RoleType.user, result.getRole());
+            assertEquals("Bearer",result.getGrantType());
+            verify(memberRepository).save(any(Member.class));
+        }
+        @Test
+        void join_PasswordMismatch_ThrowsIllegalStateException() {
+            createMemberRequestDTO.setPasswordConfirm("differentPassword");
+
+            IllegalStateException exception = assertThrows(IllegalStateException.class, () -> memberService.join(createMemberRequestDTO));
+            assertEquals("비밀번호와 비밀번호 확인이 일치하지 않습니다.", exception.getMessage());
+
         }
         @Test
         void join_DuplicateEmail_ThrowsDataIntegrityViolationException() {
-            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
-            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(false);
+            when(memberRepository.existsByEmail(anyString())).thenReturn(true);
 
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(createMemberRequestDTO));
             assertEquals("이미 사용 중인 이메일입니다.", exception.getMessage());
         }
         @Test
         void join_DuplicatePhone_ThrowsDataIntegrityViolationException() {
-            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(false);
-            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
+            when(memberRepository.existsByEmail(anyString())).thenReturn(false);
+            when(memberRepository.existsByPhone(anyString())).thenReturn(true);
 
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(createMemberRequestDTO));
             assertEquals("이미 사용 중인 전화번호입니다.", exception.getMessage());
         }
         @Test
@@ -130,31 +158,71 @@ class MemberServiceImplTest {
             when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
             when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
 
-            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(member));
+            DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(createMemberRequestDTO));
             assertEquals("이미 사용 중인 이메일과 전화번호입니다.", exception.getMessage());
         }
     }
+    @Nested
+    class MemberInfoTests {
+        @Test
+        void memberInfo_AuthenticatedUser_ReturnsMemberResponse() {
+            // 기존 코드
+            Authentication authentication = mock(Authentication.class);
+            when(authentication.getName()).thenReturn("test@example.com");
 
+            when(memberRepository.findByEmail("test@example.com")).thenReturn(Optional.of(member));
+
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+            try (var mocked = mockStatic(SecurityContextHolder.class)) {
+                mocked.when(SecurityContextHolder::getContext).thenReturn(mock(SecurityContext.class));
+                when(SecurityContextHolder.getContext().getAuthentication()).thenReturn(authentication);
+
+                MemberResponse result = memberService.memberInfo();
+
+                assertNotNull(result);
+                assertEquals(member.getId(), result.getId());
+                assertEquals(member.getEmail(), result.getEmail());
+                assertEquals(member.getName(), result.getName());
+                assertEquals(member.getPhone(), result.getPhone());
+                assertEquals(member.getRole(), result.getRole());
+            }
+        }
+    }
     @Nested
     class FindByIdTests {
         @Test
         void findById_ExistingMember_ReturnsMember() {
             when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-            Optional<Member> findMember = memberService.findById(1L);
+            Member findMember = memberService.findById(1L);
 
-            assertTrue(findMember.isPresent());
-            assertEquals(member, findMember.get());
+            assertNotNull(findMember);
+            assertEquals(member, findMember);
         }
 
         @Test
-        void findById_NonExistingMember_ThrowsIllegalArgumentException() {
+        void findById_NonExistingMember_ThrowsIdNotFoundException() {
             when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
-            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> memberService.findById(1L));
-            assertEquals("1(으)로 등록된 회원이 없습니다.", exception.getMessage());
+            assertThrows(IdNotFoundException.class, () -> memberService.findById(1L));
         }
     }
+    @Nested
+    class FindAllTests {
+        @Test
+        void findAll_AllMembersFound_ReturnsMembersPage() {
+            Page<Member> page = new PageImpl<>(Arrays.asList(member, member2));
 
+            when(memberRepository.findAll(pageable)).thenReturn(page);
+            Page<Member> resultList = memberService.findAll(pageable);
+
+            assertNotNull(resultList);
+            assertEquals(2, resultList.getTotalElements());
+            assertEquals(member, resultList.getContent().get(0));
+            assertEquals(member2, resultList.getContent().get(1));
+        }
+    }
+    /*
     @Nested
     class FindAllTests {
         @Test
@@ -329,6 +397,5 @@ class MemberServiceImplTest {
             IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> memberService.deleteById(member.getId()));
             assertEquals(member.getId() + "(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
-    }
+    }*/
 }
-*/

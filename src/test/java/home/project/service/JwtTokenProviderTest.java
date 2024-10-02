@@ -1,7 +1,8 @@
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.dto.responseDTO.TokenResponseDTO;
+import home.project.domain.RoleType;
+import home.project.dto.responseDTO.TokenResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -23,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -36,7 +36,7 @@ class JwtTokenProviderTest {
 
     private Authentication authentication;
 
-    private TokenResponseDTO tokenDto;
+    private TokenResponse tokenDto;
 
     private Member member;
 
@@ -64,7 +64,9 @@ class JwtTokenProviderTest {
 
         member = new Member();
         member.setId(1L);
-        member.setEmail("test@test.com");
+        member.setEmail("test@example.com");
+        member.setPassword("encodedPassword");
+        member.setRole(RoleType.user);
 
         invalidToken = "invalidToken";
 
@@ -209,8 +211,6 @@ class JwtTokenProviderTest {
 
         @Test
         void validateTokenDetail_InvalidToken_ReturnsInvalidStatus() {
-            String invalidToken = "invalidToken";
-
             tokenStatus = jwtTokenProvider.validateTokenDetail(invalidToken);
 
             assertEquals(JwtTokenProvider.TokenStatus.INVALID, tokenStatus);
@@ -228,7 +228,7 @@ class JwtTokenProviderTest {
             UserDetails userDetails = new User("user@user.com", "password", authentication.getAuthorities());
             when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
 
-            TokenResponseDTO newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
+            TokenResponse newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
 
             assertNotNull(newTokenDto);
             assertNotNull(newTokenDto.getAccessToken());
@@ -312,8 +312,6 @@ class JwtTokenProviderTest {
 
         @Test
         void getIdFromVerificationToken_InvalidToken_ThrowsJwtException() {
-            String invalidToken = "invalidToken";
-
             JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getIdFromVerificationToken(invalidToken));
             assertEquals("유효하지 않은 Verification token입니다.", exception.getMessage());
         }
@@ -346,8 +344,6 @@ class JwtTokenProviderTest {
 
         @Test
         void getEmailFromToken_InvalidToken_ThrowsJwtException() {
-            String invalidToken = "invalidToken";
-
             JwtException exception = assertThrows(JwtException.class, () -> jwtTokenProvider.getEmailFromToken(invalidToken));
             assertEquals("유효하지 않은  token입니다.", exception.getMessage());
         }

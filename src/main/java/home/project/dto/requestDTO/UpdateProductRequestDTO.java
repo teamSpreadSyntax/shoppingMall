@@ -49,7 +49,6 @@ public class UpdateProductRequestDTO {
      * 이 필드는 비어있을 수 없습니다.
      */
     @Column(name = "category")
-    @NotBlank(message = "상품의 카테고리를 입력해주세요.")
     private String category;
 
     /**
