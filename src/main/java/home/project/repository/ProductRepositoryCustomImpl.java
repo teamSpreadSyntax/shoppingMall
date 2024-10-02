@@ -24,27 +24,28 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
-    public Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
+    public Page<Product> findProducts(String brand, String categoryCode, String productName, String content, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
-        if (StringUtils.hasText(brand)) {
-            builder.and(product.brand.toLowerCase().contains(brand.toLowerCase()));
+        if (brand != null && !brand.isEmpty()) {
+            builder.and(product.brand.toLowerCase().like("%" + brand.toLowerCase() + "%"));
         }
-        if (StringUtils.hasText(category)) {
-            builder.and(product.category.code.toLowerCase().contains(category.toLowerCase()));
+        if (categoryCode != null && !categoryCode.isEmpty()) {
+            builder.and(product.category.code.toLowerCase().like("%" + categoryCode.toLowerCase() + "%"));
         }
-        if (StringUtils.hasText(productName)) {
-            builder.and(product.name.toLowerCase().contains(productName.toLowerCase()));
+        if (productName != null && !productName.isEmpty()) {
+            builder.and(product.name.toLowerCase().like("%" + productName.toLowerCase() + "%"));
         }
-        if (StringUtils.hasText(content)) {
-            builder.and(product.brand.toLowerCase().concat(" ")
-                    .concat(product.category.code.toLowerCase()).concat(" ")
-                    .concat(product.name.toLowerCase())
-                    .contains(content.toLowerCase()));
+        if (content != null && !content.isEmpty()) {
+            builder.and(product.brand.toLowerCase()
+                    .concat(" ").concat(product.category.code.toLowerCase())
+                    .concat(" ").concat(product.name.toLowerCase())
+                    .like("%" + content.toLowerCase() + "%"));
         }
 
         List<Product> results = queryFactory
                 .selectFrom(product)
+                .leftJoin(product.category, category).fetchJoin()
                 .where(builder)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -79,14 +80,6 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         return queryFactory
                 .selectFrom(product)
                 .where(product.category.id.eq(category.getId()))
-                .fetch();
-    }
-
-    @Override
-    public List<Product> findAllByCategoryStartingWith(String categoryCode) {
-        return queryFactory
-                .selectFrom(product)
-                .where(product.category.code.startsWith(categoryCode))
                 .fetch();
     }
 

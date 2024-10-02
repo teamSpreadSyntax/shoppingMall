@@ -1,36 +1,34 @@
 package home.project.service;
 
-import home.project.domain.Category;
 import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
-import jakarta.validation.Valid;
+import home.project.dto.responseDTO.ProductResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
 
 
 public interface ProductService {
 
     void join(CreateProductRequestDTO createProductRequestDTO);
 
-    Product findById(Long productId);
+    ProductResponse findByIdReturnProductResponse(Long productId);
 
-    Page<Product> findAll(Pageable pageable);
+    Page<ProductResponse> findAll(Pageable pageable);
 
-    Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable);
+    Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable);
 
-    String stringBuilder(String brand, String category, String productName, String content, Page<Product> productPage);
+    String stringBuilder(String brand, String category, String productName, String content, Page<ProductResponse> productPage);
 
-    Page<Product> brandList(Pageable pageable);
+    Page<ProductResponse> brandList(Pageable pageable);
 
-    Product update(UpdateProductRequestDTO updateProductRequestDTO);
+    ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO);
 
     void deleteById(Long productId);
 
-    Product increaseStock(Long productId, Long stock);
+    ProductResponse increaseStock(Long productId, Long stock);
 
-    Product decreaseStock(Long productId, Long stock);
+    ProductResponse decreaseStock(Long productId, Long stock);
 
 }

@@ -3,6 +3,7 @@ package home.project.service;
 import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
+import home.project.dto.responseDTO.ProductResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
@@ -18,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -61,7 +60,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product findById(Long productId) {
+    public ProductResponse findByIdReturnProductResponse(Long productId) {
+        Product product = findById(productId);
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getCategory().getCode(),
+                product.getProductNum(),
+                product.getStock(),
+                product.getSoldQuantity()
+        );
+    }
+
+    private Product findById(Long productId) {
         if (productId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }
@@ -72,17 +84,21 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    public Page<Product> findAll(Pageable pageable) {
-        return productRepository.findAll(pageable);
+    public Page<ProductResponse> findAll(Pageable pageable) {
+        Page<Product> pagedProduct = productRepository.findAll(pageable);
+        return convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
-    public Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
-        return productRepository.findProducts(brand, category, productName, content, pageable);
+    public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
+
+        Page<Product> pagedProduct = productRepository.findProducts(brand, category, productName, content, pageable);
+
+        return convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
-    public String stringBuilder(String brand, String category, String productName, String content, Page<Product> productPage) {
+    public String stringBuilder(String brand, String category, String productName, String content, Page<ProductResponse> productPage) {
         StringBuilder searchCriteria = new StringBuilder();
         if (brand != null) searchCriteria.append(brand).append(", ");
         if (category != null) searchCriteria.append(category).append(", ");
@@ -105,20 +121,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<Product> brandList(Pageable pageable) {
-
-        return productRepository.findAllByOrderByBrandAsc(pageable);
+    public Page<ProductResponse> brandList(Pageable pageable) {
+        Page<Product> pagedProduct = productRepository.findAllByOrderByBrandAsc(pageable);
+        return convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
     @Transactional
-    public Product update(@Valid UpdateProductRequestDTO updateProductRequestDTO) {
+    public ProductResponse update(@Valid UpdateProductRequestDTO updateProductRequestDTO) {
         Product existingProduct = findById(updateProductRequestDTO.getId());
         Product beforeUpdate = new Product();
         BeanUtils.copyProperties(existingProduct, beforeUpdate);
 
         if (!updateProductRequestDTO.getProductNum().equals(existingProduct.getProductNum())) {
-//            if (productRepository.existsByProductNumAndIdNot(updateProductRequestDTO.getProductNum(), existingProduct.getId())) {
             if (productRepository.existsByProductNum(updateProductRequestDTO.getProductNum())) {
                 throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
             }
@@ -155,7 +170,9 @@ public class ProductServiceImpl implements ProductService {
             throw new NoChangeException("변경된 상품 정보가 없습니다.");
         }
 
-        return productRepository.save(existingProduct);
+        Product product = productRepository.save(existingProduct);
+
+        return convertFromProductToProductResponse(product);
     }
 
     @Override
@@ -167,7 +184,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public Product increaseStock(Long productId, Long stock) {
+    public ProductResponse increaseStock(Long productId, Long stock) {
         if (stock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
         }
@@ -175,21 +192,44 @@ public class ProductServiceImpl implements ProductService {
         Long currentStock = product.getStock();
         Long newStock = currentStock + stock;
         product.setStock(newStock);
-        return productRepository.save(product);
+        productRepository.save(product);
+        return convertFromProductToProductResponse(product);
     }
 
     @Override
     @Transactional
-    public Product decreaseStock(Long productId, Long stock) {
+    public ProductResponse decreaseStock(Long productId, Long stock) {
         Product product = findById(productId);
         Long currentStock = product.getStock();
-        Long newStock = Math.max(currentStock - stock, 0);
+        Long newStock = Math.max(currentStock - stock, 0);//???
         if (currentStock <= 0 || stock > currentStock) {
             throw new DataIntegrityViolationException("재고가 부족합니다.");
         }
-        product.setStock(newStock);
-        return productRepository.save(product);
+        productRepository.save(product);
+        return convertFromProductToProductResponse(product);
     }
 
+    private Page<ProductResponse> convertFromPagedProductToPagedProductResponse(Page<Product> pagedProduct){
+        return pagedProduct.map(productResponse -> new ProductResponse(
+                productResponse.getId(),
+                productResponse.getName(),
+                productResponse.getBrand(),
+                productResponse.getCategory().getCode(),
+                productResponse.getProductNum(),
+                productResponse.getStock(),
+                productResponse.getSoldQuantity()
+        ));
+    }
+    private ProductResponse convertFromProductToProductResponse(Product product){
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getCategory().getCode(),
+                product.getProductNum(),
+                product.getStock(),
+                product.getSoldQuantity()
+                );
+    }
 
 }

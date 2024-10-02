@@ -12,9 +12,9 @@ import java.util.Optional;
 public interface CategoryService {
     void join(CreateCategoryRequestDTO createCategoryRequestDTO);
 
-    Category findById(Long categoryId);
+    CategoryResponse findByIdReturnCategoryResponse(Long categoryId);
 
-    Page<Category> findAllCategory(Pageable pageable);
+    Page<CategoryResponse> findAllCategory(Pageable pageable);
 
     void validateCategoryCode(String code, int level);
 
