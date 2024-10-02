@@ -1,12 +1,9 @@
-/*
 
 package home.project.service;
 
 import home.project.domain.Member;
-import home.project.domain.Role;
-import home.project.dto.UserDetailsDTO;
+import home.project.domain.RoleType;
 import home.project.repository.MemberRepository;
-import home.project.repository.RoleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -27,16 +24,10 @@ class UserDetailsServiceImplTest {
     @MockBean
     MemberRepository memberRepository;
 
-    @MockBean
-    RoleRepository roleRepository;
-
-    UserDetailsDTO userDetailsDTO;
-
     @Autowired
     UserDetailsServiceImpl userDetailsService;
 
     private Member member;
-    private Role role;
 
     @BeforeEach
     void setUp() {
@@ -44,10 +35,7 @@ class UserDetailsServiceImplTest {
         member.setId(1L);
         member.setEmail("test@test.com");
         member.setPassword("password");
-
-        role = new Role();
-        role.setId(1L);
-        role.setRole("user");
+        member.setRole(RoleType.user);
     }
 
     @Nested
@@ -55,7 +43,6 @@ class UserDetailsServiceImplTest {
         @Test
         void loadUserByUsername_ExistingEmail_ReturnsUserDetails() {
             when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
-            when(roleRepository.findById(member.getId())).thenReturn(Optional.of(role));
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmail());
 
@@ -67,9 +54,8 @@ class UserDetailsServiceImplTest {
 
         @Test
         void loadUserByUsername_AdminExists_ReturnsUserDetailsWithAdminRole() {
-            role.setRole("admin");
+            member.setRole(RoleType.admin);
             when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
-            when(roleRepository.findById(member.getId())).thenReturn(Optional.of(role));
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmail());
 
@@ -80,9 +66,8 @@ class UserDetailsServiceImplTest {
 
         @Test
         void loadUserByUsername_CenterExists_ReturnsUserDetailsWithCenterRole() {
-            role.setRole("center");
+            member.setRole(RoleType.center);
             when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
-            when(roleRepository.findById(member.getId())).thenReturn(Optional.of(role));
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmail());
 
@@ -100,4 +85,4 @@ class UserDetailsServiceImplTest {
             assertEquals("test@test.com(으)로 등록된 회원이 없습니다.", exception.getMessage());
         }
     }
-}*/
+}
