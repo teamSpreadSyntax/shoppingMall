@@ -34,6 +34,8 @@ public class QCategory extends EntityPathBase<Category> {
 
     public final QCategory parent;
 
+    public final ListPath<Product, QProduct> products = this.<Product, QProduct>createList("products", Product.class, QProduct.class, PathInits.DIRECT2);
+
     public QCategory(String variable) {
         this(Category.class, forVariable(variable), INITS);
     }
