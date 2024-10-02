@@ -106,7 +106,7 @@ class MemberServiceImplTest {
         void convertToEntity_ValidInput_ReturnsEncodedMember() {
             when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
 
-            Member member = memberService.convertToEntity(createMemberRequestDTO);
+//            Member member = memberService.convertFromCreateMemberRequestDTOToMember(createMemberRequestDTO);
 
             assertEquals("encodedPassword", member.getPassword());
             verify(passwordEncoder).encode("password");

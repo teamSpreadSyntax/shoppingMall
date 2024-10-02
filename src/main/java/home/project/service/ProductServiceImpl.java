@@ -8,6 +8,7 @@ import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
 import home.project.repository.ProductRepository;
+import home.project.util.CategoryMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
@@ -19,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+
+import static home.project.util.CategoryMapper.getCode;
 
 @RequiredArgsConstructor
 @Service
@@ -92,7 +95,9 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
 
-        Page<Product> pagedProduct = productRepository.findProducts(brand, category, productName, content, pageable);
+        String categoryCode = getCode(category);
+
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
         return convertFromPagedProductToPagedProductResponse(pagedProduct);
     }

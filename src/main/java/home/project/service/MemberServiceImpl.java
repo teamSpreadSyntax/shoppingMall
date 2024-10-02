@@ -33,8 +33,7 @@ public class MemberServiceImpl implements MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @Override
-    public Member convertToEntity(CreateMemberRequestDTO memberDTOWithoutId) {
+    private Member convertFromCreateMemberRequestDTOToMember(CreateMemberRequestDTO memberDTOWithoutId) {
         Member member = new Member();
         member.setEmail(memberDTOWithoutId.getEmail());
         member.setPassword(passwordEncoder.encode(memberDTOWithoutId.getPassword()));
@@ -61,7 +60,7 @@ public class MemberServiceImpl implements MemberService {
             throw new DataIntegrityViolationException("이미 사용 중인 전화번호입니다.");
         }
 
-        Member member = convertToEntity(createMemberRequestDTO);
+        Member member = convertFromCreateMemberRequestDTOToMember(createMemberRequestDTO);
         memberRepository.save(member);
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
@@ -79,8 +78,7 @@ public class MemberServiceImpl implements MemberService {
         String email = authentication.getName();
         Long memberId = findByEmail(email).getId();
         Member member = findById(memberId);
-        RoleType role = member.getRole();
-        return new MemberResponse(member.getId(), member.getEmail(), member.getName(), member.getPhone(), role);
+        return convertFromMemberToMemberResponse(member);
     }
 
     @Override
@@ -101,7 +99,12 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public Page<MemberResponse> convertToMemberDTOWithoutPW(Page<Member> pagedMember) {
+    public Page<MemberResponse> findAllReturnPagedMemberResponse(Pageable pageable){
+        Page<Member> pagedMember = memberRepository.findAll(pageable);
+        return convertFromPagedMemberToPagedMemberResponse(pagedMember);
+    }
+
+    private Page<MemberResponse> convertFromPagedMemberToPagedMemberResponse(Page<Member> pagedMember) {
         return pagedMember.map(member -> new MemberResponse(
                 member.getId(),
                 member.getEmail(),
@@ -111,9 +114,20 @@ public class MemberServiceImpl implements MemberService {
         ));
     }
 
+    private MemberResponse convertFromMemberToMemberResponse(Member member){
+        return new MemberResponse(
+                member.getId(),
+                member.getEmail(),
+                member.getName(),
+                member.getPhone(),
+                member.getRole()
+        );
+    }
+
     @Override
-    public Page<Member> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
-        return memberRepository.findMembers(name, email, phone, role, content, pageable);
+    public Page<MemberResponse> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
+        Page<Member> pagedMember = memberRepository.findMembers(name, email, phone, role, content, pageable);
+        return convertFromPagedMemberToPagedMemberResponse(pagedMember);
     }
 
     @Override
@@ -211,14 +225,15 @@ public class MemberServiceImpl implements MemberService {
         }
 
         Member updatedMember = memberRepository.save(existingMember);
-        return new MemberResponse(updatedMember.getId(), updatedMember.getEmail(), updatedMember.getName(), updatedMember.getPhone(), updatedMember.getRole());
+        return convertFromMemberToMemberResponse(updatedMember);
     }
 
     @Override
     @Transactional
-    public void deleteById(Long memberId) {
-        findById(memberId);
+    public String deleteById(Long memberId) {
+        String email = findById(memberId).getEmail();
         memberRepository.deleteById(memberId);
+        return email;
     }
 
 }

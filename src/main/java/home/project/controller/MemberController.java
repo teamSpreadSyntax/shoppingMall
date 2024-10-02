@@ -116,14 +116,13 @@ public class MemberController {
 
         pageable = pageUtil.pageable(pageable);
 
-        Page<Member> pagedMember = memberService.findAll(pageable);
+        Page<MemberResponse> pagedMemberResponse = memberService.findAllReturnPagedMemberResponse(pageable);
 
-        Page<MemberResponse> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(pagedMember);
 
         String successMessage = "전체 회원입니다.";
-        long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
-        int page = pagedMemberDTOWithoutPw.getNumber();
-        return new CustomResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        long totalCount = pagedMemberResponse.getTotalElements();
+        int page = pagedMemberResponse.getNumber();
+        return new CustomResponseEntity<>(pagedMemberResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
 
     }
 
@@ -152,14 +151,13 @@ public class MemberController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<Member> pagedMember = memberService.findMembers(name, email, phone, role, content, pageable);
-        Page<MemberResponse> pagedMemberDTOWithoutPw = memberService.convertToMemberDTOWithoutPW(pagedMember);
-        String successMessage = memberService.stringBuilder(name, email, phone, role, content, pagedMemberDTOWithoutPw);
+        Page<MemberResponse> pagedMemberResponse = memberService.findMembers(name, email, phone, role, content, pageable);
+        String successMessage = memberService.stringBuilder(name, email, phone, role, content, pagedMemberResponse);
 
-        long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
-        int page = pagedMemberDTOWithoutPw.getNumber();
+        long totalCount = pagedMemberResponse.getTotalElements();
+        int page = pagedMemberResponse.getNumber();
 
-        return new CustomResponseEntity<>(pagedMemberDTOWithoutPw.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        return new CustomResponseEntity<>(pagedMemberResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "본인확인 메서드", description = "본인확인 메서드입니다.")
@@ -189,7 +187,7 @@ public class MemberController {
         response.put("successMessage", "본인 확인이 완료되었습니다.");
         response.put("verificationToken", verificationToken);
 
-        return new CustomResponseEntity<>(Optional.of(response), "본인 확인 성공", HttpStatus.OK);
+        return new CustomResponseEntity<>(response, "본인 확인 성공", HttpStatus.OK);
 
     }
 
@@ -232,8 +230,7 @@ public class MemberController {
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
-        String email = memberService.findById(memberId).getEmail();
-        memberService.deleteById(memberId);
+        String email = memberService.deleteById(memberId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email + "(id:" + memberId + ")님의 계정이 삭제되었습니다.");
         return new CustomResponseEntity<>(Optional.of(responseMap), "회원 삭제 성공", HttpStatus.OK);
