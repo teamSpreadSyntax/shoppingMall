@@ -1,15 +1,12 @@
 package home.project.controller;
 
 
-import home.project.domain.*;
-import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.ProductResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.service.ProductService;
-import home.project.util.CategoryCode;
 import home.project.util.PageUtil;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,8 +30,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Tag(name = "상품", description = "상품관련 API입니다")
 @RequestMapping(path = "/api/product")

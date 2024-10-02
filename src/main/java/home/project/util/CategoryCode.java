@@ -1,3 +1,4 @@
+/*
 package home.project.util;
 
 public class CategoryCode {
@@ -81,3 +82,4 @@ public class CategoryCode {
         }
     }
 }
+*/
