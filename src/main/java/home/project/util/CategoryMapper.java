@@ -81,10 +81,33 @@ public class CategoryMapper {
         String lowercaseCategory = category.toLowerCase();
         return categoryMap.entrySet().stream()
                 .filter(entry -> entry.getValue().stream()
-                        .anyMatch(keyword -> keyword.toLowerCase().contains(lowercaseCategory)
-                                || lowercaseCategory.contains(keyword.toLowerCase())))
-                .findFirst()
+                        .anyMatch(keyword -> matchKeyword(keyword.toLowerCase(), lowercaseCategory)))
+                .max((e1, e2) -> compareMatches(e1.getValue(), e2.getValue(), lowercaseCategory))
                 .map(Map.Entry::getKey)
                 .orElse("0000");  // 기본값
+    }
+
+    private static boolean matchKeyword(String keyword, String category) {
+        return keyword.equals(category) ||
+                keyword.contains(category) ||
+                category.contains(keyword);
+    }
+
+    private static int compareMatches(List<String> keywords1, List<String> keywords2, String category) {
+        int score1 = calculateMatchScore(keywords1, category);
+        int score2 = calculateMatchScore(keywords2, category);
+        return Integer.compare(score1, score2);
+    }
+
+    private static int calculateMatchScore(List<String> keywords, String category) {
+        return keywords.stream()
+                .mapToInt(keyword -> {
+                    if (keyword.equalsIgnoreCase(category)) return 100;  // 완전 일치
+                    if (keyword.toLowerCase().contains(category)) return 50;  // 키워드가 카테고리를 포함
+                    if (category.contains(keyword.toLowerCase())) return 25;  // 카테고리가 키워드를 포함
+                    return 0;
+                })
+                .max()
+                .orElse(0);
     }
 }
