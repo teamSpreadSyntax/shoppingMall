@@ -5,6 +5,7 @@ import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.dto.requestDTO.UpdateCategoryRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
+import home.project.dto.responseDTO.CategoryResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.util.PageUtil;
@@ -131,9 +132,8 @@ public class CategoryController {
     public ResponseEntity<?> updateCategory(@RequestBody @Valid UpdateCategoryRequestDTO updatecategoryRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        categoryService.update(updatecategoryRequestDTO);
+        CategoryResponse updatedCategory = categoryService.update(updatecategoryRequestDTO);
         String successMessage = "카테고리 정보가 수정되었습니다.";
-        Category updatedCategory = categoryService.findById(updatecategoryRequestDTO.getId());
         return new CustomResponseEntity<>(updatedCategory, successMessage, HttpStatus.OK);
     }
 

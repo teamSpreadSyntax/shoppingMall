@@ -5,6 +5,7 @@ import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
+import home.project.repository.CategoryRepository;
 import home.project.repository.ProductRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     @Transactional
@@ -44,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = new Product();
         product.setBrand(createProductRequestDTO.getBrand());
-        product.setCategory(createProductRequestDTO.getCategory());
+        product.setCategory(categoryRepository.findByCode(createProductRequestDTO.getCategory()).orElseThrow(() -> new IdNotFoundException(createProductRequestDTO.getCategory() + "(으)로 등록된 카테고리가 없습니다.")));
         product.setProductNum(timeStamp + createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory().toString());
         product.setSoldQuantity(createProductRequestDTO.getSoldQuantity());
         product.setName(createProductRequestDTO.getName());
@@ -146,7 +148,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         if (updateProductRequestDTO.getCategory() != null) {
-            existingProduct.setCategory(updateProductRequestDTO.getCategory());
+            existingProduct.setCategory(categoryRepository.findByCode(updateProductRequestDTO.getCategory()).orElseThrow(() -> new IdNotFoundException(updateProductRequestDTO.getCategory() + "(으)로 등록된 카테고리가 없습니다.")));
         }
 
         if (existingProduct.equals(beforeUpdate)) {

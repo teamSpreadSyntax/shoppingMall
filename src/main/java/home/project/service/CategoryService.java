@@ -3,6 +3,7 @@ package home.project.service;
 import home.project.domain.Category;
 import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.dto.requestDTO.UpdateCategoryRequestDTO;
+import home.project.dto.responseDTO.CategoryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -17,7 +18,7 @@ public interface CategoryService {
 
     void validateCategoryCode(String code, int level);
 
-    void update(UpdateCategoryRequestDTO updateCategoryRequestDTO);
+    CategoryResponse update(UpdateCategoryRequestDTO updateCategoryRequestDTO);
 
     void delete(Long categoryId);
 }
