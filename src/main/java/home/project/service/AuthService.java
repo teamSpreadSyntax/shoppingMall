@@ -13,8 +13,6 @@ public interface AuthService {
 
     TokenResponse refreshToken(String refreshToken);
 
-    String logout(Long id);
-
     void addAuthority(Long id, RoleType authority);
 
     String roleMessage(Long id, RoleType authority);
