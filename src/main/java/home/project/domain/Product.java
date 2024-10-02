@@ -1,5 +1,8 @@
 package home.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,6 +18,9 @@ import org.hibernate.annotations.Check;
 @Getter
 @Setter
 @EqualsAndHashCode(of = {"id", "productNum", "name", "brand", "category", "stock", "soldQuantity"})
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id")
 public class Product {
 
     /**
@@ -51,8 +57,9 @@ public class Product {
      * - 이름: category
      * - 타입: VARCHAR(255) (기본값)
      */
-    @Column(name = "category")
-    private String category;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     /**
      * 상품의 고유 번호입니다.

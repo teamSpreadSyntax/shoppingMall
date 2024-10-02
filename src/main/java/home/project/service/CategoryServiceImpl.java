@@ -4,10 +4,12 @@ import home.project.domain.Category;
 import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.dto.requestDTO.UpdateCategoryRequestDTO;
+import home.project.dto.responseDTO.CategoryResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
 import home.project.repository.ProductRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final EntityManager entityManager;
 
     @Override
     @Transactional
@@ -73,7 +76,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void update(UpdateCategoryRequestDTO updateCategoryRequestDTO) {
+    public CategoryResponse update(UpdateCategoryRequestDTO updateCategoryRequestDTO) {
         Category existingCategory = findById(updateCategoryRequestDTO.getId());
 
         boolean isModified = false;
@@ -82,50 +85,71 @@ public class CategoryServiceImpl implements CategoryService {
         boolean isNameDuplicate = false;
 
         String oldCategoryCode = existingCategory.getCode();
+        String newCategoryCode = updateCategoryRequestDTO.getCode();
+        Integer newLevel = updateCategoryRequestDTO.getLevel();
 
-        if (updateCategoryRequestDTO.getCode() != null && !updateCategoryRequestDTO.getCode().equals(existingCategory.getCode())) {
-            if (categoryRepository.existsByCode(updateCategoryRequestDTO.getCode())) {
-                isCodeDuplicate = true;
-            }
-            existingCategory.setCode(updateCategoryRequestDTO.getCode());
-            isModified = true;
-            isCategoryCodeModified = true;
+        if (newCategoryCode != null || newLevel != null) {
+            String codeToValidate = newCategoryCode != null ? newCategoryCode : oldCategoryCode;
+            int levelToValidate = newLevel != null ? newLevel : existingCategory.getLevel();
+            validateCategoryCode(codeToValidate, levelToValidate);
         }
 
-        if (updateCategoryRequestDTO.getName() != null && !updateCategoryRequestDTO.getName().equals(existingCategory.getName()))  {
-                if (categoryRepository.existsByName(updateCategoryRequestDTO.getName())) {
-                isNameDuplicate = true;
+        if (newCategoryCode != null && !newCategoryCode.equals(oldCategoryCode)) {
+            if (categoryRepository.existsByCode(newCategoryCode)) {
+                throw new DataIntegrityViolationException("이미 사용 중인 코드입니다.");
+            }
+            isCategoryCodeModified = true;
+            isModified = true;
+        }
+
+        if (newLevel != null && !newLevel.equals(existingCategory.getLevel())) {
+            existingCategory.setLevel(newLevel);
+            isModified = true;
+        }
+
+
+        if (updateCategoryRequestDTO.getName() != null && !updateCategoryRequestDTO.getName().equals(existingCategory.getName())) {
+            if (categoryRepository.existsByName(updateCategoryRequestDTO.getName())) {
+                throw new DataIntegrityViolationException("이미 사용 중인 카테고리명 입니다.");
             }
             existingCategory.setName(updateCategoryRequestDTO.getName());
             isModified = true;
         }
 
-        if (updateCategoryRequestDTO.getLevel() != null && !updateCategoryRequestDTO.getLevel().equals(existingCategory.getLevel())) {
-            validateCategoryLevel(updateCategoryRequestDTO.getLevel());
-            existingCategory.setLevel(updateCategoryRequestDTO.getLevel());
-            isModified = true;
-        }
+//        if (updateCategoryRequestDTO.getLevel() != null && !updateCategoryRequestDTO.getLevel().equals(existingCategory.getLevel())) {
+//            validateCategoryLevel(updateCategoryRequestDTO.getLevel());
+//            existingCategory.setLevel(updateCategoryRequestDTO.getLevel());
+//            isModified = true;
+//        }
 
-        if (isCodeDuplicate && isNameDuplicate) {
-            throw new DataIntegrityViolationException("이미 사용 중인 코드와 카테고리명 입니다.");
-        } else if (isCodeDuplicate) {
-            throw new DataIntegrityViolationException("이미 사용 중인 코드입니다.");
-        } else if (isNameDuplicate) {
-            throw new DataIntegrityViolationException("이미 사용 중인 카테고리명 입니다.");
-        }
 
         if (!isModified) {
             throw new NoChangeException("변경된 카테고리 정보가 없습니다.");
         }
 
+        setCategoryParentForUpdate(existingCategory, updateCategoryRequestDTO);
 
-        setCategoryParentFofUpdate(existingCategory, updateCategoryRequestDTO);
 
-        if(isCategoryCodeModified){
-            updateCategoryAndProductCodes(oldCategoryCode, existingCategory.getCode());
+        if (isCategoryCodeModified) {
+            updateCategoryAndProductCodes(oldCategoryCode, newCategoryCode);
+        }
+
+        entityManager.flush();
+        entityManager.clear();
+
+
+        Category updatedCategory = categoryRepository.findById(existingCategory.getId()).orElseThrow();
+
+        if (isCategoryCodeModified) {
+            updatedCategory.setCode(newCategoryCode);
         }
 
         categoryRepository.save(existingCategory);
+
+        CategoryResponse categoryResponse = new CategoryResponse(existingCategory.getId(), existingCategory.getCode(),existingCategory.getName(), existingCategory.getLevel(), updatedCategory.getParent() != null ? updatedCategory.getParent().getId() : null
+        );
+
+        return categoryResponse;
     }
 
     private void updateCategoryAndProductCodes(String oldCode, String newCode) {
@@ -134,37 +158,17 @@ public class CategoryServiceImpl implements CategoryService {
 
         for (Category category : categoriesToUpdate) {
             String oldCategoryCode = category.getCode();
-            String newCategoryCode;
-
-            if (oldCategoryCode.equals(oldCode)) {
-                newCategoryCode = newCode;
-            } else {
-                newCategoryCode = newCode + oldCategoryCode.substring(oldCode.length());
-            }
+            String newCategoryCode = oldCategoryCode.equals(oldCode) ? newCode : newCode + oldCategoryCode.substring(oldCode.length());
 
             category.setCode(newCategoryCode);
 
-            List<Product> categoryProducts = productRepository.findAllByCategory(oldCategoryCode);
+            List<Product> categoryProducts = productRepository.findAllByCategory(category);
             for (Product product : categoryProducts) {
-                product.setCategory(newCategoryCode);
-                productsToUpdate.add(product);
-            }
-        }
-
-        List<Product> subCategoryProducts = productRepository.findAllByCategoryStartingWith(oldCode);
-        for (Product product : subCategoryProducts) {
-            if (!productsToUpdate.contains(product)) {
-                String oldProductCategory = product.getCategory();
-                String newProductCategory = newCode + oldProductCategory.substring(oldCode.length());
-                product.setCategory(newProductCategory);
-
                 String oldProductNum = product.getProductNum();
-                String newProductNum = oldProductNum.replace(oldProductCategory, newProductCategory);
+                String newProductNum = oldProductNum.replace(oldCategoryCode, newCategoryCode);
                 product.setProductNum(newProductNum);
-
                 productsToUpdate.add(product);
             }
-
         }
 
         categoryRepository.saveAll(categoriesToUpdate);
@@ -204,15 +208,15 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private void setCategoryParentFofUpdate(Category category, UpdateCategoryRequestDTO dto) {
+    private void setCategoryParentForUpdate(Category category, UpdateCategoryRequestDTO dto) {
         if (dto.getLevel() == 1) {
             category.setParent(null);
-        } else {
+        } else if (dto.getCode() != null) {
             String parentCode = dto.getCode().substring(0, dto.getCode().length() - 2);
-            Category parentCategory = categoryRepository.findByCode(parentCode).orElseThrow(() -> new IllegalArgumentException("상위 카테고리 코드를 찾을 수 없습니다. 상위 카테고리를 먼저 생성하고 다시 시도해주세요."));
+            Category parentCategory = categoryRepository.findByCode(parentCode)
+                    .orElseThrow(() -> new IllegalArgumentException("상위 카테고리 코드를 찾을 수 없습니다. 상위 카테고리를 먼저 생성하고 다시 시도해주세요."));
 
             category.setParent(parentCategory);
-            parentCategory.getChildren().add(category);
         }
     }
 }
