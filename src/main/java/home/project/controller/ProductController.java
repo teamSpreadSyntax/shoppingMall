@@ -142,8 +142,8 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        String categoryCode = CategoryCode.generateCategoryCode(category, content);
-        Page<ProductResponse> productPage = productService.findProducts(brand, categoryCode, productName, content, pageable);
+//        String categoryCode = CategoryCode.generateCategoryCode(category, content);
+        Page<ProductResponse> productPage = productService.findProducts(brand, category, productName, content, pageable);
         String successMessage = productService.stringBuilder(brand, category, productName, content, productPage);
 
         long totalCount = productPage.getTotalElements();
