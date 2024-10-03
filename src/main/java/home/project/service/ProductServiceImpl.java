@@ -98,9 +98,11 @@ public class ProductServiceImpl implements ProductService {
 
         if (category != null && !category.isEmpty()) {
             categoryCode = getCode(category);
-        } else if (content != null && !content.isEmpty()) {
+        }
+        if (content != null && !content.isEmpty()) {
             categoryCode = getCode(content);
         }
+        System.out.println(categoryCode);
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
 

@@ -31,16 +31,15 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
             builder.and(product.brand.toLowerCase().like("%" + brand.toLowerCase() + "%"));
         }
         if (categoryCode != null && !categoryCode.isEmpty()) {
-            builder.and(product.category.code.toLowerCase().like("%" + categoryCode.toLowerCase() + "%"));
+            builder.and(product.category.code.toLowerCase().like(categoryCode.toLowerCase() + "%"));
         }
         if (productName != null && !productName.isEmpty()) {
             builder.and(product.name.toLowerCase().like("%" + productName.toLowerCase() + "%"));
         }
         if (content != null && !content.isEmpty()) {
-            builder.and(product.brand.toLowerCase()
-                    .concat(" ").concat(product.category.code.toLowerCase())
-                    .concat(" ").concat(product.name.toLowerCase())
-                    .like("%" + content.toLowerCase() + "%"));
+            builder.or(product.brand.lower().like("%" + content.toLowerCase() + "%"))
+                    .or(product.category.code.lower().like("%" + content.toLowerCase() + "%"))
+                    .or(product.name.lower().like("%" + content.toLowerCase() + "%"));
         }
 
         List<Product> results = queryFactory
