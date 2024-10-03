@@ -94,8 +94,13 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
+        String categoryCode = null;
 
-        String categoryCode = getCode(category);
+        if (category != null && !category.isEmpty()) {
+            categoryCode = getCode(category);
+        } else if (content != null && !content.isEmpty()) {
+            categoryCode = getCode(content);
+        }
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
