@@ -1,10 +1,7 @@
 package home.project.controller;
 
-import home.project.domain.Category;
-import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.dto.requestDTO.UpdateCategoryRequestDTO;
-import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.CategoryResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
@@ -27,7 +24,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 

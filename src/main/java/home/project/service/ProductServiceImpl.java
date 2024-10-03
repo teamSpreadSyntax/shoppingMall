@@ -8,8 +8,6 @@ import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
 import home.project.repository.ProductRepository;
-import home.project.util.CategoryMapper;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -140,17 +138,18 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse update(@Valid UpdateProductRequestDTO updateProductRequestDTO) {
+    public ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO) {
+
+        boolean isCategoryModified = false;
+        boolean isNameModified = false;
+        boolean isBrandModified = false;
+
         Product existingProduct = findById(updateProductRequestDTO.getId());
+
+        String newProductNum = reCreateProductNum(existingProduct.getProductNum(), updateProductRequestDTO);
+
         Product beforeUpdate = new Product();
         BeanUtils.copyProperties(existingProduct, beforeUpdate);
-
-        if (!updateProductRequestDTO.getProductNum().equals(existingProduct.getProductNum())) {
-            if (productRepository.existsByProductNum(updateProductRequestDTO.getProductNum())) {
-                throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
-            }
-            existingProduct.setProductNum(updateProductRequestDTO.getProductNum());
-        }
 
         if (updateProductRequestDTO.getStock() != null) {
             if (updateProductRequestDTO.getStock() < 0) {
@@ -168,23 +167,42 @@ public class ProductServiceImpl implements ProductService {
 
         if (updateProductRequestDTO.getName() != null) {
             existingProduct.setName(updateProductRequestDTO.getName());
+            isNameModified = true;
         }
 
         if (updateProductRequestDTO.getBrand() != null) {
             existingProduct.setBrand(updateProductRequestDTO.getBrand());
+            isBrandModified = true;
         }
 
         if (updateProductRequestDTO.getCategory() != null) {
             existingProduct.setCategory(categoryRepository.findByCode(updateProductRequestDTO.getCategory()).orElseThrow(() -> new IdNotFoundException(updateProductRequestDTO.getCategory() + "(으)로 등록된 카테고리가 없습니다.")));
+            isCategoryModified = true;
         }
 
         if (existingProduct.equals(beforeUpdate)) {
             throw new NoChangeException("변경된 상품 정보가 없습니다.");
         }
 
+        if(isBrandModified || isNameModified || isCategoryModified){
+            if (!newProductNum.equals(existingProduct.getProductNum())) {
+                if (productRepository.existsByProductNum(newProductNum)) {
+                    throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
+                }
+                existingProduct.setProductNum(newProductNum);
+            }
+        }
+
         Product product = productRepository.save(existingProduct);
 
         return convertFromProductToProductResponse(product);
+    }
+
+    private String reCreateProductNum(String oldProductNum, UpdateProductRequestDTO updateProductRequestDTO){
+        String frontOfOldProductNum = oldProductNum.substring(0,12);
+        String middleOfNewProductNum = "" + updateProductRequestDTO.getBrand().charAt(0) + updateProductRequestDTO.getName().charAt(0);
+        String newCategory = updateProductRequestDTO.getCategory();
+        return frontOfOldProductNum+middleOfNewProductNum+newCategory;
     }
 
     @Override
@@ -213,7 +231,6 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse decreaseStock(Long productId, Long stock) {
         Product product = findById(productId);
         Long currentStock = product.getStock();
-        Long newStock = Math.max(currentStock - stock, 0);//???
         if (currentStock <= 0 || stock > currentStock) {
             throw new DataIntegrityViolationException("재고가 부족합니다.");
         }
@@ -243,5 +260,7 @@ public class ProductServiceImpl implements ProductService {
                 product.getSoldQuantity()
                 );
     }
+
+
 
 }

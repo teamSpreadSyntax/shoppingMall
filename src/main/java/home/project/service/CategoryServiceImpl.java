@@ -159,8 +159,8 @@ public class CategoryServiceImpl implements CategoryService {
 
             category.setCode(newCategoryCode);
 
-            List<Product> categoryProducts = productRepository.findAllByCategory(category);
-            for (Product product : categoryProducts) {
+            List<Product> ProductList = productRepository.findAllByCategory(category);
+            for (Product product : ProductList) {
                 String oldProductNum = product.getProductNum();
                 String newProductNum = oldProductNum.replace(oldCategoryCode, newCategoryCode);
                 product.setProductNum(newProductNum);
