@@ -198,13 +198,6 @@ public class ProductServiceImpl implements ProductService {
         return convertFromProductToProductResponse(product);
     }
 
-    private String reCreateProductNum(String oldProductNum, UpdateProductRequestDTO updateProductRequestDTO){
-        String frontOfOldProductNum = oldProductNum.substring(0,12);
-        String middleOfNewProductNum = "" + updateProductRequestDTO.getBrand().charAt(0) + updateProductRequestDTO.getName().charAt(0);
-        String newCategory = updateProductRequestDTO.getCategory();
-        return frontOfOldProductNum+middleOfNewProductNum+newCategory;
-    }
-
     @Override
     @Transactional
     public void deleteById(Long productId) {
@@ -238,6 +231,13 @@ public class ProductServiceImpl implements ProductService {
         return convertFromProductToProductResponse(product);
     }
 
+    private String reCreateProductNum(String oldProductNum, UpdateProductRequestDTO updateProductRequestDTO){
+        String frontOfOldProductNum = oldProductNum.substring(0,12);
+        String middleOfNewProductNum = "" + updateProductRequestDTO.getBrand().charAt(0) + updateProductRequestDTO.getName().charAt(0);
+        String newCategory = updateProductRequestDTO.getCategory();
+        return frontOfOldProductNum+middleOfNewProductNum+newCategory;
+    }
+
     private Page<ProductResponse> convertFromPagedProductToPagedProductResponse(Page<Product> pagedProduct){
         return pagedProduct.map(productResponse -> new ProductResponse(
                 productResponse.getId(),
@@ -249,6 +249,7 @@ public class ProductServiceImpl implements ProductService {
                 productResponse.getSoldQuantity()
         ));
     }
+
     private ProductResponse convertFromProductToProductResponse(Product product){
         return new ProductResponse(
                 product.getId(),
