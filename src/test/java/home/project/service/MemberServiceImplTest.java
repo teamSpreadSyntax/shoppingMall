@@ -207,6 +207,25 @@ class MemberServiceImplTest {
             assertThrows(IdNotFoundException.class, () -> memberService.findById(1L));
         }
     }
+
+    @Nested
+    class FindByEmailTests {
+        @Test
+        void findByEmail_ExistingMember_ReturnsMember() {
+            when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+            Member findMember = memberService.findByEmail(member.getEmail());
+
+            assertNotNull(findMember);
+            assertEquals(member, findMember);
+        }
+
+        @Test
+        void findByEmail_NonExistingMember_ThrowsIdNotFoundException() {
+            when(memberRepository.findByEmail(member.getEmail())).thenReturn(Optional.empty());
+
+            assertThrows(IdNotFoundException.class, () -> memberService.findByEmail(member.getEmail()));
+        }
+    }
     @Nested
     class FindAllTests {
         @Test
