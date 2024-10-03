@@ -215,6 +215,7 @@ public class MemberController {
         MemberResponse MemberResponse = memberService.update(updateMemberRequestDTO, verificationToken);
 
         String successMessage = "회원 정보가 수정되었습니다.";
+
         return new CustomResponseEntity<>(MemberResponse, successMessage, HttpStatus.OK);
     }
 

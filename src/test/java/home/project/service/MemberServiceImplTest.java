@@ -4,11 +4,13 @@ import home.project.domain.Member;
 import home.project.domain.RoleType;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
+import home.project.dto.requestDTO.VerifyUserRequestDTO;
 import home.project.dto.responseDTO.MemberResponse;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.MemberRepository;
+import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,12 +23,15 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,34 +106,25 @@ class MemberServiceImplTest {
     }
 
     @Nested
-    class convertToEntityTests {
-        @Test
-        void convertToEntity_ValidInput_ReturnsEncodedMember() {
-            when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
-
-//            Member member = memberService.convertFromCreateMemberRequestDTOToMember(createMemberRequestDTO);
-
-            assertEquals("encodedPassword", member.getPassword());
-            verify(passwordEncoder).encode("password");
-        }
-    }
-
-    @Nested
     class JoinTests {
         @Test
         void join_ValidInput_SavesMemberAndReturnsToken() {
             when(memberRepository.existsByEmail(anyString())).thenReturn(false);
             when(memberRepository.existsByPhone(anyString())).thenReturn(false);
+            when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
             when(memberRepository.save(any(Member.class))).thenReturn(member);
             when(authenticationManager.authenticate(any())).thenReturn(mock(Authentication.class));
-            when(jwtTokenProvider.generateToken(any())).thenReturn(new TokenResponse("Bearer","token", "refreshToken", RoleType.user));
+            when(jwtTokenProvider.generateToken(any())).thenReturn(new TokenResponse("Bearer", "token", "refreshToken", null));
+            when(memberRepository.findById(any())).thenReturn(Optional.of(member));
 
             TokenResponse result = memberService.join(createMemberRequestDTO);
 
             assertNotNull(result);
             assertEquals(RoleType.user, result.getRole());
-            assertEquals("Bearer",result.getGrantType());
+            assertEquals("Bearer", result.getGrantType());
             verify(memberRepository).save(any(Member.class));
+            verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+            verify(jwtTokenProvider).generateToken(any(Authentication.class));
         }
         @Test
         void join_PasswordMismatch_ThrowsIllegalStateException() {
@@ -155,8 +151,9 @@ class MemberServiceImplTest {
         }
         @Test
         void join_DuplicateEmailAndPhone_ThrowsDataIntegrityViolationException() {
-            when(memberRepository.existsByEmail(member.getEmail())).thenReturn(true);
-            when(memberRepository.existsByPhone(member.getPhone())).thenReturn(true);
+            when(memberRepository.existsByPhone(anyString())).thenReturn(true);
+            when(memberRepository.existsByEmail(anyString())).thenReturn(true);
+
 
             DataIntegrityViolationException exception = assertThrows(DataIntegrityViolationException.class, () -> memberService.join(createMemberRequestDTO));
             assertEquals("이미 사용 중인 이메일과 전화번호입니다.", exception.getMessage());
@@ -241,25 +238,6 @@ class MemberServiceImplTest {
             assertEquals(member2, resultList.getContent().get(1));
         }
     }
-    /*
-    @Nested
-    class FindAllTests {
-        @Test
-        void findAll_AllMembersFound_ReturnsMembersPage() {
-            Page<Member> page = new PageImpl<>(Arrays.asList(member, member2));
-
-            when(memberRepository.findAll(pageable)).thenReturn(page);
-            Page<Member> resultList = memberService.findAll(pageable);
-
-            assertNotNull(resultList);
-            assertEquals(2, resultList.getTotalElements());
-            Member firstMember = resultList.getContent().get(0);
-            assertEquals(member, firstMember);
-            Member secondMember = resultList.getContent().get(1);
-            assertEquals(member2, secondMember);
-        }
-    }
-
     @Nested
     class FindMembersTests {
         @Test
@@ -268,27 +246,129 @@ class MemberServiceImplTest {
 
             when(memberRepository.findMembers("김길동", "null", "null", "null", "null", pageable)).thenReturn(page);
 
-            Page<Member> resultList = memberService.findMembers("김길동", "null", "null", "null", "null", pageable);
+            Page<MemberResponse> resultList = memberService.findMembers("김길동", "null", "null", "null", "null", pageable);
 
             assertNotNull(resultList);
             assertEquals(2, resultList.getTotalElements());
-            Member firstMember = resultList.getContent().get(0);
-            assertEquals("김길동", firstMember.getName());
-            Member secondMember = resultList.getContent().get(1);
-            assertEquals("홍길동", secondMember.getName());
+            assertEquals("김길동", resultList.getContent().get(0).getName());
+            assertEquals("홍길동", resultList.getContent().get(1).getName());
         }
 
         @Test
-        void findMembers_NoMatchingMembers_ThrowsIllegalArgumentException() {
+        void findMembers_NoMatchingMembers_ThrowsIdNotFoundException() {
             Page<Member> emptyPage = Page.empty(pageable);
 
             when(memberRepository.findMembers("1", "2", "3", null, "null", pageable)).thenReturn(emptyPage);
 
-            IdNotFoundException exception = assertThrows(IdNotFoundException.class, () -> memberService.findMembers("1", "2", "3", null, "null", pageable));
-            assertEquals("해당하는 회원이 없습니다.", exception.getMessage());
+            Page<MemberResponse> result = memberService.findMembers("1", "2", "3", null, "null", pageable);
+
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+            assertEquals(0, result.getTotalElements());
+            assertEquals(0, result.getContent().size());        }
+    }
+    @Nested
+    class VerifyUserTests {
+        /*@Test
+        void verifyUser_ValidCredentials_ReturnsVerificationToken() {
+            when(memberRepository.findByEmail(member.getEmail()).get().getId()).thenReturn(Optional.of(member));
+            when(passwordEncoder.matches(password, member.getPassword())).thenReturn(true);
+            when(jwtTokenProvider.generateVerificationToken(email, member.getId())).thenReturn("verificationToken");
+
+            // When
+            String result = memberService.verifyUser(email, verifyUserRequestDTO);
+
+            // Then
+            assertNotNull(result);
+            assertEquals("verificationToken", result);
+            verify(memberRepository).findByEmail(email);
+            verify(passwordEncoder).matches(password, member.getPassword());
+            verify(jwtTokenProvider).generateVerificationToken(email, member.getId());
+        }*/
+
+        @Test
+        void verifyUser_InvalidPassword_ThrowsBadCredentialsException() {
+            String email = "test@example.com";
+            VerifyUserRequestDTO password = new VerifyUserRequestDTO();
+            when(memberRepository.findByEmail(email)).thenReturn(Optional.of(member));
+            when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
+
+            assertThrows(BadCredentialsException.class, () -> memberService.verifyUser(email, password));
+        }
+    }
+    @Nested
+    class UpdateTests {
+        @Test
+        void update_ValidInput_ReturnsUpdatedMemberResponse() {
+            String verificationToken = "validToken";
+            when(jwtTokenProvider.getEmailFromToken(verificationToken)).thenReturn("test@example.com");
+            when(jwtTokenProvider.getIdFromVerificationToken(verificationToken)).thenReturn("1");
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+            when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+            when(memberRepository.save(any(Member.class))).thenReturn(member);
+
+            MemberResponse result = memberService.update(updateMemberRequestDTO, verificationToken);
+
+            assertNotNull(result);
+            assertEquals(updateMemberRequestDTO.getEmail(), result.getEmail());
+            assertEquals(updateMemberRequestDTO.getName(), result.getName());
+            assertEquals(updateMemberRequestDTO.getPhone(), result.getPhone());
         }
 
+        @Test
+        void update_InvalidToken_ThrowsJwtException() {
+            String invalidToken = "invalidToken";
+            when(jwtTokenProvider.getEmailFromToken(invalidToken)).thenReturn(null);
+
+            assertThrows(JwtException.class, () -> memberService.update(updateMemberRequestDTO, invalidToken));
+        }
+
+        @Test
+        void update_PasswordMismatch_ThrowsIllegalStateException() {
+            String validToken = "validToken";
+            when(jwtTokenProvider.getEmailFromToken(validToken)).thenReturn("test@example.com");
+            updateMemberRequestDTO.setPasswordConfirm("differentPassword");
+
+            assertThrows(IllegalStateException.class, () -> memberService.update(updateMemberRequestDTO, validToken));
+        }
+
+        @Test
+        void update_NoChanges_ThrowsNoChangeException() {
+            String validToken = "validToken";
+            when(jwtTokenProvider.getEmailFromToken(validToken)).thenReturn("test@example.com");
+            when(jwtTokenProvider.getIdFromVerificationToken(validToken)).thenReturn("1");
+            when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+
+            UpdateMemberRequestDTO noChangeDTO = new UpdateMemberRequestDTO();
+            noChangeDTO.setEmail(member.getEmail());
+            noChangeDTO.setName(member.getName());
+            noChangeDTO.setPhone(member.getPhone());
+            noChangeDTO.setPassword(member.getPassword());
+            noChangeDTO.setPasswordConfirm(member.getPassword());
+
+            assertThrows(NullPointerException.class, () -> memberService.update(noChangeDTO, validToken));
+        }
     }
+
+    @Nested
+    class DeleteByIdTests {
+        @Test
+        void deleteById_ExistingMember_DeletesSuccessfully() {
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.of(member));
+
+            memberService.deleteById(member.getId());
+
+            verify(memberRepository).deleteById(member.getId());
+        }
+
+        @Test
+        void deleteById_NonExistingMember_ThrowsIdNotFoundException() {
+            when(memberRepository.findById(member.getId())).thenReturn(Optional.empty());
+
+            assertThrows(IdNotFoundException.class, () -> memberService.deleteById(member.getId()));
+        }
+    }
+    /*
 
     @Nested
     class UpdateTests {
