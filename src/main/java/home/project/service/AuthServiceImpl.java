@@ -64,6 +64,7 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
+    @Transactional
     public void addAuthority(Long id, RoleType authority) {
         Member member = memberService.findById(id);
         member.setRole(authority);
@@ -71,6 +72,7 @@ public class AuthServiceImpl implements AuthService {
         memberRepository.save(member);
     }
 
+    @Override
     public String roleMessage(Long id, RoleType authority) {
         String name = memberService.findById(id).getName();
         String successMessage = "";

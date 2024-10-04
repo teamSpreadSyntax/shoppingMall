@@ -8,6 +8,7 @@ import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
 import home.project.repository.ProductRepository;
+import home.project.util.StringBuilderUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -100,34 +101,10 @@ public class ProductServiceImpl implements ProductService {
         if (content != null && !content.isEmpty()) {
             categoryCode = getCode(content);
         }
-        System.out.println(categoryCode);
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
         return convertFromPagedProductToPagedProductResponse(pagedProduct);
-    }
-
-    @Override
-    public String stringBuilder(String brand, String category, String productName, String content, Page<ProductResponse> productPage) {
-        StringBuilder searchCriteria = new StringBuilder();
-        if (brand != null) searchCriteria.append(brand).append(", ");
-        if (category != null) searchCriteria.append(category).append(", ");
-        if (productName != null) searchCriteria.append(productName).append(", ");
-        if (content != null) searchCriteria.append(content).append(", ");
-
-        String successMessage;
-        if (!searchCriteria.isEmpty()) {
-            searchCriteria.setLength(searchCriteria.length() - 2);
-            successMessage = "검색 키워드 : " + searchCriteria;
-        } else {
-            successMessage = "전체 상품입니다.";
-        }
-        long totalCount = productPage.getTotalElements();
-
-        if (totalCount == 0) {
-            successMessage = "검색 결과가 없습니다. 검색 키워드 : " + searchCriteria;
-        }
-        return successMessage;
     }
 
     @Override
@@ -224,12 +201,15 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse decreaseStock(Long productId, Long stock) {
         Product product = findById(productId);
         Long currentStock = product.getStock();
+        Long newStock = Math.max(currentStock - stock, 0);
         if (currentStock <= 0 || stock > currentStock) {
             throw new DataIntegrityViolationException("재고가 부족합니다.");
         }
+        product.setStock(newStock);
         productRepository.save(product);
         return convertFromProductToProductResponse(product);
     }
+
 
     private String reCreateProductNum(String oldProductNum, UpdateProductRequestDTO updateProductRequestDTO){
         String frontOfOldProductNum = oldProductNum.substring(0,12);

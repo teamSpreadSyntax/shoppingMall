@@ -23,6 +23,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Transactional(readOnly = true)
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
@@ -172,8 +173,8 @@ public class CategoryServiceImpl implements CategoryService {
         productRepository.saveAll(productsToUpdate);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public void delete(Long categoryId) {
         findById(categoryId);
         categoryRepository.deleteById(categoryId);

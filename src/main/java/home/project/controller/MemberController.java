@@ -11,6 +11,7 @@ import home.project.response.CustomResponseEntity;
 import home.project.service.MemberService;
 
 import home.project.util.PageUtil;
+import home.project.util.StringBuilderUtil;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -152,7 +153,8 @@ public class MemberController {
         pageable = pageUtil.pageable(pageable);
 
         Page<MemberResponse> pagedMemberResponse = memberService.findMembers(name, email, phone, role, content, pageable);
-        String successMessage = memberService.stringBuilder(name, email, phone, role, content, pagedMemberResponse);
+
+        String successMessage = StringBuilderUtil.buildMemberSearchCriteria(name, email, phone, role, content, pagedMemberResponse);
 
         long totalCount = pagedMemberResponse.getTotalElements();
         int page = pagedMemberResponse.getNumber();

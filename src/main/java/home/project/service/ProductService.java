@@ -18,8 +18,6 @@ public interface ProductService {
 
     Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable);
 
-    String stringBuilder(String brand, String category, String productName, String content, Page<ProductResponse> productPage);
-
     Page<ProductResponse> brandList(Pageable pageable);
 
     ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO);

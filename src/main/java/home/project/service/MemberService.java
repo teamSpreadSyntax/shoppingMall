@@ -24,8 +24,6 @@ public interface MemberService {
     Page<MemberResponse> findAllReturnPagedMemberResponse(Pageable pageable);
 
 
-    String stringBuilder(String name, String email, String phone, String role, String content, Page<MemberResponse> pagedMemberDTOWithoutPw);
-
     Page<MemberResponse> findMembers(String name, String email, String phone, String role, String content, Pageable pageable);
 
     String verifyUser(String email, VerifyUserRequestDTO password);

@@ -8,6 +8,7 @@ import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.service.ProductService;
 import home.project.util.PageUtil;
+import home.project.util.StringBuilderUtil;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -141,7 +142,8 @@ public class ProductController {
         pageable = pageUtil.pageable(pageable);
 
         Page<ProductResponse> productPage = productService.findProducts(brand, category, productName, content, pageable);
-        String successMessage = productService.stringBuilder(brand, category, productName, content, productPage);
+
+        String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
 
         long totalCount = productPage.getTotalElements();
         int page = productPage.getNumber();

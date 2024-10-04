@@ -10,6 +10,7 @@ import home.project.dto.responseDTO.TokenResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.MemberRepository;
+import home.project.util.StringBuilderUtil;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -128,30 +129,6 @@ public class MemberServiceImpl implements MemberService {
     public Page<MemberResponse> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
         Page<Member> pagedMember = memberRepository.findMembers(name, email, phone, role, content, pageable);
         return convertFromPagedMemberToPagedMemberResponse(pagedMember);
-    }
-
-    @Override
-    public String stringBuilder(String name, String email, String phone, String role, String content, Page<MemberResponse> pagedMemberDTOWithoutPw) {
-        StringBuilder searchCriteria = new StringBuilder();
-        if (name != null) searchCriteria.append(name).append(", ");
-        if (email != null) searchCriteria.append(email).append(", ");
-        if (phone != null) searchCriteria.append(phone).append(", ");
-        if (role != null) searchCriteria.append(role).append(", ");
-        if (content != null) searchCriteria.append(content).append(", ");
-
-        String successMessage;
-        if (!searchCriteria.isEmpty()) {
-            searchCriteria.setLength(searchCriteria.length() - 2);
-            successMessage = "검색 키워드 : " + searchCriteria;
-        } else {
-            successMessage = "전체 회원입니다.";
-        }
-        long totalCount = pagedMemberDTOWithoutPw.getTotalElements();
-        if (totalCount == 0) {
-            successMessage = "검색 결과가 없습니다. 검색 키워드 : " + searchCriteria;
-        }
-
-        return successMessage;
     }
 
     @Override
