@@ -221,8 +221,8 @@ public class CategoryServiceImpl implements CategoryService {
     private Page<CategoryResponse> convertFromPagedCategoryToPagedCategoryResponse(Page<Category> pagedCategory){
         return pagedCategory.map(categoryResponse -> new CategoryResponse(
                 categoryResponse.getId(),
-                categoryResponse.getName(),
                 categoryResponse.getCode(),
+                categoryResponse.getName(),
                 categoryResponse.getLevel(),
                 categoryResponse.getParent() != null ? categoryResponse.getParent().getId() : null
         ));
@@ -230,8 +230,8 @@ public class CategoryServiceImpl implements CategoryService {
     private CategoryResponse convertFromCategoryToCategoryResponse(Category category){
         return new CategoryResponse(
                 category.getId(),
-                category.getName(),
                 category.getCode(),
+                category.getName(),
                 category.getLevel(),
                 category.getParent() != null ? category.getParent().getId() : null
         );
