@@ -1,5 +1,6 @@
 package home.project.dto.requestDTO;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -36,17 +37,32 @@ public class CreateProductRequestDTO {
     private String category;
 
     /**
-     * 상품의 판매 수량입니다.
-     * 기본값은 0입니다.
-     */
-    private Long soldQuantity = 0L;
-
-    /**
      * 상품의 현재 재고 수량입니다.
      * 이 필드는 null이 될 수 없으며, 0 이상의 값이어야 합니다.
      */
     @Check(name = "stock", constraints = "stock >= 0")
     @NotNull(message = "상품의 현재재고를 입력해주세요.")
     private Long stock;
+
+    /**
+     * 상품의 판매 수량입니다.
+     * 기본값은 0입니다.
+     */
+    private Long soldQuantity = 0L;
+
+    @NotBlank(message = "상품의 가격을 입력해주세요.")
+    private Long price;
+
+    @NotBlank(message = "상품의 할인율을 입력해주세요.")
+    private Integer discountRate = 0;
+
+    @NotBlank(message = "상품의 불량수량을 입력해주세요.")
+    private Long defectiveStock = 0L;
+
+    @NotBlank(message = "상품의 상세정보를 입력해주세요.")
+    private String description;
+
+    @NotBlank(message = "상품의 이미지를 입력해주세요.")
+    private String imageUrl;
 
 }

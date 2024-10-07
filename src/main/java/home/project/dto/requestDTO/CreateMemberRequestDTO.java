@@ -1,11 +1,16 @@
 package home.project.dto.requestDTO;
 
+import home.project.domain.Member;
+import home.project.domain.MemberGender;
 import home.project.util.RegexPatterns;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 
 /**
  * 새로운 회원을 생성하기 위한 요청 데이터 전송 객체(DTO)입니다.
@@ -58,5 +63,17 @@ public class CreateMemberRequestDTO {
     @Pattern(regexp = RegexPatterns.PHONE_PATTERN, message = RegexPatterns.PHONE_MESSAGE)
     @Schema(description = "사용자 전화번호", required = true)
     private String phone;
+
+    @NotEmpty(message = "성별을 입력해주세요.")
+    @Schema(description = "성별", required = true)
+    private MemberGender gender;
+
+    @NotEmpty(message = "생일을 입력해주세요.")
+    @Schema(description = "생년월일", required = true)
+    private LocalDate birthDate;
+
+    @NotEmpty(message = "기본 배송 주소를 입력해주세요.")
+    @Schema(description = "기본 배송 주소", required = true)
+    private String defaultAddress;
 
 }

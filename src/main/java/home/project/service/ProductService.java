@@ -3,6 +3,7 @@ package home.project.service;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.ProductResponse;
+import home.project.dto.responseDTO.ProductResponseForManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -14,9 +15,16 @@ public interface ProductService {
 
     ProductResponse findByIdReturnProductResponse(Long productId);
 
+    ProductResponseForManager findByIdReturnProductResponseForManager(Long productId);
+
     Page<ProductResponse> findAll(Pageable pageable);
 
+    Page<ProductResponseForManager> findAllForManaging(Pageable pageable);
+
     Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable);
+
+    Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable);
+
 
     Page<ProductResponse> brandList(Pageable pageable);
 
@@ -24,8 +32,8 @@ public interface ProductService {
 
     void deleteById(Long productId);
 
-    ProductResponse increaseStock(Long productId, Long stock);
+    ProductResponseForManager increaseStock(Long productId, Long stock);
 
-    ProductResponse decreaseStock(Long productId, Long stock);
+    ProductResponseForManager decreaseStock(Long productId, Long stock);
 
 }

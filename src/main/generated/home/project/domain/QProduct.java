@@ -26,9 +26,23 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final QCategory category;
 
+    public final NumberPath<Long> defectiveStock = createNumber("defectiveStock", Long.class);
+
+    public final StringPath description = createString("description");
+
+    public final NumberPath<Integer> discountRate = createNumber("discountRate", Integer.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final StringPath imageUrl = createString("imageUrl");
+
     public final StringPath name = createString("name");
+
+    public final NumberPath<Long> price = createNumber("price", Long.class);
+
+    public final ListPath<ProductCoupon, QProductCoupon> productCoupons = this.<ProductCoupon, QProductCoupon>createList("productCoupons", ProductCoupon.class, QProductCoupon.class, PathInits.DIRECT2);
+
+    public final ListPath<ProductEvent, QProductEvent> productEvents = this.<ProductEvent, QProductEvent>createList("productEvents", ProductEvent.class, QProductEvent.class, PathInits.DIRECT2);
 
     public final StringPath productNum = createString("productNum");
 

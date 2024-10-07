@@ -111,7 +111,15 @@ public class MemberServiceImpl implements MemberService {
                 member.getEmail(),
                 member.getName(),
                 member.getPhone(),
-                member.getRole()
+                member.getRole(),
+                member.getGender(),
+                member.getBirthDate(),
+                member.getDefaultAddress(),
+                member.getSecondAddress(),
+                member.getThirdAddress(),
+                member.getGrade(),
+                member.getPoint(),
+                member.getMemberCoupons()
         ));
     }
 
@@ -121,7 +129,15 @@ public class MemberServiceImpl implements MemberService {
                 member.getEmail(),
                 member.getName(),
                 member.getPhone(),
-                member.getRole()
+                member.getRole(),
+                member.getGender(),
+                member.getBirthDate(),
+                member.getDefaultAddress(),
+                member.getSecondAddress(),
+                member.getThirdAddress(),
+                member.getGrade(),
+                member.getPoint(),
+                member.getMemberCoupons()
         );
     }
 

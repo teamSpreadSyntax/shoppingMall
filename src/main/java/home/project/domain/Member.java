@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 회원 정보를 나타내는 엔티티 클래스입니다.
  * 이 클래스는 회원의 기본 정보와 역할을 저장합니다.
@@ -66,7 +70,38 @@ public class Member {
      * 데이터베이스 컬럼 정보:
      * - 타입: VARCHAR(255) (EnumType.STRING 사용)
      */
+
+    @Column
+    private MemberGender gender;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
+
+    @Column(name = "default_address")
+    private String defaultAddress;
+
+    @Column(name = "secondAddress")
+    private String secondAddress = null;
+
+    @Column(name = "thirdAddress")
+    private String thirdAddress = null;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private RoleType role = RoleType.user;
+
+    @Column(name = "accumulated_purchase")
+    private Long accumulatedPurchase = 0L;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_grade")
+    private MemberGrade grade = MemberGrade.BRONZE;
+
+    @Column(nullable = false)
+    private Long point = 0L;
+
+    @OneToMany(mappedBy = "member")
+    private List<MemberCoupon> memberCoupons = new ArrayList<>();
+
+
 }

@@ -4,11 +4,11 @@ import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.ProductResponse;
+import home.project.dto.responseDTO.ProductResponseForManager;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
 import home.project.repository.ProductRepository;
-import home.project.util.StringBuilderUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -64,15 +64,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse findByIdReturnProductResponse(Long productId) {
         Product product = findById(productId);
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getBrand(),
-                product.getCategory().getCode(),
-                product.getProductNum(),
-                product.getStock(),
-                product.getSoldQuantity()
-        );
+        return convertFromProductToProductResponse(product);
+    }
+
+    @Override
+    public ProductResponseForManager findByIdReturnProductResponseForManager(Long productId) {
+        Product product = findById(productId);
+        return convertFromProductToProductResponseForManaging(product);
     }
 
     private Product findById(Long productId) {
@@ -84,11 +82,16 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new IdNotFoundException(productId + "(으)로 등록된 상품이 없습니다."));
     }
 
-
     @Override
     public Page<ProductResponse> findAll(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
         return convertFromPagedProductToPagedProductResponse(pagedProduct);
+    }
+
+    @Override
+    public Page<ProductResponseForManager> findAllForManaging(Pageable pageable) {
+        Page<Product> pagedProduct = productRepository.findAll(pageable);
+        return convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
 
     @Override
@@ -105,6 +108,22 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
         return convertFromPagedProductToPagedProductResponse(pagedProduct);
+    }
+
+    @Override
+    public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable) {
+        String categoryCode = null;
+
+        if (category != null && !category.isEmpty()) {
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {
+            categoryCode = getCode(content);
+        }
+
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
+
+        return convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
 
     @Override
@@ -152,6 +171,26 @@ public class ProductServiceImpl implements ProductService {
             isBrandModified = true;
         }
 
+        if (updateProductRequestDTO.getPrice() != null) {
+            existingProduct.setPrice(updateProductRequestDTO.getPrice());
+        }
+
+        if (updateProductRequestDTO.getDiscountRate() != null) {
+            existingProduct.setDiscountRate(updateProductRequestDTO.getDiscountRate());
+        }
+
+        if (updateProductRequestDTO.getDefectiveStock() != null) {
+            existingProduct.setDefectiveStock(updateProductRequestDTO.getDefectiveStock());
+        }
+
+        if (updateProductRequestDTO.getDescription() != null) {
+            existingProduct.setDescription(updateProductRequestDTO.getDescription());
+        }
+
+        if (updateProductRequestDTO.getImageUrl() != null) {
+            existingProduct.setImageUrl(updateProductRequestDTO.getImageUrl());
+        }
+
         if (updateProductRequestDTO.getCategory() != null) {
             existingProduct.setCategory(categoryRepository.findByCode(updateProductRequestDTO.getCategory()).orElseThrow(() -> new IdNotFoundException(updateProductRequestDTO.getCategory() + "(으)로 등록된 카테고리가 없습니다.")));
             isCategoryModified = true;
@@ -184,7 +223,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse increaseStock(Long productId, Long stock) {
+    public ProductResponseForManager increaseStock(Long productId, Long stock) {
         if (stock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
         }
@@ -193,12 +232,12 @@ public class ProductServiceImpl implements ProductService {
         Long newStock = currentStock + stock;
         product.setStock(newStock);
         productRepository.save(product);
-        return convertFromProductToProductResponse(product);
+        return convertFromProductToProductResponseForManaging(product);
     }
 
     @Override
     @Transactional
-    public ProductResponse decreaseStock(Long productId, Long stock) {
+    public ProductResponseForManager decreaseStock(Long productId, Long stock) {
         Product product = findById(productId);
         Long currentStock = product.getStock();
         Long newStock = Math.max(currentStock - stock, 0);
@@ -207,7 +246,7 @@ public class ProductServiceImpl implements ProductService {
         }
         product.setStock(newStock);
         productRepository.save(product);
-        return convertFromProductToProductResponse(product);
+        return convertFromProductToProductResponseForManaging(product);
     }
 
 
@@ -225,8 +264,9 @@ public class ProductServiceImpl implements ProductService {
                 productResponse.getBrand(),
                 productResponse.getCategory().getCode(),
                 productResponse.getProductNum(),
-                productResponse.getStock(),
-                productResponse.getSoldQuantity()
+                productResponse.getPrice(),
+                productResponse.getProductCoupons(),
+                productResponse.getDescription()
         ));
     }
 
@@ -237,11 +277,46 @@ public class ProductServiceImpl implements ProductService {
                 product.getBrand(),
                 product.getCategory().getCode(),
                 product.getProductNum(),
-                product.getStock(),
-                product.getSoldQuantity()
+                product.getPrice(),
+                product.getProductCoupons(),
+                product.getDescription()
                 );
     }
-
-
+    private Page<ProductResponseForManager> convertFromPagedProductToPagedProductResponseForManaging(Page<Product> pagedProduct){
+        return pagedProduct.map(productResponseForManaging -> new ProductResponseForManager(
+                productResponseForManaging.getId(),
+                productResponseForManaging.getName(),
+                productResponseForManaging.getBrand(),
+                productResponseForManaging.getCategory().getCode(),
+                productResponseForManaging.getProductNum(),
+                productResponseForManaging.getStock(),
+                productResponseForManaging.getSoldQuantity(),
+                productResponseForManaging.getPrice(),
+                productResponseForManaging.getDiscountRate(),
+                productResponseForManaging.getDefectiveStock(),
+                productResponseForManaging.getDescription(),
+                productResponseForManaging.getProductCoupons(),
+                productResponseForManaging.getProductEvents(),
+                productResponseForManaging.getImageUrl()
+        ));
+    }
+    private ProductResponseForManager convertFromProductToProductResponseForManaging(Product product){
+        return new ProductResponseForManager(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getCategory().getCode(),
+                product.getProductNum(),
+                product.getStock(),
+                product.getSoldQuantity(),
+                product.getPrice(),
+                product.getDiscountRate(),
+                product.getDefectiveStock(),
+                product.getDescription(),
+                product.getProductCoupons(),
+                product.getProductEvents(),
+                product.getImageUrl()
+        );
+    }
 
 }

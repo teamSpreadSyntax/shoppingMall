@@ -1,10 +1,13 @@
 package home.project.dto.responseDTO;
 
 import home.project.domain.Category;
+import home.project.domain.ProductCoupon;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -51,34 +54,20 @@ public class ProductResponse {
      */
     private String productNum;
 
-    /**
-     * 상품의 재고 수량입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: stock
-     * - 타입: BIGINT
-     * - 제약조건: CHECK (stock >= 0)
-     */
-    @Check(constraints = "stock >= 0")
-    private Long stock;
+    private Long price;
 
-    /**
-     * 상품의 판매 수량입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: sold_Quantity
-     * - 타입: BIGINT
-     * - 제약조건: CHECK (sold_Quantity >= 0)
-     * - 기본값: 0
-     */
-    @Check(constraints = "sold_Quantity >= 0")
-    private Long soldQuantity = 0L;
+    private String description;
 
-    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity) {
+    private List<ProductCoupon> productCoupons;
+
+    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, List<ProductCoupon> productCoupons, String description) {
         this.id = id;
         this.name = name;
         this.brand = brand;
         this.category = category;
         this.productNum = productNum;
-        this.stock = stock;
-        this.soldQuantity = soldQuantity;
+        this.price = price;
+        this.description = description;
+        this.productCoupons = productCoupons;
     }
 }

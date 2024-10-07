@@ -57,4 +57,19 @@ public class UpdateProductRequestDTO {
     @Check(constraints = "sold_Quantity >= 0")
     private Long soldQuantity = 0L;
 
+    @NotBlank(message = "상품의 가격을 입력해주세요.")
+    private Long price;
+
+    @NotBlank(message = "상품의 할인율을 입력해주세요.")
+    private Integer discountRate = 0;
+
+    @NotBlank(message = "상품의 불량수량을 입력해주세요.")
+    private Long defectiveStock = 0L;
+
+    @NotBlank(message = "상품의 상세정보를 입력해주세요.")
+    private String description;
+
+    @NotBlank(message = "상품의 이미지를 입력해주세요.")
+    private String imageUrl;
+
 }

@@ -1,10 +1,9 @@
-package home.project.domain;
+package home.project.dto.responseDTO;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
+import home.project.domain.ProductCoupon;
+import home.project.domain.ProductEvent;
+import jakarta.persistence.Column;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
@@ -12,19 +11,9 @@ import org.hibernate.annotations.Check;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 상품 정보를 나타내는 엔티티 클래스입니다.
- * 이 클래스는 상품의 기본 정보, 재고, 판매량 등을 저장합니다.
- */
-@Entity
-@Table(name = "product", uniqueConstraints = {@UniqueConstraint(columnNames = {"product_num" })})
 @Getter
 @Setter
-@EqualsAndHashCode(of = {"id", "productNum", "name", "brand", "category", "stock", "soldQuantity"})
-@JsonIdentityInfo(
-        generator = ObjectIdGenerators.PropertyGenerator.class,
-        property = "id")
-public class Product {
+public class ProductResponseForManager {
 
     /**
      * 상품의 고유 식별자입니다.
@@ -32,8 +21,6 @@ public class Product {
      * - 타입: BIGINT
      * - 제약조건: AUTO_INCREMENT, PRIMARY KEY
      */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     /**
@@ -42,7 +29,6 @@ public class Product {
      * - 이름: product_name
      * - 타입: VARCHAR(255) (기본값)
      */
-    @Column(name = "product_name")
     private String name;
 
     /**
@@ -51,7 +37,6 @@ public class Product {
      * - 이름: brand
      * - 타입: VARCHAR(255) (기본값)
      */
-    @Column(name = "brand")
     private String brand;
 
     /**
@@ -60,9 +45,7 @@ public class Product {
      * - 이름: category
      * - 타입: VARCHAR(255) (기본값)
      */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_id")
-    private Category category;
+    private String category;
 
     /**
      * 상품의 고유 번호입니다.
@@ -71,7 +54,6 @@ public class Product {
      * - 타입: VARCHAR(255) (기본값)
      * - 제약조건: UNIQUE
      */
-    @Column(name = "product_num")
     private String productNum;
 
     /**
@@ -82,7 +64,6 @@ public class Product {
      * - 제약조건: CHECK (stock >= 0)
      */
     @Check(constraints = "stock >= 0")
-    @Column(name = "stock")
     private Long stock;
 
     /**
@@ -94,27 +75,38 @@ public class Product {
      * - 기본값: 0
      */
     @Check(constraints = "sold_Quantity >= 0")
-    @Column(name = "sold_Quantity")
-    private Long soldQuantity = 0L;
+    private Long soldQuantity;
 
-    @Column(nullable = false)
     private Long price;
 
-    @Column(nullable = false)
-    private Integer discountRate = 0;
+    private Integer discountRate;
 
-    @Column(name = "defective_stock")
-    private Long defectiveStock = 0L;
+    private Long defectiveStock;
 
-    @Column(nullable = false)
     private String description;
 
-    @Column(columnDefinition = "TEXT")
+    private List<ProductCoupon> productCoupons;
+
+    private List<ProductEvent> productEvents;
+
     private String imageUrl;
 
-    @OneToMany(mappedBy = "product")
-    private List<ProductCoupon> productCoupons = new ArrayList<>();
-
-    @OneToMany(mappedBy = "product")
-    private List<ProductEvent> productEvents = new ArrayList<>();
+    public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock,
+                                     Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description,
+                                     List<ProductCoupon> productCoupons, List<ProductEvent> productEvents, String imageUrl) {
+        this.id = id;
+        this.name = name;
+        this.brand = brand;
+        this.category = category;
+        this.productNum = productNum;
+        this.stock = stock;
+        this.soldQuantity = soldQuantity;
+        this.price = price;
+        this.discountRate = discountRate;
+        this.defectiveStock = defectiveStock;
+        this.description = description;
+        this.productCoupons = productCoupons;
+        this.productEvents = productEvents;
+        this.imageUrl = imageUrl;
+    }
 }

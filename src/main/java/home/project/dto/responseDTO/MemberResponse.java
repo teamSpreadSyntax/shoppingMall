@@ -1,8 +1,18 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.RoleType;
+import home.project.domain.*;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 회원 정보를 클라이언트에게 반환하기 위한 응답 데이터 전송 객체(DTO)입니다.
@@ -37,6 +47,22 @@ public class MemberResponse {
      */
     private RoleType role;
 
+    private MemberGender gender;
+
+    private LocalDate birthDate;
+
+    private String defaultAddress;
+
+    private String secondAddress;
+
+    private String thirdAddress;
+
+    private MemberGrade grade;
+
+    private Long point;
+
+    private List<MemberCoupon> memberCoupons;
+
     /**
      * MemberResponseDTO의 모든 필드를 초기화하는 생성자입니다.
      *
@@ -46,12 +72,21 @@ public class MemberResponse {
      * @param phone 회원의 전화번호
      * @param role  회원의 권한 유형
      */
-    public MemberResponse(Long id, String email, String name, String phone, RoleType role) {
+    public MemberResponse(Long id, String email, String name, String phone, RoleType role, MemberGender gender,
+                          LocalDate birthDate, String defaultAddress, String secondAddress, String thirdAddress, MemberGrade grade, Long point, List<MemberCoupon> memberCoupons) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.phone = phone;
         this.role = role;
+        this.gender = gender;
+        this.birthDate = birthDate;
+        this.defaultAddress = defaultAddress;
+        this.secondAddress = secondAddress;
+        this.thirdAddress = thirdAddress;
+        this.grade = grade;
+        this.point = point;
+        this.memberCoupons = memberCoupons;
     }
 
     // Lombok @Getter와 @Setter 어노테이션으로 인해 getter와 setter 메서드가 자동으로 생성됩니다.
