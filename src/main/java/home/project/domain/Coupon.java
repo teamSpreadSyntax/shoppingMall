@@ -22,7 +22,7 @@ public class Coupon {
     @Column(name = "coupon_name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "coupon_discountRate", nullable = false)
     private Integer discountRate;
 
     @Column(nullable = false)

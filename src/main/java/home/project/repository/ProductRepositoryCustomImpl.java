@@ -82,4 +82,20 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .fetch();
     }
 
+    @Override
+    public Page<Product> findTop20LatestProducts(Pageable pageable) {
+        List<Product> results = queryFactory
+                .selectFrom(product)
+                .orderBy(product.createAt.desc())
+                .offset(pageable.getOffset())
+                .limit(Math.min(20L, pageable.getPageSize()))
+                .fetch();
+
+        long total = Math.min(20L, queryFactory
+                .selectFrom(product)
+                .fetchCount());
+
+        return new PageImpl<>(results, pageable, total);
+    }
+
 }

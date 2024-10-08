@@ -6,6 +6,7 @@ import home.project.util.RegexPatterns;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
@@ -64,11 +65,11 @@ public class CreateMemberRequestDTO {
     @Schema(description = "사용자 전화번호", required = true)
     private String phone;
 
-    @NotEmpty(message = "성별을 입력해주세요.")
+    @NotNull(message = "성별을 입력해주세요.")
     @Schema(description = "성별", required = true)
     private MemberGender gender;
 
-    @NotEmpty(message = "생일을 입력해주세요.")
+    @NotNull(message = "생일을 입력해주세요.")
     @Schema(description = "생년월일", required = true)
     private LocalDate birthDate;
 

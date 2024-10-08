@@ -1,5 +1,6 @@
 package home.project.service;
 
+import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.ProductResponse;
@@ -13,6 +14,8 @@ public interface ProductService {
 
     void join(CreateProductRequestDTO createProductRequestDTO);
 
+    Product findById(Long id);
+
     ProductResponse findByIdReturnProductResponse(Long productId);
 
     ProductResponseForManager findByIdReturnProductResponseForManager(Long productId);
@@ -20,6 +23,9 @@ public interface ProductService {
     Page<ProductResponse> findAll(Pageable pageable);
 
     Page<ProductResponseForManager> findAllForManaging(Pageable pageable);
+
+
+    Page<ProductResponse> findNewProduct(Pageable pageable);
 
     Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable);
 

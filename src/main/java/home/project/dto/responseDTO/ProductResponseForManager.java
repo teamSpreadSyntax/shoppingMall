@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -85,15 +87,18 @@ public class ProductResponseForManager {
 
     private String description;
 
+    private LocalDateTime createProductDate;
+
+    private String imageUrl;
+
     private List<ProductCoupon> productCoupons;
 
     private List<ProductEvent> productEvents;
 
-    private String imageUrl;
 
     public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock,
-                                     Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description,
-                                     List<ProductCoupon> productCoupons, List<ProductEvent> productEvents, String imageUrl) {
+                                     Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl,
+                                     List<ProductCoupon> productCoupons, List<ProductEvent> productEvents) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -105,8 +110,9 @@ public class ProductResponseForManager {
         this.discountRate = discountRate;
         this.defectiveStock = defectiveStock;
         this.description = description;
+        this.createProductDate = createProductDate;
+        this.imageUrl = imageUrl;
         this.productCoupons = productCoupons;
         this.productEvents = productEvents;
-        this.imageUrl = imageUrl;
     }
 }

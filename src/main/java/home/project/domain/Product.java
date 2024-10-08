@@ -1,6 +1,5 @@
 package home.project.domain;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -9,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,6 +108,9 @@ public class Product {
 
     @Column(nullable = false)
     private String description;
+
+    @Column(name = "createAt_product", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createAt;
 
     @Column(columnDefinition = "TEXT")
     private String imageUrl;

@@ -6,6 +6,7 @@ import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
 import home.project.dto.responseDTO.MemberResponse;
+import home.project.dto.responseDTO.MemberResponseForUser;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.MemberService;
@@ -76,7 +77,7 @@ public class MemberController {
         responseMap.put("refreshToken", TokenResponse.getRefreshToken());
         responseMap.put("role", String.valueOf(TokenResponse.getRole()));
         responseMap.put("successMessage", "회원가입이 성공적으로 완료되었습니다.");
-        return new CustomResponseEntity<>(Optional.of(responseMap), "회원가입 성공", HttpStatus.OK);
+        return new CustomResponseEntity<>(responseMap, "회원가입 성공", HttpStatus.OK);
     }
 
     @Operation(summary = "id로 회원 조회 메서드", description = "id로 회원 조회 메서드입니다.")
@@ -214,11 +215,11 @@ public class MemberController {
             return validationResponse;
         }
 
-        MemberResponse MemberResponse = memberService.update(updateMemberRequestDTO, verificationToken);
+        MemberResponseForUser MemberResponseForUser = memberService.update(updateMemberRequestDTO, verificationToken);
 
         String successMessage = "회원 정보가 수정되었습니다.";
 
-        return new CustomResponseEntity<>(MemberResponse, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(MemberResponseForUser, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")
@@ -237,6 +238,24 @@ public class MemberController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email + "(id:" + memberId + ")님의 계정이 삭제되었습니다.");
         return new CustomResponseEntity<>(Optional.of(responseMap), "회원 삭제 성공", HttpStatus.OK);
+    }
+
+    @Operation(summary = "관리자를 위한 회원 포인트 수정 메서드", description = "관리자를 위한 회원 포인트 수정 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @DeleteMapping("increase_point")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> updatePoint(@RequestParam("memberId") Long memberId, @RequestParam("point") Long point) {
+        MemberResponse memberResponse = memberService.updatePoint(memberId, point);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", "포인트 수정 성공. "+memberResponse.getEmail() + "님의 잔여 포인트 : "+memberResponse.getPoint());
+        return new CustomResponseEntity<>(Optional.of(responseMap), "포인트 수정 성공", HttpStatus.OK);
     }
 
 }

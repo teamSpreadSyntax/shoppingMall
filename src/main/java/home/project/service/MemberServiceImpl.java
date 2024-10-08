@@ -6,6 +6,7 @@ import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
 import home.project.dto.responseDTO.MemberResponse;
+import home.project.dto.responseDTO.MemberResponseForUser;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
@@ -34,12 +35,15 @@ public class MemberServiceImpl implements MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
 
-    private Member convertFromCreateMemberRequestDTOToMember(CreateMemberRequestDTO memberDTOWithoutId) {
+    private Member convertFromCreateMemberRequestDTOToMember(CreateMemberRequestDTO createMemberRequestDTO) {
         Member member = new Member();
-        member.setEmail(memberDTOWithoutId.getEmail());
-        member.setPassword(passwordEncoder.encode(memberDTOWithoutId.getPassword()));
-        member.setName(memberDTOWithoutId.getName());
-        member.setPhone(memberDTOWithoutId.getPhone());
+        member.setEmail(createMemberRequestDTO.getEmail());
+        member.setPassword(passwordEncoder.encode(createMemberRequestDTO.getPassword()));
+        member.setName(createMemberRequestDTO.getName());
+        member.setPhone(createMemberRequestDTO.getPhone());
+        member.setGender(createMemberRequestDTO.getGender());
+        member.setBirthDate(createMemberRequestDTO.getBirthDate());
+        member.setDefaultAddress(createMemberRequestDTO.getDefaultAddress());
         return member;
     }
 
@@ -161,7 +165,7 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
-    public MemberResponse update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken) {
+    public MemberResponseForUser update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken) {
         String email = jwtTokenProvider.getEmailFromToken(verificationToken);
         if (email == null) {
             throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
@@ -218,7 +222,20 @@ public class MemberServiceImpl implements MemberService {
         }
 
         Member updatedMember = memberRepository.save(existingMember);
-        return convertFromMemberToMemberResponse(updatedMember);
+        return new MemberResponseForUser(
+                updatedMember.getId(),
+                updatedMember.getEmail(),
+                updatedMember.getName(),
+                updatedMember.getPhone(),
+                updatedMember.getGender(),
+                updatedMember.getBirthDate(),
+                updatedMember.getDefaultAddress(),
+                updatedMember.getSecondAddress(),
+                updatedMember.getThirdAddress(),
+                updatedMember.getGrade(),
+                updatedMember.getPoint(),
+                updatedMember.getMemberCoupons()
+        );
     }
 
     @Override
@@ -227,6 +244,16 @@ public class MemberServiceImpl implements MemberService {
         String email = findById(memberId).getEmail();
         memberRepository.deleteById(memberId);
         return email;
+    }
+
+    @Override
+    @Transactional
+    public MemberResponse updatePoint(Long memberId, Long point){
+        Member member = findById(memberId);
+        Long newPoint = member.getPoint() + point;
+        member.setPoint(newPoint);
+        memberRepository.save(member);
+        return convertFromMemberToMemberResponse(member);
     }
 
 }

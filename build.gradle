@@ -43,6 +43,9 @@ dependencies {
     implementation 'org.hibernate:hibernate-core:6.1.7.Final'
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.springframework.kafka:spring-kafka'
 }
 
 def querydslSrcDir = 'src/main/generated'

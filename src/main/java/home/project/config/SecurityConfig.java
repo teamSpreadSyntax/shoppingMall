@@ -1,7 +1,9 @@
 package home.project.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import home.project.exceptions.CustomLogoutSuccessHandler;
 import home.project.util.CustomOptionalSerializer;
 import home.project.util.JwtAuthenticationFilter;
@@ -84,6 +86,8 @@ public class SecurityConfig {
         SimpleModule module = new SimpleModule();
         module.addSerializer(new CustomOptionalSerializer());
         objectMapper.registerModule(module);
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
     }
 
@@ -118,6 +122,7 @@ public class SecurityConfig {
                     );
 
                     requests.anyRequest().permitAll();
+                    requests.requestMatchers("/ws/**").permitAll();
                 })
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")

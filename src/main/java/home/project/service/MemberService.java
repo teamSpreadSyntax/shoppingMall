@@ -5,6 +5,7 @@ import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
 import home.project.dto.responseDTO.MemberResponse;
+import home.project.dto.responseDTO.MemberResponseForUser;
 import home.project.dto.responseDTO.TokenResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +29,9 @@ public interface MemberService {
 
     String verifyUser(String email, VerifyUserRequestDTO password);
 
-    MemberResponse update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken);
+    MemberResponseForUser update(UpdateMemberRequestDTO updateMemberRequestDTO, String verificationToken);
 
     String deleteById(Long memberId);
+
+    MemberResponse updatePoint(Long memberId, Long point);
 }

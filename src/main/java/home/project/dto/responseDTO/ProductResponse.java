@@ -2,11 +2,14 @@ package home.project.dto.responseDTO;
 
 import home.project.domain.Category;
 import home.project.domain.ProductCoupon;
+import home.project.domain.ProductEvent;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -56,18 +59,25 @@ public class ProductResponse {
 
     private Long price;
 
+    private Integer discountRate;
+
     private String description;
+
+    private String imageUrl;
 
     private List<ProductCoupon> productCoupons;
 
-    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, List<ProductCoupon> productCoupons, String description) {
+
+    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, List<ProductCoupon> productCoupons) {
         this.id = id;
         this.name = name;
         this.brand = brand;
         this.category = category;
         this.productNum = productNum;
         this.price = price;
+        this.discountRate = discountRate;
         this.description = description;
+        this.imageUrl = imageUrl;
         this.productCoupons = productCoupons;
     }
 }

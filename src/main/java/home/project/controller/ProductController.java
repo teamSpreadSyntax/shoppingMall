@@ -162,6 +162,34 @@ public class ProductController {
         return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
+    @Operation(summary = "신상품 조회 메서드", description = "신상품 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("/newProduct")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findNewProduct(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<ProductResponse> productPage = productService.findNewProduct(pageable);
+
+        long totalCount = productPage.getTotalElements();
+
+        int page = productPage.getNumber();
+
+        String successMessage = "가장 최근 추가된 신상품 20개입니다.";
+
+        return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -307,9 +335,9 @@ public class ProductController {
     @PutMapping("/admin/increase_stock")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
-        ProductResponseForManager increaseProduct = productService.increaseStock(productId, stock);
-        String successMessage = increaseProduct.getName() + "상품이 " + stock + "개 증가하여 " + increaseProduct.getStock() + "개가 되었습니다.";
-        return new CustomResponseEntity<>(Optional.of(increaseProduct), successMessage, HttpStatus.OK);
+        ProductResponseForManager productResponseForManager = productService.increaseStock(productId, stock);
+        String successMessage = productResponseForManager.getName() + "상품이 " + stock + "개 증가하여 " + productResponseForManager.getStock() + "개가 되었습니다.";
+        return new CustomResponseEntity<>(Optional.of(productResponseForManager), successMessage, HttpStatus.OK);
 
     }
 

@@ -46,12 +46,18 @@ public class ProductServiceImpl implements ProductService {
         String timeStamp = now.format(formatter);
 
         Product product = new Product();
+        product.setName(createProductRequestDTO.getName());
         product.setBrand(createProductRequestDTO.getBrand());
         product.setCategory(categoryRepository.findByCode(createProductRequestDTO.getCategory()).orElseThrow(() -> new IdNotFoundException(createProductRequestDTO.getCategory() + "(으)로 등록된 카테고리가 없습니다.")));
+        product.setStock(createProductRequestDTO.getStock());
         product.setProductNum(timeStamp + createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory().toString());
         product.setSoldQuantity(createProductRequestDTO.getSoldQuantity());
-        product.setName(createProductRequestDTO.getName());
-        product.setStock(createProductRequestDTO.getStock());
+        product.setPrice(createProductRequestDTO.getPrice());
+        product.setDiscountRate(createProductRequestDTO.getDiscountRate());
+        product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
+        product.setDescription(createProductRequestDTO.getDescription());
+        product.setCreateAt(now);
+        product.setImageUrl(createProductRequestDTO.getImageUrl());
 
         boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
         if (productNumExists) {
@@ -73,6 +79,7 @@ public class ProductServiceImpl implements ProductService {
         return convertFromProductToProductResponseForManaging(product);
     }
 
+    @Override
     private Product findById(Long productId) {
         if (productId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
@@ -92,6 +99,12 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseForManager> findAllForManaging(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
         return convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
+    }
+
+    @Override
+    public Page<ProductResponse> findNewProduct(Pageable pageable) {
+        Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
+        return convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
@@ -265,8 +278,10 @@ public class ProductServiceImpl implements ProductService {
                 productResponse.getCategory().getCode(),
                 productResponse.getProductNum(),
                 productResponse.getPrice(),
-                productResponse.getProductCoupons(),
-                productResponse.getDescription()
+                productResponse.getDiscountRate(),
+                productResponse.getDescription(),
+                productResponse.getImageUrl(),
+                productResponse.getProductCoupons()
         ));
     }
 
@@ -278,8 +293,10 @@ public class ProductServiceImpl implements ProductService {
                 product.getCategory().getCode(),
                 product.getProductNum(),
                 product.getPrice(),
-                product.getProductCoupons(),
-                product.getDescription()
+                product.getDiscountRate(),
+                product.getDescription(),
+                product.getImageUrl(),
+                product.getProductCoupons()
                 );
     }
     private Page<ProductResponseForManager> convertFromPagedProductToPagedProductResponseForManaging(Page<Product> pagedProduct){
@@ -295,9 +312,10 @@ public class ProductServiceImpl implements ProductService {
                 productResponseForManaging.getDiscountRate(),
                 productResponseForManaging.getDefectiveStock(),
                 productResponseForManaging.getDescription(),
+                productResponseForManaging.getCreateAt(),
+                productResponseForManaging.getImageUrl(),
                 productResponseForManaging.getProductCoupons(),
-                productResponseForManaging.getProductEvents(),
-                productResponseForManaging.getImageUrl()
+                productResponseForManaging.getProductEvents()
         ));
     }
     private ProductResponseForManager convertFromProductToProductResponseForManaging(Product product){
@@ -313,9 +331,10 @@ public class ProductServiceImpl implements ProductService {
                 product.getDiscountRate(),
                 product.getDefectiveStock(),
                 product.getDescription(),
+                product.getCreateAt(),
+                product.getImageUrl(),
                 product.getProductCoupons(),
-                product.getProductEvents(),
-                product.getImageUrl()
+                product.getProductEvents()
         );
     }
 
