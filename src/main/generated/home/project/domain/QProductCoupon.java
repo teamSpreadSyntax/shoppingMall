@@ -24,11 +24,15 @@ public class QProductCoupon extends EntityPathBase<ProductCoupon> {
 
     public final QCoupon coupon;
 
-    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
-
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final DateTimePath<java.time.LocalDateTime> issuedAt = createDateTime("issuedAt", java.time.LocalDateTime.class);
+
+    public final BooleanPath isUsed = createBoolean("isUsed");
+
     public final QProduct product;
+
+    public final DateTimePath<java.time.LocalDateTime> usedAt = createDateTime("usedAt", java.time.LocalDateTime.class);
 
     public QProductCoupon(String variable) {
         this(ProductCoupon.class, forVariable(variable), INITS);

@@ -31,9 +31,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional
-    public void join(CreateCategoryRequestDTO dto) {
-        boolean codeExists = categoryRepository.existsByCode(dto.getCode());
-        boolean nameExists = categoryRepository.existsByName(dto.getName());
+    public void join(CreateCategoryRequestDTO createCategoryRequestDTO) {
+        boolean codeExists = categoryRepository.existsByCode(createCategoryRequestDTO.getCode());
+        boolean nameExists = categoryRepository.existsByName(createCategoryRequestDTO.getName());
         if (codeExists && nameExists) {
             throw new DataIntegrityViolationException("이미 존재하는 카테고리 코드와 카테고리 이름입니다.");
         } else if (codeExists) {
@@ -41,10 +41,10 @@ public class CategoryServiceImpl implements CategoryService {
         } else if (nameExists) {
             throw new DataIntegrityViolationException("이미 존재하는 카테고리 이름입니다.");
         }
-        validateCategoryCode(dto.getCode(), dto.getLevel());
-        validateCategoryLevel(dto.getLevel());
-        Category category = createCategory(dto);
-        setCategoryParentForJoin(category, dto);
+        validateCategoryCode(createCategoryRequestDTO.getCode(), createCategoryRequestDTO.getLevel());
+        validateCategoryLevel(createCategoryRequestDTO.getLevel());
+        Category category = createCategory(createCategoryRequestDTO);
+        setCategoryParentForJoin(category, createCategoryRequestDTO);
         categoryRepository.save(category);
     }
 

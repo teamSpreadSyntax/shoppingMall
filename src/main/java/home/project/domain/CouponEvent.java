@@ -1,5 +1,7 @@
 package home.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +15,21 @@ public class CouponEvent {
     private Member member;
     private Product product;
     private LocalDateTime eventTime;
+
+    @JsonCreator
+    public CouponEvent(
+            @JsonProperty("eventType") String eventType,
+            @JsonProperty("coupon") Coupon coupon,
+            @JsonProperty("member") Member member,
+            @JsonProperty("product") Product product,
+            @JsonProperty("eventTime") LocalDateTime eventTime
+    ) {
+        this.eventType = eventType;
+        this.coupon = coupon;
+        this.member = member;
+        this.product = product;
+        this.eventTime = eventTime != null ? eventTime : LocalDateTime.now();
+    }
 
     public CouponEvent(String eventType, Coupon coupon) {
         this.eventType = eventType;

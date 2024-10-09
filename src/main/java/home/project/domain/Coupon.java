@@ -1,5 +1,6 @@
 package home.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +23,7 @@ public class Coupon {
     @Column(name = "coupon_name", nullable = false)
     private String name;
 
-    @Column(name = "coupon_discountRate", nullable = false)
+    @Column(name = "discount_rate", nullable = false)
     private Integer discountRate;
 
     @Column(nullable = false)
@@ -31,6 +32,7 @@ public class Coupon {
     @Column(nullable = false)
     private LocalDateTime endDate;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "coupon")
     private List<ProductCoupon> productCoupons = new ArrayList<>();
 

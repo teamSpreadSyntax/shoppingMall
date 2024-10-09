@@ -121,8 +121,8 @@ public class SecurityConfig {
                             )
                     );
 
+                    requests.requestMatchers("/ws/**").permitAll();//웹소켓 보안 설정
                     requests.anyRequest().permitAll();
-                    requests.requestMatchers("/ws/**").permitAll();
                 })
                 .formLogin(formLogin -> formLogin
                         .loginPage("/login")

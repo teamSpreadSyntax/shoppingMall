@@ -80,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    private Product findById(Long productId) {
+    public Product findById(Long productId) {
         if (productId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
         }

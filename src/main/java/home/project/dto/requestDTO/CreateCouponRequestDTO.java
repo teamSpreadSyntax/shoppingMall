@@ -36,12 +36,12 @@ public class CreateCouponRequestDTO {
     @Schema(description = "쿠폰 사용 종료 날짜", required = true)
     private LocalDateTime endDate;
 
-    @NotNull(message = "쿠폰사용이 가능한 상품(들)을 입력해주세요.")
-    @Schema(description = "쿠폰 사용 가능 상품", required = true)
-    private List<ProductCoupon> productCoupons = new ArrayList<>();
-
-    @NotNull(message = "쿠폰 사용이 가능한 회원을 입력해주세요.")
-    @Schema(description = "쿠폰 사용 가능 회원", required = true)
-    private List<MemberCoupon> memberCoupons = new ArrayList<>();
+//    @NotNull(message = "쿠폰사용이 가능한 상품(들)을 입력해주세요.")
+//    @Schema(description = "쿠폰 사용 가능 상품", required = true)
+//    private List<ProductCoupon> productCoupons = new ArrayList<>();
+//
+//    @NotNull(message = "쿠폰 사용이 가능한 회원을 입력해주세요.")
+//    @Schema(description = "쿠폰 사용 가능 회원", required = true)
+//    private List<MemberCoupon> memberCoupons = new ArrayList<>();
 
 }
