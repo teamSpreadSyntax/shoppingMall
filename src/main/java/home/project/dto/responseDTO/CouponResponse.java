@@ -23,18 +23,21 @@ public class CouponResponse {
 
     private LocalDateTime endDate;
 
-    private List<ProductCoupon> productCoupons;
+    private String assignBy;
 
-    private List<MemberCoupon> memberCoupons;
+    private List<ProductCouponResponse> productCouponResponse;
 
-    public CouponResponse(Long id, String name, Integer discountRate, LocalDateTime startDate, LocalDateTime endDate, List<ProductCoupon> productCoupons, List<MemberCoupon> memberCoupons){
+    private List<MemberCouponResponse> memberCouponResponse;
+
+    public CouponResponse(Long id, String name, Integer discountRate, LocalDateTime startDate, LocalDateTime endDate, String assignBy, List<ProductCouponResponse> productCouponResponse, List<MemberCouponResponse> memberCouponResponse){
         this.id = id;
         this.name = name;
         this.discountRate = discountRate;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.productCoupons = productCoupons;
-        this.memberCoupons = memberCoupons;
+        this.assignBy = assignBy;
+        this.productCouponResponse = productCouponResponse;
+        this.memberCouponResponse = memberCouponResponse;
     }
 
 }

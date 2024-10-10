@@ -52,7 +52,7 @@ public class MemberResponseForUser {
 
     private Long point;
 
-    private List<MemberCoupon> memberCoupons;
+    private List<MemberCouponResponse> memberCouponResponse;
 
     /**
      * MemberResponseDTO의 모든 필드를 초기화하는 생성자입니다.
@@ -63,7 +63,7 @@ public class MemberResponseForUser {
      * @param phone 회원의 전화번호
      */
     public MemberResponseForUser(Long id, String email, String name, String phone, MemberGender gender,
-                                 LocalDate birthDate, String defaultAddress, String secondAddress, String thirdAddress, MemberGrade grade, Long point, List<MemberCoupon> memberCoupons) {
+                                 LocalDate birthDate, String defaultAddress, String secondAddress, String thirdAddress, MemberGrade grade, Long point, List<MemberCouponResponse> memberCouponResponse) {
         this.id = id;
         this.email = email;
         this.name = name;
@@ -75,7 +75,7 @@ public class MemberResponseForUser {
         this.thirdAddress = thirdAddress;
         this.grade = grade;
         this.point = point;
-        this.memberCoupons = memberCoupons;
+        this.memberCouponResponse = memberCouponResponse;
     }
 
     // Lombok @Getter와 @Setter 어노테이션으로 인해 getter와 setter 메서드가 자동으로 생성됩니다.

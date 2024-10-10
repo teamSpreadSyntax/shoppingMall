@@ -1,5 +1,6 @@
 package home.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -100,6 +101,7 @@ public class Member {
     @Column(nullable = false)
     private Long point = 0L;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "member")
     private List<MemberCoupon> memberCoupons = new ArrayList<>();
 

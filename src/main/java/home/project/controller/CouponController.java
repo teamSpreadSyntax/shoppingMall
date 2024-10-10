@@ -1,13 +1,9 @@
 package home.project.controller;
 
-import home.project.domain.Coupon;
-import home.project.domain.MemberCoupon;
-import home.project.domain.ProductCoupon;
 import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
 import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
 import home.project.dto.requestDTO.CreateCouponRequestDTO;
-import home.project.dto.responseDTO.CategoryResponse;
-import home.project.dto.responseDTO.CouponResponse;
+import home.project.dto.responseDTO.*;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CouponService;
 import home.project.util.PageUtil;
@@ -29,6 +25,10 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Tag(name = "쿠폰", description = "쿠폰관련 API입니다")
 @RequestMapping("/api/coupon")
@@ -67,6 +67,49 @@ public class CouponController {
         return new CustomResponseEntity<>(couponResponse, successMessage, HttpStatus.OK);
     }
 
+    @Operation(summary = "id로 쿠폰 조회 메서드", description = "id로 쿠폰 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @GetMapping("/coupon")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findCouponById(@RequestParam("couponId") Long couponId) {
+        CouponResponse couponResponse = couponService.findByIdReturnCouponResponse(couponId);
+        String successMessage = couponId + "에 해당하는 쿠폰 입니다.";
+        return new CustomResponseEntity<>(couponResponse, successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "관리자를 위한 전체 쿠폰 조회 메서드", description = "관리자를 위한 전체 쿠폰 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("/admin/coupons")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findAll(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<CouponResponse> pagedCoupon = couponService.findAll(pageable);
+
+        long totalCount = pagedCoupon.getTotalElements();
+
+        int page = pagedCoupon.getNumber();
+
+        String successMessage = "전체 쿠폰입니다.";
+
+        return new CustomResponseEntity<>(pagedCoupon.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
     @Operation(summary = "회원에게 쿠폰 부여 메서드", description = "회원에게 쿠폰 부여 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -86,15 +129,15 @@ public class CouponController {
             @SortDefault(sort = "name", direction = Sort.Direction.ASC)
     }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<MemberCoupon> pagedMemberCoupon = couponService.assignCouponToMember(assignCouponToMemberRequestDTO, pageable);
+        Page<MemberCouponResponse> pagedMemberCouponResponse = couponService.assignCouponToMember(assignCouponToMemberRequestDTO, pageable);
 
         String successMessage = StringBuilderUtil.buildMemberCouponSearchCriteria(assignCouponToMemberRequestDTO.getCouponId(), assignCouponToMemberRequestDTO.getName(), assignCouponToMemberRequestDTO.getEmail(), assignCouponToMemberRequestDTO.getPhone(),
-                assignCouponToMemberRequestDTO.getRole(), assignCouponToMemberRequestDTO.getContent(), pagedMemberCoupon);
+                assignCouponToMemberRequestDTO.getRole(), assignCouponToMemberRequestDTO.getContent(), pagedMemberCouponResponse);
 
-        long totalCount = pagedMemberCoupon.getTotalElements();
-        int page = pagedMemberCoupon.getNumber();
+        long totalCount = pagedMemberCouponResponse.getTotalElements();
+        int page = pagedMemberCouponResponse.getNumber();
 
-        return new CustomResponseEntity<>(pagedMemberCoupon.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        return new CustomResponseEntity<>(pagedMemberCouponResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "상품에 쿠폰 부여 메서드", description = "상품에 쿠폰 부여 메서드입니다.")
@@ -116,16 +159,35 @@ public class CouponController {
             @SortDefault(sort = "name", direction = Sort.Direction.ASC)
     }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductCoupon> pagedProductCoupon = couponService.assignCouponToProduct(assignCouponToProductRequestDTO, pageable);
+        Page<ProductCouponResponse> pagedProductCouponResponse = couponService.assignCouponToProduct(assignCouponToProductRequestDTO, pageable);
 
         String successMessage = StringBuilderUtil.buildProductCouponSearchCriteria(assignCouponToProductRequestDTO.getCouponId(), assignCouponToProductRequestDTO.getBrand(), assignCouponToProductRequestDTO.getCategory(), assignCouponToProductRequestDTO.getProductName(),
-                assignCouponToProductRequestDTO.getContent(), pagedProductCoupon);
+                assignCouponToProductRequestDTO.getContent(), pagedProductCouponResponse);
 
-        long totalCount = pagedProductCoupon.getTotalElements();
-        int page = pagedProductCoupon.getNumber();
+        long totalCount = pagedProductCouponResponse.getTotalElements();
+        int page = pagedProductCouponResponse.getNumber();
 
-        return new CustomResponseEntity<>(pagedProductCoupon.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+        return new CustomResponseEntity<>(pagedProductCouponResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
 
+    }
+
+    @Operation(summary = "관리자를 위한 쿠폰 삭제 메서드", description = "쿠폰 삭제 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @DeleteMapping("/admin/delete")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> deleteCoupon(@RequestParam("couponId") Long productId) {
+        String name = productService.findByIdReturnProductResponse(productId).getName();
+        productService.deleteById(productId);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");
+        return new CustomResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
     }
 
 

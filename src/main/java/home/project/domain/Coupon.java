@@ -32,10 +32,14 @@ public class Coupon {
     @Column(nullable = false)
     private LocalDateTime endDate;
 
+    @Column
+    private String assignBy;
+
     @JsonManagedReference
     @OneToMany(mappedBy = "coupon")
     private List<ProductCoupon> productCoupons = new ArrayList<>();
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "coupon")
     private List<MemberCoupon> memberCoupons = new ArrayList<>();
 }

@@ -3,8 +3,7 @@ package home.project.service;
 import home.project.domain.Product;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
-import home.project.dto.responseDTO.ProductResponse;
-import home.project.dto.responseDTO.ProductResponseForManager;
+import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
@@ -28,6 +27,7 @@ import static home.project.util.CategoryMapper.getCode;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final Converter converter;
 
     @Override
     @Transactional
@@ -70,13 +70,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse findByIdReturnProductResponse(Long productId) {
         Product product = findById(productId);
-        return convertFromProductToProductResponse(product);
+        return converter.convertFromProductToProductResponse(product);
     }
 
     @Override
     public ProductResponseForManager findByIdReturnProductResponseForManager(Long productId) {
         Product product = findById(productId);
-        return convertFromProductToProductResponseForManaging(product);
+        return converter.convertFromProductToProductResponseForManaging(product);
     }
 
     @Override
@@ -92,19 +92,19 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponse> findAll(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
-        return convertFromPagedProductToPagedProductResponse(pagedProduct);
+        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
     public Page<ProductResponseForManager> findAllForManaging(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
-        return convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
+        return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
 
     @Override
     public Page<ProductResponse> findNewProduct(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
-        return convertFromPagedProductToPagedProductResponse(pagedProduct);
+        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
-        return convertFromPagedProductToPagedProductResponse(pagedProduct);
+        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
@@ -136,13 +136,13 @@ public class ProductServiceImpl implements ProductService {
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
-        return convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
+        return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
 
     @Override
     public Page<ProductResponse> brandList(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAllByOrderByBrandAsc(pageable);
-        return convertFromPagedProductToPagedProductResponse(pagedProduct);
+        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
@@ -224,7 +224,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository.save(existingProduct);
 
-        return convertFromProductToProductResponse(product);
+        return converter.convertFromProductToProductResponse(product);
     }
 
     @Override
@@ -245,7 +245,7 @@ public class ProductServiceImpl implements ProductService {
         Long newStock = currentStock + stock;
         product.setStock(newStock);
         productRepository.save(product);
-        return convertFromProductToProductResponseForManaging(product);
+        return converter.convertFromProductToProductResponseForManaging(product);
     }
 
     @Override
@@ -259,7 +259,7 @@ public class ProductServiceImpl implements ProductService {
         }
         product.setStock(newStock);
         productRepository.save(product);
-        return convertFromProductToProductResponseForManaging(product);
+        return converter.convertFromProductToProductResponseForManaging(product);
     }
 
 
@@ -270,72 +270,5 @@ public class ProductServiceImpl implements ProductService {
         return frontOfOldProductNum+middleOfNewProductNum+newCategory;
     }
 
-    private Page<ProductResponse> convertFromPagedProductToPagedProductResponse(Page<Product> pagedProduct){
-        return pagedProduct.map(productResponse -> new ProductResponse(
-                productResponse.getId(),
-                productResponse.getName(),
-                productResponse.getBrand(),
-                productResponse.getCategory().getCode(),
-                productResponse.getProductNum(),
-                productResponse.getPrice(),
-                productResponse.getDiscountRate(),
-                productResponse.getDescription(),
-                productResponse.getImageUrl(),
-                productResponse.getProductCoupons()
-        ));
-    }
-
-    private ProductResponse convertFromProductToProductResponse(Product product){
-        return new ProductResponse(
-                product.getId(),
-                product.getName(),
-                product.getBrand(),
-                product.getCategory().getCode(),
-                product.getProductNum(),
-                product.getPrice(),
-                product.getDiscountRate(),
-                product.getDescription(),
-                product.getImageUrl(),
-                product.getProductCoupons()
-                );
-    }
-    private Page<ProductResponseForManager> convertFromPagedProductToPagedProductResponseForManaging(Page<Product> pagedProduct){
-        return pagedProduct.map(productResponseForManaging -> new ProductResponseForManager(
-                productResponseForManaging.getId(),
-                productResponseForManaging.getName(),
-                productResponseForManaging.getBrand(),
-                productResponseForManaging.getCategory().getCode(),
-                productResponseForManaging.getProductNum(),
-                productResponseForManaging.getStock(),
-                productResponseForManaging.getSoldQuantity(),
-                productResponseForManaging.getPrice(),
-                productResponseForManaging.getDiscountRate(),
-                productResponseForManaging.getDefectiveStock(),
-                productResponseForManaging.getDescription(),
-                productResponseForManaging.getCreateAt(),
-                productResponseForManaging.getImageUrl(),
-                productResponseForManaging.getProductCoupons(),
-                productResponseForManaging.getProductEvents()
-        ));
-    }
-    private ProductResponseForManager convertFromProductToProductResponseForManaging(Product product){
-        return new ProductResponseForManager(
-                product.getId(),
-                product.getName(),
-                product.getBrand(),
-                product.getCategory().getCode(),
-                product.getProductNum(),
-                product.getStock(),
-                product.getSoldQuantity(),
-                product.getPrice(),
-                product.getDiscountRate(),
-                product.getDefectiveStock(),
-                product.getDescription(),
-                product.getCreateAt(),
-                product.getImageUrl(),
-                product.getProductCoupons(),
-                product.getProductEvents()
-        );
-    }
 
 }

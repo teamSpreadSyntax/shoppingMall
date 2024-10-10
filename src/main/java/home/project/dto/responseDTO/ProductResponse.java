@@ -65,10 +65,10 @@ public class ProductResponse {
 
     private String imageUrl;
 
-    private List<ProductCoupon> productCoupons;
+    private List<ProductCouponResponse> productCouponResponse;
 
 
-    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, List<ProductCoupon> productCoupons) {
+    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -78,6 +78,6 @@ public class ProductResponse {
         this.discountRate = discountRate;
         this.description = description;
         this.imageUrl = imageUrl;
-        this.productCoupons = productCoupons;
+        this.productCouponResponse = productCouponResponse;
     }
 }

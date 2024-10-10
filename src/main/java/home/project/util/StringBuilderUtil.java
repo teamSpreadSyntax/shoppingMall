@@ -1,6 +1,8 @@
 package home.project.util;
 
 import home.project.domain.AssignType;
+import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
+import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -27,15 +29,17 @@ public class StringBuilderUtil {
         return finalizeSearchCriteria(searchCriteria, page, "전체 상품입니다.");
     }
 
-    public static String buildMemberCouponSearchCriteria( Long couponId, String name, String email, String phone, String role,
-                                                          String content, Page<?> page) {
+    public static String buildMemberCouponSearchCriteria(Long couponId, String name, String email, String phone, String role, String content, Page<?> page) {
         StringBuilder searchCriteria = new StringBuilder();
-        if (name != null) searchCriteria.append(name).append(", ");
-        if (email != null) searchCriteria.append(email).append(", ");
-        if (phone != null) searchCriteria.append(phone).append(", ");
-        if (role != null) searchCriteria.append(role).append(", ");
-        if (content != null) searchCriteria.append(content).append(", ");
-        if (couponId != null) searchCriteria.append(couponId);
+        if (name != null && !name.trim().isEmpty()) searchCriteria.append(name.trim()).append(", ");
+        if (email != null && !email.trim().isEmpty()) searchCriteria.append(email.trim()).append(", ");
+        if (phone != null && !phone.trim().isEmpty()) searchCriteria.append(phone.trim()).append(", ");
+        if (role != null && !role.trim().isEmpty()) searchCriteria.append(role.trim()).append(", ");
+        if (content != null && !content.trim().isEmpty()) searchCriteria.append(content.trim()).append(", ");
+
+        if (searchCriteria.length() > 2) {
+            searchCriteria.setLength(searchCriteria.length() - 2);
+        }
 
         return finalizeSearchCriteriaForMemberCoupon(searchCriteria, couponId, page, "전체 회원입니다.");
     }
@@ -75,7 +79,6 @@ public class StringBuilderUtil {
     private static String finalizeSearchCriteriaForMemberCoupon(StringBuilder searchCriteria, Long couponId, Page<?> page, String defaultMessage) {
         String successMessage;
         if (searchCriteria.length() > 0) {
-            searchCriteria.setLength(searchCriteria.length() - 2);
             successMessage = "쿠폰"+couponId+"을 부여받은 회원 조건 : " + searchCriteria;
         } else {
             successMessage = defaultMessage;
@@ -105,4 +108,53 @@ public class StringBuilderUtil {
         return successMessage;
     }
 
+    public static String buildAssignCondition(AssignCouponToMemberRequestDTO dto) {
+        StringBuilder condition = new StringBuilder();
+        if (dto.getAssignType() == AssignType.SPECIFIC_MEMBERS) {
+            if (dto.getName() != null && !dto.getName().trim().isEmpty()) {
+                condition.append("이름: ").append(dto.getName().trim()).append(", ");
+            }
+            if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+                condition.append("이메일: ").append(dto.getEmail().trim()).append(", ");
+            }
+            if (dto.getPhone() != null && !dto.getPhone().trim().isEmpty()) {
+                condition.append("전화번호: ").append(dto.getPhone().trim()).append(", ");
+            }
+            if (dto.getRole() != null && !dto.getRole().trim().isEmpty()) {
+                condition.append("역할: ").append(dto.getRole().trim()).append(", ");
+            }
+            if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+                condition.append("내용: ").append(dto.getContent().trim()).append(", ");
+            }
+            if (condition.length() > 2) {
+                condition.setLength(condition.length() - 2);
+            }
+        } else {
+            condition.append("전체 회원");
+        }
+        return condition.toString();
+    }
+    public static String buildAssignCondition(AssignCouponToProductRequestDTO dto) {
+        StringBuilder condition = new StringBuilder();
+        if (dto.getAssignType() == AssignType.SPECIFIC_PRODUCTS) {
+            if (dto.getBrand() != null && !dto.getBrand().trim().isEmpty()) {
+                condition.append("브랜드: ").append(dto.getBrand().trim()).append(", ");
+            }
+            if (dto.getCategory() != null && !dto.getCategory().trim().isEmpty()) {
+                condition.append("카테고리: ").append(dto.getCategory().trim()).append(", ");
+            }
+            if (dto.getProductName() != null && !dto.getProductName().trim().isEmpty()) {
+                condition.append("상품명: ").append(dto.getProductName().trim()).append(", ");
+            }
+            if (dto.getContent() != null && !dto.getContent().trim().isEmpty()) {
+                condition.append("내용: ").append(dto.getContent().trim()).append(", ");
+            }
+            if (condition.length() > 2) {
+                condition.setLength(condition.length() - 2);
+            }
+        } else {
+            condition.append("전체 상품");
+        }
+        return condition.toString();
+    }
 }

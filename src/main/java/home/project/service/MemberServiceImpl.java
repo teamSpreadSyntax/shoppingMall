@@ -11,7 +11,6 @@ import home.project.dto.responseDTO.TokenResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.MemberRepository;
-import home.project.util.StringBuilderUtil;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -34,18 +33,9 @@ public class MemberServiceImpl implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final Converter converter;
 
-    private Member convertFromCreateMemberRequestDTOToMember(CreateMemberRequestDTO createMemberRequestDTO) {
-        Member member = new Member();
-        member.setEmail(createMemberRequestDTO.getEmail());
-        member.setPassword(passwordEncoder.encode(createMemberRequestDTO.getPassword()));
-        member.setName(createMemberRequestDTO.getName());
-        member.setPhone(createMemberRequestDTO.getPhone());
-        member.setGender(createMemberRequestDTO.getGender());
-        member.setBirthDate(createMemberRequestDTO.getBirthDate());
-        member.setDefaultAddress(createMemberRequestDTO.getDefaultAddress());
-        return member;
-    }
+
 
     @Override
     @Transactional
@@ -65,7 +55,7 @@ public class MemberServiceImpl implements MemberService {
             throw new DataIntegrityViolationException("이미 사용 중인 전화번호입니다.");
         }
 
-        Member member = convertFromCreateMemberRequestDTOToMember(createMemberRequestDTO);
+        Member member = converter.convertFromCreateMemberRequestDTOToMember(createMemberRequestDTO);
         memberRepository.save(member);
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
@@ -83,7 +73,7 @@ public class MemberServiceImpl implements MemberService {
         String email = authentication.getName();
         Long memberId = findByEmail(email).getId();
         Member member = findById(memberId);
-        return convertFromMemberToMemberResponse(member);
+        return converter.convertFromMemberToMemberResponse(member);
     }
 
     @Override
@@ -106,49 +96,17 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Page<MemberResponse> findAllReturnPagedMemberResponse(Pageable pageable){
         Page<Member> pagedMember = memberRepository.findAll(pageable);
-        return convertFromPagedMemberToPagedMemberResponse(pagedMember);
+        return converter.convertFromPagedMemberToPagedMemberResponse(pagedMember);
     }
 
-    private Page<MemberResponse> convertFromPagedMemberToPagedMemberResponse(Page<Member> pagedMember) {
-        return pagedMember.map(member -> new MemberResponse(
-                member.getId(),
-                member.getEmail(),
-                member.getName(),
-                member.getPhone(),
-                member.getRole(),
-                member.getGender(),
-                member.getBirthDate(),
-                member.getDefaultAddress(),
-                member.getSecondAddress(),
-                member.getThirdAddress(),
-                member.getGrade(),
-                member.getPoint(),
-                member.getMemberCoupons()
-        ));
-    }
 
-    private MemberResponse convertFromMemberToMemberResponse(Member member){
-        return new MemberResponse(
-                member.getId(),
-                member.getEmail(),
-                member.getName(),
-                member.getPhone(),
-                member.getRole(),
-                member.getGender(),
-                member.getBirthDate(),
-                member.getDefaultAddress(),
-                member.getSecondAddress(),
-                member.getThirdAddress(),
-                member.getGrade(),
-                member.getPoint(),
-                member.getMemberCoupons()
-        );
-    }
+
+
 
     @Override
     public Page<MemberResponse> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
         Page<Member> pagedMember = memberRepository.findMembers(name, email, phone, role, content, pageable);
-        return convertFromPagedMemberToPagedMemberResponse(pagedMember);
+        return converter.convertFromPagedMemberToPagedMemberResponse(pagedMember);
     }
 
     @Override
@@ -234,7 +192,7 @@ public class MemberServiceImpl implements MemberService {
                 updatedMember.getThirdAddress(),
                 updatedMember.getGrade(),
                 updatedMember.getPoint(),
-                updatedMember.getMemberCoupons()
+                converter.convertFromListedMemberCouponMemberCouponResponse(updatedMember.getMemberCoupons())
         );
     }
 
@@ -253,7 +211,7 @@ public class MemberServiceImpl implements MemberService {
         Long newPoint = member.getPoint() + point;
         member.setPoint(newPoint);
         memberRepository.save(member);
-        return convertFromMemberToMemberResponse(member);
+        return converter.convertFromMemberToMemberResponse(member);
     }
 
 }
