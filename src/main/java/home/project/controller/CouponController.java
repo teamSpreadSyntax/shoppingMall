@@ -182,12 +182,11 @@ public class CouponController {
     })
     @DeleteMapping("/admin/delete")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteCoupon(@RequestParam("couponId") Long productId) {
-        String name = productService.findByIdReturnProductResponse(productId).getName();
-        productService.deleteById(productId);
+    public ResponseEntity<?> deleteCoupon(@RequestParam("couponId") Long couponId) {
+        String name = couponService.deleteById(couponId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");
-        return new CustomResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
+        responseMap.put("successMessage", name + "(id:" + couponId + ")(이)가 삭제되었습니다.");
+        return new CustomResponseEntity<>(responseMap, "상품 삭제 성공", HttpStatus.OK);
     }
 
 

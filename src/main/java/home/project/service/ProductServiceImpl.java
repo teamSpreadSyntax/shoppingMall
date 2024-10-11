@@ -229,9 +229,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void deleteById(Long productId) {
-        findById(productId);
+    public String deleteById(Long productId) {
+        String name = findById(productId).getName();
         productRepository.deleteById(productId);
+        return name;
     }
 
     @Override

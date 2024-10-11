@@ -314,11 +314,10 @@ public class ProductController {
     @DeleteMapping("/admin/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
-        String name = productService.findByIdReturnProductResponse(productId).getName();
-        productService.deleteById(productId);
+        String name = productService.deleteById(productId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");
-        return new CustomResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
+        return new CustomResponseEntity<>(responseMap, "상품 삭제 성공", HttpStatus.OK);
     }
 
     @Operation(summary = "관리자를 위한 재고 수량 증가 메서드", description = "재고 수량 증가 메서드입니다.")

@@ -36,10 +36,10 @@ public class Coupon {
     private String assignBy;
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "coupon")
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductCoupon> productCoupons = new ArrayList<>();
 
     @JsonManagedReference
-    @OneToMany(mappedBy = "coupon")
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MemberCoupon> memberCoupons = new ArrayList<>();
 }

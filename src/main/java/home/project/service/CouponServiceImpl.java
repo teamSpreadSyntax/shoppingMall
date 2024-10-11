@@ -171,10 +171,17 @@ public class CouponServiceImpl implements CouponService{
         } else {
             throw new IllegalArgumentException("assign type을 확인해주세요. (SPECIFIC_PRODUCTS : 특정 상품(들)에 쿠폰 부여, ALL : 모든 상품에 쿠폰 부여.)");
         }
+
+
     }
 
-
-
+    @Override
+    @Transactional
+    public String deleteById(Long couponId) {
+        String name = findById(couponId).getName();
+        couponRepository.deleteById(couponId);
+        return name;
+    }
 
 
 

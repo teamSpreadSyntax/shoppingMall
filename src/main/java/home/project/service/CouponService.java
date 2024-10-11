@@ -20,6 +20,8 @@ public interface CouponService {
     CouponResponse findByIdReturnCouponResponse(Long couponId);
 
     Page<MemberCouponResponse> assignCouponToMember(AssignCouponToMemberRequestDTO assignCouponToMemberRequestDTO, Pageable pageable);
+
     Page<ProductCouponResponse> assignCouponToProduct(AssignCouponToProductRequestDTO assignCouponToProductRequestDTO, Pageable pageable);
 
+    String deleteById(Long couponId);
 }

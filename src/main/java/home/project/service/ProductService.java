@@ -36,7 +36,7 @@ public interface ProductService {
 
     ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO);
 
-    void deleteById(Long productId);
+    String deleteById(Long productId);
 
     ProductResponseForManager increaseStock(Long productId, Long stock);
 
