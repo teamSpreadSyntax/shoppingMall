@@ -36,6 +36,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final ListPath<MemberCoupon, QMemberCoupon> memberCoupons = this.<MemberCoupon, QMemberCoupon>createList("memberCoupons", MemberCoupon.class, QMemberCoupon.class, PathInits.DIRECT2);
 
+    public final ListPath<MemberEvent, QMemberEvent> memberEvents = this.<MemberEvent, QMemberEvent>createList("memberEvents", MemberEvent.class, QMemberEvent.class, PathInits.DIRECT2);
+
     public final StringPath name = createString("name");
 
     public final StringPath password = createString("password");

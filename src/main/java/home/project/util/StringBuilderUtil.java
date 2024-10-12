@@ -4,6 +4,7 @@ import home.project.domain.AssignType;
 import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
 import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -27,6 +28,28 @@ public class StringBuilderUtil {
         if (content != null) searchCriteria.append(content).append(", ");
 
         return finalizeSearchCriteria(searchCriteria, page, "전체 상품입니다.");
+    }
+
+    public static String buildCouponSearchCriteria(String name, String startDate, String endDate, String assignBy, String content, Page<?> page) {
+        StringBuilder searchCriteria = new StringBuilder();
+        if (name != null) searchCriteria.append(name).append(", ");
+        if (startDate != null) searchCriteria.append(startDate).append(", ");
+        if (endDate != null) searchCriteria.append(endDate).append(", ");
+        if (assignBy != null) searchCriteria.append(assignBy).append(", ");
+        if (content != null) searchCriteria.append(content).append(", ");
+
+        return finalizeSearchCriteria(searchCriteria, page, "전체 쿠폰입니다.");
+    }
+
+    public static String buildEventSearchCriteria(String name, String startDate, String endDate, Integer discountRate, String content, Page<?> page) {
+        StringBuilder searchCriteria = new StringBuilder();
+        if (name != null) searchCriteria.append(name).append(", ");
+        if (startDate != null) searchCriteria.append(startDate).append(", ");
+        if (endDate != null) searchCriteria.append(endDate).append(", ");
+        if (discountRate != null) searchCriteria.append(discountRate).append(", ");
+        if (content != null) searchCriteria.append(content).append(", ");
+
+        return finalizeSearchCriteria(searchCriteria, page, "전체 이벤트입니다.");
     }
 
     public static String buildMemberCouponSearchCriteria(Long couponId, String name, String email, String phone, String role, String content, Page<?> page) {

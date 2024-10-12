@@ -22,9 +22,15 @@ public class QEvent extends EntityPathBase<Event> {
 
     public final StringPath description = createString("description");
 
+    public final NumberPath<Integer> discountRate = createNumber("discountRate", Integer.class);
+
     public final DateTimePath<java.time.LocalDateTime> endDate = createDateTime("endDate", java.time.LocalDateTime.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    public final StringPath image = createString("image");
+
+    public final ListPath<MemberEvent, QMemberEvent> memberEvents = this.<MemberEvent, QMemberEvent>createList("memberEvents", MemberEvent.class, QMemberEvent.class, PathInits.DIRECT2);
 
     public final StringPath name = createString("name");
 

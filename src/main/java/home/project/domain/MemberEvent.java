@@ -8,18 +8,18 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "product_event")
+@Table(name = "member_event")
 @Getter
 @Setter
-public class ProductEvent {
+public class MemberEvent {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "product_id")
-    private Product product;
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @JsonBackReference
     @ManyToOne

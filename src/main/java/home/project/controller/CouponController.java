@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Tag(name = "쿠폰", description = "쿠폰관련 API입니다")
 @RequestMapping("/api/coupon")
@@ -96,7 +95,7 @@ public class CouponController {
     public ResponseEntity<?> findAll(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
+                    {@SortDefault(sort = "startDate", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
         Page<CouponResponse> pagedCoupon = couponService.findAll(pageable);
@@ -108,6 +107,40 @@ public class CouponController {
         String successMessage = "전체 쿠폰입니다.";
 
         return new CustomResponseEntity<>(pagedCoupon.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
+    @Operation(summary = "쿠폰 통합 조회 메서드", description = "쿠폰이름, 사용시작날짜, 사용종료날짜, 쿠폰부여조건 및 일반 검색어로 쿠폰을 조회합니다. 모든 조건을 만족하는 쿠폰을 조회합니다. 검색어가 없으면 전체 쿠폰을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @GetMapping("/search")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> searchCoupon(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "assignBy", required = false) String assignBy,
+            @RequestParam(value = "content", required = false) String content,
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+
+        Page<CouponResponse> pagedCouponResponse = couponService.findCoupons(name, startDate, endDate, assignBy, content, pageable);
+
+        String successMessage = StringBuilderUtil.buildCouponSearchCriteria(name, startDate, endDate, assignBy, content, pagedCouponResponse);
+
+        long totalCount = pagedCouponResponse.getTotalElements();
+        int page = pagedCouponResponse.getNumber();
+
+        return new CustomResponseEntity<>(pagedCouponResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+
     }
 
     @Operation(summary = "회원에게 쿠폰 부여 메서드", description = "회원에게 쿠폰 부여 메서드입니다.")

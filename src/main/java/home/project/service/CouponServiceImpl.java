@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
+import static home.project.util.CategoryMapper.getCode;
+
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -57,8 +59,7 @@ public class CouponServiceImpl implements CouponService{
 
     @Override
     public CouponResponse findByIdReturnCouponResponse(Long couponId) {
-        return converter.convertFromCouponToCouponResponse(couponRepository.findById(couponId)
-                .orElseThrow(() -> new IdNotFoundException(couponId + "(으)로 등록된 쿠폰이 없습니다.")));
+        return converter.convertFromCouponToCouponResponse(findById(couponId));
     }
 
 
@@ -76,6 +77,16 @@ public class CouponServiceImpl implements CouponService{
         return couponRepository.findById(couponId)
                 .orElseThrow(() -> new IdNotFoundException(couponId + "(으)로 등록된 쿠폰이 없습니다."));
     }
+
+    @Override
+    public Page<CouponResponse> findCoupons(String name, String startDate, String endDate, String assignBy, String content, Pageable pageable) {
+
+        Page<Coupon> pagedCoupon = couponRepository.findCoupons(name, startDate, endDate, assignBy, content, pageable);
+
+        return converter.convertFromPagedCouponToPagedCouponResponse(pagedCoupon);
+    }
+
+
 
     @Override
     @Transactional

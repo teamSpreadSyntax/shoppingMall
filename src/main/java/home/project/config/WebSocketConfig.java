@@ -9,7 +9,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-@ConditionalOnProperty(name = "websocket.enabled", havingValue = "true", matchIfMissing = true)
+//@ConditionalOnProperty(name = "websocket.enabled", havingValue = "true", matchIfMissing = true)//웹소켓 비활성화
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override

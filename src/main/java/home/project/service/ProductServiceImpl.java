@@ -111,10 +111,10 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
         String categoryCode = null;
 
-        if (category != null && !category.isEmpty()) {
+        if (category != null && !category.isEmpty()) {//?
             categoryCode = getCode(category);
         }
-        if (content != null && !content.isEmpty()) {
+        if (content != null && !content.isEmpty()) {//?
             categoryCode = getCode(content);
         }
 

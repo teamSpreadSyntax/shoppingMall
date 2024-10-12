@@ -183,7 +183,7 @@ public class Converter {
                         productEvent.getId(),
                         productEvent.getProduct().getProductNum(),
                         productEvent.getEvent().getId(),
-                        productEvent.getCreatedAt()
+                        productEvent.getProduct().getCreateAt()
                 ))
                 .collect(Collectors.toList());
     }
@@ -222,5 +222,64 @@ public class Converter {
 
     public Page<ProductCouponResponse> convertFromPagedProductAndCouponToPagedProductCouponResponse(Page<Product> pagedProduct, Coupon coupon) {
         return pagedProduct.map(product -> new ProductCouponResponse(product.getId(), product.getProductNum(), coupon.getId(), LocalDateTime.now(), null, false));
+    }
+
+    public EventResponse convertFromEventToEventResponse(Event event){
+        return new EventResponse(
+                event.getId(),
+                event.getName(),
+                event.getDiscountRate(),
+                event.getDescription(),
+                event.getStartDate(),
+                event.getEndDate(),
+                event.getImage(),
+                convertFromListedProductEventProductEventResponse(event.getProductEvents()),
+                convertFromListedMemberEventToMemberEventResponse(event.getMemberEvents())
+        );
+    }
+
+    public Page<EventResponse> convertFromPagedEventToPagedEventResponse(Page<Event> pagedEvent) {
+        return pagedEvent.map(event -> new EventResponse(
+                event.getId(),
+                event.getName(),
+                event.getDiscountRate(),
+                event.getDescription(),
+                event.getStartDate(),
+                event.getEndDate(),
+                event.getImage(),
+                convertFromListedProductEventToProductEventResponse(event.getProductEvents()),
+                convertFromListedMemberEventToMemberEventResponse(event.getMemberEvents())
+        ));
+    }
+
+    public List<ProductEventResponse> convertFromListedProductEventToProductEventResponse(List<ProductEvent> listedProductEvent){
+        if (listedProductEvent == null) {
+
+            return new ArrayList<>(); // 또는 null을 반환할 수 있습니다, 비즈니스 로직에 따라 결정
+        }
+
+        return listedProductEvent.stream()
+                .map(productEvent -> new ProductEventResponse(
+                        productEvent.getId(),
+                        productEvent.getProduct().getProductNum(),
+                        productEvent.getEvent().getId(),
+                        productEvent.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<MemberEventResponse> convertFromListedMemberEventToMemberEventResponse(List<MemberEvent> listedMemberEvent){
+        if (listedMemberEvent == null) {
+            return new ArrayList<>(); // 또는 null을 반환할 수 있습니다, 비즈니스 로직에 따라 결정
+        }
+
+        return listedMemberEvent.stream()
+                .map(memberEvent -> new MemberEventResponse(
+                        memberEvent.getId(),
+                        memberEvent.getMember().getEmail(),
+                        memberEvent.getEvent().getId(),
+                        memberEvent.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
     }
 }
