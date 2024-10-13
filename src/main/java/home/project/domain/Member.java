@@ -109,5 +109,7 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<MemberEvent> memberEvents = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member")
+    private List<Order> order = new ArrayList<>();
 
 }

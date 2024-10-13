@@ -122,4 +122,8 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<ProductEvent> productEvents = new ArrayList<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "product")
+    private List<ProductOrder> productOrder = new ArrayList<>();
 }

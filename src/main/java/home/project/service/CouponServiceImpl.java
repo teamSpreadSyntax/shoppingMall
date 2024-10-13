@@ -73,7 +73,8 @@ public class CouponServiceImpl implements CouponService{
         }
     }
 
-    private Coupon findById(Long couponId){
+    @Override
+    public Coupon findById(Long couponId){
         return couponRepository.findById(couponId)
                 .orElseThrow(() -> new IdNotFoundException(couponId + "(으)로 등록된 쿠폰이 없습니다."));
     }

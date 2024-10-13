@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 public interface CouponService {
     CouponResponse join(CreateCouponRequestDTO createCouponRequestDTO);
 
+    Coupon findById(Long couponId);
+
     Page<CouponResponse> findAll(Pageable pageable);
 
     Page<CouponResponse> findCoupons(String name, String startDate, String endDate, String assignBy, String content, Pageable pageable);

@@ -29,6 +29,9 @@ import java.time.LocalDateTime;
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService{
     private final EventRepository eventRepository;
+    private final EventCouponRepository eventCouponRepository;
+    private final CouponService couponService;
+    private final CouponRepository couponRepository;
     private final MemberCouponRepository memberCouponRepository;
     private final ProductCouponRepository productCouponRepository;
     private final MemberRepository memberRepository;
@@ -50,6 +53,14 @@ public class EventServiceImpl implements EventService{
         event.setImage(createEventRequestDTO.getImage());
 
         eventRepository.save(event);
+
+        EventCoupon eventCoupon = new EventCoupon();
+        Coupon coupon = couponService.findById(createEventRequestDTO.getCouponId());
+        eventCoupon.setCoupon(coupon);
+        eventCoupon.setEvent(event);
+        eventCoupon.setUsed(false);
+
+        eventCouponRepository.save(eventCoupon);
 
 //        sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
 
