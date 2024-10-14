@@ -28,6 +28,8 @@ public class QShipping extends EntityPathBase<Shipping> {
 
     public final StringPath deliveryAddress = createString("deliveryAddress");
 
+    public final NumberPath<Long> deliveryCost = createNumber("deliveryCost", Long.class);
+
     public final StringPath deliveryNum = createString("deliveryNum");
 
     public final EnumPath<DeliveryStatusType> deliveryStatus = createEnum("deliveryStatus", DeliveryStatusType.class);

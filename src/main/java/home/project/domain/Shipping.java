@@ -30,6 +30,10 @@ public class Shipping {
     @Column(name = "arrived_date")
     private String arrivedDate = null;
 
+    @Column(name = "delivery_cost")
+    private Long deliveryCost = null;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status", nullable = false)
     private DeliveryStatusType deliveryStatus = DeliveryStatusType.ORDER_REQUESTED;
 

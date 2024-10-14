@@ -340,7 +340,7 @@ public class Converter {
                 .collect(Collectors.toList());
     }
 
-    public Shipping convertFromCreateShippingRequestDTOToShipping(CreateOrderRequestDTO createOrderRequestDTO){
+    public Shipping convertFromCreateOrderRequestDTOToShipping(CreateOrderRequestDTO createOrderRequestDTO){
 
         CreateShippingRequestDTO createShippingRequestDTO = createOrderRequestDTO.getShippingInfo();
 
@@ -361,11 +361,32 @@ public class Converter {
 
         if(deliveryType==DeliveryType.ORDINARY_DELIVERY){
             shipping.setArrivingDate(LocalDateTime.now().plusDays(5).toString());
-
+            shipping.setDeliveryCost(0L);
         } else if (deliveryType==DeliveryType.STRAIGHT_DELIVERY) {
             shipping.setArrivingDate(LocalDateTime.now().plusDays(3).toString());
+            shipping.setDeliveryCost(3000L);
+        } else if (deliveryType==DeliveryType.REMOTE_DELIVERY) {
+            shipping.setArrivingDate(LocalDateTime.now().plusDays(7).toString());
+            shipping.setDeliveryCost(5000L);
         }
+
         return shipping;
+
+    }
+
+
+    public ShippingResponse convertShippingFromShippingResponse(Shipping shipping){
+
+        return new ShippingResponse(
+                shipping.getId(),
+                shipping.getDeliveryNum(),
+                shipping.getOrders().getOrderDate(),
+                shipping.getDeliveryAddress(),
+                shipping.getOrders().getAmount(),
+                convertOrderProductsToProductDTOForOrder(shipping.getOrders().getProductOrders()),
+                shipping.getDeliveryType(),
+                shipping.getDeliveryStatus()
+        );
 
     }
 }

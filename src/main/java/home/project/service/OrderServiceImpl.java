@@ -3,7 +3,6 @@ package home.project.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.*;
 import home.project.dto.requestDTO.CreateOrderRequestDTO;
-import home.project.dto.requestDTO.CreateShippingRequestDTO;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.OrderResponse;
 import home.project.exceptions.exception.IdNotFoundException;
@@ -40,7 +39,7 @@ public class OrderServiceImpl implements OrderService{
     @Transactional
     public OrderResponse join(CreateOrderRequestDTO createOrderRequestDTO){
 
-        Shipping shipping = converter.convertFromCreateShippingRequestDTOToShipping(createOrderRequestDTO);
+        Shipping shipping = converter.convertFromCreateOrderRequestDTOToShipping(createOrderRequestDTO);
 
         Orders orders = new Orders();
         LocalDateTime orderDate = LocalDateTime.now();
@@ -49,6 +48,8 @@ public class OrderServiceImpl implements OrderService{
         orders.setOrderDate(orderDate);
         orders.setShipping(shipping);
         shipping.setOrders(orders); // 양방향 관계 설정
+
+
 
         long amount = 0L;
 
