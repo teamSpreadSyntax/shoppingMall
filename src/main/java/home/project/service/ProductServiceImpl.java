@@ -90,6 +90,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Product findByProductNum(String productNum){
+        return productRepository.findByProductNum(productNum);
+    }
+
+    @Override
     public Page<ProductResponse> findAll(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
@@ -259,6 +264,37 @@ public class ProductServiceImpl implements ProductService {
             throw new DataIntegrityViolationException("재고가 부족합니다.");
         }
         product.setStock(newStock);
+        productRepository.save(product);
+        return converter.convertFromProductToProductResponseForManaging(product);
+    }
+
+    @Override
+    @Transactional
+    public ProductResponseForManager increaseSoldQuantity(Long productId, Long quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("증가시킬 판매 수량은 음수일 수 없습니다.");
+        }
+        Product product = findById(productId);
+        Long currentSoldQuantity = product.getSoldQuantity();
+        Long newSoldQuantity = currentSoldQuantity + quantity;
+        product.setSoldQuantity(newSoldQuantity);
+        productRepository.save(product);
+        return converter.convertFromProductToProductResponseForManaging(product);
+    }
+
+    @Override
+    @Transactional
+    public ProductResponseForManager decreaseSoldQuantity(Long productId, Long quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("감소시킬 판매 수량은 음수일 수 없습니다.");
+        }
+        Product product = findById(productId);
+        Long currentSoldQuantity = product.getSoldQuantity();
+        if (currentSoldQuantity < quantity) {
+            throw new DataIntegrityViolationException("감소시킬 판매 수량이 현재 판매 수량보다 많습니다.");
+        }
+        Long newSoldQuantity = currentSoldQuantity - quantity;
+        product.setSoldQuantity(newSoldQuantity);
         productRepository.save(product);
         return converter.convertFromProductToProductResponseForManaging(product);
     }

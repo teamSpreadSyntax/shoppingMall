@@ -26,6 +26,8 @@ public class QShipping extends EntityPathBase<Shipping> {
 
     public final StringPath arrivingDate = createString("arrivingDate");
 
+    public final StringPath deliveryAddress = createString("deliveryAddress");
+
     public final StringPath deliveryNum = createString("deliveryNum");
 
     public final EnumPath<DeliveryStatusType> deliveryStatus = createEnum("deliveryStatus", DeliveryStatusType.class);
@@ -34,7 +36,7 @@ public class QShipping extends EntityPathBase<Shipping> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final QOrder order;
+    public final QOrders orders;
 
     public QShipping(String variable) {
         this(Shipping.class, forVariable(variable), INITS);
@@ -54,7 +56,7 @@ public class QShipping extends EntityPathBase<Shipping> {
 
     public QShipping(Class<? extends Shipping> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.order = inits.isInitialized("order") ? new QOrder(forProperty("order"), inits.get("order")) : null;
+        this.orders = inits.isInitialized("orders") ? new QOrders(forProperty("orders"), inits.get("orders")) : null;
     }
 
 }

@@ -2,7 +2,12 @@ package home.project.service;
 
 import home.project.domain.*;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
+import home.project.dto.requestDTO.CreateOrderRequestDTO;
+import home.project.dto.requestDTO.CreateShippingRequestDTO;
+import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.*;
+import home.project.exceptions.exception.IdNotFoundException;
+import home.project.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +23,7 @@ import java.util.stream.Collectors;
 public class Converter {
 
     private final PasswordEncoder passwordEncoder;
+    private final MemberRepository memberRepository;
 
     public Member convertFromCreateMemberRequestDTOToMember(CreateMemberRequestDTO createMemberRequestDTO) {
         Member member = new Member();
@@ -66,6 +72,57 @@ public class Converter {
                 convertFromListedMemberCouponMemberCouponResponse(member.getMemberCoupons())
         );
     }
+
+    public OrderResponse convertFromOrderToOrderResponse(Orders orders) {
+        List<ProductDTOForOrder> productDTOs = orders.getProductOrders().stream()
+                .map(this::convertFromProductOrderToProductDTOForOrder)
+                .collect(Collectors.toList());
+
+        return new OrderResponse(
+                orders.getId(),
+                orders.getOrderNum(),
+                orders.getOrderDate(),
+                orders.getShipping().getDeliveryAddress(),
+                calculateTotalAmount(orders),
+                productDTOs
+        );
+    }
+
+    private Long calculateTotalAmount(Orders orders) {
+        return orders.getProductOrders().stream()
+                .mapToLong(item -> item.getPrice() * item.getQuantity())
+                .sum();
+    }
+
+    private ProductDTOForOrder convertFromProductOrderToProductDTOForOrder(ProductOrder orderProduct) {
+        return new ProductDTOForOrder(
+                orderProduct.getId(),
+                orderProduct.getPrice(),
+                orderProduct.getQuantity()
+        );
+    }
+
+    public Page<OrderResponse> convertFromPagedOrderToPagedOrderResponse(Page<Orders> pagedOrder) {
+        return pagedOrder.map(order -> new OrderResponse(
+                order.getId(),
+                order.getOrderNum(),
+                order.getOrderDate(),
+                order.getShipping().getDeliveryAddress(),
+                calculateTotalAmount(order),
+                convertOrderProductsToProductDTOForOrder(order.getProductOrders())
+        ));
+    }
+
+    private List<ProductDTOForOrder> convertOrderProductsToProductDTOForOrder(List<ProductOrder> orderProducts) {
+        return orderProducts.stream()
+                .map(orderProduct -> new ProductDTOForOrder(
+                        orderProduct.getId(),
+                        orderProduct.getPrice(),
+                        orderProduct.getQuantity()
+                ))
+                .collect(Collectors.toList());
+    }
+
 
     public List<MemberCouponResponse> convertFromListedMemberCouponMemberCouponResponse(List<MemberCoupon> listedMemberCoupon){
         if (listedMemberCoupon == null) {
@@ -281,5 +338,34 @@ public class Converter {
                         memberEvent.getCreatedAt()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public Shipping convertFromCreateShippingRequestDTOToShipping(CreateOrderRequestDTO createOrderRequestDTO){
+
+        CreateShippingRequestDTO createShippingRequestDTO = createOrderRequestDTO.getShippingInfo();
+
+        Shipping shipping = new Shipping();
+        DeliveryType deliveryType = createShippingRequestDTO.getDeliveryType();
+        shipping.setDeliveryType(deliveryType);
+
+        String defaultAddress = memberRepository.findByEmail(createOrderRequestDTO.getEmail()).orElseThrow(() -> new IdNotFoundException(createOrderRequestDTO.getEmail() + "(으)로 등록된 회원이 없습니다.")).getDefaultAddress();
+        if(createShippingRequestDTO.getDeliveryAddressType() == DeliveryAddressType.NEW_ADDRESS && defaultAddress != null){
+            shipping.setDeliveryNum(createShippingRequestDTO.getDeliveryAddress().substring(0,2));
+            shipping.setDeliveryAddress(createShippingRequestDTO.getDeliveryAddress());
+
+        } else if (createShippingRequestDTO.getDeliveryAddressType() == DeliveryAddressType.DEFAULT_ADDRESS) {
+            shipping.setDeliveryNum(defaultAddress.substring(0,2));
+            shipping.setDeliveryAddress(defaultAddress);
+
+        }
+
+        if(deliveryType==DeliveryType.ORDINARY_DELIVERY){
+            shipping.setArrivingDate(LocalDateTime.now().plusDays(5).toString());
+
+        } else if (deliveryType==DeliveryType.STRAIGHT_DELIVERY) {
+            shipping.setArrivingDate(LocalDateTime.now().plusDays(3).toString());
+        }
+        return shipping;
+
     }
 }

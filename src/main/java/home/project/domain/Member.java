@@ -110,6 +110,6 @@ public class Member {
     private List<MemberEvent> memberEvents = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")
-    private List<Order> order = new ArrayList<>();
+    private List<Orders> orders = new ArrayList<>();
 
 }

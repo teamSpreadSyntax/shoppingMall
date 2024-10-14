@@ -1,14 +1,9 @@
 package home.project.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Entity
@@ -23,8 +18,11 @@ public class Shipping {
     @Column(name = "shipping_type", nullable = false)
     private DeliveryType deliveryType;
 
-    @Column(name = "delivery_num", nullable = false)
-    private String deliveryNum;
+    @Column(name = "delivery_num")
+    private String deliveryNum = null;
+
+    @Column(name = "delivery_Address", nullable = false)
+    private String deliveryAddress;
 
     @Column(name = "arriving_date", nullable = false)
     private String arrivingDate;
@@ -33,12 +31,12 @@ public class Shipping {
     private String arrivedDate = null;
 
     @Column(name = "delivery_status", nullable = false)
-    private DeliveryStatusType deliveryStatus;
+    private DeliveryStatusType deliveryStatus = DeliveryStatusType.ORDER_REQUESTED;
 
     @JsonBackReference
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    private Order order;
+    private Orders orders;
 
 
 }

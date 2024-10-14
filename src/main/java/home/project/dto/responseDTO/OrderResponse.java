@@ -1,6 +1,7 @@
 package home.project.dto.responseDTO;
 
 import home.project.domain.Product;
+import home.project.dto.requestDTO.ProductDTOForOrder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,17 +20,17 @@ public class OrderResponse {
 
     private String deliveryAddress;
 
-    private Long accumulatedPurchase;
+    private Long totalAmount;
 
-    private List<Product> products;
+    private List<ProductDTOForOrder> products;
 
 
-    public OrderResponse(Long id, String orderNum, LocalDateTime orderDate, String deliveryAddress, Long accumulatedPurchase, List<Product> products) {
+    public OrderResponse(Long id, String orderNum, LocalDateTime orderDate, String deliveryAddress, Long totalAmount, List<ProductDTOForOrder> products) {
         this.id = id;
         this.orderNum = orderNum;
         this.orderDate = orderDate;
         this.deliveryAddress = deliveryAddress;
-        this.accumulatedPurchase = accumulatedPurchase;
+        this.totalAmount = totalAmount;
         this.products = products;
     }
 }

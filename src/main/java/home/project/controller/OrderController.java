@@ -67,7 +67,7 @@ public class OrderController {
 
         OrderResponse orderResponse = orderService.join(createOrderRequestDTO);
 
-        String successMessage = orderResponse.getName() + "(으)로 주문이 등록되었습니다.";
+        String successMessage = orderResponse.getOrderNum() + "(으)로 주문이 등록되었습니다.";
 
         return new CustomResponseEntity<>(orderResponse, successMessage, HttpStatus.OK);
     }
@@ -115,7 +115,7 @@ public class OrderController {
         return new CustomResponseEntity<>(pagedOrder.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "주문 통합 조회 메서드", description = "주문이름, 사용시작날짜, 사용종료날짜, 쿠폰부여조건 및 일반 검색어로 쿠폰을 조회합니다. 모든 조건을 만족하는 쿠폰을 조회합니다. 검색어가 없으면 전체 쿠폰을 조회합니다.")
+    @Operation(summary = "주문 통합 조회 메서드", description = "주문번호, 주문날짜, 상품 품번, 회원 이메일 및 일반 검색어로 쿠폰을 조회합니다. 모든 조건을 만족하는 쿠폰을 조회합니다. 검색어가 없으면 전체 쿠폰을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
@@ -128,17 +128,19 @@ public class OrderController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> searchOrder(
             @RequestParam(value = "orderNum", required = false) String orderNum,
-            @RequestParam(value = "orderDate", required = false) LocalDateTime orderDate,
-            @RequestParam(value = "deliveryAddress", required = false) String deliveryAddress,
+            @RequestParam(value = "orderDate", required = false) String orderDate,
+            @RequestParam(value = "deliveryAddress", required = false) String productNumber,
+            @RequestParam(value = "memberEmail", required = false) String email,
+            @RequestParam(value = "content", required = false) String content,
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
-                    @SortDefault(sort = "order_num", direction = Sort.Direction.ASC)
+                    @SortDefault(sort = "orders_num", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<OrderResponse> pagedOrderResponse = orderService.findOrders(orderNum, orderDate, deliveryAddress, pageable);
+        Page<OrderResponse> pagedOrderResponse = orderService.findOrders(orderNum, orderDate, productNumber, email, content, pageable);
 
-        String successMessage = StringBuilderUtil.buildOrderSearchCriteria(orderNum, orderDate, deliveryAddress, content, pagedOrderResponse);
+        String successMessage = StringBuilderUtil.buildOrderSearchCriteria(orderNum, orderDate, productNumber, email, content, pagedOrderResponse);
 
         long totalCount = pagedOrderResponse.getTotalElements();
         int page = pagedOrderResponse.getNumber();

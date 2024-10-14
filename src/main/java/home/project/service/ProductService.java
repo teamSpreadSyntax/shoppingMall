@@ -20,6 +20,8 @@ public interface ProductService {
 
     ProductResponseForManager findByIdReturnProductResponseForManager(Long productId);
 
+    Product findByProductNum(String productNum);
+
     Page<ProductResponse> findAll(Pageable pageable);
 
     Page<ProductResponseForManager> findAllForManaging(Pageable pageable);
@@ -41,5 +43,9 @@ public interface ProductService {
     ProductResponseForManager increaseStock(Long productId, Long stock);
 
     ProductResponseForManager decreaseStock(Long productId, Long stock);
+
+    ProductResponseForManager increaseSoldQuantity(Long productId, Long stock);
+
+    ProductResponseForManager decreaseSoldQuantity(Long productId, Long stock);
 
 }

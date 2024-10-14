@@ -2,7 +2,6 @@ package home.project.repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import home.project.domain.Coupon;
 import home.project.domain.Event;
 import home.project.domain.QEvent;
 import jakarta.persistence.EntityManager;

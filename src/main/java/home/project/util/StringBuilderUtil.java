@@ -6,6 +6,7 @@ import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class StringBuilderUtil {
@@ -50,6 +51,17 @@ public class StringBuilderUtil {
         if (content != null) searchCriteria.append(content).append(", ");
 
         return finalizeSearchCriteria(searchCriteria, page, "전체 이벤트입니다.");
+    }
+
+    public static String buildOrderSearchCriteria(String orderNum, String orderDate, String productNumber, String email, String content, Page<?> page) {
+        StringBuilder searchCriteria = new StringBuilder();
+        if (orderNum != null) searchCriteria.append(orderNum).append(", ");
+        if (orderDate != null) searchCriteria.append(orderDate).append(", ");
+        if (productNumber != null) searchCriteria.append(productNumber).append(", ");
+        if (email != null) searchCriteria.append(email).append(", ");
+        if (content != null) searchCriteria.append(content).append(", ");
+
+        return finalizeSearchCriteria(searchCriteria, page, "전체 주문입니다.");
     }
 
     public static String buildMemberCouponSearchCriteria(Long couponId, String name, String email, String phone, String role, String content, Page<?> page) {
