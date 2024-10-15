@@ -32,6 +32,10 @@ public class QOrders extends EntityPathBase<Orders> {
 
     public final StringPath orderNum = createString("orderNum");
 
+    public final NumberPath<Long> pointsEarned = createNumber("pointsEarned", Long.class);
+
+    public final NumberPath<Long> pointsUsed = createNumber("pointsUsed", Long.class);
+
     public final ListPath<ProductOrder, QProductOrder> productOrders = this.<ProductOrder, QProductOrder>createList("productOrders", ProductOrder.class, QProductOrder.class, PathInits.DIRECT2);
 
     public final QShipping shipping;

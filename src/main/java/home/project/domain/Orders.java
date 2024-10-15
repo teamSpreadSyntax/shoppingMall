@@ -34,6 +34,13 @@ public class Orders {
     @Column(name = "amount", nullable = false)
     Long amount;
 
+    @Column(name = "points_used")
+    private Long pointsUsed = 0L;
+
+    // 주문으로 적립된 포인트
+    @Column(name = "points_earned")
+    private Long pointsEarned = 0L;
+
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductOrder> productOrders = new ArrayList<>();
 

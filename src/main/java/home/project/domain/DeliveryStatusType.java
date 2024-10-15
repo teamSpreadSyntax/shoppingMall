@@ -16,7 +16,9 @@ public enum DeliveryStatusType {
     DELIVERY_DELAYED("배송지연"),
     REFUND_REQUESTED("환불요청"),
     REFUND_IN_PROGRESS("환불"),
-    REFUND_COMPLETED("환불완료");
+    REFUND_COMPLETED("환불완료"),
+    RETURN_CONFIRMED("환불요청수락"),
+    PURCHASE_CONFIRMED("구매확정");
 
     private final String description;
 

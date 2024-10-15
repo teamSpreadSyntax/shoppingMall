@@ -34,7 +34,7 @@ public class Shipping {
     private Long deliveryCost = null;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "delivery_status", nullable = false)
+    @Column(name = "delivery_status", nullable = false, length = 30)
     private DeliveryStatusType deliveryStatus = DeliveryStatusType.ORDER_REQUESTED;
 
     @JsonBackReference

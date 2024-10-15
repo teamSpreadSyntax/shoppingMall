@@ -4,13 +4,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.*;
 import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.requestDTO.ProductDTOForOrder;
+import home.project.dto.responseDTO.MemberCouponResponse;
 import home.project.dto.responseDTO.OrderResponse;
 import home.project.exceptions.exception.IdNotFoundException;
+import home.project.exceptions.exception.InvalidCouponException;
 import home.project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +33,9 @@ public class OrderServiceImpl implements OrderService{
 //    private final MemberOrderRepository memberOrderRepository;
 //    private final ProductOrderRepository productOrderRepository;
     private final MemberRepository memberRepository;
+    private final MemberCouponRepository memberCouponRepository;
+    private final CouponService couponService;
+    private final ShippingRepository shippingRepository;
 //    private final ProductRepository productRepository;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
@@ -44,16 +51,12 @@ public class OrderServiceImpl implements OrderService{
         Orders orders = new Orders();
         LocalDateTime orderDate = LocalDateTime.now();
         orders.setOrderNum(generateOrderNumber(createOrderRequestDTO.getProductOrders(), orderDate));
-
         orders.setOrderDate(orderDate);
         orders.setShipping(shipping);
         shipping.setOrders(orders); // 양방향 관계 설정
 
 
-
         long amount = 0L;
-
-
         for (ProductDTOForOrder productDTO : createOrderRequestDTO.getProductOrders()) {
             Product product = productService.findById(productDTO.getProductId());
 
@@ -70,9 +73,45 @@ public class OrderServiceImpl implements OrderService{
 
             amount += productDTO.getPrice()*productDTO.getQuantity();
         }
-        orders.setAmount(amount);
 
-        Member member = memberService.findByEmail(createOrderRequestDTO.getEmail());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        // 3. 쿠폰 유효성 검사 및 할인 적용
+        if (createOrderRequestDTO.getCouponId() != null) { // 쿠폰이 있을 경우
+            Coupon coupon = couponService.findById(createOrderRequestDTO.getCouponId());
+
+            // 현재 날짜를 기준으로 유효기간 검사
+            LocalDateTime now = LocalDateTime.now();
+            if (now.isBefore(coupon.getStartDate()) || now.isAfter(coupon.getEndDate())) {
+                throw new InvalidCouponException("쿠폰이 유효하지 않습니다. 유효기간을 확인해 주세요.");
+            }
+
+            // 이미 사용된 쿠폰인지 확인
+            MemberCoupon memberCoupon = memberCouponRepository.findByMemberAndCoupon(member, coupon)
+                    .orElseThrow(() -> new InvalidCouponException("해당 회원에게 할당된 쿠폰이 아닙니다."));
+
+            if (memberCoupon.isUsed()) {
+                throw new InvalidCouponException("이미 사용된 쿠폰입니다.");
+            }
+
+            // 쿠폰 적용 - 할인율 계산 및 총 금액에서 차감
+            Integer couponDiscountRate = coupon.getDiscountRate();
+            long discountAmount = amount * couponDiscountRate / 100;
+            amount -= discountAmount;
+
+            // 쿠폰 사용 처리
+            memberCoupon.setUsed(true);
+            memberCoupon.setUsedAt(now);
+            memberCouponRepository.save(memberCoupon); // 쿠폰 업데이트 (사용 처리)
+        }
+
+        // **총 구매 금액(amount) 저장**
+        orders.setAmount(amount);  // 총 금액을 주문에 저장
+
+
+
         long newAccumulatePurchase = member.getAccumulatedPurchase()+amount;
         if (newAccumulatePurchase < 0) {
             member.setGrade(MemberGrade.BRONZE);
@@ -85,6 +124,14 @@ public class OrderServiceImpl implements OrderService{
         }
         member.setAccumulatedPurchase(newAccumulatePurchase);
         orders.setMember(member);
+
+        Long pointsUsed = createOrderRequestDTO.getPointsUsed();
+        orders.setPointsUsed(pointsUsed);
+
+        Long pointsEarned = (long) (orders.getAmount() * 0.05);
+        orders.setPointsEarned(pointsEarned);
+
+
         memberRepository.save(member);
         orderRepository.save(orders);
 

@@ -15,7 +15,6 @@ public class ProductDTOForOrder {
 
     private Integer quantity;
 
-
     public ProductDTOForOrder(Long productId, Long price, Integer quantity) {
         this.productId = productId;
         this.price = price;

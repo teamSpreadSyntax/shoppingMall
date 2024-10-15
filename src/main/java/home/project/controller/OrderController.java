@@ -1,16 +1,16 @@
 package home.project.controller;
 
+import home.project.domain.DeliveryStatusType;
+import home.project.domain.Shipping;
 import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
 import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
 import home.project.dto.requestDTO.CreateCouponRequestDTO;
 import home.project.dto.requestDTO.CreateOrderRequestDTO;
-import home.project.dto.responseDTO.CouponResponse;
-import home.project.dto.responseDTO.MemberCouponResponse;
-import home.project.dto.responseDTO.OrderResponse;
-import home.project.dto.responseDTO.ProductCouponResponse;
+import home.project.dto.responseDTO.*;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CouponService;
 import home.project.service.OrderService;
+import home.project.service.ShippingService;
 import home.project.util.PageUtil;
 import home.project.util.StringBuilderUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +46,7 @@ import java.util.Map;
 public class OrderController {
 
     private final OrderService orderService;
+    private final ShippingService shippingService;
     private final PageUtil pageUtil;
 
 
@@ -166,6 +167,59 @@ public class OrderController {
         responseMap.put("successMessage", name + "(id:" + orderId + ")(이)가 삭제되었습니다.");
         return new CustomResponseEntity<>(responseMap, "주문 취소 성공", HttpStatus.OK);
     }
+
+
+    @Operation(summary = "반품 요청 메서드", description = "반품 요청 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
+    })
+    @PostMapping("/refund")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> refundRequest(@RequestParam("shippingId") Long shippingId) {
+
+        DeliveryStatusType deliveryStatusType = DeliveryStatusType.REFUND_REQUESTED;
+
+        ShippingResponse shippingResponse = shippingService.update(shippingId, deliveryStatusType);
+
+        String successMessage = shippingResponse.getDeliveryNum() + "의 반품 신청이 완료되었습니다.";
+
+        return new CustomResponseEntity<>(shippingResponse, successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "반품 요청 메서드", description = "반품 요청 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
+    })
+    @PostMapping("/confirm_purchase")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> purchaseConfirm(@RequestParam("shippingId") Long shippingId) {
+
+        DeliveryStatusType deliveryStatusType = DeliveryStatusType.PURCHASE_CONFIRMED;
+
+        ShippingResponse shippingResponse = shippingService.update(shippingId, deliveryStatusType);
+
+        String successMessage = shippingResponse.getDeliveryNum() + "의 구매확정이 완료되었습니다.";
+
+        return new CustomResponseEntity<>(shippingResponse, successMessage, HttpStatus.OK);
+    }
+
+
 
 
 }

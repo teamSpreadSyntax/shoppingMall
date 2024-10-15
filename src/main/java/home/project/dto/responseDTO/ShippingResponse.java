@@ -29,8 +29,12 @@ public class ShippingResponse {
 
     private DeliveryStatusType deliveryStatusType;
 
+    private Long deliveryCost;
 
-    public ShippingResponse(Long id, String deliveryNum, LocalDateTime orderDate, String deliveryAddress, Long totalAmount, List<ProductDTOForOrder> products, DeliveryType deliveryType, DeliveryStatusType deliveryStatusType) {
+    private String memberEmail;
+
+
+    public ShippingResponse(Long id, String deliveryNum, LocalDateTime orderDate, String deliveryAddress, Long totalAmount, List<ProductDTOForOrder> products, DeliveryType deliveryType, DeliveryStatusType deliveryStatusType, Long deliveryCost, String memberEmail) {
         this.id = id;
         this.deliveryNum = deliveryNum;
         this.orderDate = orderDate;
@@ -39,5 +43,7 @@ public class ShippingResponse {
         this.products = products;
         this.deliveryType = deliveryType;
         this.deliveryStatusType = deliveryStatusType;
+        this.deliveryCost = deliveryCost;
+        this.memberEmail = memberEmail;
     }
 }

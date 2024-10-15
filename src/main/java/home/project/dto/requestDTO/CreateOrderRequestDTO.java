@@ -1,5 +1,6 @@
 package home.project.dto.requestDTO;
 
+import home.project.domain.Coupon;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -13,10 +14,6 @@ import java.util.List;
 @Setter
 public class CreateOrderRequestDTO {
 
-    @NotNull(message = "주문 회원 이메일을 입력해주세요.")
-    @Schema(description = "이메일", required = true)
-    private String email;
-
     @NotEmpty(message = "주문 항목을 입력해주세요.")
     @Schema(description = "주문 항목 리스트", required = true)
     private List<ProductDTOForOrder> productOrders;
@@ -25,5 +22,12 @@ public class CreateOrderRequestDTO {
     @Schema(description = "배송정보", required = true)
     private CreateShippingRequestDTO shippingInfo;
 
+    @NotNull(message = "사용할 포인트를 입력해주세요.")
+    @Schema(description = "배송정보")
+    private Long pointsUsed = 0L;
+
+    @NotNull(message = "사용할 쿠폰을 선택해주세요.")
+    @Schema(description = "배송정보")
+    private Long couponId = null;
 
 }

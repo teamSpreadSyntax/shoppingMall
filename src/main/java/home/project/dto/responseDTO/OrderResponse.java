@@ -22,15 +22,21 @@ public class OrderResponse {
 
     private Long totalAmount;
 
+    private Long pointsUsed;
+
+    private Long pointsEarned;
+
     private List<ProductDTOForOrder> products;
 
 
-    public OrderResponse(Long id, String orderNum, LocalDateTime orderDate, String deliveryAddress, Long totalAmount, List<ProductDTOForOrder> products) {
+    public OrderResponse(Long id, String orderNum, LocalDateTime orderDate, String deliveryAddress, Long totalAmount, Long pointsUsed, Long pointsEarned, List<ProductDTOForOrder> products) {
         this.id = id;
         this.orderNum = orderNum;
         this.orderDate = orderDate;
         this.deliveryAddress = deliveryAddress;
         this.totalAmount = totalAmount;
+        this.pointsUsed = pointsUsed;
+        this.pointsEarned = pointsEarned;
         this.products = products;
     }
 }

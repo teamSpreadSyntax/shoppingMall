@@ -1,9 +1,6 @@
 package home.project.exceptions;
 
-import home.project.exceptions.exception.IdNotFoundException;
-import home.project.exceptions.exception.JwtAuthenticationException;
-import home.project.exceptions.exception.NoChangeException;
-import home.project.exceptions.exception.PageNotFoundException;
+import home.project.exceptions.exception.*;
 import home.project.response.CustomResponseBody;
 import home.project.response.CustomResponseEntity;
 import io.jsonwebtoken.JwtException;
@@ -82,6 +79,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         responseBody.put("errorMessage", ex.getMessage());
         CustomResponseBody<?> errorBody = new CustomResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.FORBIDDEN.value());
         return new CustomResponseEntity<>(errorBody, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InvalidCouponException.class)
+    public ResponseEntity<?> handleInvalidCouponException(InvalidCouponException ex) {
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", ex.getMessage());
+        CustomResponseBody<?> errorBody = new CustomResponseBody<>(Optional.of(responseBody), "인증되지 않은 사용자입니다.", HttpStatus.FORBIDDEN.value());
+        return new CustomResponseEntity<>(errorBody, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler(JwtAuthenticationException.class)

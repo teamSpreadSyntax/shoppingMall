@@ -10,6 +10,8 @@ import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -74,7 +76,7 @@ public class Converter {
     }
 
     public OrderResponse convertFromOrderToOrderResponse(Orders orders) {
-        List<ProductDTOForOrder> productDTOs = orders.getProductOrders().stream()
+        List<ProductDTOForOrder> ListedProductDTOForOrder = orders.getProductOrders().stream()
                 .map(this::convertFromProductOrderToProductDTOForOrder)
                 .collect(Collectors.toList());
 
@@ -84,7 +86,9 @@ public class Converter {
                 orders.getOrderDate(),
                 orders.getShipping().getDeliveryAddress(),
                 calculateTotalAmount(orders),
-                productDTOs
+                orders.getPointsUsed(),
+                orders.getPointsEarned(),
+                ListedProductDTOForOrder
         );
     }
 
@@ -109,17 +113,25 @@ public class Converter {
                 order.getOrderDate(),
                 order.getShipping().getDeliveryAddress(),
                 calculateTotalAmount(order),
-                convertOrderProductsToProductDTOForOrder(order.getProductOrders())
+                order.getPointsUsed(),
+                order.getPointsEarned(),
+                convertListedProductOrderToProductDTOForOrder(order.getProductOrders())
         ));
     }
 
-    private List<ProductDTOForOrder> convertOrderProductsToProductDTOForOrder(List<ProductOrder> orderProducts) {
-        return orderProducts.stream()
+    private List<ProductDTOForOrder> convertListedProductOrderToProductDTOForOrder(List<ProductOrder> listedProductOrder) {
+        return listedProductOrder.stream()
                 .map(orderProduct -> new ProductDTOForOrder(
                         orderProduct.getId(),
                         orderProduct.getPrice(),
                         orderProduct.getQuantity()
                 ))
+                .collect(Collectors.toList());
+    }
+
+    public List<Product> convertFromListedProductOrderToListedProduct(List<ProductOrder> listedProductOrder) {
+        return listedProductOrder.stream()
+                .map(ProductOrder::getProduct)
                 .collect(Collectors.toList());
     }
 
@@ -213,7 +225,7 @@ public class Converter {
 
     public List<ProductCouponResponse> convertFromListedProductCouponProductCouponResponse(List<ProductCoupon> listedProductCoupon){
         if (listedProductCoupon == null) {
-            return new ArrayList<>(); // 또는 null을 반환할 수 있습니다, 비즈니스 로직에 따라 결정
+            return new ArrayList<>();
         }
 
         return listedProductCoupon.stream()
@@ -232,7 +244,7 @@ public class Converter {
     public List<ProductEventResponse> convertFromListedProductEventProductEventResponse(List<ProductEvent> listedProductEvent){
         if (listedProductEvent == null) {
 
-            return new ArrayList<>(); // 또는 null을 반환할 수 있습니다, 비즈니스 로직에 따라 결정
+            return new ArrayList<>();
         }
 
         return listedProductEvent.stream()
@@ -348,7 +360,10 @@ public class Converter {
         DeliveryType deliveryType = createShippingRequestDTO.getDeliveryType();
         shipping.setDeliveryType(deliveryType);
 
-        String defaultAddress = memberRepository.findByEmail(createOrderRequestDTO.getEmail()).orElseThrow(() -> new IdNotFoundException(createOrderRequestDTO.getEmail() + "(으)로 등록된 회원이 없습니다.")).getDefaultAddress();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        String defaultAddress = memberRepository.findByEmail(email).orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다.")).getDefaultAddress();
         if(createShippingRequestDTO.getDeliveryAddressType() == DeliveryAddressType.NEW_ADDRESS && defaultAddress != null){
             shipping.setDeliveryNum(createShippingRequestDTO.getDeliveryAddress().substring(0,2));
             shipping.setDeliveryAddress(createShippingRequestDTO.getDeliveryAddress());
@@ -375,7 +390,7 @@ public class Converter {
     }
 
 
-    public ShippingResponse convertShippingFromShippingResponse(Shipping shipping){
+    public ShippingResponse convertFromShippingToShippingResponse(Shipping shipping){
 
         return new ShippingResponse(
                 shipping.getId(),
@@ -383,10 +398,27 @@ public class Converter {
                 shipping.getOrders().getOrderDate(),
                 shipping.getDeliveryAddress(),
                 shipping.getOrders().getAmount(),
-                convertOrderProductsToProductDTOForOrder(shipping.getOrders().getProductOrders()),
+                convertListedProductOrderToProductDTOForOrder(shipping.getOrders().getProductOrders()),
                 shipping.getDeliveryType(),
-                shipping.getDeliveryStatus()
+                shipping.getDeliveryStatus(),
+                shipping.getDeliveryCost(),
+                shipping.getOrders().getMember().getEmail()
         );
 
+    }
+
+    public Page<ShippingResponse> convertFromPagedShippingToPagedShippingResponse(Page<Shipping> pagedShipping) {
+        return pagedShipping.map(shipping -> new ShippingResponse(
+                shipping.getId(),
+                shipping.getDeliveryNum(),
+                shipping.getOrders().getOrderDate(),
+                shipping.getDeliveryAddress(),
+                shipping.getOrders().getAmount(),
+                convertListedProductOrderToProductDTOForOrder(shipping.getOrders().getProductOrders()),
+                shipping.getDeliveryType(),
+                shipping.getDeliveryStatus(),
+                shipping.getDeliveryCost(),
+                shipping.getOrders().getMember().getEmail()
+        ));
     }
 }

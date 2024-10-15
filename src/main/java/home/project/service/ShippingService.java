@@ -13,13 +13,13 @@ import org.springframework.data.domain.Pageable;
 public interface ShippingService {
     ShippingResponse update(Long id, DeliveryStatusType deliveryStatusType);
 
-//    Shipping findById(Long shippingId);
-//
-//    Page<ShippingResponse> findAll(Pageable pageable);
-//
-//    Page<ShippingResponse> findShipping(String shippingNum, String orderDate, String productNumber, String email, String content, Pageable pageable);
-//
-//    ShippingResponse findByIdReturnShippingResponse(Long shippingId);
-//
+    Shipping findById(Long shippingId);
+    ShippingResponse findByIdReturnShippingResponse(Long shippingId);
+
+    Page<ShippingResponse> findAll(Pageable pageable);
+
+    Page<ShippingResponse> findShippings(String deliveryNum, String orderDate, String orderNum, String email, String content, Pageable pageable);
+
+
 //    String deleteById(Long shippingId);
 }

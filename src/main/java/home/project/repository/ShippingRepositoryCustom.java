@@ -6,6 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface ShippingRepositoryCustom {
-//    Page<Shipping> findShipping(String deliveryNum, String deliveryDate, String productNumber, String email, String content, Pageable pageable);
+    Page<Shipping> findShippings(String shippingNum, String orderDate, String productNumber, String email, String content, Pageable pageable);
 
 }

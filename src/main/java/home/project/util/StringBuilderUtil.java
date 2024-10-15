@@ -64,6 +64,17 @@ public class StringBuilderUtil {
         return finalizeSearchCriteria(searchCriteria, page, "전체 주문입니다.");
     }
 
+    public static String buildShippingSearchCriteria(String deliveryNum, String orderDate, String orderNum, String email, String content, Page<?> page) {
+        StringBuilder searchCriteria = new StringBuilder();
+        if (deliveryNum != null) searchCriteria.append(deliveryNum).append(", ");
+        if (orderDate != null) searchCriteria.append(orderDate).append(", ");
+        if (orderNum != null) searchCriteria.append(orderNum).append(", ");
+        if (email != null) searchCriteria.append(email).append(", ");
+        if (content != null) searchCriteria.append(content).append(", ");
+
+        return finalizeSearchCriteria(searchCriteria, page, "전체 배송정보입니다.");
+    }
+
     public static String buildMemberCouponSearchCriteria(Long couponId, String name, String email, String phone, String role, String content, Page<?> page) {
         StringBuilder searchCriteria = new StringBuilder();
         if (name != null && !name.trim().isEmpty()) searchCriteria.append(name.trim()).append(", ");
