@@ -26,13 +26,15 @@ public interface ProductService {
 
     Page<ProductResponseForManager> findAllForManaging(Pageable pageable);
 
-
     Page<ProductResponse> findNewProduct(Pageable pageable);
 
     Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable);
 
     Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable);
 
+    Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, Pageable pageable);
+
+    Page<ProductResponse> findAllBySoldQuantity(Pageable pageable);
 
     Page<ProductResponse> brandList(Pageable pageable);
 

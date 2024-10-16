@@ -1,10 +1,7 @@
 package home.project.service;
 
 import home.project.domain.*;
-import home.project.dto.requestDTO.CreateMemberRequestDTO;
-import home.project.dto.requestDTO.CreateOrderRequestDTO;
-import home.project.dto.requestDTO.CreateShippingRequestDTO;
-import home.project.dto.requestDTO.ProductDTOForOrder;
+import home.project.dto.requestDTO.*;
 import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.MemberRepository;
@@ -122,7 +119,7 @@ public class Converter {
     private List<ProductDTOForOrder> convertListedProductOrderToProductDTOForOrder(List<ProductOrder> listedProductOrder) {
         return listedProductOrder.stream()
                 .map(orderProduct -> new ProductDTOForOrder(
-                        orderProduct.getId(),
+                        orderProduct.getProduct().getId(),
                         orderProduct.getPrice(),
                         orderProduct.getQuantity()
                 ))
@@ -169,7 +166,7 @@ public class Converter {
                 product.getCreateAt(),
                 product.getImageUrl(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
-                convertFromListedProductEventProductEventResponse(product.getProductEvents())
+                convertFromListedProductEventToListedProductEventResponse(product.getProductEvents())
         );
     }
 
@@ -189,7 +186,7 @@ public class Converter {
                 productResponseForManaging.getCreateAt(),
                 productResponseForManaging.getImageUrl(),
                 convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProductCoupons()),
-                convertFromListedProductEventProductEventResponse(productResponseForManaging.getProductEvents())
+                convertFromListedProductEventToListedProductEventResponse(productResponseForManaging.getProductEvents())
         ));
     }
 
@@ -241,7 +238,7 @@ public class Converter {
     }
 
 
-    public List<ProductEventResponse> convertFromListedProductEventProductEventResponse(List<ProductEvent> listedProductEvent){
+    public List<ProductEventResponse> convertFromListedProductEventToListedProductEventResponse(List<ProductEvent> listedProductEvent){
         if (listedProductEvent == null) {
 
             return new ArrayList<>();
@@ -302,7 +299,7 @@ public class Converter {
                 event.getStartDate(),
                 event.getEndDate(),
                 event.getImage(),
-                convertFromListedProductEventProductEventResponse(event.getProductEvents()),
+                convertFromListedProductEventToListedProductEventResponse(event.getProductEvents()),
                 convertFromListedMemberEventToMemberEventResponse(event.getMemberEvents())
         );
     }
@@ -421,4 +418,43 @@ public class Converter {
                 shipping.getOrders().getMember().getEmail()
         ));
     }
+//
+//    public Cart convertFromCreateCartRequestDTOToProductCart(CreateCartRequestDTO createCartRequestDTO) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+//        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다."));
+//        Cart cart = new Cart();
+//        cart.setProductCart(convertListedProductDTOForOrderToListedProductCart(createCartRequestDTO.getProductOrders()));
+//
+//        return cart;
+//    }
+
+
+//    public List<ProductCart> convertFromCreateCartRequestDTOToListedProductCart(CreateCartRequestDTO CreateCartRequestDTO){
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+//        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다."));
+//
+//        convertListedProductDTOForOrderToListedProductCart(CreateCartRequestDTO);
+//
+//        return listedCreateCartRequestDT.stream()
+//                .map(productDTOForOrder -> new ProductCart(
+//
+//                        productDTOForOrder.getProductId(),
+//
+//                ))
+//                .collect(Collectors.toList());
+//    }
+//
+//    public List<ProductDTOForOrder> convertListedProductDTOForOrderToListedProductCart(CreateCartRequestDTO CreateCartRequestDTO) {
+//
+//        List<ProductOrder> listedProductOrder = new ArrayList<>();
+//        return listedProductOrder.stream()
+//                .map(productOrder -> new ProductDTOForOrder(
+//                        productOrder.getProduct().getId(),
+//                        productOrder.getPrice(),
+//                        productOrder.getQuantity()
+//                ))
+//                .collect(Collectors.toList());
+//    }
 }

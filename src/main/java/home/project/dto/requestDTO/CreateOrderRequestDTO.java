@@ -23,11 +23,11 @@ public class CreateOrderRequestDTO {
     private CreateShippingRequestDTO shippingInfo;
 
     @NotNull(message = "사용할 포인트를 입력해주세요.")
-    @Schema(description = "배송정보")
+    @Schema(description = "사용할 포인트")
     private Long pointsUsed = 0L;
 
     @NotNull(message = "사용할 쿠폰을 선택해주세요.")
-    @Schema(description = "배송정보")
+    @Schema(description = "쿠폰")
     private Long couponId = null;
 
 }

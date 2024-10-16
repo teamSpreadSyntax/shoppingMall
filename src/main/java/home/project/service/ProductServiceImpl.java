@@ -145,6 +145,28 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, Pageable pageable) {
+        String categoryCode = null;
+
+        if (category != null && !category.isEmpty()) {
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {
+            categoryCode = getCode(content);
+        }
+
+        Page<Product> pagedProduct = productRepository.findSoldProducts(brand, categoryCode, productName, content, pageable);
+
+        return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
+    }
+
+    @Override
+    public Page<ProductResponse> findAllBySoldQuantity(Pageable pageable) {
+        Page<Product> pagedProduct = productRepository.findAllBySoldQuantity(pageable);
+        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+    }
+
+    @Override
     public Page<ProductResponse> brandList(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAllByOrderByBrandAsc(pageable);
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
