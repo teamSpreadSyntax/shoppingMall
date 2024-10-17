@@ -1,6 +1,6 @@
 package home.project.domain;
 
-public enum MemberGrade {
+public enum MemberGradeType {
 
     BRONZE, SILVER, GOLD, PLATINUM
 

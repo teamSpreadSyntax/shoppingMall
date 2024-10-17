@@ -5,6 +5,7 @@ import home.project.dto.requestDTO.*;
 import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.MemberRepository;
+import home.project.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
@@ -23,6 +24,7 @@ public class Converter {
 
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final ProductRepository productRepository;
 
     public Member convertFromCreateMemberRequestDTOToMember(CreateMemberRequestDTO createMemberRequestDTO) {
         Member member = new Member();
@@ -418,43 +420,43 @@ public class Converter {
                 shipping.getOrders().getMember().getEmail()
         ));
     }
-//
-//    public Cart convertFromCreateCartRequestDTOToProductCart(CreateCartRequestDTO createCartRequestDTO) {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String email = authentication.getName();
-//        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다."));
-//        Cart cart = new Cart();
-//        cart.setProductCart(convertListedProductDTOForOrderToListedProductCart(createCartRequestDTO.getProductOrders()));
-//
-//        return cart;
-//    }
+
+    public List<ProductCart> convertFromListedProductDTOForOrderToListedProductCart(List<ProductDTOForOrder> listedProductDTOForOrder, Cart cart, Coupon coupon) {
+
+        return listedProductDTOForOrder.stream()
+                .map(productDTOForOrder -> {
+                    Product product = productRepository.findById(productDTOForOrder.getProductId()).orElseThrow(() -> new IdNotFoundException(productDTOForOrder.getProductId() + "(으)로 등록된 상품이 없습니다."));
+                    ProductCart productCart = new ProductCart();
+                    productCart.setCart(cart);
+                    productCart.setProduct(product);
+                    productCart.setQuantity(productDTOForOrder.getQuantity());
+                    return productCart;
+                })
+                .collect(Collectors.toList());
+    }
+
+    public CartResponse convertFromCartToCartResponse(Cart cart){
+        return new CartResponse(
+                cart.getMember().getEmail(),
+                convertListedProductCartToListedProductDTOFOrOrder(cart.getProductCart())
+        );
+    }
 
 
-//    public List<ProductCart> convertFromCreateCartRequestDTOToListedProductCart(CreateCartRequestDTO CreateCartRequestDTO){
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String email = authentication.getName();
-//        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다."));
-//
-//        convertListedProductDTOForOrderToListedProductCart(CreateCartRequestDTO);
-//
-//        return listedCreateCartRequestDT.stream()
-//                .map(productDTOForOrder -> new ProductCart(
-//
-//                        productDTOForOrder.getProductId(),
-//
-//                ))
-//                .collect(Collectors.toList());
-//    }
-//
-//    public List<ProductDTOForOrder> convertListedProductDTOForOrderToListedProductCart(CreateCartRequestDTO CreateCartRequestDTO) {
-//
-//        List<ProductOrder> listedProductOrder = new ArrayList<>();
-//        return listedProductOrder.stream()
-//                .map(productOrder -> new ProductDTOForOrder(
-//                        productOrder.getProduct().getId(),
-//                        productOrder.getPrice(),
-//                        productOrder.getQuantity()
-//                ))
-//                .collect(Collectors.toList());
-//    }
+    public List<ProductDTOForOrder> convertListedProductCartToListedProductDTOFOrOrder(List<ProductCart> listedProductCart){
+            return listedProductCart.stream()
+                    .map(productCart -> new ProductDTOForOrder(
+                            productCart.getProduct().getId(),
+                            productCart.getProduct().getPrice(),
+                            productCart.getQuantity()
+                    ))
+                    .collect(Collectors.toList());
+    }
+
+    public Page<CartResponse> convertFromPagedCartToPagedCartResponse(Page<Cart> pagedCart) {
+        return pagedCart.map(cart -> new CartResponse(
+                cart.getMember().getEmail(),
+                convertListedProductCartToListedProductDTOFOrOrder(cart.getProductCart())
+        ));
+    }
 }

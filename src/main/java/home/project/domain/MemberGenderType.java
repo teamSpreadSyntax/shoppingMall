@@ -1,6 +1,6 @@
 package home.project.domain;
 
-public enum MemberGender {
+public enum MemberGenderType {
 
         M, F, N
 

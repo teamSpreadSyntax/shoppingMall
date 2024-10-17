@@ -1,5 +1,6 @@
 package home.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,10 +27,4 @@ public class ProductCart {
 
     @Column(nullable = false)
     private Integer quantity;
-
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Coupon> coupons = new ArrayList<>();
-
-    @Column(nullable = false)
-    private Long price;
 }

@@ -1,9 +1,7 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.MemberCoupon;
-import home.project.domain.MemberGender;
-import home.project.domain.MemberGrade;
-import home.project.domain.RoleType;
+import home.project.domain.MemberGenderType;
+import home.project.domain.MemberGradeType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -38,7 +36,7 @@ public class MemberResponseForUser {
      */
     private String phone;
 
-    private MemberGender gender;
+    private MemberGenderType gender;
 
     private LocalDate birthDate;
 
@@ -48,7 +46,7 @@ public class MemberResponseForUser {
 
     private String thirdAddress;
 
-    private MemberGrade grade;
+    private MemberGradeType grade;
 
     private Long point;
 
@@ -62,8 +60,8 @@ public class MemberResponseForUser {
      * @param name  회원의 이름
      * @param phone 회원의 전화번호
      */
-    public MemberResponseForUser(Long id, String email, String name, String phone, MemberGender gender,
-                                 LocalDate birthDate, String defaultAddress, String secondAddress, String thirdAddress, MemberGrade grade, Long point, List<MemberCouponResponse> memberCouponResponse) {
+    public MemberResponseForUser(Long id, String email, String name, String phone, MemberGenderType gender,
+                                 LocalDate birthDate, String defaultAddress, String secondAddress, String thirdAddress, MemberGradeType grade, Long point, List<MemberCouponResponse> memberCouponResponse) {
         this.id = id;
         this.email = email;
         this.name = name;

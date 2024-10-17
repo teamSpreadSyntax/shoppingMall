@@ -72,8 +72,9 @@ public class Member {
      * - 타입: VARCHAR(255) (EnumType.STRING 사용)
      */
 
-    @Column
-    private MemberGender gender;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    private MemberGenderType gender;
 
     @Column(name = "birth_date")
     private LocalDate birthDate;
@@ -81,10 +82,10 @@ public class Member {
     @Column(name = "default_address")
     private String defaultAddress;
 
-    @Column(name = "secondAddress")
+    @Column(name = "second_address")
     private String secondAddress = null;
 
-    @Column(name = "thirdAddress")
+    @Column(name = "third_address")
     private String thirdAddress = null;
 
     @Enumerated(EnumType.STRING)
@@ -96,7 +97,7 @@ public class Member {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "member_grade")
-    private MemberGrade grade = MemberGrade.BRONZE;
+    private MemberGradeType grade = MemberGradeType.BRONZE;
 
     @Column(nullable = false)
     private Long point = 0L;

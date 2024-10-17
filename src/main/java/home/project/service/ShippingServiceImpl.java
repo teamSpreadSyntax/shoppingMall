@@ -1,7 +1,6 @@
 package home.project.service;
 
 import home.project.domain.*;
-import home.project.dto.responseDTO.ProductResponse;
 import home.project.dto.responseDTO.ShippingResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.MemberRepository;
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-
-import static home.project.util.CategoryMapper.getCode;
 
 @RequiredArgsConstructor
 @Service
@@ -63,13 +60,13 @@ public class ShippingServiceImpl implements ShippingService{
 
     private void updateMemberGrade(Member member, long accumulatedPurchase) {
         if (accumulatedPurchase < 10000) {
-            member.setGrade(MemberGrade.BRONZE);
+            member.setGrade(MemberGradeType.BRONZE);
         } else if (accumulatedPurchase < 200000) {
-            member.setGrade(MemberGrade.SILVER);
+            member.setGrade(MemberGradeType.SILVER);
         } else if (accumulatedPurchase < 300000) {
-            member.setGrade(MemberGrade.GOLD);
+            member.setGrade(MemberGradeType.GOLD);
         } else {
-            member.setGrade(MemberGrade.PLATINUM);
+            member.setGrade(MemberGradeType.PLATINUM);
         }
     }
 

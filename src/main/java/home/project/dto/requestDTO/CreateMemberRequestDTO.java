@@ -1,10 +1,8 @@
 package home.project.dto.requestDTO;
 
-import home.project.domain.Member;
-import home.project.domain.MemberGender;
+import home.project.domain.MemberGenderType;
 import home.project.util.RegexPatterns;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -67,7 +65,7 @@ public class CreateMemberRequestDTO {
 
     @NotNull(message = "성별을 입력해주세요.")
     @Schema(description = "성별", required = true)
-    private MemberGender gender;
+    private MemberGenderType gender;
 
     @NotNull(message = "생일을 입력해주세요.")
     @Schema(description = "생년월일", required = true)

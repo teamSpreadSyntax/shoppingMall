@@ -11,16 +11,12 @@ import java.util.List;
 @Setter
 public class CartResponse {
 
-    private Long id;
-
-    private Long totalAmount;
+    private String email;
 
     private List<ProductDTOForOrder> products;
 
-
-    public CartResponse(Long id, Long totalAmount, List<ProductDTOForOrder> products) {
-        this.id = id;
-        this.totalAmount = totalAmount;
+    public CartResponse(String email, List<ProductDTOForOrder> products) {
+        this.email = email;
         this.products = products;
     }
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.*;
 import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.requestDTO.ProductDTOForOrder;
-import home.project.dto.responseDTO.MemberCouponResponse;
 import home.project.dto.responseDTO.OrderResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.InvalidCouponException;
@@ -114,13 +113,13 @@ public class OrderServiceImpl implements OrderService{
 
         long newAccumulatePurchase = member.getAccumulatedPurchase()+amount;
         if (newAccumulatePurchase < 0) {
-            member.setGrade(MemberGrade.BRONZE);
+            member.setGrade(MemberGradeType.BRONZE);
         } else if (newAccumulatePurchase >= 10000 && newAccumulatePurchase < 200000) {
-            member.setGrade(MemberGrade.SILVER);
+            member.setGrade(MemberGradeType.SILVER);
         } else if (newAccumulatePurchase >= 200000 && newAccumulatePurchase < 300000) {
-            member.setGrade(MemberGrade.GOLD);
+            member.setGrade(MemberGradeType.GOLD);
         } else if (newAccumulatePurchase >= 300000) {
-            member.setGrade(MemberGrade.PLATINUM);
+            member.setGrade(MemberGradeType.PLATINUM);
         }
         member.setAccumulatedPurchase(newAccumulatePurchase);
         orders.setMember(member);
@@ -184,13 +183,13 @@ public class OrderServiceImpl implements OrderService{
         member.setAccumulatedPurchase(newAccumulatedPurchase);
 
         if (newAccumulatedPurchase < 10000) {
-            member.setGrade(MemberGrade.BRONZE);
+            member.setGrade(MemberGradeType.BRONZE);
         } else if (newAccumulatedPurchase < 200000) {
-            member.setGrade(MemberGrade.SILVER);
+            member.setGrade(MemberGradeType.SILVER);
         } else if (newAccumulatedPurchase < 300000) {
-            member.setGrade(MemberGrade.GOLD);
+            member.setGrade(MemberGradeType.GOLD);
         } else {
-            member.setGrade(MemberGrade.PLATINUM);
+            member.setGrade(MemberGradeType.PLATINUM);
         }
 
         for (ProductOrder productOrder : order.getProductOrders()) {

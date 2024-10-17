@@ -1,17 +1,10 @@
 package home.project.dto.responseDTO;
 
 import home.project.domain.*;
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -47,7 +40,7 @@ public class MemberResponse {
      */
     private RoleType role;
 
-    private MemberGender gender;
+    private MemberGenderType gender;
 
     private LocalDate birthDate;
 
@@ -57,7 +50,7 @@ public class MemberResponse {
 
     private String thirdAddress;
 
-    private MemberGrade grade;
+    private MemberGradeType grade;
 
     private Long point;
 
@@ -72,8 +65,8 @@ public class MemberResponse {
      * @param phone 회원의 전화번호
      * @param role  회원의 권한 유형
      */
-    public MemberResponse(Long id, String email, String name, String phone, RoleType role, MemberGender gender,
-                          LocalDate birthDate, String defaultAddress, String secondAddress, String thirdAddress, MemberGrade grade, Long point, List<MemberCouponResponse> memberCouponResponse) {
+    public MemberResponse(Long id, String email, String name, String phone, RoleType role, MemberGenderType gender,
+                          LocalDate birthDate, String defaultAddress, String secondAddress, String thirdAddress, MemberGradeType grade, Long point, List<MemberCouponResponse> memberCouponResponse) {
         this.id = id;
         this.name = name;
         this.email = email;
