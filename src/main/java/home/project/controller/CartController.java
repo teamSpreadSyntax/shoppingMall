@@ -1,17 +1,10 @@
 package home.project.controller;
 
-import home.project.domain.DeliveryStatusType;
-import home.project.dto.requestDTO.CreateCartRequestDTO;
-import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.responseDTO.CartResponse;
-import home.project.dto.responseDTO.OrderResponse;
-import home.project.dto.responseDTO.ShippingResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CartService;
-import home.project.service.OrderService;
 import home.project.service.ShippingService;
 import home.project.util.PageUtil;
-import home.project.util.StringBuilderUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -112,10 +105,10 @@ public class CartController {
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteFromCart(@RequestParam("productId") Long productId) {
-        String name = cartService.deleteById(productId);
+    public ResponseEntity<?> deleteFromCart(@RequestParam("cartId") Long cartId) {
+        String name = cartService.deleteById(cartId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 장바구니에서 삭제되었습니다.");
+        responseMap.put("successMessage", name + "(id:" + cartId + ")(이)가 장바구니에서 삭제되었습니다.");
         return new CustomResponseEntity<>(responseMap, "상품 삭제 성공", HttpStatus.OK);
     }
 

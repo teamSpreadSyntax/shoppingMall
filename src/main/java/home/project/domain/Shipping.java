@@ -15,7 +15,8 @@ public class Shipping {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "shipping_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_type", nullable = false)
     private DeliveryType deliveryType;
 
     @Column(name = "delivery_num")
@@ -39,7 +40,7 @@ public class Shipping {
 
     @JsonBackReference
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "orders_id")
     private Orders orders;
 
 
