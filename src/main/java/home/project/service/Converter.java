@@ -74,6 +74,29 @@ public class Converter {
         );
     }
 
+    public QnADetailResponse convertFromQnAToQnADetailResponse(QnA qnA){
+        return new QnADetailResponse(
+                qnA.getId(),
+                qnA.getQnAType(),
+                qnA.getSubject(),
+                qnA.getProduct() != null ? qnA.getProduct().getProductNum() : null,
+                qnA.getOrders() != null ? qnA.getOrders().getOrderNum() : null,
+                qnA.getDescription(),
+                qnA.getMember().getEmail(),
+                qnA.getCreateAt()
+        );
+    }
+
+    public QnAResponse convertFromQnAToQnAResponse(QnA qnA){
+        return new QnAResponse(
+                qnA.getId(),
+                qnA.getQnAType(),
+                qnA.getSubject(),
+                qnA.getMember().getEmail(),
+                qnA.getCreateAt()
+        );
+    }
+
     public OrderResponse convertFromOrderToOrderResponse(Orders orders) {
         List<ProductDTOForOrder> ListedProductDTOForOrder = orders.getProductOrders().stream()
                 .map(this::convertFromProductOrderToProductDTOForOrder)
@@ -115,6 +138,29 @@ public class Converter {
                 order.getPointsUsed(),
                 order.getPointsEarned(),
                 convertListedProductOrderToProductDTOForOrder(order.getProductOrders())
+        ));
+    }
+
+    public Page<QnADetailResponse> convertFromPagedQnAToPagedQnADetailResponse(Page<QnA> pagedQna) {
+        return pagedQna.map(qnA -> new QnADetailResponse(
+                qnA.getId(),
+                qnA.getQnAType(),
+                qnA.getSubject(),
+                qnA.getProduct() != null ? qnA.getProduct().getProductNum() : null,
+                qnA.getOrders() != null ? qnA.getOrders().getOrderNum() : null,
+                qnA.getDescription(),
+                qnA.getMember().getEmail(),
+                qnA.getCreateAt()
+        ));
+    }
+
+    public Page<QnAResponse> convertFromPagedQnAToPagedQnAResponse(Page<QnA> pagedQna) {
+        return pagedQna.map(qnA -> new QnAResponse(
+                qnA.getId(),
+                qnA.getQnAType(),
+                qnA.getSubject(),
+                qnA.getMember().getEmail(),
+                qnA.getCreateAt()
         ));
     }
 

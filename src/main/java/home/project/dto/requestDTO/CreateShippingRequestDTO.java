@@ -21,8 +21,8 @@ public class CreateShippingRequestDTO {
     private DeliveryType deliveryType;
 
 
-    @NotNull(message = "배송지를 입력해주세요.")
-    @Schema(description = "배송지", required = true)
+    @NotNull(message = "기존배송지를 사용할지, 새로운 배송지를 사용할지 선택해주세요")
+    @Schema(description = "기존 배송지", required = true)
     private DeliveryAddressType deliveryAddressType;
 
     @NotNull(message = "새 배송지를 입력해주세요.")

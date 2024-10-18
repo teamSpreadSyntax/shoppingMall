@@ -163,6 +163,12 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
+    public Orders findByOrderNum(String OrderNum){
+        return orderRepository.findByOrderNum(OrderNum)
+                .orElseThrow(() -> new IdNotFoundException(OrderNum + "(으)로 등록된 주문이 없습니다."));
+    }
+
+    @Override
     public Page<OrderResponse> findOrders(String orderNum, String orderDate, String productNumber, String email, String content, Pageable pageable) {
 
         Page<Orders> pagedOrder = orderRepository.findOrders(orderNum, orderDate, productNumber, email, content, pageable);

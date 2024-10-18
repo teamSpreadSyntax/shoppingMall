@@ -11,6 +11,8 @@ public interface OrderService {
 
     Orders findById(Long orderId);
 
+    Orders findByOrderNum(String OrderNum);
+
     Page<OrderResponse> findAll(Pageable pageable);
 
     Page<OrderResponse> findOrders(String orderNum, String orderDate, String productNumber, String email, String content, Pageable pageable);

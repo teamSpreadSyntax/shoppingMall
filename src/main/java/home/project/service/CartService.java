@@ -14,7 +14,7 @@ public interface CartService {
 
     Cart findById(Long cartId);
 
-    Page<CartResponse> findAll(Pageable pageable);
+    Page<CartResponse> findAllByMemberId(Pageable pageable);
 
     String deleteById(Long id);
 

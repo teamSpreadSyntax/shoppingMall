@@ -88,7 +88,7 @@ public class CartServiceImpl implements CartService{
     }
 
     @Override
-    public Page<CartResponse> findAll(Pageable pageable){
+    public Page<CartResponse> findAllByMemberId(Pageable pageable){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = memberService.findByEmail(email).getId();

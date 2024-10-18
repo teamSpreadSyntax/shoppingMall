@@ -77,13 +77,13 @@ public class CartController {
     })
     @GetMapping("/admin/products_in_cart")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findAll(
+    public ResponseEntity<?> findByEmail(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults(
                     {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<CartResponse> pagedCart = cartService.findAll(pageable);
+        Page<CartResponse> pagedCart = cartService.findAllByMemberId(pageable);
 
         long totalCount = pagedCart.getTotalElements();
 
