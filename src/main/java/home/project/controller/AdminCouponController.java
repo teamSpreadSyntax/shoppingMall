@@ -83,7 +83,7 @@ public class AdminCouponController {
         return new CustomResponseEntity<>(couponResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "관리자를 위한 전체 쿠폰 조회 메서드", description = "관리자를 위한 전체 쿠폰 조회 메서드입니다.")
+    @Operation(summary = "전체 쿠폰 조회 메서드", description = "전체 쿠폰 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
@@ -92,7 +92,7 @@ public class AdminCouponController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/admin/coupons")
+    @GetMapping("coupons")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findAll(
             @PageableDefault(page = 1, size = 5)
@@ -206,7 +206,7 @@ public class AdminCouponController {
 
     }
 
-    @Operation(summary = "관리자를 위한 쿠폰 삭제 메서드", description = "쿠폰 삭제 메서드입니다.")
+    @Operation(summary = "쿠폰 삭제 메서드", description = "쿠폰 삭제 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
@@ -215,7 +215,7 @@ public class AdminCouponController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @DeleteMapping("/admin/delete")
+    @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteCoupon(@RequestParam("couponId") Long couponId) {
         String name = couponService.deleteById(couponId);

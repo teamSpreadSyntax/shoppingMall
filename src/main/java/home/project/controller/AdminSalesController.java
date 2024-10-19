@@ -83,7 +83,7 @@ public class AdminSalesController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @GetMapping("/admin/sales_ranking")
+    @GetMapping("/sales_ranking")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> salesRanking(
             @PageableDefault(page = 1, size = 5)
