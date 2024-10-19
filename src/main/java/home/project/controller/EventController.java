@@ -46,29 +46,6 @@ public class EventController {
     private final PageUtil pageUtil;
 
 
-    @Operation(summary = "이벤트 생성 메서드", description = "이벤트 생성 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
-    })
-    @PostMapping("/join")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createEvent(@RequestBody CreateEventRequestDTO createEventRequestDTO) {
-
-        EventResponse eventResponse = eventService.join(createEventRequestDTO);
-
-        String successMessage = eventResponse.getName() + "(으)로 이벤트가 등록되었습니다.";
-
-        return new CustomResponseEntity<>(eventResponse, successMessage, HttpStatus.OK);
-    }
-
     @Operation(summary = "id로 이벤트 조회 메서드", description = "id로 이벤트 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
