@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Tag(name = "상품", description = "상품관련 API입니다")
+@Tag(name = "관리자 상품", description = "관리자 상품 관련 API입니다")
 @RequestMapping(path = "/api/admin/product")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "Internal server error",

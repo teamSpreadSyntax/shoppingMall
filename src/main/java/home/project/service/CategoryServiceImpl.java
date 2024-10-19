@@ -218,22 +218,43 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    private Page<CategoryResponse> convertFromPagedCategoryToPagedCategoryResponse(Page<Category> pagedCategory){
-        return pagedCategory.map(categoryResponse -> new CategoryResponse(
-                categoryResponse.getId(),
-                categoryResponse.getCode(),
-                categoryResponse.getName(),
-                categoryResponse.getLevel(),
-                categoryResponse.getParent() != null ? categoryResponse.getParent().getId() : null
-        ));
-    }
     private CategoryResponse convertFromCategoryToCategoryResponse(Category category){
+        // 자식 카테고리들을 CategoryResponse로 변환
+        List<CategoryResponse> childrenResponses = new ArrayList<>();
+        if (category.getChildren() != null) {
+            for (Category childCategory : category.getChildren()) {
+                childrenResponses.add(convertFromCategoryToCategoryResponse(childCategory));
+            }
+        }
+
         return new CategoryResponse(
                 category.getId(),
                 category.getCode(),
                 category.getName(),
                 category.getLevel(),
-                category.getParent() != null ? category.getParent().getId() : null
+                category.getParent() != null ? category.getParent().getId() : null,
+                childrenResponses // 변환된 자식 카테고리 목록을 설정
         );
+    }
+
+    private Page<CategoryResponse> convertFromPagedCategoryToPagedCategoryResponse(Page<Category> pagedCategory){
+        return pagedCategory.map(category -> {
+            // Category 엔티티를 CategoryResponse로 변환
+            List<CategoryResponse> childrenResponses = new ArrayList<>();
+            if (category.getChildren() != null) {
+                for (Category childCategory : category.getChildren()) {
+                    childrenResponses.add(convertFromCategoryToCategoryResponse(childCategory));
+                }
+            }
+
+            return new CategoryResponse(
+                    category.getId(),
+                    category.getCode(),
+                    category.getName(),
+                    category.getLevel(),
+                    category.getParent() != null ? category.getParent().getId() : null,
+                    childrenResponses
+            );
+        });
     }
 }

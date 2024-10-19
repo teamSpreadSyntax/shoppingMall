@@ -45,7 +45,7 @@ public class AdminCategoryController {
     private final CategoryService categoryService;
     private final ValidationCheck validationCheck;
 
-    @Operation(summary = "관리자 카테고리 등록 메서드", description = "카테고리 등록 메서드입니다.")
+    @Operation(summary = "카테고리 등록 메서드", description = "카테고리 등록 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryCreateSuccessResponseSchema"))),

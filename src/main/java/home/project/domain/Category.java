@@ -56,6 +56,7 @@ public class Category {
      * 상위 카테고리에 대한 참조입니다.
      * 지연 로딩(LAZY)을 사용합니다.
      */
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Category parent;
@@ -64,6 +65,7 @@ public class Category {
      * 하위 카테고리 목록입니다.
      * 양방향 관계로, 부모 카테고리가 삭제될 때 모든 자식 카테고리도 함께 삭제됩니다.
      */
+    @JsonManagedReference
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Category> children = new ArrayList<>();
 
