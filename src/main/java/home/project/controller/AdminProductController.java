@@ -37,20 +37,44 @@ import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "상품", description = "상품관련 API입니다")
-@RequestMapping(path = "/api/product")
+@RequestMapping(path = "/api/admin/product")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
 @RestController
-public class ProductController {
+public class AdminProductController {
 
     private final PageUtil pageUtil;
     private final ProductService productService;
     private final ValidationCheck validationCheck;
     private final CategoryService categoryService;
 
+
+    @Operation(summary = "상품 등록 메서드", description = "상품 등록 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+
+    })
+    @PostMapping("/create")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> createProduct(@RequestBody @Valid CreateProductRequestDTO createProductRequestDTO, BindingResult bindingResult) {
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+
+        if (validationResponse != null) return validationResponse;
+
+        productService.join(createProductRequestDTO);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", createProductRequestDTO.getName() + "(이)가 등록되었습니다.");
+        return new CustomResponseEntity<>(responseMap, "상품 등록 성공", HttpStatus.OK);
+
+    }
 
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")
     @ApiResponses(value = {
@@ -61,10 +85,10 @@ public class ProductController {
     })
     @GetMapping("/product")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findProductById(@RequestParam("productId") Long productId) {
-        ProductResponse productResponse = productService.findByIdReturnProductResponse(productId);
+    public ResponseEntity<?> findProductByIdForManaging(@RequestParam("productId") Long productId) {
+        ProductResponseForManager productResponseForManager = productService.findByIdReturnProductResponseForManager(productId);
         String successMessage = productId + "에 해당하는 상품 입니다.";
-        return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(productResponseForManager, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
@@ -78,13 +102,13 @@ public class ProductController {
     })
     @GetMapping("/products")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findAllProduct(
+    public ResponseEntity<?> findAllProductForManaging(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults(
                     {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductResponse> productPage = productService.findAll(pageable);
+        Page<ProductResponseForManager> productPage = productService.findAllForManaging(pageable);
 
         long totalCount = productPage.getTotalElements();
 
@@ -134,7 +158,7 @@ public class ProductController {
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> searchProducts(
+    public ResponseEntity<?> searchProductsForManaging(
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "productName", required = false) String productName,
@@ -145,7 +169,7 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<ProductResponse> productPage = productService.findProducts(brand, category, productName, content, pageable);
+        Page<ProductResponseForManager> productPage = productService.findProductsForManaging(brand, category, productName, content, pageable);
 
         String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
 
@@ -179,4 +203,85 @@ public class ProductController {
         return new CustomResponseEntity<>(pagedBrands.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
+    @Operation(summary = "상품 업데이트(수정) 메서드", description = "업데이트(수정) 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "204", description = "NO_CONTENT",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+    })
+    @PutMapping("/update")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequestDTO updateProductRequestDTO, BindingResult bindingResult) {
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
+        ProductResponse productResponse = productService.update(updateProductRequestDTO);
+        String successMessage = "상품 정보가 수정되었습니다.";
+        return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "상품 삭제 메서드", description = "상품 삭제 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @DeleteMapping("/delete")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
+        String name = productService.deleteById(productId);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");
+        return new CustomResponseEntity<>(responseMap, "상품 삭제 성공", HttpStatus.OK);
+    }
+
+    @Operation(summary = "재고 수량 증가 메서드", description = "증가 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @PutMapping("/increase_stock")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
+        ProductResponseForManager productResponseForManager = productService.increaseStock(productId, stock);
+        String successMessage = productResponseForManager.getName() + "상품이 " + stock + "개 증가하여 " + productResponseForManager.getStock() + "개가 되었습니다.";
+        return new CustomResponseEntity<>(Optional.of(productResponseForManager), successMessage, HttpStatus.OK);
+
+    }
+
+    @Transactional
+    @Operation(summary = "재고 수량 감소 메서드", description = "재고 수량 감소 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
+
+    })
+    @PutMapping("/decrease_stock")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
+        ProductResponseForManager decreaseProduct = productService.decreaseStock(productId, stock);
+        String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다.";
+        return new CustomResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
+    }
 }

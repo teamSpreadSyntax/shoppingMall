@@ -64,7 +64,7 @@ public class EventController {
 
         EventResponse eventResponse = eventService.join(createEventRequestDTO);
 
-        String successMessage = eventResponse.getName() + "(으)로 쿠폰이 등록되었습니다.";
+        String successMessage = eventResponse.getName() + "(으)로 이벤트가 등록되었습니다.";
 
         return new CustomResponseEntity<>(eventResponse, successMessage, HttpStatus.OK);
     }
@@ -84,7 +84,7 @@ public class EventController {
         return new CustomResponseEntity<>(eventResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "관리자를 위한 전체 이벤트 조회 메서드", description = "관리자를 위한 전체 이벤트 조회 메서드입니다.")
+    @Operation(summary = "전체 이벤트 조회 메서드", description = "전체 이벤트 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
@@ -93,7 +93,7 @@ public class EventController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/admin/events")
+    @GetMapping("/events")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findAll(
             @PageableDefault(page = 1, size = 5)
@@ -144,24 +144,6 @@ public class EventController {
 
         return new CustomResponseEntity<>(pagedEventResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
 
-    }
-
-    @Operation(summary = "관리자를 위한 이벤트 삭제 메서드", description = "이벤트 삭제 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-    })
-    @DeleteMapping("/admin/delete")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteEvent(@RequestParam("eventId") Long eventId) {
-        String name = eventService.deleteById(eventId);
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", name + "(id:" + eventId + ")(이)가 삭제되었습니다.");
-        return new CustomResponseEntity<>(responseMap, "이벤트 삭제 성공", HttpStatus.OK);
     }
 
 

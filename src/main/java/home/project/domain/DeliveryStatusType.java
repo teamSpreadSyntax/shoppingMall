@@ -18,6 +18,9 @@ public enum DeliveryStatusType {
     REFUND_IN_PROGRESS("환불"),
     REFUND_COMPLETED("환불완료"),
     RETURN_CONFIRMED("환불요청수락"),
+    CHANGE_REQUESTED("교환요청"),
+    CHANGE_REQUEST_CONFIRMED("교환신청수락"),
+    CHANGE_COMPLETED("교환완료"),
     PURCHASE_CONFIRMED("구매확정");
 
     private final String description;

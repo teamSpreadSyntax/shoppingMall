@@ -88,69 +88,32 @@ public class OrderController {
         return new CustomResponseEntity<>(orderResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "관리자를 위한 전체 주문 조회 메서드", description = "관리자를 위한 전체 주문 조회 메서드입니다.")
+    @Operation(summary = "내 주문 조회 메서드", description = "내 주문 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/admin/orders")
+    @GetMapping("/my_order")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findAll(
-            @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "startDate", direction = Sort.Direction.ASC)})
-            @ParameterObject Pageable pageable) {
-        pageable = pageUtil.pageable(pageable);
-        Page<OrderResponse> pagedOrder = orderService.findAll(pageable);
-
-        long totalCount = pagedOrder.getTotalElements();
-
-        int page = pagedOrder.getNumber();
-
-        String successMessage = "전체 주문입니다.";
-
-        return new CustomResponseEntity<>(pagedOrder.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-    }
-
-    @Operation(summary = "주문 통합 조회 메서드", description = "주문번호, 주문날짜, 상품 품번, 회원 이메일 및 일반 검색어로 쿠폰을 조회합니다. 모든 조건을 만족하는 쿠폰을 조회합니다. 검색어가 없으면 전체 쿠폰을 조회합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-    })
-    @GetMapping("/search")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> searchOrder(
-            @RequestParam(value = "orderNum", required = false) String orderNum,
-            @RequestParam(value = "orderDate", required = false) String orderDate,
-            @RequestParam(value = "deliveryAddress", required = false) String productNumber,
-            @RequestParam(value = "memberEmail", required = false) String email,
-            @RequestParam(value = "content", required = false) String content,
-            @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults({
-                    @SortDefault(sort = "orders_num", direction = Sort.Direction.ASC)
+    public ResponseEntity<?> findOrderByMemberId(
+        @PageableDefault(page = 1, size = 5)
+        @SortDefault.SortDefaults({
+                @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
+        Page<OrderResponse> pagedOrderResponse = orderService.findByMemberId(pageable);
 
-        Page<OrderResponse> pagedOrderResponse = orderService.findOrders(orderNum, orderDate, productNumber, email, content, pageable);
+            long totalCount = pagedOrderResponse.getTotalElements();
 
-        String successMessage = StringBuilderUtil.buildOrderSearchCriteria(orderNum, orderDate, productNumber, email, content, pagedOrderResponse);
+            int page = pagedOrderResponse.getNumber();
 
-        long totalCount = pagedOrderResponse.getTotalElements();
-        int page = pagedOrderResponse.getNumber();
-
+        String successMessage = "내 주문목록 입니다.";
         return new CustomResponseEntity<>(pagedOrderResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-
     }
 
-    @Operation(summary = "관리자를 위한 주문 취소 메서드", description = "주문 취소 메서드입니다.")
+    @Operation(summary = "주문 취소 메서드", description = "주문 취소 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
@@ -159,17 +122,17 @@ public class OrderController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @DeleteMapping("/admin/cancel")
+    @DeleteMapping("/cancel")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> cancelOrder(@RequestParam("orderId") Long orderId) {
         String name = orderService.deleteById(orderId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", name + "(id:" + orderId + ")(이)가 삭제되었습니다.");
+        responseMap.put("successMessage", name + "(id:" + orderId + ")(이)이 취소되었습니다.");
         return new CustomResponseEntity<>(responseMap, "주문 취소 성공", HttpStatus.OK);
     }
 
 
-    @Operation(summary = "반품 요청 메서드", description = "반품 요청 메서드입니다.")
+    @Operation(summary = "반품 신청 메서드", description = "반품 신청 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
@@ -194,7 +157,7 @@ public class OrderController {
         return new CustomResponseEntity<>(shippingResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "반품 요청 메서드", description = "반품 요청 메서드입니다.")
+    @Operation(summary = "교환 신청 메서드", description = "교환 신청 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
@@ -206,15 +169,15 @@ public class OrderController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 
     })
-    @PostMapping("/confirm_purchase")
+    @PostMapping("/change")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> purchaseConfirm(@RequestParam("shippingId") Long shippingId) {
+    public ResponseEntity<?> changeRequest(@RequestParam("shippingId") Long shippingId) {
 
-        DeliveryStatusType deliveryStatusType = DeliveryStatusType.PURCHASE_CONFIRMED;
+        DeliveryStatusType deliveryStatusType = DeliveryStatusType.CHANGE_REQUESTED;
 
         ShippingResponse shippingResponse = shippingService.update(shippingId, deliveryStatusType);
 
-        String successMessage = shippingResponse.getDeliveryNum() + "의 구매확정이 완료되었습니다.";
+        String successMessage = shippingResponse.getDeliveryNum() + "의 교환 신청이 완료되었습니다.";
 
         return new CustomResponseEntity<>(shippingResponse, successMessage, HttpStatus.OK);
     }

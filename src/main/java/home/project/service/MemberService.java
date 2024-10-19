@@ -33,5 +33,7 @@ public interface MemberService {
 
     String deleteById(Long memberId);
 
+    String cancelMember(Long memberId, String verificationToken);
+
     MemberResponse updatePoint(Long memberId, Long point);
 }

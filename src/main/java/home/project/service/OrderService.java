@@ -13,6 +13,8 @@ public interface OrderService {
 
     Orders findByOrderNum(String OrderNum);
 
+    Page<OrderResponse> findByMemberId(Pageable pageable);
+
     Page<OrderResponse> findAll(Pageable pageable);
 
     Page<OrderResponse> findOrders(String orderNum, String orderDate, String productNumber, String email, String content, Pageable pageable);

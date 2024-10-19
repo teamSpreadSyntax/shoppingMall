@@ -1,7 +1,6 @@
 package home.project.controller;
 
 
-import home.project.domain.*;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
@@ -10,13 +9,11 @@ import home.project.dto.responseDTO.MemberResponseForUser;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.MemberService;
-
 import home.project.util.PageUtil;
 import home.project.util.StringBuilderUtil;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -41,15 +38,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@Tag(name = "회원", description = "회원관련 API입니다")
-@RequestMapping(path = "/api/member")
+@Tag(name = "관리자 회원", description = "관리자를 위한 회원관련 API입니다")
+@RequestMapping(path = "/api/admin/member")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
 @RestController
-public class MemberController {
+public class AdminMemberController {
 
     private final MemberService memberService;
     private final ValidationCheck validationCheck;
@@ -96,6 +93,71 @@ public class MemberController {
         Long memberId = memberResponse.getId();
         String successMessage = memberId + "(으)로 가입된 회원정보입니다";
         return new CustomResponseEntity<>(memberResponse, successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "전체 회원 조회 메서드", description = "전체 회원 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema")))
+
+    })
+    @GetMapping("/members")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findAllMember(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "name", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+
+        pageable = pageUtil.pageable(pageable);
+
+        Page<MemberResponse> pagedMemberResponse = memberService.findAllReturnPagedMemberResponse(pageable);
+
+
+        String successMessage = "전체 회원입니다.";
+        long totalCount = pagedMemberResponse.getTotalElements();
+        int page = pagedMemberResponse.getNumber();
+        return new CustomResponseEntity<>(pagedMemberResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+
+    }
+
+    @Operation(summary = "회원 통합 조회 메서드", description = "이름, 이메일, 전화번호 및 일반 검색어로 회원을 조회합니다. 모든 조건을 만족하는 회원을 조회합니다. 검색어가 없으면 전체 회원을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberListResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @GetMapping("/search")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> searchMembers(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "role", required = false) String role,
+            @RequestParam(value = "content", required = false) String content,
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "name", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+
+        Page<MemberResponse> pagedMemberResponse = memberService.findMembers(name, email, phone, role, content, pageable);
+
+        String successMessage = StringBuilderUtil.buildMemberSearchCriteria(name, email, phone, role, content, pagedMemberResponse);
+
+        long totalCount = pagedMemberResponse.getTotalElements();
+        int page = pagedMemberResponse.getNumber();
+
+        return new CustomResponseEntity<>(pagedMemberResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "본인확인 메서드", description = "본인확인 메서드입니다.")
@@ -157,6 +219,24 @@ public class MemberController {
         return new CustomResponseEntity<>(MemberResponseForUser, successMessage, HttpStatus.OK);
     }
 
+    @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @DeleteMapping("/delete")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> deleteMember(@RequestParam("memberId") Long memberId) {
+        String email = memberService.deleteById(memberId);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", email + "(id:" + memberId + ")님의 계정이 삭제되었습니다.");
+        return new CustomResponseEntity<>(Optional.of(responseMap), "회원 삭제 성공", HttpStatus.OK);
+    }
+
     @Operation(summary = "회원 탈퇴 메서드", description = "회원 탈퇴 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -174,6 +254,24 @@ public class MemberController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email + "(id:" + memberId + ")님의 계정이 탈퇴되었습니다. 이용해주셔서 감사합니다.");
         return new CustomResponseEntity<>(Optional.of(responseMap), "회원 탈퇴 성공", HttpStatus.OK);
+    }
+
+    @Operation(summary = "회원 포인트 수정 메서드", description = "회원 포인트 수정 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @DeleteMapping("increase_point")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> updatePoint(@RequestParam("memberId") Long memberId, @RequestParam("point") Long point) {
+        MemberResponse memberResponse = memberService.updatePoint(memberId, point);
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", "포인트 수정 성공. "+memberResponse.getEmail() + "님의 잔여 포인트 : "+memberResponse.getPoint());
+        return new CustomResponseEntity<>(Optional.of(responseMap), "포인트 수정 성공", HttpStatus.OK);
     }
 
 }

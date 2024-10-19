@@ -8,6 +8,8 @@ import home.project.repository.ShippingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -103,6 +105,18 @@ public class ShippingServiceImpl implements ShippingService{
         Shipping shipping = findById(shippingId);
         return converter.convertFromShippingToShippingResponse(shipping);
     }
+
+//    @Override
+//    public Page<ShippingResponse> findByMemberIdReturnShippingResponse(Long shippingId, Pageable pageable) {
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+//
+//        Long memberId = memberRepository.findByEmail(email).orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다.")).getId();
+//
+//        Page<Shipping> shipping = shippingRepository.findByMemberId(memberId, pageable);
+//        return converter.convertFromPagedShippingToPagedShippingResponse(shipping);
+//    }
 
     @Override
     public Page<ShippingResponse> findAll(Pageable pageable) {

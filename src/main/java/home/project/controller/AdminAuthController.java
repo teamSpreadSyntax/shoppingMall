@@ -1,11 +1,11 @@
 package home.project.controller;
 
-import home.project.domain.*;
+import home.project.domain.RoleType;
+import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.dto.responseDTO.RoleResponse;
 import home.project.dto.responseDTO.TokenResponse;
-import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.response.CustomResponseEntity;
-import home.project.service.*;
+import home.project.service.AuthService;
 import home.project.util.PageUtil;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,8 +15,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,26 +25,18 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 
-import java.util.HashMap;
-import java.util.Map;
-
-@Tag(name = "로그인, 로그아웃, 권한", description = "로그인, 로그아웃, 권한 관련 API입니다.")
-@RequestMapping(path = "/api/auth")
+@Tag(name = "관리자 로그인, 로그아웃, 권한", description = "관리자 로그인, 로그아웃, 권한 관련 API입니다.")
+@RequestMapping(path = "/api/admin/auth")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
 @RestController
-public class AuthController {
+public class AdminAuthController {
 
     private final ValidationCheck validationCheck;
     private final AuthService authService;
@@ -85,6 +77,51 @@ public class AuthController {
         TokenResponse newTokenDto = authService.refreshToken(refreshToken);
 
         return new CustomResponseEntity<>(newTokenDto, "토큰이 성공적으로 갱신되었습니다.", HttpStatus.OK);
+    }
+
+
+    @Operation(summary = "권한 부여 메서드", description = "권한 부여 메서드입니다. (center : 중앙 관리자, admin : 중간 관리자, user : 일반 사용자)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/AuthorityChangeSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @PostMapping("/authorization")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> addAuthority(@RequestParam("memberId") Long memberId, @RequestParam("authority") RoleType authority) {
+
+        authService.addAuthority(memberId, authority);
+        String successMessage = authService.roleMessage(memberId, authority);
+
+        return new CustomResponseEntity<>(authority, successMessage, HttpStatus.OK);
+
+    }
+
+    @Operation(summary = "전체 회원별 권한 조회 메서드", description = "전체 회원별 권한 조회 메서드입니다. (center : 중앙 관리자, admin : 중간 관리자, user : 일반 사용자)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedUserRoleListResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+    })
+    @GetMapping("/authorities")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> checkAuthority(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "name", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        String successMessage = "전체 회원별 권한 목록입니다.";
+        Page<RoleResponse> rolesWithMemberNamesPage = authService.checkAuthority(pageable);
+        long totalCount = rolesWithMemberNamesPage.getTotalElements();
+        int page = rolesWithMemberNamesPage.getNumber();
+        return new CustomResponseEntity<>(rolesWithMemberNamesPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "토큰 유효성 확인 메서드", description = "새로고침할때마다 액세스토큰과 리프레쉬토큰을 검증하는 메서드입니다.")

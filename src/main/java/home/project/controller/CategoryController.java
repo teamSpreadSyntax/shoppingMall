@@ -45,26 +45,6 @@ public class CategoryController {
     private final CategoryService categoryService;
     private final ValidationCheck validationCheck;
 
-    @Operation(summary = "카테고리 등록 메서드", description = "카테고리 등록 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryCreateSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema")))
-    })
-    @PostMapping("/createCategory")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createCategory(@RequestBody @Valid CreateCategoryRequestDTO createCategoryRequestDTO, BindingResult bindingResult) {
-        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
-        if (validationResponse != null) return validationResponse;
-        categoryService.join(createCategoryRequestDTO);
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", createCategoryRequestDTO.getName() + "(이)가 등록되었습니다.");
-        return new CustomResponseEntity<>(Optional.of(responseMap), "카테고리 등록 성공", HttpStatus.OK);
-    }
-
     @Operation(summary = "id로 카테고리 조회 메서드", description = "id로 카테고리 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -110,45 +90,5 @@ public class CategoryController {
         return new CustomResponseEntity<>(categoryPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "카테고리(수정) 메서드", description = "카테고리(수정) 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
-            @ApiResponse(responseCode = "204", description = "NO_CONTENT",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-    })
-    @PutMapping("/update")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> updateCategory(@RequestBody @Valid UpdateCategoryRequestDTO updatecategoryRequestDTO, BindingResult bindingResult) {
-        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
-        if (validationResponse != null) return validationResponse;
-        CategoryResponse updatedCategory = categoryService.update(updatecategoryRequestDTO);
-        String successMessage = "카테고리 정보가 수정되었습니다.";
-        return new CustomResponseEntity<>(updatedCategory, successMessage, HttpStatus.OK);
-    }
 
-    @Operation(summary = "카테고리 삭제 메서드", description = "카테고리 삭제 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-    })
-    @DeleteMapping("/delete")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteProduct(@RequestParam("categoryId") Long categoryId) {
-        String name = categoryService.findByIdReturnCategoryResponse(categoryId).getName();
-        categoryService.delete(categoryId);
-        Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", name + "(id:" + categoryId + ")(이)가 삭제되었습니다.");
-        return new CustomResponseEntity<>(Optional.of(responseMap), "상품 삭제 성공", HttpStatus.OK);
-    }
 }

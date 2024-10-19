@@ -206,6 +206,17 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     @Transactional
+    public String cancelMember(Long memberId, String verificationToken) {
+        String email = jwtTokenProvider.getEmailFromToken(verificationToken);
+        if (email == null) {
+            throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
+        }
+        memberRepository.deleteById(memberId);
+        return email;
+    }
+
+    @Override
+    @Transactional
     public MemberResponse updatePoint(Long memberId, Long point){
         Member member = findById(memberId);
         Long newPoint = member.getPoint() + point;

@@ -14,7 +14,10 @@ public interface ShippingService {
     ShippingResponse update(Long id, DeliveryStatusType deliveryStatusType);
 
     Shipping findById(Long shippingId);
+
     ShippingResponse findByIdReturnShippingResponse(Long shippingId);
+
+//    Page<ShippingResponse> findByMemberIdReturnShippingResponse(Long shippingId, Pageable pageable);
 
     Page<ShippingResponse> findAll(Pageable pageable);
 

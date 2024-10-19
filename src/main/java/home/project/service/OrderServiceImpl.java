@@ -163,6 +163,17 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
+    public Page<OrderResponse> findByMemberId(Pageable pageable){
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Long memberId = memberRepository.findByEmail(email).orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다.")).getId();
+
+        return converter.convertFromPagedOrderToPagedOrderResponse(orderRepository.findByMemberId(memberId, pageable));
+    }
+
+    @Override
     public Orders findByOrderNum(String OrderNum){
         return orderRepository.findByOrderNum(OrderNum)
                 .orElseThrow(() -> new IdNotFoundException(OrderNum + "(으)로 등록된 주문이 없습니다."));
