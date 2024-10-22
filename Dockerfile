@@ -7,7 +7,6 @@ WORKDIR /app
 # 필요한 빌드 파일만 복사
 COPY build.gradle settings.gradle ./
 COPY src ./src
-COPY src/main/resources/keystore.jks /app/keystore.jks
 
 # Build with no daemon
 RUN gradle build -x test --no-daemon
@@ -20,6 +19,9 @@ WORKDIR /app
 
 # Copy the JAR file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
+
+COPY src/main/resources/keystore.jks /app/keystore.jks
+
 
 # Expose port 8080 for the application
 EXPOSE 443
