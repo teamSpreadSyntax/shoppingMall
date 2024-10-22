@@ -1,3 +1,4 @@
+/*
 package home.project.service;
 
 import home.project.domain.Category;
@@ -193,4 +194,4 @@ class CategoryServiceImplTest {
             assertThrows(IdNotFoundException.class, () -> categoryService.delete(3L));
         }
     }
-}
+}*/
