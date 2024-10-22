@@ -28,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final Converter converter;
+    private final LogService logService;
 
     @Override
     @Transactional
@@ -70,6 +71,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductResponse findByIdReturnProductResponse(Long productId) {
         Product product = findById(productId);
+        logService.sendProductViewLog(productId);
         return converter.convertFromProductToProductResponse(product);
     }
 

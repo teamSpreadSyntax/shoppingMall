@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+DockerDesktopWSL/main/ext4.vhdx
+DockerDesktopWSL/disk/docker_data.vhdx
