@@ -18,3 +18,9 @@ spring:
       on-profile: docker
   kafka:
     bootstrap-servers: kafka:9092
+  server:
+    ssl:
+      key-store: file:/app/keystore.jks    # 도커 환경용 경로만 변경
+      key-store-password: changeit         # 기존 비밀번호 유지
+      key-store-type: JKS
+      key-alias: tomcat

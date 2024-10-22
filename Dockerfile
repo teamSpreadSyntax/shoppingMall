@@ -7,6 +7,7 @@ WORKDIR /app
 # 필요한 빌드 파일만 복사
 COPY build.gradle settings.gradle ./
 COPY src ./src
+COPY src/main/resources/keystore.jks /app/keystore.jks
 
 # Build with no daemon
 RUN gradle build -x test --no-daemon
