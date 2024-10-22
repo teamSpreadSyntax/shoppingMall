@@ -26,7 +26,6 @@ services:
       - xpack.security.enabled=true  # 보안 기능 활성화
       - xpack.security.authc.api_key.enabled=true  # API 키 기능 활성화
       - ELASTIC_PASSWORD=Ccenter123456! # elastic 사용자 기본 비밀번호 설정
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
       - "9300:9300"
