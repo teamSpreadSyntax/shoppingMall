@@ -1,0 +1,34 @@
+# Gradle specific
+.gradle/
+build/
+!build/libs/  # build/libs 폴더는 제외하지 않음 (JAR 파일이 여기에 있기 때문)
+
+# IDE specific
+.idea/
+*.iml
+.vscode/
+
+# Logs
+*.log
+
+# Git specific
+.git/
+.gitignore
+
+# Temporary files
+*.tmp
+*.swp
+
+# OS specific
+.DS_Store
+
+# Spring Boot specific
+*.jar
+!build/libs/*.jar  # 최종 JAR만 포함
+
+# Other unnecessary files
+*.class
+*.war
+*.ear
+*.zip
+*.tar.gz
