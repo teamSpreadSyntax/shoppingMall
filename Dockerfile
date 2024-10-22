@@ -21,7 +21,7 @@ WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Expose port 8080 for the application
-EXPOSE 433
+EXPOSE 443
 
 # Expose port 9092 for Kafka
 #EXPOSE 9092
