@@ -1,3 +1,5 @@
+version: '3'
+
 services:
   zookeeper:
     image: wurstmeister/zookeeper:latest  # 최신 버전 사용
@@ -50,4 +52,29 @@ services:
     ports:
       - "5601:5601"
     depends_on:
+      - elasticsearch
+  spring-app:
+    build: .
+    container_name: spring-app
+    ports:
+      - "443:443"
+    environment:
+      # 기본 Spring 애플리케이션 환경 변수 설정
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 443
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT: org.hibernate.dialect.MySQLDialect
+      SPRINGDOC_SWAGGER_UI_ENABLED: true
+      SPRINGDOC_API_DOCS_ENABLED: true
+      SPRINGDOC_SWAGGER_UI_PATH: /swagger-ui.html
+      SERVER_SSL_KEY_STORE: /app/keystore.jks
+      SERVER_SSL_KEY_STORE_TYPE: JKS
+      SERVER_SSL_KEY_ALIAS: tomcat
+
+    volumes:
+      - ./src/main/resources/keystore.jks:/app/keystore.jks  # SSL 인증서 마운트
+
+    depends_on:
+      - kafka
+      - zookeeper
       - elasticsearch
