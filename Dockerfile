@@ -31,3 +31,5 @@ EXPOSE 443
 
 # Run the jar file
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+COPY src/main/resources/keystore.jks /app/keystore.jks
