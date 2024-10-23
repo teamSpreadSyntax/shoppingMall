@@ -20,21 +20,21 @@ WORKDIR /app
 # Copy the JAR file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-COPY src/main/resources/keystore.jks /app/keystore.jks
+# Copy the PKCS12 keystore instead of JKS
+COPY /etc/letsencrypt/live/www.projectkkk.com/keystore.p12 /app/keystore.p12
 
-
-# Expose port 8080 for the application
+# Expose port 443 for HTTPS (instead of 8080)
 EXPOSE 443
-
-# Expose port 9092 for Kafka
-#EXPOSE 9092
 
 # Set environment variables for Kafka, MySQL, and other Spring properties
 ENV SPRING_DATASOURCE_URL=jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB \
     SPRING_DATASOURCE_USERNAME=Kang \
     SPRING_DATASOURCE_PASSWORD=alstj121! \
-    SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+    SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092 \
+    SERVER_SSL_KEY_STORE=/app/keystore.p12 \
+    SERVER_SSL_KEY_STORE_PASSWORD=changeit \
+    SERVER_SSL_KEY_STORE_TYPE=PKCS12 \
+    SERVER_SSL_KEY_ALIAS=tomcat
 
-
-# Run the Spring Boot application
+# Run the Spring Boot application with the JAR file
 ENTRYPOINT ["java", "-jar", "app.jar"]
