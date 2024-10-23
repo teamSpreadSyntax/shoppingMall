@@ -26,6 +26,9 @@ COPY /etc/letsencrypt/live/www.projectkkk.com/keystore.p12 /app/keystore.p12
 # Expose port 443 for HTTPS (instead of 8080)
 EXPOSE 443
 
+# Copy the PKCS12 keystore from the local project directory to the container
+COPY keystore.p12 /app/keystore.p12
+
 # Set environment variables for Kafka, MySQL, and other Spring properties
 ENV SPRING_DATASOURCE_URL=jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB \
     SPRING_DATASOURCE_USERNAME=Kang \
