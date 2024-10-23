@@ -49,7 +49,7 @@ services:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
       ELASTICSEARCH_USERNAME: "elastic"  # elastic 사용자 이름
       ELASTICSEARCH_PASSWORD: Ccenter123456! #  elastic 사용자 비밀번호
-      SERVER_PUBLICBASEURL: "http://52.78.39.146:5601"  # 이 줄 추가
+      SERVER_PUBLICBASEURL: "http://34.70.90.91:5601"  # 이 줄 추가
     ports:
       - "5601:5601"
     depends_on:
