@@ -1,40 +1,33 @@
-# Step 1: Use an official Gradle image to build the project
-FROM gradle:8.5-jdk17 AS builder
+# Build stage
+FROM gradle:8.5-jdk17 AS build
+WORKDIR /home/gradle/src
+COPY --chown=gradle:gradle . .
+RUN gradle build --no-daemon
 
-# Set the working directory
-WORKDIR /app
-
-# 필요한 빌드 파일만 복사
-COPY build.gradle settings.gradle ./
-COPY src ./src
-
-# Build with no daemon
-RUN gradle build -x test --no-daemon
-
-# Step 2: Use an official OpenJDK runtime image to run the app
+# Run stage
 FROM openjdk:17-jdk-slim
-
-# Set the working directory in the runtime container
 WORKDIR /app
 
-# Copy the JAR file from the builder stage
-COPY --from=builder /app/build/libs/*.jar app.jar
+# Copy the built artifact from the build stage
+COPY --from=build /home/gradle/src/build/libs/*.jar app.jar
 
-# Copy the PKCS12 keystore from the local project directory to the container
-COPY keystore.p12 /app/keystore.p12
+# Copy SSL keystore
+COPY src/main/resources/keystore.jks /app/keystore.jks
 
-# Expose port 443 for HTTPS
+# Default environment variables
+ENV SPRING_PROFILES_ACTIVE=prod
+ENV SERVER_PORT=443
+ENV SPRING_JPA_HIBERNATE_DDL_AUTO=update
+ENV SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+ENV SPRINGDOC_SWAGGER_UI_ENABLED=true
+ENV SPRINGDOC_API_DOCS_ENABLED=true
+ENV SPRINGDOC_SWAGGER_UI_PATH=/swagger-ui.html
+ENV SERVER_SSL_KEY_STORE=/app/keystore.jks
+ENV SERVER_SSL_KEY_STORE_TYPE=JKS
+ENV SERVER_SSL_KEY_ALIAS=tomcat
+
+# Expose the port the app runs on
 EXPOSE 443
 
-# Set environment variables for Kafka, MySQL, and other Spring properties
-ENV SPRING_DATASOURCE_URL=jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB \
-    SPRING_DATASOURCE_USERNAME=Kang \
-    SPRING_DATASOURCE_PASSWORD=alstj121! \
-    SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092 \
-    SERVER_SSL_KEY_STORE=/app/keystore.p12 \
-    SERVER_SSL_KEY_STORE_PASSWORD=changeit \
-    SERVER_SSL_KEY_STORE_TYPE=PKCS12 \
-    SERVER_SSL_KEY_ALIAS=tomcat
-
-# Run the Spring Boot application
+# Run the jar file
 ENTRYPOINT ["java", "-jar", "app.jar"]
