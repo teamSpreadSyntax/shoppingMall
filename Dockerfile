@@ -20,6 +20,12 @@ WORKDIR /app
 # Copy the JAR file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
+# wait-for-it.sh 스크립트를 복사 (scripts 폴더에 있는 스크립트를 이미지 내로 복사)
+COPY scripts/wait-for-it.sh /app/wait-for-it.sh
+
+# 권한 설정 (스크립트를 실행 가능하게 만듭니다)
+RUN chmod +x /app/wait-for-it.sh
+
 COPY src/main/resources/keystore.jks /app/keystore.jks
 
 
@@ -36,5 +42,7 @@ ENV SPRING_DATASOURCE_URL=jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast
     SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
 
-# Run the Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-jar", "app.jar"]
+

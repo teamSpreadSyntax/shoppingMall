@@ -46,6 +46,11 @@ dependencies {
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.kafka:spring-kafka'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'co.elastic.clients:elasticsearch-java:8.10.4'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.3'
+    implementation 'jakarta.json:jakarta.json-api:2.1.1'
+    implementation 'org.springframework.data:spring-data-elasticsearch:5.2.3'
 }
 
 def querydslSrcDir = 'src/main/generated'

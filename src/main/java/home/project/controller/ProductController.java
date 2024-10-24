@@ -145,7 +145,7 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<ProductResponse> productPage = productService.findProducts(brand, category, productName, content, pageable);
+        Page<ProductResponse> productPage = productService.findProductsOnElastic(brand, category, productName, content, pageable);
 
         String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
 

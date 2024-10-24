@@ -37,8 +37,6 @@ public class ShippingServiceImpl implements ShippingService{
         if (deliveryStatusType == DeliveryStatusType.ORDER_CANCELLATION_COMPLETED
                 || deliveryStatusType == DeliveryStatusType.REFUND_COMPLETED) {
             handleCancellationRefundOrReturn(order, member);
-
-            restoreProductStockAndSoldQuantity(order.getProductOrders());
         }
 
         shipping.setDeliveryStatus(deliveryStatusType);

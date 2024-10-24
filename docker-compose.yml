@@ -20,40 +20,59 @@ services:
       - zookeeper
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.9  # 기존 버전 유지 가능
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4  # 기존 버전 유지 가능
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=true  # 보안 기능 활성화
       - xpack.security.authc.api_key.enabled=true  # API 키 기능 활성화
       - ELASTIC_PASSWORD=Ccenter123456! # elastic 사용자 기본 비밀번호 설정
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.transport.ssl.enabled=false
+      - xpack.security.http.ssl.enabled=false  # HTTP SSL 비활성화 추가
+      - ingest.geoip.downloader.enabled=false
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
+    command: >
+      /bin/sh -c "bin/elasticsearch-plugin install analysis-nori || true && 
+      /usr/local/bin/docker-entrypoint.sh eswrapper"
+    healthcheck:  # 헬스체크 추가
+      test: ["CMD-SHELL", "curl -s http://localhost:9200 -u elastic:Ccenter123456!"]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:7.17.9  # 기존 버전 유지 가능
+    image: docker.elastic.co/logstash/logstash:8.10.4  # 기존 버전 유지 가능
     container_name: logstash
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     ports:
       - "5000:5000"
+    environment:  # Logstash 환경변수 추가
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USER=elastic
+      - ELASTICSEARCH_PASSWORD=Ccenter123456!
     depends_on:
-      - elasticsearch
-      - kafka
+      elasticsearch:
+        condition: service_healthy  # 헬스체크 기다리기
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.9  # 기존 버전 유지 가능
+    image: docker.elastic.co/kibana/kibana:8.10.4  # 기존 버전 유지 가능
     container_name: kibana
     environment:
       ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-      ELASTICSEARCH_USERNAME: "elastic"  # elastic 사용자 이름
-      ELASTICSEARCH_PASSWORD: Ccenter123456! #  elastic 사용자 비밀번호
+      ELASTICSEARCH_SERVICE_ACCOUNT_TOKEN: "AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1hY2Nlc3MtdG9rZW46bC03bXI2ZXFSa2lmVXdVRVYxdXpxUQ"  # elastic 계정 대신 사용
       SERVER_PUBLICBASEURL: "http://35.208.16.192:5601"  # 이 줄 추가
     ports:
       - "5601:5601"
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy  # 헬스체크 기다리기
 
   springboot:
     build:
@@ -68,7 +87,15 @@ services:
       SPRING_DATASOURCE_USERNAME: Kang
       SPRING_DATASOURCE_PASSWORD: alstj121!
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+      SPRING_ELASTICSEARCH_USERNAME: elastic
+      SPRING_ELASTICSEARCH_PASSWORD: Ccenter123456!
+      SPRING_ELASTICSEARCH_SSL_VERIFICATION_MODE: none
     depends_on:
-      - kafka
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy  # 헬스체크 기다리기
+      kafka:
+        condition: service_started
 
+volumes:
+  elasticsearch-data:
