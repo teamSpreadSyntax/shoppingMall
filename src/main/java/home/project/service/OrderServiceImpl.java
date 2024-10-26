@@ -96,19 +96,16 @@ public class OrderServiceImpl implements OrderService{
                 throw new InvalidCouponException("이미 사용된 쿠폰입니다.");
             }
 
-            // 쿠폰 적용 - 할인율 계산 및 총 금액에서 차감
             Integer couponDiscountRate = coupon.getDiscountRate();
             long discountAmount = amount * couponDiscountRate / 100;
             amount -= discountAmount;
 
-            // 쿠폰 사용 처리
             memberCoupon.setUsed(true);
             memberCoupon.setUsedAt(now);
-            memberCouponRepository.save(memberCoupon); // 쿠폰 업데이트 (사용 처리)
+            memberCouponRepository.save(memberCoupon);
         }
 
-        // **총 구매 금액(amount) 저장**
-        orders.setAmount(amount);  // 총 금액을 주문에 저장
+        orders.setAmount(amount);
 
 
 
@@ -143,7 +140,8 @@ public class OrderServiceImpl implements OrderService{
     private String generateOrderNumber(List<ProductDTOForOrder> orderItems, LocalDateTime orderDate) {
         String productPrefix = orderItems.stream()
                 .map(item -> String.valueOf(item.getProductId()))
-                .map(id -> id.length() > 0 ? id.substring(0, 1) : "")                .collect(Collectors.joining());
+                .map(id -> id.length() > 0 ? id.substring(0, 1) : "")
+                .collect(Collectors.joining());
         String orderDateString = orderDate.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         return productPrefix + orderDateString;
     }
