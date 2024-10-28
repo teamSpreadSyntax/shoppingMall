@@ -5,6 +5,7 @@ import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.responseDTO.OrderResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface OrderService {
     OrderResponse join(CreateOrderRequestDTO createOrderRequestDTO);
@@ -22,4 +23,6 @@ public interface OrderService {
     OrderResponse findByIdReturnOrderResponse(Long orderId);
 
     String deleteById(Long orderId);
+
+    void confirmPurchase(Long orderId);
 }

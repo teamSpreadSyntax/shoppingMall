@@ -1,24 +1,18 @@
 package home.project.service;
 
-import home.project.domain.QnA;
-import home.project.dto.requestDTO.CreateQnARequestDTO;
 import home.project.dto.requestDTO.CreateReviewRequestDTO;
-import home.project.dto.responseDTO.QnADetailResponse;
-import home.project.dto.responseDTO.QnAResponse;
+import home.project.dto.responseDTO.ReviewDetailResponse;
 import home.project.dto.responseDTO.ReviewResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ReviewService {
-    ReviewResponse join(CreateReviewRequestDTO createReviewRequestDTO);
+    ReviewDetailResponse join(Long productOrderId, CreateReviewRequestDTO createReviewRequestDTO);
 
-    /*QnA findById(Long qnAId);
+    Page<ReviewResponse> findAllMyReview(Pageable pageable);
 
-    QnADetailResponse findByIdReturnQnADetailResponse(Long qnAId);
+    ReviewDetailResponse increaseHelpfulCount(Long reviewId);
 
-    Page<QnAResponse> findAll(Pageable pageable);
-
-    Page<QnAResponse> findAllMyQnA(Pageable pageable);
-
-    void deleteById(Long qnAid);*/
+    void deleteById(Long ReviewId);
 }

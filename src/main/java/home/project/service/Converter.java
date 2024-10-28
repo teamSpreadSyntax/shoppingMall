@@ -505,4 +505,29 @@ public class Converter {
                 convertListedProductCartToListedProductDTOFOrOrder(cart.getProductCart())
         ));
     }
+
+    public ReviewDetailResponse convertFromReviewToReviewDetailResponse(Review review){
+        return new ReviewDetailResponse(
+                review.getId(),
+                review.getMember().getEmail(),
+                review.getProduct().getName(),
+                review.getCreateAt(),
+                review.getRating(),
+                review.getDescription(),
+                review.getImageUrl1(),
+                review.getImageUrl2(),
+                review.getImageUrl3(),
+                review.getHelpful()
+        );
+    }
+
+    public Page<ReviewResponse> convertFromPagedReviewToPagedQnAResponse(Page<Review> pagedReview) {
+        return pagedReview.map(review -> new ReviewResponse(
+                review.getId(),
+                review.getProduct().getName(),
+                review.getMember().getEmail(),
+                review.getCreateAt()
+        ));
+    }
+
 }

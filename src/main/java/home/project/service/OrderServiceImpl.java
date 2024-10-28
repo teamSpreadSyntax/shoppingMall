@@ -69,6 +69,7 @@ public class OrderServiceImpl implements OrderService{
             productOrder.setQuantity(productDTO.getQuantity());
             productOrder.setPrice(productDTO.getPrice());
             productOrder.setOrders(orders);
+            productOrder.setDeliveryStatus(DeliveryStatusType.ORDER_REQUESTED);
             orders.getProductOrders().add(productOrder);
 
             amount += productDTO.getPrice()*productDTO.getQuantity();
@@ -223,7 +224,20 @@ public class OrderServiceImpl implements OrderService{
 
         return orderNum;
     }
+    @Override
+    @Transactional
+    public void confirmPurchase(Long orderId) {
 
+        Orders order = findById(orderId);
+
+        for (ProductOrder productOrder : order.getProductOrders()) {
+            if (productOrder.getDeliveryStatus() == DeliveryStatusType.DELIVERY_COMPLETED) {
+                productOrder.setDeliveryStatus(DeliveryStatusType.PURCHASE_CONFIRMED);
+            }
+        }
+
+        orderRepository.save(order);
+    }
 
 
 }

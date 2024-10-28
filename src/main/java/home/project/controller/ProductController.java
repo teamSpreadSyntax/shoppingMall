@@ -179,4 +179,18 @@ public class ProductController {
         return new CustomResponseEntity<>(pagedBrands.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
+    @Operation(summary = "id로 특정 상품 주문 조회 메서드", description = "id로 상품 주문 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @GetMapping("/productOrder")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findProductOrderId(@RequestParam("productOrderId") Long productOrderId) {
+        ProductResponse productResponse = productService.findByIdReturnProductResponse(productOrderId);
+        String successMessage = productOrderId + "에 해당하는 상품 입니다.";
+        return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
+    }
 }

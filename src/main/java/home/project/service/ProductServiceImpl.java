@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Product;
+import home.project.domain.ProductOrder;
 import home.project.domain.elasticsearch.ProductDocument;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
@@ -8,6 +9,7 @@ import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
+import home.project.repository.ProductOrderRepository;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.repository.ProductRepository;
 import home.project.service.mapper.ProductMapper;
@@ -18,7 +20,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ import static home.project.util.CategoryMapper.getCode;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductOrderRepository productOrderRepository;
     private final ProductElasticsearchRepository productElasticsearchRepository;
     private final ProductMapper productMapper;
     private final Converter converter;
@@ -387,5 +389,11 @@ public class ProductServiceImpl implements ProductService {
         return frontOfOldProductNum+middleOfNewProductNum+newCategory;
     }
 
+    @Override
+    public Product findByProductOrderNum(Long productOrderId) {
+        ProductOrder productOrder = productOrderRepository.findById(productOrderId)
+                .orElseThrow(() -> new IdNotFoundException(productOrderId + "(으)로 등록된 주문서가 없습니다."));
+        return productOrder.getProduct();
+    }
 
 }

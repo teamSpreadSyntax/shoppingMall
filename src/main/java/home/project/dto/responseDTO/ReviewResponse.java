@@ -1,5 +1,6 @@
 package home.project.dto.responseDTO;
 
+import home.project.domain.Product;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,10 +12,16 @@ public class ReviewResponse {
 
     private Long reviewId;
 
-    private String subject;
+    private String productName;
 
     private String memberEmail;
 
     private LocalDateTime createAt;
 
+    public ReviewResponse(Long reviewId, String productName, String memberEmail, LocalDateTime createAt) {
+        this.reviewId = reviewId;
+        this.productName = productName;
+        this.memberEmail = memberEmail;
+        this.createAt = createAt;
+    }
 }
