@@ -231,8 +231,7 @@ public class OrderServiceImpl implements OrderService{
         Orders order = findById(orderId);
 
         for (ProductOrder productOrder : order.getProductOrders()) {
-//            if (productOrder.getDeliveryStatus() == DeliveryStatusType.DELIVERY_COMPLETED) {
-            if (order.getShipping().getDeliveryStatus() == DeliveryStatusType.DELIVERY_COMPLETED) {
+            if (productOrder.getDeliveryStatus() == DeliveryStatusType.DELIVERY_COMPLETED) {
                 productOrder.setDeliveryStatus(DeliveryStatusType.PURCHASE_CONFIRMED);
             }
         }

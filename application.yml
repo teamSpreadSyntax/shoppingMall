@@ -9,17 +9,14 @@ spring:
       on-profile: local
   kafka:
     bootstrap-servers: localhost:9092
-  elasticsearch: # data.elasticsearch 대신 elasticsearch 사용
-    uris: https://localhost:9200
-    username: elastic
-    password: Ccenter123456!
-    ssl:
-      verification-mode: certificate
-      certificate-authorities: ./elasticsearch.crt
   data:
     elasticsearch:
       repositories:
         enabled: true
+      cluster-name: docker-cluster
+      cluster-nodes: localhost:9200
+      username: elastic
+      password: Ccenter123456!
 
 ---
 spring:
@@ -29,21 +26,20 @@ spring:
   kafka:
     bootstrap-servers: kafka:9092
   elasticsearch:
-    uris: https://elasticsearch:9200
+    uris: http://elasticsearch:9200
     username: elastic
     password: Ccenter123456!
-    connection-timeout: 60s
-    socket-timeout: 30s
+    connection-timeout: 5s
+    socket-timeout: 3s
     ssl:
-      verification-mode: certificate
-      certificate-authorities: /app/elasticsearch.crt
+      verification-mode: none
   data:
     elasticsearch:
       repositories:
         enabled: true
   server:
     ssl:
-      key-store: /app/keystore.jks
+      key-store: file:/app/keystore.jks
       key-store-password: changeit
       key-store-type: JKS
       key-alias: tomcat
