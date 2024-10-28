@@ -52,4 +52,5 @@ public interface ProductService {
 
     ProductResponseForManager decreaseSoldQuantity(Long productId, Long stock);
 
+    Product findByProductOrderNum(Long productOrderId);
 }

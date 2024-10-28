@@ -409,15 +409,15 @@ public class Converter {
         String email = authentication.getName();
 
         String defaultAddress = memberRepository.findByEmail(email).orElseThrow(() -> new IdNotFoundException(email + "(으)로 등록된 회원이 없습니다.")).getDefaultAddress();
-        if(createShippingRequestDTO.getDeliveryAddressType() == DeliveryAddressType.NEW_ADDRESS && defaultAddress != null){
+        if(createShippingRequestDTO.getDeliveryAddressType() == DeliveryAddressType.NEW_ADDRESS){
             shipping.setDeliveryNum(createShippingRequestDTO.getDeliveryAddress().substring(0,2));
             shipping.setDeliveryAddress(createShippingRequestDTO.getDeliveryAddress());
 
-        } else if (createShippingRequestDTO.getDeliveryAddressType() == DeliveryAddressType.DEFAULT_ADDRESS) {
+        } else if (createShippingRequestDTO.getDeliveryAddressType() == DeliveryAddressType.DEFAULT_ADDRESS && defaultAddress != null) {
             shipping.setDeliveryNum(defaultAddress.substring(0,2));
             shipping.setDeliveryAddress(defaultAddress);
 
-        }
+        }//예외처리 추가
 
         if(deliveryType==DeliveryType.ORDINARY_DELIVERY){
             shipping.setArrivingDate(LocalDateTime.now().plusDays(5).toString());
@@ -505,4 +505,29 @@ public class Converter {
                 convertListedProductCartToListedProductDTOFOrOrder(cart.getProductCart())
         ));
     }
+
+    public ReviewDetailResponse convertFromReviewToReviewDetailResponse(Review review){
+        return new ReviewDetailResponse(
+                review.getId(),
+                review.getMember().getEmail(),
+                review.getProduct().getName(),
+                review.getCreateAt(),
+                review.getRating(),
+                review.getDescription(),
+                review.getImageUrl1(),
+                review.getImageUrl2(),
+                review.getImageUrl3(),
+                review.getHelpful()
+        );
+    }
+
+    public Page<ReviewResponse> convertFromPagedReviewToPagedQnAResponse(Page<Review> pagedReview) {
+        return pagedReview.map(review -> new ReviewResponse(
+                review.getId(),
+                review.getProduct().getName(),
+                review.getMember().getEmail(),
+                review.getCreateAt()
+        ));
+    }
+
 }

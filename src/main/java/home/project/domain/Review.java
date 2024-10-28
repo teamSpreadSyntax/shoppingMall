@@ -1,44 +1,47 @@
-//package home.project.domain;
-//
-//import jakarta.persistence.*;
-//import lombok.Getter;
-//import lombok.Setter;
-//
-//import java.time.LocalDateTime;
-//
-//
-//@Entity
-//@Table(name = "qna")
-//@Getter
-//@Setter
-//public class Review {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-//
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "qna_type", nullable = false, length = 30)
-//    private QnAType qnAType = QnAType.OTHER;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "member_id")
-//    private Member member;
-//
-//    @Column(name = "subject", nullable = false)
-//    private String subject;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "product_id")
-//    private Product product;
-//
-//    @Enumerated(EnumType.STRING)
-//    @Column(name = "starRating")
-//    private StarRatingType starRatingType = StarRatingType.FIVE ;
-//
-//    @Column(name = "createAt_qna", columnDefinition = "TIMESTAMP")
-//    private LocalDateTime createAt;
-//
-//    @Column(name = "description", nullable = false)
-//    private String description;
-//
-//}
+package home.project.domain;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "review")
+@Getter
+@Setter
+public class Review {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
+    @Column(name = "createAt_review", columnDefinition = "TIMESTAMP")
+    private LocalDateTime createAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rating", nullable = false, length = 30)
+    private Rating rating;
+
+    @Column(name = "description", nullable = false)
+    private String description;
+
+    @Column(name = "image_url_1", columnDefinition = "TEXT")
+    private String imageUrl1;
+
+    @Column(name = "image_url_2", columnDefinition = "TEXT")
+    private String imageUrl2;
+
+    @Column(name = "image_url_3", columnDefinition = "TEXT")
+    private String imageUrl3;
+
+    @Column(name = "helpful_count")
+    private Long helpful;
+}

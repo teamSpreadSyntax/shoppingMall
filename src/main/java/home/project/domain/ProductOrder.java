@@ -26,4 +26,8 @@ public class ProductOrder {
 
     @Column(nullable = false)
     private Long price;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "delivery_status", nullable = false)
+    private DeliveryStatusType deliveryStatus = DeliveryStatusType.ORDER_REQUESTED;
 }

@@ -22,6 +22,8 @@ public class QProductOrder extends EntityPathBase<ProductOrder> {
 
     public static final QProductOrder productOrder = new QProductOrder("productOrder");
 
+    public final EnumPath<DeliveryStatusType> deliveryStatus = createEnum("deliveryStatus", DeliveryStatusType.class);
+
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QOrders orders;

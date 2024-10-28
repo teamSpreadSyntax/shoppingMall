@@ -182,6 +182,29 @@ public class OrderController {
         return new CustomResponseEntity<>(shippingResponse, successMessage, HttpStatus.OK);
     }
 
+    @Operation(summary = "구매 확정 메서드", description = "구매 확정 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @PostMapping("/confirm")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> confirmPurchase(@RequestParam("orderId") Long orderId) {
+
+        orderService.confirmPurchase(orderId);
+
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", "주문 ID: " + orderId + "에 대한 구매가 확정되었습니다.");
+
+        return new CustomResponseEntity<>(responseMap, "구매 확정", HttpStatus.OK);
+    }
+
 
 
 
