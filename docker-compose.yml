@@ -1,9 +1,11 @@
 services:
   zookeeper:
-    image: wurstmeister/zookeeper:latest  # 최신 버전 사용
+    image: wurstmeister/zookeeper:latest
     container_name: zookeeper
     ports:
       - "2181:2181"
+    networks:
+      - project_default
 
   kafka:
     image: wurstmeister/kafka:latest
@@ -12,67 +14,137 @@ services:
       - "9092:9092"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_CREATE_TOPICS: "product-view-log:1:1,purchase-activity-log:1:1"
     depends_on:
       - zookeeper
+    networks:
+      - project_default
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4  # 기존 버전 유지 가능
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
     container_name: elasticsearch
+    restart: unless-stopped
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=true  # 보안 기능 활성화
-      - xpack.security.authc.api_key.enabled=true  # API 키 기능 활성화
-      - ELASTIC_PASSWORD=Ccenter123456! # elastic 사용자 기본 비밀번호 설정
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
-      - xpack.security.transport.ssl.enabled=false
-      - xpack.security.http.ssl.enabled=false  # HTTP SSL 비활성화 추가
-      - ingest.geoip.downloader.enabled=false
+      - xpack.security.enabled=true
+      - xpack.security.authc.api_key.enabled=true
+      - ELASTIC_PASSWORD=Ccenter123456!
+      - bootstrap.memory_lock=true
+      - xpack.security.transport.ssl.enabled=true
+      - xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/keystore.jks
+      - xpack.security.transport.ssl.truststore.path=/usr/share/elasticsearch/config/keystore.jks
+      - xpack.security.transport.ssl.verification_mode=certificate
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/keystore.jks
+      - ingest.geoip.downloader.enabled=true
+      - KIBANA_SYSTEM_PASSWORD=Ccenter123456!
+      - xpack.license.self_generated.type=basic
+      - xpack.security.authc.token.enabled=true
+      - ES_JAVA_OPTS=-Xms4g -Xmx4g -Djava.security.egd=file:/dev/urandom
+      - "node.store.allow_mmap=false"
+      - ELASTIC_USERNAME=elastic
+      - xpack.security.http.ssl.truststore.path=/usr/share/elasticsearch/config/keystore.jks
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - ./src/main/resources/keystore.jks:/usr/share/elasticsearch/config/keystore.jks
+      - ./elasticsearch.crt:/usr/share/elasticsearch/config/elasticsearch.crt:ro
+      - /dev/urandom:/dev/random
     ports:
       - "9200:9200"
       - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - project_default
     command: >
-      /bin/sh -c "bin/elasticsearch-plugin install analysis-nori || true && 
-      /usr/local/bin/docker-entrypoint.sh eswrapper"
-    healthcheck:  # 헬스체크 추가
-      test: ["CMD-SHELL", "curl -s http://localhost:9200 -u elastic:Ccenter123456!"]
-      interval: 10s
-      timeout: 10s
-      retries: 120
-
+      /bin/bash -c "
+            if [ ! -f config/elasticsearch.keystore ]; then
+              bin/elasticsearch-keystore create;
+            fi;
+            echo 'changeit' | bin/elasticsearch-keystore add -f xpack.security.transport.ssl.keystore.secure_password;
+            echo 'changeit' | bin/elasticsearch-keystore add -f xpack.security.transport.ssl.truststore.secure_password;
+            echo 'changeit' | bin/elasticsearch-keystore add -f xpack.security.http.ssl.keystore.secure_password;
+            echo 'changeit' | bin/elasticsearch-keystore add -f xpack.security.http.ssl.truststore.secure_password;
+            if [ ! -d '/usr/share/elasticsearch/plugins/analysis-nori' ]; then
+              bin/elasticsearch-plugin install --batch analysis-nori;
+            fi;
+            exec /usr/local/bin/docker-entrypoint.sh eswrapper"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "-u", "elastic:Ccenter123456!", "https://localhost:9200/_cluster/health"]
+      interval: 60s
+      timeout: 120s
+      retries: 10
+      start_period: 300s
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:8.10.4  # 기존 버전 유지 가능
+    image: docker.elastic.co/logstash/logstash:8.10.4
     container_name: logstash
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - ./src/main/resources/keystore.jks:/usr/share/logstash/config/keystore.jks
+      - ./elasticsearch.crt:/usr/share/logstash/config/elasticsearch.crt:ro
+      - ./logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ELASTICSEARCH_SSL_VERIFICATIONMODE=certificate
     ports:
       - "5000:5000"
-    environment:  # Logstash 환경변수 추가
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - "9600:9600"
+    environment:
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
       - ELASTICSEARCH_USER=elastic
       - ELASTICSEARCH_PASSWORD=Ccenter123456!
     depends_on:
       elasticsearch:
-        condition: service_healthy  # 헬스체크 기다리기
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600/_node/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - project_default
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:8.10.4  # 기존 버전 유지 가능
+    image: docker.elastic.co/kibana/kibana:8.10.4
     container_name: kibana
     environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-      ELASTICSEARCH_SERVICE_ACCOUNT_TOKEN: "AAEAAWVsYXN0aWMva2liYW5hL2tpYmFuYS1hY2Nlc3MtdG9rZW46bC03bXI2ZXFSa2lmVXdVRVYxdXpxUQ"  # elastic 계정 대신 사용
-      SERVER_PUBLICBASEURL: "http://35.208.16.192:5601"  # 이 줄 추가
+      ELASTICSEARCH_HOSTS: https://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: Ccenter123456!
+      ELASTICSEARCH_SSL_VERIFICATIONMODE: "certificate"
+      ELASTICSEARCH_STARTUP_TIMEOUT: "600s"
+      xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
+      xpack.reporting.kibanaServer.hostname: "localhost"
+      XPACK_SECURITY_ENCRYPTIONKEY: "something_at_least_32_characters"
+      XPACK_ENCRYPTEDUSAVEDOBJECTS_ENCRYPTIONKEY: "something_at_least_32_characters"
+      XPACK_REPORTING_ENCRYPTIONKEY: "something_at_least_32_characters"
+      XPACK_REPORTING_ROLES_ENABLED: "false"
+      LOGGING_LEVEL: debug
+      SERVER_SSL_ENABLED: "true"
+      SERVER_SSL_CERTIFICATE: "/usr/share/kibana/config/certs/kibana.crt" # 서버 SSL 인증서 경로
+      SERVER_SSL_KEY: "/usr/share/kibana/config/certs/kibana.key"
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITY: "/usr/share/kibana/config/certs/elasticsearch.crt"
     ports:
       - "5601:5601"
     depends_on:
       elasticsearch:
-        condition: service_healthy  # 헬스체크 기다리기
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s https://localhost:5601/api/status | grep -q 'Looking good'" ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    volumes:
+      - ./kibana.crt:/usr/share/kibana/config/certs/kibana.crt # 추가된 인증서 파일
+      - ./kibana.key:/usr/share/kibana/config/certs/kibana.key # 추가된 키 파일
+      - ./elasticsearch.crt:/usr/share/kibana/config/certs/elasticsearch.crt:ro
+    networks:
+      - project_default
 
   springboot:
     build:
@@ -87,15 +159,27 @@ services:
       SPRING_DATASOURCE_USERNAME: Kang
       SPRING_DATASOURCE_PASSWORD: alstj121!
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+      SPRING_ELASTICSEARCH_URIS: https://elasticsearch:9200
       SPRING_ELASTICSEARCH_USERNAME: elastic
       SPRING_ELASTICSEARCH_PASSWORD: Ccenter123456!
-      SPRING_ELASTICSEARCH_SSL_VERIFICATION_MODE: none
+      SPRING_ELASTICSEARCH_SSL_VERIFICATION_MODE: certificate
     depends_on:
       elasticsearch:
-        condition: service_healthy  # 헬스체크 기다리기
+        condition: service_healthy
       kafka:
         condition: service_started
+      logstash:
+        condition: service_healthy
+    volumes:
+      - ./elasticsearch.crt:/app/elasticsearch.crt:ro
+      - ./src/main/resources/keystore.jks:/app/keystore.jks:ro
+    networks:
+      - project_default
 
 volumes:
   elasticsearch-data:
+  kibana-data:
+
+networks:
+  project_default:
+    external: true  # 이미 존재하는 네트워크를 외부 네트워크로 선언
