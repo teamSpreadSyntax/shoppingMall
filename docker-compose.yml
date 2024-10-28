@@ -48,7 +48,6 @@ services:
       - ES_JAVA_OPTS=-Xms4g -Xmx4g -Djava.security.egd=file:/dev/urandom
       - "node.store.allow_mmap=false"
       - ELASTIC_USERNAME=elastic
-      - xpack.security.http.ssl.truststore.path=/usr/share/elasticsearch/config/keystore.jks
     volumes:
       - ./src/main/resources/elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12:ro
       - ./elasticsearch.crt:/usr/share/elasticsearch/config/elasticsearch.crt:ro
