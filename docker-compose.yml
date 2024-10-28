@@ -93,7 +93,7 @@ services:
       - "5000:5000"
       - "9600:9600"
     environment:
-      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200ㅍ
+      - ELASTICSEARCH_HOSTS=https://elasticsearch:9200
       - ELASTICSEARCH_USER=elastic
       - ELASTICSEARCH_PASSWORD=Ccenter123456!
     depends_on:
