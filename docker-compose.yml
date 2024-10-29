@@ -164,6 +164,7 @@ services:
       logstash:
         condition: service_healthy
     volumes:
+      - - ~/.gradle:/root/.gradle
       - ./src/main/resources/keystore.p12:/app/keystore.p12:ro
     networks:
       - project_default
