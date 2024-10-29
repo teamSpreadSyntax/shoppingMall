@@ -171,4 +171,4 @@ services:
 
 networks:
   project_default:
-    external: false
+    driver: bridge
