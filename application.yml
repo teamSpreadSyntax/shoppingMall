@@ -9,17 +9,26 @@ spring:
       on-profile: local
   kafka:
     bootstrap-servers: localhost:9092
-  elasticsearch: # data.elasticsearch 대신 elasticsearch 사용
+  elasticsearch:
     uris: https://localhost:9200
     username: elastic
     password: Ccenter123456!
     ssl:
       verification-mode: certificate
-      certificate-authorities: ./elasticsearch.crt
+      key-store: ./keystore.p12
+      key-store-password: changeit
+      key-store-type: PKCS12
   data:
     elasticsearch:
       repositories:
         enabled: true
+  server:
+    ssl:
+      key-store: ./keystore.p12
+      key-store-password: changeit
+      key-store-type: PKCS12
+      key-alias: tomcat
+      enabled: true
 
 ---
 spring:
@@ -36,18 +45,20 @@ spring:
     socket-timeout: 30s
     ssl:
       verification-mode: certificate
-      certificate-authorities: /app/elasticsearch.crt
+      key-store: /app/keystore.p12
+      key-store-password: changeit
+      key-store-type: PKCS12
   data:
     elasticsearch:
       repositories:
         enabled: true
   server:
     ssl:
-      key-store: /app/keystore.jks
+      key-store: /app/keystore.p12
       key-store-password: changeit
-      key-store-type: JKS
+      key-store-type: PKCS12
       key-alias: tomcat
-      enabled: true # SSL 활성화 추가
+      enabled: true
   servlet:
     multipart:
       max-file-size: 10MB
@@ -60,9 +71,10 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-    open-in-view: false # 성능 최적화를 위해 false로 설정
+    open-in-view: false
   logging:
     level:
       org.springframework.data.elasticsearch.client.WIRE: TRACE
       org.springframework.data.elasticsearch: DEBUG
       org.elasticsearch: DEBUG
+      javax.net.ssl: DEBUG  # SSL 디버깅을 위한 로깅 추가
