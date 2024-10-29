@@ -142,7 +142,7 @@ services:
       dockerfile: Dockerfile
     container_name: springboot-app
     ports:
-      - "443:443"
+      - "8443:443"
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB
