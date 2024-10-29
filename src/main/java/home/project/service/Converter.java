@@ -530,4 +530,15 @@ public class Converter {
         ));
     }
 
+    public Page<WishListDetailResponse> convertFromPagedWishListToPagedWishListResponse(Page<WishList> pagedWishList) {
+        return pagedWishList.map(wishList -> new WishListDetailResponse(
+                wishList.getId(),
+                wishList.getProduct().getId(),
+                wishList.getProduct().getName(),
+                wishList.getProduct().getImageUrl(),
+                wishList.getProduct().getPrice(),
+                wishList.getCreateAt()
+        ));
+    }
+
 }

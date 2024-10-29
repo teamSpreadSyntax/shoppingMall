@@ -1,9 +1,6 @@
 package home.project.controller;
 
-import home.project.dto.requestDTO.CreateQnARequestDTO;
 import home.project.dto.requestDTO.CreateReviewRequestDTO;
-import home.project.dto.responseDTO.QnADetailResponse;
-import home.project.dto.responseDTO.QnAResponse;
 import home.project.dto.responseDTO.ReviewDetailResponse;
 import home.project.dto.responseDTO.ReviewResponse;
 import home.project.response.CustomResponseEntity;
