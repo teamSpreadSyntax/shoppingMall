@@ -6,8 +6,11 @@ WORKDIR /app
 
 # 필요한 빌드 파일과 Gradle Wrapper 복사
 COPY build.gradle settings.gradle gradlew ./
-COPY gradle ./gradle
+COPY gradle ./gradle 
 COPY src ./src
+
+# Give execute permission to gradlew
+RUN chmod +x ./gradlew
 
 # Build with no daemon
 RUN ./gradlew build -x test --no-daemon
