@@ -13,7 +13,7 @@ COPY src ./src
 RUN chmod +x ./gradlew
 
 # Build with no daemon
-RUN ./gradlew build -x test --no-daemon
+RUN --network=host ./gradlew build -x test --no-daemon
 
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim

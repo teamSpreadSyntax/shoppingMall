@@ -171,4 +171,4 @@ services:
 
 networks:
   project_default:
-    driver: bridge
+    driver: host
