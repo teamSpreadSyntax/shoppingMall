@@ -1,3 +1,4 @@
+/*
 package home.project.domain;
 
 import jakarta.persistence.*;
@@ -30,4 +31,4 @@ public class Notification {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-}
+}*/
