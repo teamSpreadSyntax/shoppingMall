@@ -5,8 +5,8 @@ FROM gradle:8.5-jdk17 AS builder
 WORKDIR /app
 
 # 필요한 빌드 파일과 Gradle Wrapper 복사
-COPY build.gradle settings.gradle gradlew ./  # Gradle Wrapper 스크립트를 포함
-COPY gradle ./gradle  # gradle 폴더 복사 (Wrapper가 필요한 경우)
+COPY build.gradle settings.gradle gradlew ./
+COPY gradle ./gradle
 COPY src ./src
 
 # Build with no daemon
