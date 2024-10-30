@@ -1,3 +1,11 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://repo.spring.io/release' }
+    }
+}
+
 plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.3'
@@ -20,6 +28,9 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven { url "https://plugins.gradle.org/m2/" }
+    maven { url 'https://repo.spring.io/release' }
+    gradlePluginPortal()
 }
 
 dependencies {
