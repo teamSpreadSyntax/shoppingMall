@@ -5,13 +5,11 @@ FROM gradle:8.5-jdk17 AS builder
 WORKDIR /app
 
 # 필요한 빌드 파일만 복사
-COPY gradlew .
-COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
 # Build with no daemon
-RUN ./gradlew build -x test --no-daemon
+RUN gradle build -x test --no-daemon
 
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
