@@ -11,10 +11,10 @@ public class CreateNotificationRequestDTO {
 
     @NotEmpty(message = "공지 제목을 입력해주세요.")
     @Schema(description = "공지 제목", required = true)
-    private String title;
+    private String subject;
 
     @NotEmpty(message = "공지 내용을 입력해주세요.")
     @Schema(description = "공지 내용", required = true)
-    private String content;
+    private String description;
 }
 

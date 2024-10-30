@@ -1,4 +1,3 @@
-/*
 package home.project.domain;
 
 import jakarta.persistence.*;
@@ -18,11 +17,15 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     @Column(nullable = false)
-    private String title;
+    private String subject;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    private String content;
+    private String description;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
@@ -31,4 +34,4 @@ public class Notification {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
-}*/
+}

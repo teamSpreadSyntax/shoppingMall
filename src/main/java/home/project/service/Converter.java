@@ -541,4 +541,31 @@ public class Converter {
         ));
     }
 
+    public NotificationResponse convertFromNotificationToNotificationResponse(Notification notification){
+        return new NotificationResponse(
+                notification.getId(),
+                notification.getMember(),
+                notification.getSubject(),
+                notification.getDescription(),
+                notification.getCreatedAt()
+        );
+    }
+
+    public Page<NotificationResponse> convertFromPagedNotificationsToPagedNotificationsResponse(Page<Notification> pagedNotification){
+        return pagedNotification.map(notification -> new NotificationResponse(
+                notification.getId(),
+                notification.getMember(),
+                notification.getSubject(),
+                notification.getDescription(),
+                notification.getCreatedAt()
+        ));
+    }
+    public NotificationDetailResponse convertFromNotificationToNotificationDetailResponse(Notification notification){
+        return new NotificationDetailResponse(
+                notification.getSubject(),
+                notification.getDescription(),
+                notification.getCreatedAt()
+        );
+    }
+
 }
