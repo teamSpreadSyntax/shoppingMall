@@ -17,7 +17,7 @@ RUN chmod +x gradlew
 RUN chown -R gradle:gradle /app /home/gradle/.gradle
 
 # Gradle Wrapper로 빌드 수행
-USER gradle
+USER root
 RUN ./gradlew build -x test --no-daemon
 
 # Step 2: Use an official OpenJDK runtime image to run the app
