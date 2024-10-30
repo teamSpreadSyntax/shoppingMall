@@ -5,6 +5,7 @@ FROM gradle:8.5-jdk17 AS builder
 WORKDIR /app
 
 # 필요한 빌드 파일만 복사
+COPY gradlew .
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
