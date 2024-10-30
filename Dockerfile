@@ -9,11 +9,12 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
-# 로컬에서 다운받은 Gradle 파일 복사
-COPY gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
 
-# gradle-wrapper.properties의 distributionUrl을 로컬 파일로 변경
-RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|gradle/gradle-8.5-bin.zip|' gradle/wrapper/gradle-wrapper.properties
+# Gradle 파일 복사
+COPY /home/shared/shoppingMall/gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
+
+# gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
+RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:///app/gradle/gradle-8.5-bin.zip|' gradle/wrapper/gradle-wrapper.properties
 
 # Gradle Wrapper를 사용하여 빌드
 RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
