@@ -20,29 +20,18 @@ WORKDIR /app
 # Copy the JAR file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# wait-for-it.sh 스크립트를 복사 (scripts 폴더에 있는 스크립트를 이미지 내로 복사)
+# wait-for-it.sh 스크립트를 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
-# 권한 설정 (스크립트를 실행 가능하게 만듭니다)
+# 권한 설정
 RUN chmod +x /app/wait-for-it.sh
 
-COPY src/main/resources/keystore.jks /app/keystore.jks
+# SSL 인증서 복사
+COPY elastic-stack-ca.p12 /app/elastic-stack-ca.p12
+COPY springboot.p12 /app/springboot.p12
 
-
-# Expose port 8080 for the application
+# Expose port 443 for the application
 EXPOSE 443
-
-# Expose port 9092 for Kafka
-#EXPOSE 9092
-
-# Set environment variables for Kafka, MySQL, and other Spring properties
-ENV SPRING_DATASOURCE_URL=jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB \
-    SPRING_DATASOURCE_USERNAME=Kang \
-    SPRING_DATASOURCE_PASSWORD=alstj121! \
-    SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-
-
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
 ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-jar", "app.jar"]
-

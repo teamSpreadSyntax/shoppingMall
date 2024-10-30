@@ -10,25 +10,25 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
   elasticsearch:
-    uris: https://localhost:9200
-    username: elastic
-    password: Ccenter123456!
-    ssl:
-      verification-mode: certificate
-      key-store: ./keystore.p12
-      key-store-password: changeit
-      key-store-type: PKCS12
+    rest:
+      uris: https://localhost:9200
+      username: elastic
+      password: ${ELASTIC_PASSWORD}
+      connection-timeout: 60s
+      socket-timeout: 30s
+      ssl:
+        enabled: true
+        verification-mode: none
+        trust-store-type: PKCS12
+        trust-store: ./src/main/resources/elastic-stack-ca.p12
+        trust-store-password: ${CA_PASSWORD}
+        key-store: ./src/main/resources/new_keystore.p12
+        key-store-password: ${KEYSTORE_PASSWORD}
+        key-store-type: PKCS12
   data:
     elasticsearch:
       repositories:
         enabled: true
-  server:
-    ssl:
-      key-store: ./keystore.p12
-      key-store-password: changeit
-      key-store-type: PKCS12
-      key-alias: tomcat
-      enabled: true
 
 ---
 spring:
@@ -38,27 +38,24 @@ spring:
   kafka:
     bootstrap-servers: kafka:9092
   elasticsearch:
-    uris: https://elasticsearch:9200
-    username: elastic
-    password: Ccenter123456!
-    connection-timeout: 60s
-    socket-timeout: 30s
-    ssl:
-      verification-mode: certificate
-      key-store: /app/keystore.p12
-      key-store-password: changeit
-      key-store-type: PKCS12
+    rest:
+      uris: https://elasticsearch:9200
+      username: elastic
+      password: ${ELASTIC_PASSWORD}
+      connection-timeout: 60s
+      socket-timeout: 30s
+      ssl:
+        enabled: true
+        trust-store-type: PKCS12
+        trust-store: /app/elastic-stack-ca.p12
+        trust-store-password: ${CA_PASSWORD}
+        key-store: /app/springboot.p12
+        key-store-password: ${KEYSTORE_PASSWORD}
+        key-store-type: PKCS12
   data:
     elasticsearch:
       repositories:
         enabled: true
-  server:
-    ssl:
-      key-store: /app/keystore.p12
-      key-store-password: changeit
-      key-store-type: PKCS12
-      key-alias: tomcat
-      enabled: true
   servlet:
     multipart:
       max-file-size: 10MB
@@ -71,10 +68,18 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-    open-in-view: false
+    open-in-view: false # 성능 최적화를 위해 false로 설정
   logging:
     level:
       org.springframework.data.elasticsearch.client.WIRE: TRACE
       org.springframework.data.elasticsearch: DEBUG
       org.elasticsearch: DEBUG
-      javax.net.ssl: DEBUG  # SSL 디버깅을 위한 로깅 추가
+
+server:
+  port: 443
+  ssl:
+    enabled: true
+    key-store: /app/springboot.p12
+    key-store-password: ${KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: springboot
