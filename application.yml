@@ -22,7 +22,7 @@ spring:
         trust-store-type: PKCS12
         trust-store: ./src/main/resources/elastic-stack-ca.p12
         trust-store-password: ${CA_PASSWORD}
-        key-store: ./src/main/resources/new_keystore.p12
+        key-store: ./src/main/resources/springboot.p12
         key-store-password: ${KEYSTORE_PASSWORD}
         key-store-type: PKCS12
   data:
