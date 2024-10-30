@@ -6,6 +6,7 @@ WORKDIR /app
 
 # 필요한 빌드 파일만 복사
 COPY gradlew .
+COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
