@@ -1,6 +1,9 @@
 # Step 1: Use an official Gradle image to build the project
 FROM gradle:8.5-jdk17 AS builder
 
+# DNS 설정 추가
+RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
 # Set the working directory
 WORKDIR /app
 
