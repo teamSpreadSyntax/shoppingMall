@@ -9,13 +9,22 @@ spring:
       on-profile: local
   kafka:
     bootstrap-servers: localhost:9092
-  elasticsearch: # data.elasticsearch 대신 elasticsearch 사용
-    uris: https://localhost:9200
-    username: elastic
-    password: Ccenter123456!
-    ssl:
-      verification-mode: certificate
-      certificate-authorities: ./elasticsearch.crt
+  elasticsearch:
+    rest:
+      uris: https://localhost:9200
+      username: elastic
+      password: ${ELASTIC_PASSWORD}
+      connection-timeout: 60s
+      socket-timeout: 30s
+      ssl:
+        enabled: true
+        verification-mode: none
+        trust-store-type: PKCS12
+        trust-store: ./src/main/resources/elastic-stack-ca.p12
+        trust-store-password: ${CA_PASSWORD}
+        key-store: ./src/main/resources/new_keystore.p12
+        key-store-password: ${KEYSTORE_PASSWORD}
+        key-store-type: PKCS12
   data:
     elasticsearch:
       repositories:
@@ -29,25 +38,24 @@ spring:
   kafka:
     bootstrap-servers: kafka:9092
   elasticsearch:
-    uris: https://elasticsearch:9200
-    username: elastic
-    password: Ccenter123456!
-    connection-timeout: 60s
-    socket-timeout: 30s
-    ssl:
-      verification-mode: certificate
-      certificate-authorities: /app/elasticsearch.crt
+    rest:
+      uris: https://elasticsearch:9200
+      username: elastic
+      password: ${ELASTIC_PASSWORD}
+      connection-timeout: 60s
+      socket-timeout: 30s
+      ssl:
+        enabled: true
+        trust-store-type: PKCS12
+        trust-store: /app/elastic-stack-ca.p12
+        trust-store-password: ${CA_PASSWORD}
+        key-store: /app/springboot.p12
+        key-store-password: ${KEYSTORE_PASSWORD}
+        key-store-type: PKCS12
   data:
     elasticsearch:
       repositories:
         enabled: true
-  server:
-    ssl:
-      key-store: /app/keystore.jks
-      key-store-password: changeit
-      key-store-type: JKS
-      key-alias: tomcat
-      enabled: true # SSL 활성화 추가
   servlet:
     multipart:
       max-file-size: 10MB
@@ -60,9 +68,18 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-    open-in-view: false # 성능 최적화를 위해 false로 설정
+    open-in-view: false
   logging:
     level:
       org.springframework.data.elasticsearch.client.WIRE: TRACE
       org.springframework.data.elasticsearch: DEBUG
       org.elasticsearch: DEBUG
+
+server:
+  port: 443
+  ssl:
+    enabled: true
+    key-store: /app/springboot.p12
+    key-store-password: ${KEYSTORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: springboot
