@@ -1,15 +1,17 @@
-# Step 1: Use an official Gradle image to build the project
-FROM gradle:8.5-jdk17 AS builder
+# Step 1: Use an official OpenJDK image with a JDK for building the project
+FROM openjdk:17-jdk-slim AS builder
 
 # Set the working directory
 WORKDIR /app
 
-# 필요한 빌드 파일만 복사
+# 필요한 빌드 파일과 Gradle Wrapper를 복사
+COPY gradlew gradlew
+COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
-# Build with no daemon
-RUN gradle build -x test --no-daemon --info --stacktrace --debug
+# Gradle Wrapper로 빌드 수행
+RUN ./gradlew build -x test --no-daemon
 
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
