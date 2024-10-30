@@ -4,17 +4,12 @@ FROM gradle:8.5-jdk17 AS builder
 # Set the working directory
 WORKDIR /app
 
-# Gradle Wrapper 파일들을 먼저 복사
-COPY gradlew .
-COPY gradle gradle
+# 빌드에 필요한 파일들 복사
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
-# Gradle Wrapper에 실행 권한 부여
-RUN chmod +x gradlew
-
-# Gradle Wrapper를 사용하여 빌드
-RUN ./gradlew build -x test --no-daemon
+# Gradle 캐시를 사용하여 빌드
+RUN --mount=type=cache,target=/root/.gradle gradle build -x test --no-daemon
 
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
