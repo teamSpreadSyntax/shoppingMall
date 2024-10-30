@@ -9,7 +9,7 @@ COPY build.gradle settings.gradle ./
 COPY src ./src
 
 # Build with no daemon
-RUN gradle build -x test --no-daemon
+RUN gradle build -x test --no-daemon --info --stacktrace --debug
 
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
