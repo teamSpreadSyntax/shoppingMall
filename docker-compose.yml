@@ -114,7 +114,7 @@ services:
             echo '서비스 토큰이 성공적으로 생성되었습니다.'
             echo '토큰이 성공적으로 저장되었습니다.'
           else
-            echo '토큰 생성에 실패했습니다. Elasticsearch 로그를 확인하세요.'
+            echo '토큰생성에 실패했습니다. Elasticsearch 로그를 확인하세요.'
           fi;
           wait"
     healthcheck:
