@@ -1,18 +1,17 @@
 # Step 1: Use an official Gradle image to build the project
 FROM gradle:8.5-jdk17 AS builder
 
-# DNS 설정 추가
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
-
 # Set the working directory
 WORKDIR /app
 
 # 빌드에 필요한 파일들 복사
+COPY gradlew .
+COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
-# Gradle 캐시를 사용하여 빌드
-RUN --mount=type=cache,target=/root/.gradle gradle build -x test --no-daemon
+# Gradle Wrapper를 사용하여 빌드
+RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
