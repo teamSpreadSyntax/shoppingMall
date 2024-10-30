@@ -10,6 +10,9 @@ COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
+# Gradle Wrapper에 실행 권한 추가
+RUN chmod +x gradlew
+
 # Gradle Wrapper로 빌드 수행
 RUN ./gradlew build -x test --no-daemon
 
