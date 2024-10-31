@@ -2,6 +2,8 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.RoleType;
+import home.project.domain.elasticsearch.MemberDocument;
+import home.project.domain.elasticsearch.ProductDocument;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
@@ -11,6 +13,7 @@ import home.project.dto.responseDTO.TokenResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.MemberRepository;
+import home.project.util.IndexToElasticsearch;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -34,6 +37,7 @@ public class MemberServiceImpl implements MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final Converter converter;
+    private final IndexToElasticsearch indexToElasticsearch;
 
 
 
@@ -57,6 +61,16 @@ public class MemberServiceImpl implements MemberService {
 
         Member member = converter.convertFromCreateMemberRequestDTOToMember(createMemberRequestDTO);
         memberRepository.save(member);
+
+        MemberDocument memberDocument = converter.convertFromMemberToMemberDocument(member);
+
+
+        try {
+            indexToElasticsearch.indexMemberToElasticsearch(memberDocument);
+        } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
         TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);

@@ -169,7 +169,7 @@ public class AdminProductController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<ProductResponseForManager> productPage = productService.findProductsForManaging(brand, category, productName, content, pageable);
+        Page<ProductResponseForManager> productPage = productService.findProductsOnElasticForManaging(brand, category, productName, content, pageable);
 
         String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
 

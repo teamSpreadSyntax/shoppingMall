@@ -1,6 +1,8 @@
 package home.project.service;
 
 import home.project.domain.*;
+import home.project.domain.elasticsearch.MemberDocument;
+import home.project.domain.elasticsearch.ProductDocument;
 import home.project.dto.requestDTO.*;
 import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
@@ -566,6 +568,46 @@ public class Converter {
                 notification.getDescription(),
                 notification.getCreatedAt()
         );
+    }
+
+    public ProductDocument convertFromProductToProductDocument(Product product) {
+        ProductDocument doc = new ProductDocument();
+        doc.setId(product.getId());
+        doc.setName(product.getName());
+        doc.setBrand(product.getBrand());
+        doc.setCategoryCode(product.getCategory().getCode());
+        doc.setProductNum(product.getProductNum());
+        doc.setStock(product.getStock());
+        doc.setSoldQuantity(product.getSoldQuantity());
+        doc.setPrice(product.getPrice());
+        doc.setDiscountRate(product.getDiscountRate());
+        doc.setDefectiveStock(product.getDefectiveStock());
+        doc.setDescription(product.getDescription());
+        doc.setCreateAt(product.getCreateAt());
+        doc.setImageUrl(product.getImageUrl());
+        return doc;
+    }
+
+    public MemberDocument convertFromMemberToMemberDocument(Member member) {
+        MemberDocument memberDocument = new MemberDocument();
+        memberDocument.setId(member.getId());
+        memberDocument.setEmail(member.getEmail());
+        memberDocument.setName(member.getName());
+        memberDocument.setPhone(member.getPhone());
+        memberDocument.setGender(member.getGender());
+        memberDocument.setBirthDate(member.getBirthDate());
+        memberDocument.setDefaultAddress(member.getDefaultAddress());
+        memberDocument.setSecondAddress(member.getSecondAddress());
+        memberDocument.setThirdAddress(member.getThirdAddress());
+        memberDocument.setRole(member.getRole());
+        memberDocument.setAccumulatedPurchase(member.getAccumulatedPurchase());
+        memberDocument.setGrade(member.getGrade());
+        memberDocument.setPoint(member.getPoint());
+        memberDocument.setMemberCoupons(member.getMemberCoupons());
+        memberDocument.setMemberEvents(member.getMemberEvents());
+        memberDocument.setOrders(member.getOrders());
+        memberDocument.setWishLists(member.getWishLists());
+        return memberDocument;
     }
 
 }

@@ -12,8 +12,7 @@ import home.project.repository.CategoryRepository;
 import home.project.repository.ProductOrderRepository;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.repository.ProductRepository;
-import home.project.service.mapper.ProductMapper;
-import home.project.util.IndexProductToElasticsearch;
+import home.project.util.IndexToElasticsearch;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -36,10 +35,9 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductOrderRepository productOrderRepository;
     private final ProductElasticsearchRepository productElasticsearchRepository;
-    private final ProductMapper productMapper;
     private final Converter converter;
     private final LogService logService;
-    private final IndexProductToElasticsearch indexProductToElasticsearch;
+    private final IndexToElasticsearch indexToElasticsearch;
     private final ElasticsearchOperations elasticsearchOperations;
 
 
@@ -81,11 +79,11 @@ public class ProductServiceImpl implements ProductService {
 
         productRepository.save(product);
 
-        ProductDocument document = productMapper.toDocument(product);
+        ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
 
 
         try {
-            elasticsearchOperations.save(document);
+            indexToElasticsearch.indexProductToElasticsearch(productDocument);
         } catch (Exception e) {
             System.out.println("에러 발생: " + e.getMessage());
             e.printStackTrace();
@@ -166,10 +164,8 @@ public class ProductServiceImpl implements ProductService {
             categoryCode = getCode(content);
         }
 
-// Elasticsearch 검색 결과를 Product로 변환하는 로직 필요
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
-        // ProductDocument를 Product로 변환하는 로직이 필요할 수 있습니다
         Page<Product> pagedProduct = pagedDocuments.map(doc -> findById(doc.getId()));
 
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
@@ -187,6 +183,24 @@ public class ProductServiceImpl implements ProductService {
         }
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
+
+        return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
+    }
+
+    @Override
+    public Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable) {
+        String categoryCode = null;
+
+        if (category != null && !category.isEmpty()) {//?
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {//?
+            categoryCode = getCode(content);
+        }
+
+        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
+
+        Page<Product> pagedProduct = pagedDocuments.map(doc -> findById(doc.getId()));
 
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
@@ -298,8 +312,8 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository.save(existingProduct);
 
-        ProductDocument document = productMapper.toDocument(product);
-        elasticsearchOperations.save(document);
+        ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+        indexToElasticsearch.indexProductToElasticsearch(productDocument);
 
         return converter.convertFromProductToProductResponse(product);
     }
@@ -325,8 +339,8 @@ public class ProductServiceImpl implements ProductService {
         Long newStock = currentStock + stock;
         product.setStock(newStock);
         productRepository.save(product);
-        ProductDocument document = productMapper.toDocument(product);
-        elasticsearchOperations.save(document);
+        ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+        elasticsearchOperations.save(productDocument);
         return converter.convertFromProductToProductResponseForManaging(product);
     }
 
@@ -341,8 +355,8 @@ public class ProductServiceImpl implements ProductService {
         }
         product.setStock(newStock);
         productRepository.save(product);
-        ProductDocument document = productMapper.toDocument(product);
-        elasticsearchOperations.save(document);
+        ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+        indexToElasticsearch.indexProductToElasticsearch(productDocument);
         return converter.convertFromProductToProductResponseForManaging(product);
     }
 
@@ -357,8 +371,8 @@ public class ProductServiceImpl implements ProductService {
         Long newSoldQuantity = currentSoldQuantity + quantity;
         product.setSoldQuantity(newSoldQuantity);
         productRepository.save(product);
-        ProductDocument document = productMapper.toDocument(product);
-        elasticsearchOperations.save(document);
+        ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+        indexToElasticsearch.indexProductToElasticsearch(productDocument);
         return converter.convertFromProductToProductResponseForManaging(product);
     }
 
@@ -376,8 +390,8 @@ public class ProductServiceImpl implements ProductService {
         Long newSoldQuantity = currentSoldQuantity - quantity;
         product.setSoldQuantity(newSoldQuantity);
         productRepository.save(product);
-        ProductDocument document = productMapper.toDocument(product);
-        elasticsearchOperations.save(document);
+        ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+        indexToElasticsearch.indexProductToElasticsearch(productDocument);
         return converter.convertFromProductToProductResponseForManaging(product);
     }
 

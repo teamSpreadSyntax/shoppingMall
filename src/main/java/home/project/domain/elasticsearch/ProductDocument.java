@@ -1,6 +1,13 @@
 package home.project.domain.elasticsearch;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import home.project.domain.ProductCoupon;
+import home.project.domain.ProductEvent;
+import home.project.domain.ProductOrder;
+import home.project.domain.WishList;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -9,11 +16,14 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @Document(indexName = "products")
 public class ProductDocument {
+
     @Id
     private Long id;
 
@@ -50,8 +60,19 @@ public class ProductDocument {
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime createAt;
 
-
-
     @Field(type = FieldType.Text)
     private String imageUrl;
+
+    @Field(type = FieldType.Nested)
+    private List<ProductCoupon> productCoupons = new ArrayList<>();
+
+    @Field(type = FieldType.Nested)
+    private List<ProductEvent> productEvents = new ArrayList<>();
+
+    @Field(type = FieldType.Nested)
+    private List<ProductOrder> productOrder = new ArrayList<>();
+
+    @Field(type = FieldType.Nested)
+    private List<WishList> wishLists = new ArrayList<>();
+
 }
