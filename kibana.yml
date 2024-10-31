@@ -5,14 +5,14 @@ server.port: 5601
 
 # SSL configuration
 server.ssl.enabled: true
-server.ssl.keystore.path: "/usr/share/kibana/config/new_keystore.p12"
-server.ssl.keystore.password: "changeit"
+server.ssl.keystore.path: "/usr/share/kibana/config/kibana.p12"
+server.ssl.keystore.password: ${KIBANA_KEYSTORE_PASSWORD}
 
 
 # Elasticsearch configuration
 elasticsearch.hosts: ["https://elasticsearch:9200"]
 elasticsearch.ssl.verificationMode: none
-elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/new_keystore.p12"]
+elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/elastic-stack-ca.p12"]
 elasticsearch.username: "kibana_system"
 elasticsearch.password: "Ccenter123456!"
 

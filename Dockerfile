@@ -4,13 +4,20 @@ FROM gradle:8.5-jdk17 AS builder
 # Set the working directory
 WORKDIR /app
 
-# 필요한 빌드 파일만 복사
+# 빌드에 필요한 파일들 복사
+COPY gradlew .
+COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
 
-# Build with no daemon
-USER root
-RUN gradle build -x test --no-daemon --info --stacktrace --debug
+# Gradle 파일 복사
+COPY gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
+
+# gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
+RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:///app/gradle/gradle-8.5-bin.zip|' gradle/wrapper/gradle-wrapper.properties
+
+# Gradle Wrapper를 사용하여 빌드
+RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim

@@ -114,7 +114,7 @@ services:
             echo '서비스 토큰이 성공적으로 생성되었습니다.'
             echo '토큰이 성공적으로 저장되었습니다.'
           else
-            echo '토큰 생성에 실패했습니다. Elasticsearch 로그를 확인하세요.'
+            echo '토큰생성에 실패했습니다. Elasticsearch 로그를 확인하세요.'
           fi;
           wait"
     healthcheck:
@@ -127,6 +127,7 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:8.10.4
     container_name: logstash
+    user: root
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
       - ./elastic-stack-ca.p12:/usr/share/logstash/config/elastic-stack-ca.p12
@@ -187,6 +188,7 @@ services:
       SERVER_SSL_KEYSTORE_PATH: /usr/share/kibana/config/kibana.p12
       SERVER_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       SERVER_SSL_KEYSTORE_TYPE: PKCS12
+      KIBANA_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
     ports:
       - "5601:5601"
     depends_on:
@@ -217,6 +219,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    dns:
+      - 8.8.8.8
     container_name: springboot
     ports:
       - "443:443"
@@ -243,6 +247,10 @@ services:
       SERVER_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
       SERVER_SSL_KEY_STORE_TYPE: "PKCS12"
       SERVER_SSL_KEY_ALIAS: "springboot"
+      # HSTS 비활성화 설정 추가
+      SERVER_HSTS_ENABLED: "false"
+      SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
+      SERVER_HSTS_PRELOAD: "false"
     depends_on:
       elasticsearch:
         condition: service_healthy
