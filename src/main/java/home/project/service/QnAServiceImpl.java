@@ -84,8 +84,8 @@ public class QnAServiceImpl implements QnAService{
 
     @Override
     public Page<QnAResponse> findAll(Pageable pageable){
-        Page<QnA> pagedCart = qnARepository.findAll(pageable);
-        return converter.convertFromPagedQnAToPagedQnAResponse(pagedCart);
+        Page<QnA> pagedQnA = qnARepository.findAll(pageable);
+        return converter.convertFromPagedQnAToPagedQnAResponse(pagedQnA);
     }
 
     @Override

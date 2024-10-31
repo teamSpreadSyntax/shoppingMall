@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
-public class ReviewServiceImp implements ReviewService{
+public class ReviewServiceImpl implements ReviewService{
     private final MemberService memberService;
     private final ProductService productService;
     private final ReviewRepository reviewRepository;

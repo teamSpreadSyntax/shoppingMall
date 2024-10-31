@@ -203,7 +203,7 @@ services:
                     /usr/local/bin/kibana-docker --allow-root &
                     wait"
     healthcheck:
-      test: [ "CMD-SHELL", "curl -s -k https://localhost:5601/api/status | grep -q 'Looking good'" ]
+      test: [ "CMD-SHELL", "curl -s https://localhost:5601/api/status | grep -q 'Looking good'" ]
       interval: 10s
       timeout: 10s
       retries: 120
