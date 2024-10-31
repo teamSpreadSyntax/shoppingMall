@@ -1,12 +1,10 @@
 package home.project.controller;
 
-import home.project.dto.requestDTO.CreateQnARequestDTO;
-import home.project.dto.responseDTO.QnADetailResponse;
-import home.project.dto.responseDTO.QnAResponse;
+import home.project.dto.requestDTO.CreateNotificationRequestDTO;
+import home.project.dto.responseDTO.NotificationDetailResponse;
+import home.project.dto.responseDTO.NotificationResponse;
 import home.project.response.CustomResponseEntity;
-import home.project.service.CartService;
-import home.project.service.QnAService;
-import home.project.service.ShippingService;
+import home.project.service.NotificationService;
 import home.project.util.PageUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -29,21 +27,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@Tag(name = "QnA", description = "QnA관련 API입니다")
-@RequestMapping("/api/qna")
+@Tag(name = "Notification", description = "Notification 관련 API입니다")
+@RequestMapping("/api/notification")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
 @RestController
-public class QnAController {
+public class NotificationController {
 
-    private final QnAService qnAService;
+    private final NotificationService notificationService;
     private final PageUtil pageUtil;
 
 
-    @Operation(summary = "QnA 작성 메서드", description = "QnA 작성 메서드입니다.")
+    @Operation(summary = "Notification 작성 메서드", description = "Notification 작성 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
@@ -57,88 +55,62 @@ public class QnAController {
     })
     @PostMapping("/join")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createQnA(@RequestBody CreateQnARequestDTO createQnARequestDTO) {
+    public ResponseEntity<?> createNotification(@RequestBody CreateNotificationRequestDTO createNotificationRequestDTO) {
 
-        QnADetailResponse qnADetailResponse = qnAService.join(createQnARequestDTO);
+        NotificationResponse notificationResponse = notificationService.createNotification(createNotificationRequestDTO);
 
-        String successMessage = "QnA가 작성되었습니다.";
+        String successMessage = "공지사항이 작성되었습니다.";
 
-        return new CustomResponseEntity<>(qnADetailResponse, successMessage, HttpStatus.OK);
+        return new CustomResponseEntity<>(notificationResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "id로 QnA 상세정보 조회 메서드", description = "id로 QnA 조회 메서드입니다.")
+    @Operation(summary = "전체 Notification 조회 메서드", description = "전체 Notification 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("/notifications")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findAll(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "notificationId", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<NotificationResponse> pagedNotification = notificationService.findAllNotifications(pageable);
+
+        long totalCount = pagedNotification.getTotalElements();
+
+        int page = pagedNotification.getNumber();
+
+        String successMessage = "모든 공지사항 입니다.";
+
+        return new CustomResponseEntity<>(pagedNotification.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
+    @Operation(summary = "id로 Notification 상세정보 조회 메서드", description = "id로 Notification 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @GetMapping("/qna_detail")
+    @GetMapping("/notification_detail")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findQnAByIdReturnQnADetailResponse(@RequestParam("qnAId") Long qnAId) {
-        QnADetailResponse qnADetailResponse = qnAService.findByIdReturnQnADetailResponse(qnAId);
-        String successMessage = qnAId + "에 해당하는 QnA 입니다.";
-        return new CustomResponseEntity<>(qnADetailResponse, successMessage, HttpStatus.OK);
+    public ResponseEntity<?> findNotificationByIdReturnQnADetailResponse(@RequestParam("notificationId") Long notificationId) {
+
+        NotificationDetailResponse notificationDetailResponse = notificationService.findByIdReturnNotificationDetailResponse(notificationId);
+
+        String successMessage = notificationId + "에 해당하는 공지사항 입니다.";
+
+        return new CustomResponseEntity<>(notificationDetailResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "전체 QnA 조회 메서드", description = "전체 QnA 조회 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-    })
-    @GetMapping("/qnas")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findAll(
-            @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
-            @ParameterObject Pageable pageable) {
-        pageable = pageUtil.pageable(pageable);
-        Page<QnAResponse> pagedQnA = qnAService.findAll(pageable);
-
-        long totalCount = pagedQnA.getTotalElements();
-
-        int page = pagedQnA.getNumber();
-
-        String successMessage = "모든 QnA 입니다.";
-
-        return new CustomResponseEntity<>(pagedQnA.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-    }
-
-    @Operation(summary = "내 QnA 조회 메서드", description = "내 QnA 조회 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-    })
-    @GetMapping("/my_qna")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findMyQnA(
-            @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
-            @ParameterObject Pageable pageable) {
-        pageable = pageUtil.pageable(pageable);
-        Page<QnAResponse> pagedQnA = qnAService.findAllMyQnA(pageable);
-
-        long totalCount = pagedQnA.getTotalElements();
-
-        int page = pagedQnA.getNumber();
-
-        String successMessage = "내 모든 QnA 입니다.";
-
-        return new CustomResponseEntity<>(pagedQnA.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-    }
-
-
-    @Operation(summary = "QnA 삭제 메서드", description = "QnA 삭제 메서드입니다.")
+    @Operation(summary = "Notification 삭제 메서드", description = "Notification 삭제 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
@@ -149,32 +121,11 @@ public class QnAController {
     })
     @DeleteMapping("delete")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteQnA(@RequestParam("qnAId") Long qnAId) {
-        qnAService.deleteById(qnAId);
+    public ResponseEntity<?> deleteQnA(@RequestParam("notificationId") Long notificationId) {
+        notificationService.deleteById(notificationId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage",  qnAId + "번 QnA가 삭제되었습니다.");
-        return new CustomResponseEntity<>(responseMap, "QnA 삭제 성공", HttpStatus.OK);
+        responseMap.put("successMessage",  notificationId + "번 공지사항이 삭제되었습니다.");
+        return new CustomResponseEntity<>(responseMap, "공지사항 삭제 성공", HttpStatus.OK);
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

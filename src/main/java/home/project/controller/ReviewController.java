@@ -1,10 +1,8 @@
 package home.project.controller;
 
-import home.project.dto.requestDTO.CreateQnARequestDTO;
 import home.project.dto.requestDTO.CreateReviewRequestDTO;
-import home.project.dto.responseDTO.QnADetailResponse;
-import home.project.dto.responseDTO.QnAResponse;
 import home.project.dto.responseDTO.ReviewDetailResponse;
+import home.project.dto.responseDTO.ReviewProductResponse;
 import home.project.dto.responseDTO.ReviewResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.ReviewService;
@@ -42,6 +40,34 @@ public class ReviewController {
 
     private final ReviewService reviewService;
     private final PageUtil pageUtil;
+
+    @Operation(summary = "리뷰 작성 가능 제품 목록 조회 메서드", description = "리뷰 작성 가능 제품 목록 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("/reviewableProducts")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> getReviewableProducts(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "productId", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<ReviewProductResponse> pagedProduct = reviewService.getReviewableProducts(pageable);
+
+        long totalCount = pagedProduct.getTotalElements();
+
+        int page = pagedProduct.getNumber();
+
+        String successMessage = "리뷰 작성 가능 제품 목록 입니다.";
+
+        return new CustomResponseEntity<>(pagedProduct.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
 
     @Operation(summary = "Review 작성 메서드", description = "구매 확정된 제품에 대한 Review를 작성하는 메서드입니다.")
     @ApiResponses(value = {

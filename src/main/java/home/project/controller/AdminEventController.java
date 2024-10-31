@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -62,6 +63,26 @@ public class AdminEventController {
         String successMessage = eventResponse.getName() + "(으)로 이벤트가 등록되었습니다.";
 
         return new CustomResponseEntity<>(eventResponse, successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "이벤트 수정 메서드", description = "이벤트 정보를 수정하는 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/EventResponseSchema"))),
+            @ApiResponse(responseCode = "204", description = "No Content",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @PutMapping("/update")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> updateEvent(@RequestParam("eventId") Long eventId,
+                                         @RequestBody @Valid CreateEventRequestDTO updateEventRequestDTO) {
+        EventResponse updatedEvent = eventService.updateEvent(eventId, updateEventRequestDTO);
+        String successMessage = "이벤트 정보가 수정되었습니다.";
+        return new CustomResponseEntity<>(updatedEvent, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "id로 이벤트 조회 메서드", description = "id로 이벤트 조회 메서드입니다.")

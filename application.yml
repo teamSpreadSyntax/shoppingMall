@@ -68,7 +68,7 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
-    open-in-view: false
+    open-in-view: false # 성능 최적화를 위해 false로 설정
   logging:
     level:
       org.springframework.data.elasticsearch.client.WIRE: TRACE

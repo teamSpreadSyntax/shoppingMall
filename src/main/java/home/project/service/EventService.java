@@ -7,9 +7,13 @@ import home.project.dto.requestDTO.CreateEventRequestDTO;
 import home.project.dto.responseDTO.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface EventService {
     EventResponse join(CreateEventRequestDTO createEventRequestDTO);
+
+    @Transactional
+    EventResponse updateEvent(Long eventId, CreateEventRequestDTO updateEventRequestDTO);
 
     Page<EventResponse> findAll(Pageable pageable);
 
