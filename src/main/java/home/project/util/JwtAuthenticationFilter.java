@@ -26,17 +26,28 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     private final JwtTokenProvider jwtTokenProvider;
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
 
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.startsWith("/api/address-search") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.startsWith("/ws");
+    }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
-        String token = resolveToken((HttpServletRequest) request);
+        // shouldNotFilter 체크 추가
+        if (shouldNotFilter(httpServletRequest)) {
+            chain.doFilter(request, response);
+            return;
+        }
 
+        String token = resolveToken(httpServletRequest);
 
         logger.info("Authorization Header: {}", httpServletRequest.getHeader("Authorization"));
         logger.info("Resolved token: {}", token);
-
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);

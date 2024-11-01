@@ -27,6 +27,7 @@ public class WishListServiceImpl implements WishListService {
     private final MemberService memberService;
     private final Converter converter;
 
+    @Transactional
     @Override
     public WishListResponse toggleWishList(Long productId) {
 
