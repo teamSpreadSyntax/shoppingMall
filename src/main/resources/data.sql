@@ -136,10 +136,34 @@ INSERT INTO product_event (id, product_id, event_id, created_at) VALUES
 (2, 2, 2, NOW());
 
 -- QnA 테이블 초기화
-INSERT INTO qna (member_id, qna_type, subject, product_id, orders_id, create_at_qna, description) VALUES
-(1, 'SHIPPING', 'Is this product durable?', 1, NULL, NOW(), 'I want to know if this product can last for more than a year.'),
-(2, 'ORDER', 'Can I track my order?', NULL, 1, NOW(), 'I would like to know how to track my order after shipping.');
+INSERT INTO qna (member_id, qna_type, subject, product_id, orders_id, create_at_qna, description, answer, answer_date, answerer_id, answer_status) VALUES
+(1, 'SHIPPING', 'Is this product durable?', 1, NULL, NOW(), 'I want to know if this product can last for more than a year.', NULL, NULL, NULL, 'WAITING'),
+(2, 'ORDER', 'Can I track my order?', NULL, 1, NOW(), 'I would like to know how to track my order after shipping.', NULL, NULL, NULL, 'WAITING'),
+(3, 'OTHER', 'What are the product dimensions?', 2, NULL, NOW(), 'Could you please provide the dimensions for the product?', NULL, NULL, NULL, 'WAITING'),
+(4, 'REFUND', 'What is the return policy?', NULL, 2, NOW() - INTERVAL 1 DAY, 'Can I return the product if I am not satisfied?', 'Yes, returns are accepted within 30 days.', NOW(), 1, 'ANSWERED'),
+(5, 'ORDER', 'How long does it take for delivery?', NULL, 3, NOW() - INTERVAL 2 DAY, 'I would like to know the expected delivery time.', 'Delivery takes 3-5 business days.', NOW(), 2, 'ANSWERED'),
+(6, 'OTHER', 'Is there a warranty?', 3, NULL, NOW() - INTERVAL 3 DAY, 'Does this product come with a warranty?', 'Yes, a 1-year warranty is included.', NOW(), 3, 'ANSWERED');
 
+
+/*-- QnA 테이블 초기화
+INSERT INTO qna (member_id, qna_type, subject, product_id, orders_id, createat_qna, description, answer, answer_date, answerer_id, answer_status) VALUES
+-- WAITING 상태의 질문 3개
+(1, 'SHIPPING', 'Is this product durable?', 1, NULL, NOW(), 'I want to know if this product can last for more than a year.', NULL, NULL, NULL, 'WAITING'),
+(2, 'ORDER', 'Can I track my order?', NULL, 1, NOW(), 'I would like to know how to track my order after shipping.', NULL, NULL, NULL, 'WAITING'),
+(3, 'PRODUCT', 'What are the product dimensions?', 2, NULL, NOW(), 'Could you please provide the dimensions for the product?', NULL, NULL, NULL, 'WAITING'),
+*/
+/*-- ANSWERED 상태의 질문 3개
+(4, 'RETURN', 'What is the return policy?', NULL, 2, NOW() - INTERVAL 1 DAY, 'Can I return the product if I am not satisfied?', 'Yes, returns are accepted within 30 days.', NOW(), 1, 'ANSWERED'),
+(5, 'ORDER', 'How long does it take for delivery?', NULL, 3, NOW() - INTERVAL 2 DAY, 'I would like to know the expected delivery time.', 'Delivery takes 3-5 business days.', NOW(), 2, 'ANSWERED'),
+(6, 'PRODUCT', 'Is there a warranty?', 3, NULL, NOW() - INTERVAL 3 DAY, 'Does this product come with a warranty?', 'Yes, a 1-year warranty is included.', NOW(), 3, 'ANSWERED');
+
+-- qna_answer 테이블 초기화
+INSERT INTO qna_nswer (qna_id, content, answer_date, answerer_id) VALUES
+                                                                      (4, 'Yes, returns are accepted within 30 days.', NOW(), 1),
+                                                                      (5, 'Delivery takes 3-5 business days.', NOW(), 2),
+                                                                      (6, 'Yes, a 1-year warranty is included.', NOW(), 3);
+
+*/
 
 
 

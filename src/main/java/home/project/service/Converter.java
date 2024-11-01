@@ -74,7 +74,7 @@ public class Converter {
         );
     }
 
-    public QnADetailResponse convertFromQnAToQnADetailResponse(QnA qnA){
+    public QnADetailResponse convertFromQnAToQnADetailResponse(QnA qnA) {
         return new QnADetailResponse(
                 qnA.getId(),
                 qnA.getQnAType(),
@@ -83,19 +83,14 @@ public class Converter {
                 qnA.getOrders() != null ? qnA.getOrders().getOrderNum() : null,
                 qnA.getDescription(),
                 qnA.getMember().getEmail(),
-                qnA.getCreateAt()
+                qnA.getCreateAt(),
+                qnA.getAnswer(),
+                qnA.getAnswerDate(),
+                qnA.getAnswerer() != null ? qnA.getAnswerer().getEmail() : null,
+                qnA.getAnswerStatus()
         );
     }
 
-    public QnAResponse convertFromQnAToQnAResponse(QnA qnA){
-        return new QnAResponse(
-                qnA.getId(),
-                qnA.getQnAType(),
-                qnA.getSubject(),
-                qnA.getMember().getEmail(),
-                qnA.getCreateAt()
-        );
-    }
 
     public OrderResponse convertFromOrderToOrderResponse(Orders orders) {
         List<ProductDTOForOrder> ListedProductDTOForOrder = orders.getProductOrders().stream()
@@ -150,7 +145,11 @@ public class Converter {
                 qnA.getOrders() != null ? qnA.getOrders().getOrderNum() : null,
                 qnA.getDescription(),
                 qnA.getMember().getEmail(),
-                qnA.getCreateAt()
+                qnA.getCreateAt(),
+                qnA.getAnswer(),
+                qnA.getAnswerDate(),
+                qnA.getAnswerer() != null ? qnA.getAnswerer().getEmail() : null,
+                qnA.getAnswerStatus()
         ));
     }
 
@@ -160,7 +159,8 @@ public class Converter {
                 qnA.getQnAType(),
                 qnA.getSubject(),
                 qnA.getMember().getEmail(),
-                qnA.getCreateAt()
+                qnA.getCreateAt(),
+                qnA.getAnswerStatus()
         ));
     }
 

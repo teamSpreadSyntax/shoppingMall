@@ -130,6 +130,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         CustomResponseBody<?> errorBody = new CustomResponseBody<>(Optional.of(responseBody), "변경된 정보가 없습니다", HttpStatus.NO_CONTENT.value());
         return new CustomResponseEntity<>(errorBody, HttpStatus.NO_CONTENT);
     }
+
+    @ExceptionHandler(AddressSearchException.class)
+    public ResponseEntity<?> handleAddressSearchException(AddressSearchException e) {
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("errorMessage", e.getMessage());
+        CustomResponseBody<Map<String, String>> errorBody = new CustomResponseBody<>(
+                Optional.of(responseMap),
+                "주소 검색 중 오류가 발생했습니다.",
+                HttpStatus.BAD_REQUEST.value()
+        );
+        return new CustomResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AddressNotFoundException.class)
+    public ResponseEntity<?> handleAddressNotFoundException(AddressNotFoundException e) {
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("errorMessage", e.getMessage());
+        CustomResponseBody<Map<String, String>> errorBody = new CustomResponseBody<>(
+                Optional.of(responseMap),
+                "검색 결과가 없습니다.",
+                HttpStatus.NOT_FOUND.value()
+        );
+        return new CustomResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+    }
 }
 
 

@@ -6,6 +6,7 @@ import home.project.dto.responseDTO.QnADetailResponse;
 import home.project.dto.responseDTO.QnAResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface QnAService {
     QnADetailResponse join(CreateQnARequestDTO createQnARequestDTO);
@@ -20,5 +21,11 @@ public interface QnAService {
 
     void deleteById(Long qnAid);
 
+    QnADetailResponse addAnswer(Long qnAId, String answer);
 
+    QnADetailResponse updateAnswer(Long qnAId, String answer);
+
+    void deleteAnswer(Long qnAId);
+
+    Page<QnADetailResponse> findAllWaitingQnA(Pageable pageable);
 }

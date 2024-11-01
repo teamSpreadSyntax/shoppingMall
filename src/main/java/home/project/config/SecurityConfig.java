@@ -120,7 +120,7 @@ public class SecurityConfig {
                                     requests.requestMatchers(pattern).hasRole(role)
                             )
                     );
-
+                    requests.requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll();
                     requests.requestMatchers("/ws/**").permitAll();//웹소켓 보안 설정
                     requests.anyRequest().permitAll();
                 })

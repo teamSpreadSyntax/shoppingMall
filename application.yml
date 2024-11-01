@@ -87,3 +87,7 @@ server:
     require-ssl: false
   hsts:
     enabled: false
+
+kakao:
+  api:
+    key: 5ef47e46986e714e47d918266a647a01    # 카카오 개발자 센터에서 발급받은 REST API 키
