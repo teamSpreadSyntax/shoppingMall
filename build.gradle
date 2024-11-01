@@ -68,6 +68,8 @@ dependencies {
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.2.1'
     implementation 'org.apache.httpcomponents:httpcore:4.4.16'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 }
 
 def querydslSrcDir = 'src/main/generated'

@@ -54,6 +54,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath thirdAddress = createString("thirdAddress");
 
+    public final ListPath<WishList, QWishList> wishLists = this.<WishList, QWishList>createList("wishLists", WishList.class, QWishList.class, PathInits.DIRECT2);
+
     public QMember(String variable) {
         super(Member.class, forVariable(variable));
     }

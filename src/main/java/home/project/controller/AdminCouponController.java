@@ -83,6 +83,29 @@ public class AdminCouponController {
         return new CustomResponseEntity<>(couponResponse, successMessage, HttpStatus.OK);
     }
 
+    @Operation(summary = "쿠폰 수정 메서드", description = "쿠폰 수정 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @PutMapping("/update")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> updateCoupon(
+            @RequestParam("couponId") Long couponId,
+            @RequestBody CreateCouponRequestDTO updateCouponRequestDTO) {
+
+        CouponResponse couponResponse = couponService.updateCoupon(couponId, updateCouponRequestDTO);
+
+        String successMessage = couponId + "에 해당하는 쿠폰이 수정되었습니다.";
+        return new CustomResponseEntity<>(couponResponse, successMessage, HttpStatus.OK);
+    }
+
     @Operation(summary = "전체 쿠폰 조회 메서드", description = "전체 쿠폰 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",

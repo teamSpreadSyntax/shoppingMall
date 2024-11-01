@@ -31,6 +31,9 @@ public class Shipping {
     @Column(name = "arrived_date")
     private String arrivedDate = null;
 
+    @Column(name = "departure_date")
+    private String departureDate = null;
+
     @Column(name = "delivery_cost")
     private Long deliveryCost = null;
 

@@ -24,6 +24,8 @@ public class ProductCouponResponse {
 
     private LocalDateTime usedAt;
 
+    private Integer discountRate;
+
     private boolean isUsed;
 
     public ProductCouponResponse(Long id, String productNum, Long couponId, LocalDateTime issuedAt, LocalDateTime usedAt, boolean isUsed){

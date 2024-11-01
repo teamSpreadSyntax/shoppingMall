@@ -2,9 +2,7 @@ package home.project.controller;
 
 
 import home.project.domain.*;
-import home.project.dto.requestDTO.CreateMemberRequestDTO;
-import home.project.dto.requestDTO.UpdateMemberRequestDTO;
-import home.project.dto.requestDTO.VerifyUserRequestDTO;
+import home.project.dto.requestDTO.*;
 import home.project.dto.responseDTO.MemberResponse;
 import home.project.dto.responseDTO.MemberResponseForUser;
 import home.project.dto.responseDTO.TokenResponse;
@@ -174,6 +172,39 @@ public class MemberController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", email + "(id:" + memberId + ")님의 계정이 탈퇴되었습니다. 이용해주셔서 감사합니다.");
         return new CustomResponseEntity<>(Optional.of(responseMap), "회원 탈퇴 성공", HttpStatus.OK);
+    }
+
+    @Operation(summary = "이메일 찾기 메서드", description = "이름과 전화번호를 기반으로 사용자의 이메일을 찾습니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberEmailResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @PostMapping("/find-email")
+    public ResponseEntity<?> findEmail(@RequestBody @Valid FindEmailRequestDTO findEmailRequestDTO, BindingResult bindingResult) {
+        CustomResponseEntity<Map<String, String>> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
+
+        String email = memberService.findEmail(findEmailRequestDTO.getName(), findEmailRequestDTO.getPhone());
+
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("email", email);
+        responseMap.put("successMessage", "이메일 찾기에 성공했습니다.");
+        return new CustomResponseEntity<>(responseMap, "이메일 찾기 성공", HttpStatus.OK);
+    }
+
+    @Operation(summary = "비밀번호 재설정 요청", description = "비밀번호 재설정을 위해 이메일로 링크를 전송합니다.")
+    @PostMapping("/reset-password-request")
+    public ResponseEntity<?> resetPasswordRequest(@RequestBody @Valid PasswordResetRequestDTO requestDTO, BindingResult bindingResult) {
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
+
+        memberService.sendPasswordResetEmail(requestDTO.getEmail());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("successMessage", "비밀번호 재설정 링크가 이메일로 전송되었습니다.");
+        return new CustomResponseEntity<>(response, "비밀번호 재설정 요청 성공", HttpStatus.OK);
     }
 
 }

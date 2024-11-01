@@ -30,8 +30,10 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         String path = request.getRequestURI();
         return path.startsWith("/api/address-search") ||
                 path.startsWith("/swagger-ui") ||
+                path.startsWith("/swagger-ui/index.html") ||
                 path.startsWith("/v3/api-docs") ||
-                path.startsWith("/ws");
+                path.startsWith("/ws") ||
+                path.startsWith("/api/password-request");
     }
 
     @Override

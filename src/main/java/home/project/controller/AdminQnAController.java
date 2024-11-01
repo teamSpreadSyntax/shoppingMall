@@ -39,7 +39,7 @@ public class AdminQnAController {
     private final QnAService qnAService;
     private final PageUtil pageUtil;
 
-    @Operation(summary = "QnA 답변 작성 메서드", description = "관리자가 QnA 답변을 작성하는 메서드입니다.")
+    @Operation(summary = "관리자 QnA 답변 작성 메서드", description = "관리자가 QnA 답변을 작성하는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/QnADetailResponseSchema"))),
@@ -55,7 +55,7 @@ public class AdminQnAController {
         return new CustomResponseEntity<>(response, "답변이 등록되었습니다.", HttpStatus.OK);
     }
 
-    @Operation(summary = "QnA 답변 수정 메서드", description = "관리자가 QnA 답변을 수정하는 메서드입니다.")
+    @Operation(summary = "관리자 QnA 답변 수정 메서드", description = "관리자가 QnA 답변을 수정하는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/QnADetailResponseSchema"))),
@@ -71,7 +71,7 @@ public class AdminQnAController {
         return new CustomResponseEntity<>(response, "답변이 수정되었습니다.", HttpStatus.OK);
     }
 
-    @Operation(summary = "QnA 답변 삭제 메서드", description = "관리자가 QnA 답변을 삭제하는 메서드입니다.")
+    @Operation(summary = "관리자 QnA 답변 삭제 메서드", description = "관리자가 QnA 답변을 삭제하는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
@@ -87,7 +87,7 @@ public class AdminQnAController {
         return new CustomResponseEntity<>(responseMap, "답변 삭제 성공", HttpStatus.OK);
     }
 
-    @Operation(summary = "전체 QnA 답변 대기 목록 조회 메서드", description = "답변 대기중인 전체 QnA 목록을 조회하는 메서드입니다.")
+    @Operation(summary = "관리자 전체 QnA 답변 대기 목록 조회 메서드", description = "답변 대기중인 전체 QnA 목록을 조회하는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedQnAListResponseSchema"))),

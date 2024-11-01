@@ -15,12 +15,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-
-import static home.project.util.CategoryMapper.getCode;
+import java.util.Comparator;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -34,6 +36,7 @@ public class CouponServiceImpl implements CouponService{
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final Converter converter;
+    private final MemberService memberService;
 
 
     @Override
@@ -49,6 +52,22 @@ public class CouponServiceImpl implements CouponService{
         sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
 
         return converter.convertFromCouponToCouponResponse(coupon);
+    }
+
+    @Override
+    @Transactional
+    public CouponResponse updateCoupon(Long couponId, CreateCouponRequestDTO updateCouponRequestDTO) {
+
+        Coupon coupon = findById(couponId);
+
+        coupon.setName(updateCouponRequestDTO.getName());
+        coupon.setDiscountRate(updateCouponRequestDTO.getDiscountRate());
+        coupon.setStartDate(updateCouponRequestDTO.getStartDate());
+        coupon.setEndDate(updateCouponRequestDTO.getEndDate());
+
+        couponRepository.save(coupon);
+        return converter.convertFromCouponToCouponResponse(coupon);
+
     }
 
     @Override
@@ -87,6 +106,31 @@ public class CouponServiceImpl implements CouponService{
         return converter.convertFromPagedCouponToPagedCouponResponse(pagedCoupon);
     }
 
+    @Override
+    public CouponResponse selectBestCouponForMember(Long productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        List<Coupon> availableCoupons = couponRepository.findAvailableCoupons(member.getId(), productId);
+        Coupon bestCoupon = selectBestCoupon(availableCoupons);
+
+        return bestCoupon != null ? converter.convertFromCouponToCouponResponse(bestCoupon) : null;
+    }
+
+    public Coupon selectBestCoupon(List<Coupon> coupons) {
+        return coupons.stream()
+                .filter(coupon -> isValidCoupon(coupon))
+                .max(Comparator.comparingInt(Coupon::getDiscountRate)
+                        .thenComparing(Coupon::getStartDate))
+                .orElse(null);
+    }
+
+    private boolean isValidCoupon(Coupon coupon) {
+        LocalDateTime now = LocalDateTime.now();
+        return (coupon.getStartDate().isBefore(now) || coupon.getStartDate().isEqual(now)) &&
+                coupon.getEndDate().isAfter(now);
+    }
 
 
     @Override

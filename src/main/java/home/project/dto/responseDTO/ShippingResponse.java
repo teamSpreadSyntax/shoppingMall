@@ -27,14 +27,17 @@ public class ShippingResponse {
 
     private DeliveryType deliveryType;
 
+    private String arrivedDate;
+
+    private String departureDate;
+
     private DeliveryStatusType deliveryStatusType;
 
     private Long deliveryCost;
 
     private String memberEmail;
 
-
-    public ShippingResponse(Long id, String deliveryNum, LocalDateTime orderDate, String deliveryAddress, Long totalAmount, List<ProductDTOForOrder> products, DeliveryType deliveryType, DeliveryStatusType deliveryStatusType, Long deliveryCost, String memberEmail) {
+    public ShippingResponse(Long id, String deliveryNum, LocalDateTime orderDate, String deliveryAddress, Long totalAmount, List<ProductDTOForOrder> products, DeliveryType deliveryType, String arrivedDate, String departureDate, DeliveryStatusType deliveryStatusType, Long deliveryCost, String memberEmail) {
         this.id = id;
         this.deliveryNum = deliveryNum;
         this.orderDate = orderDate;
@@ -42,6 +45,8 @@ public class ShippingResponse {
         this.totalAmount = totalAmount;
         this.products = products;
         this.deliveryType = deliveryType;
+        this.arrivedDate = arrivedDate;
+        this.departureDate = departureDate;
         this.deliveryStatusType = deliveryStatusType;
         this.deliveryCost = deliveryCost;
         this.memberEmail = memberEmail;

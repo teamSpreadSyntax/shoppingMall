@@ -119,4 +119,21 @@ public class CouponController {
 
     }
 
+    @Operation(summary = "최적 쿠폰 조회 메서드", description = "특정 회원과 상품에 대해 가장 적절한 쿠폰을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/CouponResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "No suitable coupon found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @GetMapping("/best-coupon")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> getBestCoupon(
+            @RequestParam("productId") Long productId) {
+
+        CouponResponse bestCouponResponse = couponService.selectBestCouponForMember(productId);
+
+        return new CustomResponseEntity<>(bestCouponResponse, "가장 적절한 쿠폰 조회 성공", HttpStatus.OK);
+    }
+
 }

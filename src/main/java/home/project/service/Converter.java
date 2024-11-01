@@ -445,6 +445,8 @@ public class Converter {
                 shipping.getOrders().getAmount(),
                 convertListedProductOrderToProductDTOForOrder(shipping.getOrders().getProductOrders()),
                 shipping.getDeliveryType(),
+                shipping.getArrivedDate(),
+                shipping.getDepartureDate(),
                 shipping.getDeliveryStatus(),
                 shipping.getDeliveryCost(),
                 shipping.getOrders().getMember().getEmail()
@@ -461,6 +463,8 @@ public class Converter {
                 shipping.getOrders().getAmount(),
                 convertListedProductOrderToProductDTOForOrder(shipping.getOrders().getProductOrders()),
                 shipping.getDeliveryType(),
+                shipping.getArrivedDate(),
+                shipping.getDepartureDate(),
                 shipping.getDeliveryStatus(),
                 shipping.getDeliveryCost(),
                 shipping.getOrders().getMember().getEmail()

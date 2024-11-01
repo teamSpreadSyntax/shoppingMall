@@ -9,6 +9,7 @@ import home.project.dto.responseDTO.MemberResponseForUser;
 import home.project.dto.responseDTO.TokenResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface MemberService {
 
@@ -36,4 +37,9 @@ public interface MemberService {
     String cancelMember(Long memberId, String verificationToken);
 
     MemberResponse updatePoint(Long memberId, Long point);
+
+    String findEmail(String name, String phone);
+
+    @Transactional
+    void sendPasswordResetEmail(String email);
 }

@@ -34,6 +34,7 @@ public class MemberServiceImpl implements MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final Converter converter;
+    private final EmailService emailService;
 
 
 
@@ -223,6 +224,29 @@ public class MemberServiceImpl implements MemberService {
         member.setPoint(newPoint);
         memberRepository.save(member);
         return converter.convertFromMemberToMemberResponse(member);
+    }
+
+    @Override
+    public String findEmail(String name, String phone) {
+        Member member = memberRepository.findByNameAndPhone(name, phone)
+                .orElseThrow(() -> new IdNotFoundException("일치하는 회원이 없습니다."));
+        return member.getEmail();
+    }
+
+    @Override
+    @Transactional
+    public void sendPasswordResetEmail(String email) {
+
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IdNotFoundException("등록된 이메일이 없습니다."));
+
+        String token = jwtTokenProvider.generateResetToken(email); // 토큰 생성
+        String resetLink = "https://yourdomain.com/reset-password?token=" + token;
+
+        emailService.sendEmail(email, "비밀번호 재설정 요청",
+                "비밀번호 재설정을 원하시면 다음 링크를 클릭하세요: " + resetLink);
+
+        memberRepository.save(member);
     }
 
 }

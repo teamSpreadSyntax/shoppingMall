@@ -38,7 +38,6 @@ public class ReviewServiceImpl implements ReviewService{
 
         Page<Orders> pagedOrders = orderRepository.findByMemberId(member.getId(), pageable);
 
-        // 각 주문의 배송 상태가 확인된 제품들을 ReviewProductResponse로 변환
         List<ReviewProductResponse> reviewProductResponses = pagedOrders.stream()
                 .filter(order -> order.getShipping() != null && order.getShipping().getDeliveryStatus() == DeliveryStatusType.PURCHASE_CONFIRMED)
                 .flatMap(order -> order.getProductOrders().stream()
