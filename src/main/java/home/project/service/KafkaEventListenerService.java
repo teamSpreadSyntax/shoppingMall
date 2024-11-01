@@ -19,12 +19,6 @@ public class KafkaEventListenerService {
     public void listenCouponEvents(String message) throws JsonProcessingException {
         CouponEventDTO event = objectMapper.readValue(message, CouponEventDTO.class);
         switch (event.getEventType()) {
-            case "coupon_created":
-                handleCouponCreated(event);
-                break;
-            case "coupon_updated":
-                handleCouponUpdated(event);
-                break;
             case "coupon_assigned_to_member":
                 handleCouponAssignedToMember(event);
                 break;
@@ -39,22 +33,12 @@ public class KafkaEventListenerService {
     public void listenProductEvents(String message) {
         System.out.println("Product viewed log: " + message);
         elkLogSenderService.sendLogToElk("product-view-log", message);
-        webSocketNotificationService.sendNotification("/topic/logs", message);
     }
 
-    @KafkaListener(topics = "purchase-activity-log", groupId = "member-group")
+    @KafkaListener(topics = "member-join-events", groupId = "member-group")
     public void listenMemberEvents(String message) {
-        System.out.println("Purchase activity log: " + message);
-        elkLogSenderService.sendLogToElk("purchase-activity-log", message);
-        webSocketNotificationService.sendNotification("/topic/logs", message);
-    }
-
-    private void handleCouponCreated(CouponEventDTO couponEventDTO) {
-        // 쿠폰 생성 처리 로직
-    }
-
-    private void handleCouponUpdated(CouponEventDTO couponEventDTO) {
-        // 쿠폰 업데이트 처리 로직
+        System.out.println("member-join: " + message);
+        elkLogSenderService.sendLogToElk("member-join-events", message);
     }
 
     private void handleCouponAssignedToMember(CouponEventDTO couponEventDTO) {

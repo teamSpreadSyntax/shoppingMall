@@ -14,7 +14,6 @@ public class KafkaEventProducerService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    // SendEventLogs의 기능
     public void sendCouponEvent(CouponEventDTO event) {
         try {
             String message = objectMapper.writeValueAsString(event);
@@ -33,7 +32,6 @@ public class KafkaEventProducerService {
         }
     }
 
-    // KafkaLogProducerService의 기능
     public void sendProductViewLog(Long productId) {
         kafkaTemplate.send("product-view-log", "Product viewed: " + productId);
     }
