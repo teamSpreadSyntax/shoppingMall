@@ -1,7 +1,5 @@
 package home.project.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.*;
 import home.project.dto.CouponEventDTO;
 import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
@@ -14,13 +12,11 @@ import home.project.util.StringBuilderUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-
-import static home.project.util.CategoryMapper.getCode;
 
 @RequiredArgsConstructor
 @Service
@@ -31,9 +27,9 @@ public class CouponServiceImpl implements CouponService{
     private final ProductCouponRepository productCouponRepository;
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
     private final Converter converter;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final KafkaEventProducerService kafkaEventProducerService;
 
 
     @Override
@@ -46,7 +42,10 @@ public class CouponServiceImpl implements CouponService{
         coupon.setEndDate(createCouponRequestDTO.getEndDate());
         couponRepository.save(coupon);
 
-        sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
+        kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
+
+        messagingTemplate.convertAndSend("/topic/coupons", "New Coupon Created: " + coupon.getName());
+
 
         return converter.convertFromCouponToCouponResponse(coupon);
     }
@@ -63,15 +62,7 @@ public class CouponServiceImpl implements CouponService{
     }
 
 
-    private void sendCouponEvent(CouponEventDTO event) {
-        try {
-            String message = objectMapper.writeValueAsString(event);
-            kafkaTemplate.send("coupon-events", message);
-        } catch (JsonProcessingException e) {
-            // 에러 처리
-            e.printStackTrace();
-        }
-    }
+
 
     @Override
     public Coupon findById(Long couponId){
@@ -108,7 +99,7 @@ public class CouponServiceImpl implements CouponService{
 
             MemberCoupon savedMemberCoupon = memberCouponRepository.save(memberCoupon);
 
-            sendCouponEvent(new CouponEventDTO("coupon_assigned_to_member", coupon.getId(), member.getId()));
+            kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_member", coupon.getId(), member.getId()));
 
             return new MemberCouponResponse(
                     savedMemberCoupon.getId(),
@@ -140,7 +131,7 @@ public class CouponServiceImpl implements CouponService{
 
             ProductCoupon savedProductCoupon = productCouponRepository.save(productCoupon);
 
-            sendCouponEvent(new CouponEventDTO("coupon_assigned_to_product", coupon.getId(), null, product.getId()));
+            kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_product", coupon.getId(), null, product.getId()));
 
             return new ProductCouponResponse(
                     savedProductCoupon.getId(),

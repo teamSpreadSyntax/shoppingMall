@@ -26,6 +26,7 @@ public interface MemberService {
 
 
     Page<MemberResponse> findMembers(String name, String email, String phone, String role, String content, Pageable pageable);
+    Page<MemberResponse> findMembersOnElasticForManaging(String name, String email, String phone, String role, String content, Pageable pageable);
 
     String verifyUser(String email, VerifyUserRequestDTO password);
 
