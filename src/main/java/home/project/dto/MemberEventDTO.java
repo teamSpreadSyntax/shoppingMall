@@ -17,7 +17,7 @@ public class MemberEventDTO {
     public MemberEventDTO(
             @JsonProperty("eventType") String eventType,
             @JsonProperty("gender") MemberGenderType gender,
-            @JsonProperty("age")int age
+            @JsonProperty("age") int age
     ) {
         this.eventType = eventType;
         this.gender = gender;
