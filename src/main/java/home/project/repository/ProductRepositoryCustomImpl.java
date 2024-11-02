@@ -3,13 +3,10 @@ package home.project.repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import home.project.domain.*;
-import home.project.dto.responseDTO.ProductResponse;
-import home.project.dto.responseDTO.ProductResponseForManager;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-
 
 import java.util.List;
 
@@ -21,13 +18,12 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     private final QOrders orders = QOrders.orders;
     private final QShipping shipping = QShipping.shipping;
 
-
     public ProductRepositoryCustomImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
     @Override
-    public Page<Product> findProducts(String brand, String categoryCode, String productName, String content, Pageable pageable) {
+    public Page<Product> findProducts(String brand, String categoryCode, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (brand != null && !brand.isEmpty()) {
@@ -43,6 +39,12 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
             builder.or(product.brand.lower().like("%" + content.toLowerCase() + "%"))
                     .or(product.category.code.lower().like("%" + content.toLowerCase() + "%"))
                     .or(product.name.lower().like("%" + content.toLowerCase() + "%"));
+        }
+        if (colors != null && !colors.isEmpty()) {
+            builder.and(product.colors.any().in(colors));
+        }
+        if (sizes != null && !sizes.isEmpty()) {
+            builder.and(product.sizes.any().in(sizes));
         }
 
         List<Product> results = queryFactory
@@ -62,7 +64,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
-    public Page<Product> findSoldProducts(String brand, String categoryCode, String productName, String content, Pageable pageable) {
+    public Page<Product> findSoldProducts(String brand, String categoryCode, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (brand != null && !brand.isEmpty()) {
@@ -79,8 +81,13 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                     .or(product.category.code.lower().like("%" + content.toLowerCase() + "%"))
                     .or(product.name.lower().like("%" + content.toLowerCase() + "%"));
         }
+        if (colors != null && !colors.isEmpty()) {
+            builder.and(product.colors.any().in(colors));
+        }
+        if (sizes != null && !sizes.isEmpty()) {
+            builder.and(product.sizes.any().in(sizes));
+        }
 
-        // PURCHASE_CONFIRMED 상태의 주문만 필터링
         builder.and(product.productOrder.any().orders.shipping.deliveryStatus.eq(DeliveryStatusType.PURCHASE_CONFIRMED));
 
         List<Product> results = queryFactory
@@ -91,7 +98,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .leftJoin(orders.shipping, shipping).fetchJoin()
                 .where(builder)
                 .distinct()
-                .orderBy(product.soldQuantity.desc()) // 정렬 추가
+                .orderBy(product.soldQuantity.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -108,23 +115,20 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
         return new PageImpl<>(results, pageable, total);
     }
 
-    public Page<Product> findAllBySoldQuantity(Pageable pageable){
-        // 판매 갯수(soldQuantity)가 많은 순으로 정렬하여 상품 조회
+    public Page<Product> findAllBySoldQuantity(Pageable pageable) {
         List<Product> results = queryFactory
                 .selectFrom(product)
-                .orderBy(product.soldQuantity.desc())  // soldQuantity 기준 내림차순 정렬
+                .orderBy(product.soldQuantity.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        // 전체 상품 수 계산
         long total = queryFactory
                 .selectFrom(product)
                 .fetchCount();
 
-        // 결과를 PageImpl로 감싸서 반환
         return new PageImpl<>(results, pageable, total);
-    };
+    }
 
     @Override
     public Page<Product> findAllByOrderByBrandAsc(Pageable pageable) {
@@ -165,5 +169,4 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
         return new PageImpl<>(results, pageable, total);
     }
-
 }

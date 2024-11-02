@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @Tag(name = "판매", description = "판매관련 API입니다")
 @RequestMapping("/api/admin/sales")
 @ApiResponses(value = {
@@ -41,7 +43,7 @@ public class AdminSalesController {
     private final PageUtil pageUtil;
 
 
-    @Operation(summary = "판매 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 판매 내역을 조회합니다. 모든 조건을 만족하는 판매 내역을 조회합니다. 검색어가 없으면 전체 판매 내역을 조회합니다.")
+    @Operation(summary = "판매 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명, 일반 검색어, 색상, 사이즈로 판매 내역을 조회합니다. 모든 조건을 만족하는 판매 내역을 조회합니다. 검색어가 없으면 전체 판매 내역을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
@@ -57,13 +59,15 @@ public class AdminSalesController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "productName", required = false) String productName,
             @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "colors", required = false) List<String> colors,
+            @RequestParam(value = "sizes", required = false) List<String> sizes,
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "soldQuantity", direction = Sort.Direction.DESC)
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<ProductResponseForManager> productPage = productService.findSoldProducts(brand, category, productName, content, pageable);
+        Page<ProductResponseForManager> productPage = productService.findSoldProducts(brand, category, productName, content, colors, sizes, pageable);
 
         String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
 
@@ -71,8 +75,8 @@ public class AdminSalesController {
         int page = productPage.getNumber();
 
         return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-
     }
+
 
     @Operation(summary = "판매순위 조회 메서드", description = "판매수량이 많은순으로 상품이 조회됩니다.")
     @ApiResponses(value = {

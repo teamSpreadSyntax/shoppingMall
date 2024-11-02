@@ -76,6 +76,8 @@ public class QProduct extends EntityPathBase<Product> {
         super(type, metadata, inits);
         this.category = inits.isInitialized("category") ? new QCategory(forProperty("category"), inits.get("category")) : null;
     }
+    public final ListPath<String, StringPath> colors = this.<String, StringPath>createList("colors", String.class, StringPath.class, PathInits.DIRECT2);
+    public final ListPath<String, StringPath> sizes = this.<String, StringPath>createList("sizes", String.class, StringPath.class, PathInits.DIRECT2);
 
 }
 

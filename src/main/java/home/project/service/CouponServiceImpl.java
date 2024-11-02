@@ -220,6 +220,8 @@ public class CouponServiceImpl implements CouponService{
                     assignCouponToProductRequestDTO.getCategory(),
                     assignCouponToProductRequestDTO.getProductName(),
                     assignCouponToProductRequestDTO.getContent(),
+                    assignCouponToProductRequestDTO.getColors(),   // 색상 필터 추가
+                    assignCouponToProductRequestDTO.getSizes(),    // 사이즈 필터 추가
                     pageable
             );
         } else if (assignCouponToProductRequestDTO.getAssignType() == AssignType.ALL) {
@@ -227,8 +229,6 @@ public class CouponServiceImpl implements CouponService{
         } else {
             throw new IllegalArgumentException("assign type을 확인해주세요. (SPECIFIC_PRODUCTS : 특정 상품(들)에 쿠폰 부여, ALL : 모든 상품에 쿠폰 부여.)");
         }
-
-
     }
 
     @Override
