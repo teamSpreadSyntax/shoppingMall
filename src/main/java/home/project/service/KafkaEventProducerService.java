@@ -32,6 +32,15 @@ public class KafkaEventProducerService {
         }
     }
 
+    public void sendOrderEvent(MemberEventDTO memberEventDTO) {
+        try {
+            String message = objectMapper.writeValueAsString(memberEventDTO);
+            kafkaTemplate.send("member-join-events", message);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void sendProductViewLog(Long productId) {
         kafkaTemplate.send("product-view-log", "Product viewed: " + productId);
     }
