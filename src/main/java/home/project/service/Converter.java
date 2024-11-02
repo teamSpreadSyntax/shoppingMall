@@ -603,10 +603,10 @@ public class Converter {
         memberDocument.setAccumulatedPurchase(member.getAccumulatedPurchase());
         memberDocument.setGrade(member.getGrade());
         memberDocument.setPoint(member.getPoint());
-        memberDocument.setMemberCoupons(member.getMemberCoupons());
-        memberDocument.setMemberEvents(member.getMemberEvents());
-        memberDocument.setOrders(member.getOrders());
-        memberDocument.setWishLists(member.getWishLists());
+        memberDocument.setMemberCoupons(new ArrayList<>());
+        memberDocument.setMemberEvents(new ArrayList<>());
+        memberDocument.setOrders(new ArrayList<>());
+        memberDocument.setWishLists(new ArrayList<>());
         return memberDocument;
     }
 

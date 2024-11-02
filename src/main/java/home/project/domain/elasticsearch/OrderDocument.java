@@ -16,58 +16,86 @@ import java.util.List;
 
 @Getter
 @Setter
-@Document(indexName = "members")
-public class MemberDocument {
+@Document(indexName = "orders")
+public class OrderDocument {
     @Id
     private Long id;
 
     @Field(type = FieldType.Keyword)
-    private String email;
+    private String orderNum;
 
-    @Field(type = FieldType.Text, analyzer = "nori")
-    private String name;
-
-    @Field(type = FieldType.Keyword)
-    private String phone;
-
-    @Field(type = FieldType.Keyword)
-    private MemberGenderType gender;
-
-    @Field(type = FieldType.Date, format = DateFormat.date)
-    private LocalDate birthDate;
-
-    @Field(type = FieldType.Keyword)
-    private String defaultAddress;
-
-    @Field(type = FieldType.Keyword)
-    private String secondAddress;
-
-    @Field(type = FieldType.Keyword)
-    private String thirdAddress;
-
-    @Field(type = FieldType.Keyword)
-    private RoleType role;
+    @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    private LocalDateTime orderDate;
 
     @Field(type = FieldType.Long)
-    private Long accumulatedPurchase;
-
-    @Field(type = FieldType.Keyword)
-    private MemberGradeType grade;
+    private Long amount;
 
     @Field(type = FieldType.Long)
-    private Long point;
+    private Long pointsUsed;
+
+    @Field(type = FieldType.Long)
+    private Long pointsEarned;
 
     @Field(type = FieldType.Nested)
-    private List<MemberCoupon> memberCoupons = new ArrayList<>();
+    private Member member;
 
     @Field(type = FieldType.Nested)
-    private List<MemberEvent> memberEvents = new ArrayList<>();
+    private Shipping shipping;
 
     @Field(type = FieldType.Nested)
-    private List<Order> orders = new ArrayList<>();
+    private List<ProductOrder> productOrders = new ArrayList<>();
 
-    @Field(type = FieldType.Nested)
-    private List<WishList> wishLists = new ArrayList<>();
+    @Getter
+    @Setter
+    public static class Member {
+        @Field(type = FieldType.Long)
+        private Long id;
+
+        @Field(type = FieldType.Keyword)
+        private String email;
+
+        @Field(type = FieldType.Text, analyzer = "nori")
+        private String name;
+
+        @Field(type = FieldType.Keyword)
+        private String phone;
+
+        @Field(type = FieldType.Keyword)
+        private MemberGenderType gender;
+
+        @Field(type = FieldType.Date, format = DateFormat.date)
+        private LocalDate birthDate;
+
+        @Field(type = FieldType.Keyword)
+        private String defaultAddress;
+
+        @Field(type = FieldType.Keyword)
+        private String secondAddress;
+
+        @Field(type = FieldType.Keyword)
+        private String thirdAddress;
+
+        @Field(type = FieldType.Keyword)
+        private RoleType role;
+
+        @Field(type = FieldType.Long)
+        private Long accumulatedPurchase;
+
+        @Field(type = FieldType.Keyword)
+        private MemberGradeType grade;
+
+        @Field(type = FieldType.Long)
+        private Long point;
+
+        @Field(type = FieldType.Nested)
+        private List<MemberCoupon> memberCoupons = new ArrayList<>();
+
+        @Field(type = FieldType.Nested)
+        private List<MemberEvent> memberEvents = new ArrayList<>();
+
+        @Field(type = FieldType.Nested)
+        private List<WishList> wishLists = new ArrayList<>();
+    }
 
     @Getter
     @Setter
@@ -105,37 +133,6 @@ public class MemberDocument {
 
         @Field(type = FieldType.Nested)
         private Event event;
-    }
-
-    @Getter
-    @Setter
-    public static class Order {
-        @Field(type = FieldType.Long)
-        private Long id;
-
-        @Field(type = FieldType.Keyword)
-        private String orderNum;
-
-        @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        private LocalDateTime orderDate;
-
-        @Field(type = FieldType.Long)
-        private Long amount;
-
-        @Field(type = FieldType.Long)
-        private Long pointsUsed;
-
-        @Field(type = FieldType.Long)
-        private Long pointsEarned;
-
-        @Field(type = FieldType.Long)
-        private Long memberId;  // 순환참조 방지
-
-        @Field(type = FieldType.Nested)
-        private Shipping shipping;
-
-        @Field(type = FieldType.Nested)
-        private List<ProductOrder> productOrders = new ArrayList<>();
     }
 
     @Getter
