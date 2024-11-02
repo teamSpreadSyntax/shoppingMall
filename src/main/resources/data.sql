@@ -41,31 +41,31 @@ INSERT INTO category (id, category_code, category_name, level, parent_id) VALUES
 (9, '000100', '반소매 티셔츠', 3, 5),
 (10, '000101', '긴소매 티셔츠', 3, 5),
 (11, '000200', '후드 집업', 3, 6);
+INSERT INTO seller (id, name, phone_number, email, address, member_id) VALUES
+(1, 'Seller One', '010-1111-1111', 'seller1@example.com', '123 First St', 1),
+(2, 'Seller Two', '010-2222-2222', 'seller2@example.com', '456 Second St', 2),
+(3, 'Seller Three', '010-3333-3333', 'seller3@example.com', '789 Third St', 3),
+(4, 'Seller Four', '010-4444-4444', 'seller4@example.com', '101 Fourth St', 4),
+(5, 'Seller Five', '010-5555-5555', 'seller5@example.com', '202 Fifth St', 5),
+(6, 'Seller Six', '010-6666-6666', 'seller6@example.com', '303 Sixth St', 6),
+(7, 'Seller Seven', '010-7777-7777', 'seller7@example.com', '404 Seventh St', 7),
+(8, 'Seller Eight', '010-8888-8888', 'seller8@example.com', '505 Eighth St', 8),
+(9, 'Seller Nine', '010-9999-9999', 'seller9@example.com', '606 Ninth St', 9),
+(10, 'Seller Ten', '010-1010-1010', 'seller10@example.com', '707 Tenth St', 10);
 
 -- Product 테이블 초기화
-INSERT INTO product (id, product_name, brand, category_id, product_num, stock, sold_quantity, price, discount_rate, defective_stock, description, create_at_product, image_url) VALUES
-(1, '반소매 티셔츠', 'BrandA', 9, '20231018BR반000100', 150, 0, 30000, 0, 0, 'Short sleeve t-shirt', NOW(), 'http://example.com/images/short_sleeve_tshirt.jpg'),
-(2, '긴소매 티셔츠', 'BrandB', 10, '20231018BG긴000101', 120, 0, 40000, 0, 0, 'Long sleeve t-shirt', NOW(), 'http://example.com/images/long_sleeve_tshirt.jpg'),
-(3, '후드 집업', 'BrandC', 11, '20231018CH후000200', 30, 0, 120000, 0, 0, 'Hooded zip-up', NOW(), 'http://example.com/images/hooded_zipup.jpg'),
-(4, '청바지', 'BrandD', 9, '20231018DC청000100', 200, 0, 50000, 0, 0, 'Blue jeans', NOW(), 'http://example.com/images/blue_jeans.jpg'),
-(5, '블랙진', 'BrandE', 9, '20231018EB블000100', 180, 0, 55000, 0, 0, 'Black jeans', NOW(), 'http://example.com/images/black_jeans.jpg'),
-(6, '미니 스커트', 'BrandF', 9, '20231018FM미000100', 100, 0, 45000, 0, 0, 'Mini skirt', NOW(), 'http://example.com/images/mini_skirt.jpg'),
-(7, '맥시 스커트', 'BrandG', 9, '20231018GM맥000100', 80, 0, 60000, 0, 0, 'Maxi skirt', NOW(), 'http://example.com/images/maxi_skirt.jpg'),
-(8, '원피스', 'BrandH', 9, '20231018HO원000100', 90, 0, 70000, 0, 0, 'One-piece dress', NOW(), 'http://example.com/images/one_piece.jpg'),
-(9, '블레이저', 'BrandI', 11, '20231018IB블000200', 60, 0, 80000, 0, 0, 'Blazer', NOW(), 'http://example.com/images/blazer.jpg'),
-(10, '트렌치 코트', 'BrandJ', 11, '20231018JT트000200', 50, 0, 120000, 0, 0, 'Trench coat', NOW(), 'http://example.com/images/trench_coat.jpg'),
-(11, '패딩', 'BrandK', 11, '20231018KP패000200', 70, 0, 150000, 0, 0, 'Padded jacket', NOW(), 'http://example.com/images/padded_jacket.jpg'),
-(12, '백팩', 'BrandL', 7, '20231018LB백0100', 200, 0, 50000, 0, 0, 'Backpack', NOW(), 'http://example.com/images/backpack.jpg'),
-(13, '토트백', 'BrandM', 7, '20231018MT토0100', 150, 0, 60000, 0, 0, 'Tote bag', NOW(), 'http://example.com/images/tote_bag.jpg'),
-(14, '숄더백', 'BrandN', 7, '20231018NS숄0100', 130, 0, 55000, 0, 0, 'Shoulder bag', NOW(), 'http://example.com/images/shoulder_bag.jpg'),
-(15, '구두', 'BrandO', 8, '20231018OG구0200', 80, 0, 80000, 0, 0, 'Dress shoes', NOW(), 'http://example.com/images/dress_shoes.jpg'),
-(16, '운동화', 'BrandP', 8, '20231018PU운0200', 150, 0, 70000, 0, 0, 'Sneakers', NOW(), 'http://example.com/images/sneakers.jpg'),
-(17, '부츠', 'BrandQ', 8, '20231018QB부0200', 60, 0, 90000, 0, 0, 'Boots', NOW(), 'http://example.com/images/boots.jpg'),
-(18, '샌들', 'BrandR', 8, '20231018RS샌0200', 120, 0, 40000, 0, 0, 'Sandals', NOW(), 'http://example.com/images/sandals.jpg'),
-(19, '목걸이', 'BrandS', 4, '20231018SM목03', 200, 0, 30000, 0, 0, 'Necklace', NOW(), 'http://example.com/images/necklace.jpg'),
-(20, '반지', 'BrandT', 4, '20231018TR반03', 250, 0, 20000, 0, 0, 'Ring', NOW(), 'http://example.com/images/ring.jpg');
 
-
+INSERT INTO product (id, product_name, brand, category_id, product_num, stock, sold_quantity, price, discount_rate, defective_stock, description, createAt_product, imageUrl, seller_id) VALUES
+(1, 'Product One', 'Brand A', 1, 'P0001', 100, 10, 50000, 10, 2, 'This is the first product.', NOW(), 'http://example.com/image1.jpg', 1),
+(2, 'Product Two', 'Brand B', 2, 'P0002', 150, 20, 60000, 15, 3, 'This is the second product.', NOW(), 'http://example.com/image2.jpg', 2),
+(3, 'Product Three', 'Brand C', 3, 'P0003', 200, 30, 70000, 20, 4, 'This is the third product.', NOW(), 'http://example.com/image3.jpg', 3),
+(4, 'Product Four', 'Brand D', 4, 'P0004', 250, 40, 80000, 25, 5, 'This is the fourth product.', NOW(), 'http://example.com/image4.jpg', 4),
+(5, 'Product Five', 'Brand E', 5, 'P0005', 300, 50, 90000, 30, 6, 'This is the fifth product.', NOW(), 'http://example.com/image5.jpg', 5),
+(6, 'Product Six', 'Brand F', 6, 'P0006', 350, 60, 100000, 35, 7, 'This is the sixth product.', NOW(), 'http://example.com/image6.jpg', 6),
+(7, 'Product Seven', 'Brand G', 7, 'P0007', 400, 70, 110000, 40, 8, 'This is the seventh product.', NOW(), 'http://example.com/image7.jpg', 7),
+(8, 'Product Eight', 'Brand H', 8, 'P0008', 450, 80, 120000, 45, 9, 'This is the eighth product.', NOW(), 'http://example.com/image8.jpg', 8),
+(9, 'Product Nine', 'Brand I', 9, 'P0009', 500, 90, 130000, 50, 10, 'This is the ninth product.', NOW(), 'http://example.com/image9.jpg', 9),
+(10, 'Product Ten', 'Brand J', 10, 'P0010', 550, 100, 140000, 55, 11, 'This is the tenth product.', NOW(), 'http://example.com/image10.jpg', 10);
 
 -- Coupon 테이블 초기화
 INSERT INTO coupon (id, coupon_name, coupon_discount_rate, start_date, end_date) VALUES
