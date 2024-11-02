@@ -150,7 +150,7 @@ public class AdminMemberController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<MemberResponse> pagedMemberResponse = memberService.findMembers(name, email, phone, role, content, pageable);
+        Page<MemberResponse> pagedMemberResponse = memberService.findMembersOnElasticForManaging(name, email, phone, role, content, pageable);
 
         String successMessage = StringBuilderUtil.buildMemberSearchCriteria(name, email, phone, role, content, pagedMemberResponse);
 
@@ -189,34 +189,6 @@ public class AdminMemberController {
 
         return new CustomResponseEntity<>(response, "본인 확인 성공", HttpStatus.OK);
 
-    }
-
-    @Operation(summary = "회원 정보 업데이트(수정) 메서드", description = "회원 정보 업데이트(수정) 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema"))),
-            @ApiResponse(responseCode = "204", description = "NO_CONTENT",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "409", description = "Conflict",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
-    })
-    @PutMapping("/update")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> updateMember(@RequestBody @Valid UpdateMemberRequestDTO updateMemberRequestDTO,
-                                          BindingResult bindingResult,
-                                          @RequestParam("verificationToken") String verificationToken) {
-        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
-        if (validationResponse != null) {
-            return validationResponse;
-        }
-
-        MemberResponseForUser MemberResponseForUser = memberService.update(updateMemberRequestDTO, verificationToken);
-
-        String successMessage = "회원 정보가 수정되었습니다.";
-
-        return new CustomResponseEntity<>(MemberResponseForUser, successMessage, HttpStatus.OK);
     }
 
     @Operation(summary = "회원 삭제 메서드", description = "회원 삭제 메서드입니다.")

@@ -39,7 +39,7 @@ public class OrderServiceImpl implements OrderService{
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final Converter converter;
-    private final LogService logService;
+    private final KafkaEventProducerService kafkaEventProducerService;
 
 
     @Override
@@ -133,7 +133,7 @@ public class OrderServiceImpl implements OrderService{
         memberRepository.save(member);
         orderRepository.save(orders);
 
-        logService.sendPurchaseLog(orders.getId());
+        kafkaEventProducerService.sendPurchaseLog(orders.getId());
 
         return converter.convertFromOrderToOrderResponse(orders);
     }

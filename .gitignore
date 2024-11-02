@@ -39,3 +39,5 @@ out/
 
 DockerDesktopWSL/main/ext4.vhdx
 DockerDesktopWSL/disk/docker_data.vhdx
+
+gradle/gradle-8.5-bin.zip

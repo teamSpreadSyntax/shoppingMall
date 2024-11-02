@@ -2,6 +2,8 @@ package home.project.service;
 
 import home.project.domain.Member;
 import home.project.domain.RoleType;
+import home.project.domain.elasticsearch.MemberDocument;
+import home.project.dto.MemberEventDTO;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
@@ -11,11 +13,14 @@ import home.project.dto.responseDTO.TokenResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.MemberRepository;
+import home.project.repositoryForElasticsearch.MemberElasticsearchRepository;
+import home.project.util.IndexToElasticsearch;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +29,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.Period;
 
 @RequiredArgsConstructor
 @Service
@@ -34,6 +42,11 @@ public class MemberServiceImpl implements MemberService {
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final Converter converter;
+    private final IndexToElasticsearch indexToElasticsearch;
+    private final ElasticsearchOperations elasticsearchOperations;
+    private final MemberElasticsearchRepository memberElasticsearchRepository;
+    private final KafkaEventProducerService kafkaEventProducerService;
+
     private final EmailService emailService;
 
 
@@ -58,6 +71,16 @@ public class MemberServiceImpl implements MemberService {
 
         Member member = converter.convertFromCreateMemberRequestDTOToMember(createMemberRequestDTO);
         memberRepository.save(member);
+
+        MemberDocument memberDocument = converter.convertFromMemberToMemberDocument(member);
+        try {
+            indexToElasticsearch.indexDocumentToElasticsearch(memberDocument, MemberDocument.class);
+        } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        kafkaEventProducerService.sendMemberJoinEvent(new MemberEventDTO("member-join", member.getGender(), Period.between(member.getBirthDate(), LocalDate.now()).getYears()));
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
         TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
@@ -101,12 +124,16 @@ public class MemberServiceImpl implements MemberService {
     }
 
 
-
-
-
     @Override
     public Page<MemberResponse> findMembers(String name, String email, String phone, String role, String content, Pageable pageable) {
         Page<Member> pagedMember = memberRepository.findMembers(name, email, phone, role, content, pageable);
+        return converter.convertFromPagedMemberToPagedMemberResponse(pagedMember);
+    }
+
+    @Override
+    public Page<MemberResponse> findMembersOnElasticForManaging(String name, String email, String phone, String role, String content, Pageable pageable) {
+        Page<MemberDocument> pagedDocuments = memberElasticsearchRepository.findMembers(name, email, phone, role, content, pageable);
+        Page<Member> pagedMember = pagedDocuments.map(memberDocument -> findById(memberDocument.getId()));
         return converter.convertFromPagedMemberToPagedMemberResponse(pagedMember);
     }
 
@@ -180,7 +207,13 @@ public class MemberServiceImpl implements MemberService {
             throw new NoChangeException("변경된 회원 정보가 없습니다.");
         }
 
+
+
         Member updatedMember = memberRepository.save(existingMember);
+
+        MemberDocument memberDocument = converter.convertFromMemberToMemberDocument(existingMember);
+        indexToElasticsearch.indexDocumentToElasticsearch(memberDocument, MemberDocument.class);
+
         return new MemberResponseForUser(
                 updatedMember.getId(),
                 updatedMember.getEmail(),
@@ -202,6 +235,7 @@ public class MemberServiceImpl implements MemberService {
     public String deleteById(Long memberId) {
         String email = findById(memberId).getEmail();
         memberRepository.deleteById(memberId);
+        elasticsearchOperations.delete(String.valueOf(memberId), MemberDocument.class);
         return email;
     }
 
@@ -213,6 +247,7 @@ public class MemberServiceImpl implements MemberService {
             throw new JwtException("유효하지 않은 본인인증 토큰입니다. 본인인증을 다시 진행해주세요.");
         }
         memberRepository.deleteById(memberId);
+        elasticsearchOperations.delete(String.valueOf(memberId), MemberDocument.class);
         return email;
     }
 
@@ -223,6 +258,8 @@ public class MemberServiceImpl implements MemberService {
         Long newPoint = member.getPoint() + point;
         member.setPoint(newPoint);
         memberRepository.save(member);
+        MemberDocument memberDocument = converter.convertFromMemberToMemberDocument(member);
+        indexToElasticsearch.indexDocumentToElasticsearch(memberDocument, MemberDocument.class);
         return converter.convertFromMemberToMemberResponse(member);
     }
 
