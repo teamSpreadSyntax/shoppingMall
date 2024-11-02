@@ -108,13 +108,13 @@ public class AdminProductController {
                     {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductResponseForManager> productPage = productService.findAllForManaging(pageable);
+        Page<ProductResponseForManager> productPage = productService.findAllByIdReturnProductResponseForManager(pageable);
 
         long totalCount = productPage.getTotalElements();
 
         int page = productPage.getNumber();
 
-        String successMessage = "전체 상품입니다.";
+        String successMessage = "귀 판매자가 관리하는 전체 상품입니다.";
 
         return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
@@ -169,7 +169,7 @@ public class AdminProductController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<ProductResponseForManager> productPage = productService.findProductsOnElasticForManaging(brand, category, productName, content, pageable);
+        Page<ProductResponseForManager> productPage = productService.findProductsOnElasticForAdmin(brand, category, productName, content, pageable);
 
         String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
 
@@ -221,7 +221,7 @@ public class AdminProductController {
     public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequestDTO updateProductRequestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        ProductResponse productResponse = productService.update(updateProductRequestDTO);
+        ProductResponse productResponse = productService.updateMyProduct(updateProductRequestDTO);
         String successMessage = "상품 정보가 수정되었습니다.";
         return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
     }
@@ -238,7 +238,7 @@ public class AdminProductController {
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> deleteProduct(@RequestParam("productId") Long productId) {
-        String name = productService.deleteById(productId);
+        String name = productService.deleteByIdForAdmin(productId);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 삭제되었습니다.");
         return new CustomResponseEntity<>(responseMap, "상품 삭제 성공", HttpStatus.OK);
@@ -258,7 +258,7 @@ public class AdminProductController {
     @PutMapping("/increase_stock")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> increaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
-        ProductResponseForManager productResponseForManager = productService.increaseStock(productId, stock);
+        ProductResponseForManager productResponseForManager = productService.increaseStockForAdmin(productId, stock);
         String successMessage = productResponseForManager.getName() + "상품이 " + stock + "개 증가하여 " + productResponseForManager.getStock() + "개가 되었습니다.";
         return new CustomResponseEntity<>(Optional.of(productResponseForManager), successMessage, HttpStatus.OK);
 
@@ -280,7 +280,7 @@ public class AdminProductController {
     @PutMapping("/decrease_stock")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> decreaseStock(@RequestParam("productId") Long productId, @RequestParam("stock") Long stock) {
-        ProductResponseForManager decreaseProduct = productService.decreaseStock(productId, stock);
+        ProductResponseForManager decreaseProduct = productService.decreaseStockForAdmin(productId, stock);
         String successMessage = decreaseProduct.getName() + "상품이 " + stock + "개 감소하여 " + decreaseProduct.getStock() + "개가 되었습니다.";
         return new CustomResponseEntity<>(Optional.of(decreaseProduct), successMessage, HttpStatus.OK);
     }

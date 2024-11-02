@@ -21,6 +21,8 @@ public interface ProductService {
 
     ProductResponseForManager findByIdReturnProductResponseForManager(Long productId);
 
+    Page<ProductResponseForManager> findAllByIdReturnProductResponseForManager(Pageable pageable);
+
     Product findByProductNum(String productNum);
 
     Page<ProductResponse> findAll(Pageable pageable);
@@ -57,4 +59,20 @@ public interface ProductService {
     ProductResponseForManager decreaseSoldQuantity(Long productId, Long stock);
 
     Product findByProductOrderNum(Long productOrderId);
+
+    ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO);
+
+    String deleteByIdForAdmin(Long productId);
+
+    ProductResponseForManager increaseStockForAdmin(Long productId, Long stock);
+
+    ProductResponseForManager decreaseStockForAdmin(Long productId, Long stock);
+
+    ProductResponseForManager increaseSoldQuantityForAdmin(Long productId, Long quantity);
+
+    ProductResponseForManager decreaseSoldQuantityForAdmin(Long productId, Long quantity);
+
+    Page<ProductResponseForManager> findProductsOnElasticForAdmin(String brand, String category, String productName, String content, Pageable pageable);
+
+    Product findByProductOrderNumForAdmin(Long productOrderId);
 }
