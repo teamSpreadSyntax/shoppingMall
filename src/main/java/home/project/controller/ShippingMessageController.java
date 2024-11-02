@@ -6,6 +6,7 @@ import home.project.dto.responseDTO.ShippingMessageResponse;
 import home.project.dto.responseDTO.ShippingResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.ShippingMessageService;
+import home.project.util.PageUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,6 +39,7 @@ import java.util.Map;
 public class ShippingMessageController {
 
     private final ShippingMessageService shippingMessageService;
+    private final PageUtil pageUtil;
 
     @Operation(summary = "배송 메시지 생성", description = "새로운 배송 메시지를 생성합니다.")
     @ApiResponses(value = {
@@ -82,6 +84,8 @@ public class ShippingMessageController {
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({@SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)})
             @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+
         Page<ShippingMessageResponse> pagedMessages = shippingMessageService.findAll(pageable);
         long totalCount = pagedMessages.getTotalElements();
         int page = pagedMessages.getNumber();
