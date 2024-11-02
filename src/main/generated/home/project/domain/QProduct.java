@@ -54,6 +54,8 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Long> stock = createNumber("stock", Long.class);
 
+    public final ListPath<WishList, QWishList> wishLists = this.<WishList, QWishList>createList("wishLists", WishList.class, QWishList.class, PathInits.DIRECT2);
+
     public QProduct(String variable) {
         this(Product.class, forVariable(variable), INITS);
     }
@@ -74,6 +76,8 @@ public class QProduct extends EntityPathBase<Product> {
         super(type, metadata, inits);
         this.category = inits.isInitialized("category") ? new QCategory(forProperty("category"), inits.get("category")) : null;
     }
+    public final ListPath<String, StringPath> colors = this.<String, StringPath>createList("colors", String.class, StringPath.class, PathInits.DIRECT2);
+    public final ListPath<String, StringPath> sizes = this.<String, StringPath>createList("sizes", String.class, StringPath.class, PathInits.DIRECT2);
 
 }
 

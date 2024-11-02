@@ -22,6 +22,14 @@ public class QQnA extends EntityPathBase<QnA> {
 
     public static final QQnA qnA = new QQnA("qnA");
 
+    public final StringPath answer = createString("answer");
+
+    public final DateTimePath<java.time.LocalDateTime> answerDate = createDateTime("answerDate", java.time.LocalDateTime.class);
+
+    public final QMember answerer;
+
+    public final EnumPath<AnswerStatus> answerStatus = createEnum("answerStatus", AnswerStatus.class);
+
     public final DateTimePath<java.time.LocalDateTime> createAt = createDateTime("createAt", java.time.LocalDateTime.class);
 
     public final StringPath description = createString("description");
@@ -56,6 +64,7 @@ public class QQnA extends EntityPathBase<QnA> {
 
     public QQnA(Class<? extends QnA> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.answerer = inits.isInitialized("answerer") ? new QMember(forProperty("answerer")) : null;
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
         this.orders = inits.isInitialized("orders") ? new QOrders(forProperty("orders"), inits.get("orders")) : null;
         this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;

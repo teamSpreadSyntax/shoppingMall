@@ -3,7 +3,7 @@ package home.project.dto.requestDTO;
 import home.project.domain.AssignType;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,16 +14,6 @@ public class AssignCouponToProductRequestDTO {
     private String category;
     private String productName;
     private String content;
-
-
-//    private MemberCriteria criteria;
-
-
-
-
-//    public static class MemberCriteria {
-//        private LocalDate registrationDateAfter;
-//        private LocalDate registrationDateBefore;
-//
-//    }
+    private List<String> colors;
+    private List<String> sizes;
 }

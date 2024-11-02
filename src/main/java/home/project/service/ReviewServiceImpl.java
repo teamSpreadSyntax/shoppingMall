@@ -2,11 +2,12 @@ package home.project.service;
 
 import home.project.domain.*;
 import home.project.dto.requestDTO.CreateReviewRequestDTO;
-import home.project.dto.responseDTO.ReviewDetailResponse;
-import home.project.dto.responseDTO.ReviewResponse;
+import home.project.dto.responseDTO.*;
+import home.project.repository.OrderRepository;
 import home.project.repository.ReviewRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -21,8 +24,34 @@ import java.time.LocalDateTime;
 public class ReviewServiceImpl implements ReviewService{
     private final MemberService memberService;
     private final ProductService productService;
+    private final OrderService orderService;
     private final ReviewRepository reviewRepository;
     private final Converter converter;
+    private final OrderRepository orderRepository;
+
+
+    @Override
+    public Page<ReviewProductResponse> getReviewableProducts(Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        Page<Orders> pagedOrders = orderRepository.findByMemberId(member.getId(), pageable);
+
+        List<ReviewProductResponse> reviewProductResponses = pagedOrders.stream()
+                .filter(order -> order.getShipping() != null && order.getShipping().getDeliveryStatus() == DeliveryStatusType.PURCHASE_CONFIRMED)
+                .flatMap(order -> order.getProductOrders().stream()
+                        .map(productOrder -> new ReviewProductResponse(
+                                productOrder.getProduct().getId(),
+                                productOrder.getProduct().getName(),
+                                productOrder.getProduct().getBrand(),
+                                order.getOrderDate(),
+                                productOrder.getProduct().getImageUrl()
+                        )))
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(reviewProductResponses, pageable, reviewProductResponses.size());
+    }
 
     @Override
     @Transactional

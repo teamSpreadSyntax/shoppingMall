@@ -8,6 +8,7 @@ import home.project.dto.responseDTO.QnAResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -27,15 +28,6 @@ public class QnAServiceImpl implements QnAService{
     private final MemberService memberService;
     private final ProductService productService;
     private final OrderService orderService;
-//    private final MemberOrderRepository memberOrderRepository;
-//    private final ProductOrderRepository productOrderRepository;
-    private final MemberRepository memberRepository;
-    private final MemberCouponRepository memberCouponRepository;
-    private final CouponService couponService;
-    private final ShippingRepository shippingRepository;
-//    private final ProductRepository productRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
     private final Converter converter;
 
 
@@ -65,6 +57,7 @@ public class QnAServiceImpl implements QnAService{
         qnA.setOrders(order);
         qnA.setCreateAt(LocalDateTime.now());
         qnA.setDescription(createQnARequestDTO.getDescription());
+        qnA.setAnswerStatus(AnswerStatus.WAITING);
 
         qnARepository.save(qnA);
 
@@ -106,6 +99,79 @@ public class QnAServiceImpl implements QnAService{
         qnARepository.deleteById(qnAId);
     }
 
+    @Override
+    @Transactional
+    public QnADetailResponse addAnswer(Long qnAId, String answer) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member answerer = memberService.findByEmail(email);
 
+        QnA qnA = findById(qnAId);
+
+        if (qnA.getAnswerStatus() != AnswerStatus.WAITING) {
+            throw new IllegalStateException("답변 대기중인 QnA만 답변을 작성할 수 있습니다.");
+        }
+
+        qnA.setAnswer(answer);
+        qnA.setAnswerDate(LocalDateTime.now());
+        qnA.setAnswerer(answerer);
+        qnA.setAnswerStatus(AnswerStatus.ANSWERED);
+
+        return converter.convertFromQnAToQnADetailResponse(qnA);
+    }
+
+    @Override
+    @Transactional
+    public QnADetailResponse updateAnswer(Long qnAId, String answer) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member answerer = memberService.findByEmail(email);
+
+        QnA qnA = findById(qnAId);
+
+        if (qnA.getAnswerStatus() != AnswerStatus.ANSWERED) {
+            throw new IllegalStateException("답변 완료 상태의 QnA만 수정할 수 있습니다.");
+        }
+
+        if (!qnA.getAnswerer().getId().equals(answerer.getId())) {
+            throw new IllegalStateException("답변 작성자만 수정할 수 있습니다.");
+        }
+
+        qnA.setAnswer(answer);
+        qnA.setAnswerDate(LocalDateTime.now());
+
+        return converter.convertFromQnAToQnADetailResponse(qnA);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAnswer(Long qnAId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member answerer = memberService.findByEmail(email);
+
+        QnA qnA = findById(qnAId);
+
+        if (qnA.getAnswerStatus() != AnswerStatus.ANSWERED) {
+            throw new IllegalStateException("답변 완료 상태의 QnA만 삭제할 수 있습니다.");
+        }
+
+        if (!qnA.getAnswerer().getId().equals(answerer.getId())) {
+            throw new IllegalStateException("답변 작성자만 삭제할 수 있습니다.");
+        }
+
+        qnA.setAnswer(null);
+        qnA.setAnswerDate(null);
+        qnA.setAnswerer(null);
+        qnA.setAnswerStatus(AnswerStatus.DELETED);
+    }
+
+    @Override
+    public Page<QnADetailResponse> findAllWaitingQnA(Pageable pageable) {
+
+        Page<QnA> pagedQnA = qnARepository.findByAnswerStatus(AnswerStatus.WAITING, pageable);
+
+        return converter.convertFromPagedQnAToPagedQnADetailResponse(pagedQnA);
+    }
 
 }

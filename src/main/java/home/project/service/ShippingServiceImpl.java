@@ -13,7 +13,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 @RequiredArgsConstructor
 @Service
@@ -39,9 +43,20 @@ public class ShippingServiceImpl implements ShippingService{
             handleCancellationRefundOrReturn(order, member);
         }
 
+        if (deliveryStatusType == DeliveryStatusType.DELIVERY_STARTED) {
+            shipping.setDeliveryNum(generateShippingNumber());
+            shipping.setDepartureDate(LocalDateTime.now().toString());
+        }
+
         shipping.setDeliveryStatus(deliveryStatusType);
         shippingRepository.save(shipping);
         return converter.convertFromShippingToShippingResponse(shipping);
+    }
+
+    private String generateShippingNumber() {
+        String timePart = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String randomPart = String.format("%04d", new Random().nextInt(10000));
+        return "SHIP" + timePart + randomPart;
     }
 
     private void handleCancellationRefundOrReturn(Orders order, Member member) {
@@ -129,4 +144,5 @@ public class ShippingServiceImpl implements ShippingService{
 
         return converter.convertFromPagedShippingToPagedShippingResponse(pagedShipping);
     }
+
 }

@@ -8,6 +8,7 @@ import home.project.dto.responseDTO.ProductResponseForManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 
 
 public interface ProductService {
@@ -28,15 +29,16 @@ public interface ProductService {
 
     Page<ProductResponse> findNewProduct(Pageable pageable);
 
-    Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable);
+    Page<ProductResponse> findProducts(String brand, String category, String productName, String content,List<String> colors, List<String> sizes, Pageable pageable);
 
     Page<ProductResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable);
 
+    Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable);
     Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable);
 
     Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable);
 
-    Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, Pageable pageable);
+    Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content,List<String> colors, List<String> sizes,  Pageable pageable);
 
     Page<ProductResponse> findAllBySoldQuantity(Pageable pageable);
 

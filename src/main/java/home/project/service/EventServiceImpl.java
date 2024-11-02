@@ -1,28 +1,18 @@
 package home.project.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.*;
-import home.project.dto.CouponEventDTO;
-import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
-import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
-import home.project.dto.requestDTO.CreateCouponRequestDTO;
 import home.project.dto.requestDTO.CreateEventRequestDTO;
-import home.project.dto.responseDTO.CouponResponse;
 import home.project.dto.responseDTO.EventResponse;
-import home.project.dto.responseDTO.MemberCouponResponse;
-import home.project.dto.responseDTO.ProductCouponResponse;
 import home.project.exceptions.exception.IdNotFoundException;
+import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.*;
-import home.project.util.StringBuilderUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @Service
@@ -67,6 +57,51 @@ public class EventServiceImpl implements EventService{
         return converter.convertFromEventToEventResponse(event);
     }
 
+    @Override
+    @Transactional
+    public EventResponse updateEvent(Long eventId, CreateEventRequestDTO updateEventRequestDTO) {
+
+        Event existingEvent = findById(eventId);
+
+        boolean isModified = false;
+
+        if (updateEventRequestDTO.getName() != null && !updateEventRequestDTO.getName().equals(existingEvent.getName())) {
+            existingEvent.setName(updateEventRequestDTO.getName());
+            isModified = true;
+        }
+
+        if (updateEventRequestDTO.getDiscountRate() != null && !updateEventRequestDTO.getDiscountRate().equals(existingEvent.getDiscountRate())) {
+            existingEvent.setDiscountRate(updateEventRequestDTO.getDiscountRate());
+            isModified = true;
+        }
+
+        if (updateEventRequestDTO.getDescription() != null && !updateEventRequestDTO.getDescription().equals(existingEvent.getDescription())) {
+            existingEvent.setDescription(updateEventRequestDTO.getDescription());
+            isModified = true;
+        }
+
+        if (updateEventRequestDTO.getStartDate() != null && !updateEventRequestDTO.getStartDate().equals(existingEvent.getStartDate())) {
+            existingEvent.setStartDate(updateEventRequestDTO.getStartDate());
+            isModified = true;
+        }
+
+        if (updateEventRequestDTO.getEndDate() != null && !updateEventRequestDTO.getEndDate().equals(existingEvent.getEndDate())) {
+            existingEvent.setEndDate(updateEventRequestDTO.getEndDate());
+            isModified = true;
+        }
+
+        if (updateEventRequestDTO.getImage() != null && !updateEventRequestDTO.getImage().equals(existingEvent.getImage())) {
+            existingEvent.setImage(updateEventRequestDTO.getImage());
+            isModified = true;
+        }
+
+        if (!isModified) {
+            throw new NoChangeException("변경된 이벤트 정보가 없습니다.");
+        }
+
+        eventRepository.save(existingEvent);
+        return converter.convertFromEventToEventResponse(existingEvent);
+    }
     @Override
     public Page<EventResponse> findAll(Pageable pageable) {
         Page<Event> pagedEvent= eventRepository.findAll(pageable);

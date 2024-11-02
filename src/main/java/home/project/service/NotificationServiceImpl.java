@@ -57,6 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
         return converter.convertFromNotificationToNotificationDetailResponse(findById(notificationId));
     }
 
+    @Transactional
     @Override
     public void deleteById(Long id) {
         notificationRepository.deleteById(id);

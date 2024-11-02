@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static home.project.util.CategoryMapper.getCode;
 
@@ -61,7 +62,8 @@ public class ProductServiceImpl implements ProductService {
         Product product = new Product();
         product.setName(createProductRequestDTO.getName());
         product.setBrand(createProductRequestDTO.getBrand());
-        product.setCategory(categoryRepository.findByCode(createProductRequestDTO.getCategory()).orElseThrow(() -> new IdNotFoundException(createProductRequestDTO.getCategory() + "(으)로 등록된 카테고리가 없습니다.")));
+        product.setCategory(categoryRepository.findByCode(createProductRequestDTO.getCategory())
+                .orElseThrow(() -> new IdNotFoundException(createProductRequestDTO.getCategory() + " 카테고리가 없습니다.")));
         product.setStock(createProductRequestDTO.getStock());
         product.setProductNum(timeStamp + createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory().toString());
         product.setSoldQuantity(createProductRequestDTO.getSoldQuantity());
@@ -69,8 +71,10 @@ public class ProductServiceImpl implements ProductService {
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
         product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
         product.setDescription(createProductRequestDTO.getDescription());
-        product.setCreateAt(now);
+        product.setCreateAt(LocalDateTime.now());
         product.setImageUrl(createProductRequestDTO.getImageUrl());
+        product.setSizes(createProductRequestDTO.getSizes());
+        product.setColors(createProductRequestDTO.getColors());
 
         boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
         if (productNumExists) {
@@ -138,7 +142,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
+    public Page<ProductResponse> findProducts(String brand, String category, String productName, String content,List<String> colors, List<String> sizes,  Pageable pageable) {
         String categoryCode = null;
 
         if (category != null && !category.isEmpty()) {//?
@@ -148,7 +152,7 @@ public class ProductServiceImpl implements ProductService {
             categoryCode = getCode(content);
         }
 
-        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content,colors, sizes, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
@@ -172,7 +176,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable) {
+    public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content,List<String> colors, List<String> sizes,  Pageable pageable) {
         String categoryCode = null;
 
         if (category != null && !category.isEmpty()) {
@@ -182,7 +186,7 @@ public class ProductServiceImpl implements ProductService {
             categoryCode = getCode(content);
         }
 
-        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, pageable);
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content,colors, sizes, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
@@ -206,7 +210,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, Pageable pageable) {
+    public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable) {
+        return null;
+    }
+
+    @Override
+    public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
         String categoryCode = null;
 
         if (category != null && !category.isEmpty()) {
@@ -216,7 +225,7 @@ public class ProductServiceImpl implements ProductService {
             categoryCode = getCode(content);
         }
 
-        Page<Product> pagedProduct = productRepository.findSoldProducts(brand, categoryCode, productName, content, pageable);
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, colors, sizes, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
@@ -295,6 +304,14 @@ public class ProductServiceImpl implements ProductService {
         if (updateProductRequestDTO.getCategory() != null) {
             existingProduct.setCategory(categoryRepository.findByCode(updateProductRequestDTO.getCategory()).orElseThrow(() -> new IdNotFoundException(updateProductRequestDTO.getCategory() + "(으)로 등록된 카테고리가 없습니다.")));
             isCategoryModified = true;
+        }
+
+        if (updateProductRequestDTO.getSizes() != null && !updateProductRequestDTO.getSizes().isEmpty()) {
+            existingProduct.setSizes(updateProductRequestDTO.getSizes());
+        }
+
+        if (updateProductRequestDTO.getColors() != null && !updateProductRequestDTO.getColors().isEmpty()) {
+            existingProduct.setColors(updateProductRequestDTO.getColors());
         }
 
         if (existingProduct.equals(beforeUpdate)) {

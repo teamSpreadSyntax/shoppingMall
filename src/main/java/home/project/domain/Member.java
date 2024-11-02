@@ -116,4 +116,9 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WishList> wishLists = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member")
+    private List<ShippingMessage> shippingMessages = new ArrayList<>();
+
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Seller seller;
 }

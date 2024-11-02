@@ -76,7 +76,7 @@ public class Converter {
         );
     }
 
-    public QnADetailResponse convertFromQnAToQnADetailResponse(QnA qnA){
+    public QnADetailResponse convertFromQnAToQnADetailResponse(QnA qnA) {
         return new QnADetailResponse(
                 qnA.getId(),
                 qnA.getQnAType(),
@@ -85,19 +85,14 @@ public class Converter {
                 qnA.getOrders() != null ? qnA.getOrders().getOrderNum() : null,
                 qnA.getDescription(),
                 qnA.getMember().getEmail(),
-                qnA.getCreateAt()
+                qnA.getCreateAt(),
+                qnA.getAnswer(),
+                qnA.getAnswerDate(),
+                qnA.getAnswerer() != null ? qnA.getAnswerer().getEmail() : null,
+                qnA.getAnswerStatus()
         );
     }
 
-    public QnAResponse convertFromQnAToQnAResponse(QnA qnA){
-        return new QnAResponse(
-                qnA.getId(),
-                qnA.getQnAType(),
-                qnA.getSubject(),
-                qnA.getMember().getEmail(),
-                qnA.getCreateAt()
-        );
-    }
 
     public OrderResponse convertFromOrderToOrderResponse(Orders orders) {
         List<ProductDTOForOrder> ListedProductDTOForOrder = orders.getProductOrders().stream()
@@ -152,7 +147,11 @@ public class Converter {
                 qnA.getOrders() != null ? qnA.getOrders().getOrderNum() : null,
                 qnA.getDescription(),
                 qnA.getMember().getEmail(),
-                qnA.getCreateAt()
+                qnA.getCreateAt(),
+                qnA.getAnswer(),
+                qnA.getAnswerDate(),
+                qnA.getAnswerer() != null ? qnA.getAnswerer().getEmail() : null,
+                qnA.getAnswerStatus()
         ));
     }
 
@@ -162,7 +161,8 @@ public class Converter {
                 qnA.getQnAType(),
                 qnA.getSubject(),
                 qnA.getMember().getEmail(),
-                qnA.getCreateAt()
+                qnA.getCreateAt(),
+                qnA.getAnswerStatus()
         ));
     }
 
@@ -251,11 +251,13 @@ public class Converter {
                 productResponse.getDiscountRate(),
                 productResponse.getDescription(),
                 productResponse.getImageUrl(),
+                productResponse.getSizes(),
+                productResponse.getColors(),
                 convertFromListedProductCouponProductCouponResponse(productResponse.getProductCoupons())
         ));
     }
 
-    public ProductResponse convertFromProductToProductResponse(Product product){
+    public ProductResponse convertFromProductToProductResponse(Product product) {
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
@@ -266,6 +268,8 @@ public class Converter {
                 product.getDiscountRate(),
                 product.getDescription(),
                 product.getImageUrl(),
+                product.getSizes(),
+                product.getColors(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
         );
     }
@@ -447,6 +451,8 @@ public class Converter {
                 shipping.getOrders().getAmount(),
                 convertListedProductOrderToProductDTOForOrder(shipping.getOrders().getProductOrders()),
                 shipping.getDeliveryType(),
+                shipping.getArrivedDate(),
+                shipping.getDepartureDate(),
                 shipping.getDeliveryStatus(),
                 shipping.getDeliveryCost(),
                 shipping.getOrders().getMember().getEmail()
@@ -463,6 +469,8 @@ public class Converter {
                 shipping.getOrders().getAmount(),
                 convertListedProductOrderToProductDTOForOrder(shipping.getOrders().getProductOrders()),
                 shipping.getDeliveryType(),
+                shipping.getArrivedDate(),
+                shipping.getDepartureDate(),
                 shipping.getDeliveryStatus(),
                 shipping.getDeliveryCost(),
                 shipping.getOrders().getMember().getEmail()
@@ -567,6 +575,51 @@ public class Converter {
                 notification.getSubject(),
                 notification.getDescription(),
                 notification.getCreatedAt()
+        );
+    }
+
+    public ShippingMessageResponse convertFromShippingMessageToShippingMessageResponse(ShippingMessage shippingMessage) {
+        return new ShippingMessageResponse(
+                shippingMessage.getId(),
+                shippingMessage.getContent(),
+                shippingMessage.getCreatedAt(),
+                shippingMessage.getMember()
+        );
+    }
+
+    public Page<ShippingMessageResponse> convertFromPagedShippingMessageToPagedShippingMessageResponse(Page<ShippingMessage> pagedShippingMessage) {
+        return pagedShippingMessage.map(shippingMessage -> new ShippingMessageResponse(
+                shippingMessage.getId(),
+                shippingMessage.getContent(),
+                shippingMessage.getCreatedAt(),
+                shippingMessage.getMember()
+        ));
+    }
+
+    public SellerResponse convertFromSellerToSellerResponse(Seller seller) {
+        return new SellerResponse(
+                seller.getId(),
+                seller.getName(),
+                seller.getPhoneNumber(),
+                seller.getEmail(),
+                seller.getAddress()
+        );
+    }
+
+    public ProductSellerResponse convertFromProductToProductSellerResponse(Product product) {
+        Seller seller = product.getSeller();
+        return new ProductSellerResponse(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getPrice(),
+                product.getDescription(),
+                product.getImageUrl(),
+                seller.getId(),
+                seller.getName(),
+                seller.getPhoneNumber(),
+                seller.getEmail(),
+                seller.getAddress()
         );
     }
 

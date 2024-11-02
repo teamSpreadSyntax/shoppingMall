@@ -27,6 +27,7 @@ public class JwtTokenProvider {
     private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주-30분
     private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주
     private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
+    private final Long RESET_TOKEN_VALIDATION_PERIOD = 60L * 60 * 1000; // 1시간 유효기간 설정
     // 2주 - 5분
     private final UserDetailsService userDetailsService;
 
@@ -192,6 +193,19 @@ public class JwtTokenProvider {
         VALID,
         INVALID,
         EXPIRED
+    }
+
+    // 비밀번호 재설정 토큰 생성 메서드 추가
+    public String generateResetToken(String email) {
+        long now = getNow();
+        Date expirationDate = new Date(now + RESET_TOKEN_VALIDATION_PERIOD);
+
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date(now))
+                .setExpiration(expirationDate)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
 }

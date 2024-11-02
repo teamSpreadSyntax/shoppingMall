@@ -66,4 +66,5 @@ public class CouponRepositoryCustomImpl implements CouponRepositoryCustom  {
 
         return new PageImpl<>(results, pageable, total);
     }
+
 }

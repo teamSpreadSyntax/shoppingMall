@@ -29,5 +29,5 @@ public class ProductOrder {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_status", nullable = false)
-    private DeliveryStatusType deliveryStatus = DeliveryStatusType.ORDER_REQUESTED;
+    private DeliveryStatusType deliveryStatus;
 }

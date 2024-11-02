@@ -43,4 +43,17 @@ public class QnA {
     @Column(name = "description", nullable = false)
     private String description;
 
+    @Column(name = "answer", columnDefinition = "TEXT")
+    private String answer;
+
+    @Column(name = "answer_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime answerDate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "answerer_id")
+    private Member answerer;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "answer_status", length = 20)
+    private AnswerStatus answerStatus = AnswerStatus.WAITING;
 }

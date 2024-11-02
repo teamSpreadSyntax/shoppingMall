@@ -13,10 +13,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+
 
 @RequiredArgsConstructor
 @Service
@@ -30,6 +36,7 @@ public class CouponServiceImpl implements CouponService{
     private final Converter converter;
     private final SimpMessagingTemplate messagingTemplate;
     private final KafkaEventProducerService kafkaEventProducerService;
+    private final MemberService memberService;
 
 
     @Override
@@ -48,6 +55,22 @@ public class CouponServiceImpl implements CouponService{
 
 
         return converter.convertFromCouponToCouponResponse(coupon);
+    }
+
+    @Override
+    @Transactional
+    public CouponResponse updateCoupon(Long couponId, CreateCouponRequestDTO updateCouponRequestDTO) {
+
+        Coupon coupon = findById(couponId);
+
+        coupon.setName(updateCouponRequestDTO.getName());
+        coupon.setDiscountRate(updateCouponRequestDTO.getDiscountRate());
+        coupon.setStartDate(updateCouponRequestDTO.getStartDate());
+        coupon.setEndDate(updateCouponRequestDTO.getEndDate());
+
+        couponRepository.save(coupon);
+        return converter.convertFromCouponToCouponResponse(coupon);
+
     }
 
     @Override
@@ -78,6 +101,31 @@ public class CouponServiceImpl implements CouponService{
         return converter.convertFromPagedCouponToPagedCouponResponse(pagedCoupon);
     }
 
+    @Override
+    public CouponResponse selectBestCouponForMember(Long productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        List<Coupon> availableCoupons = couponRepository.findAvailableCoupons(member.getId(), productId);
+        Coupon bestCoupon = selectBestCoupon(availableCoupons);
+
+        return bestCoupon != null ? converter.convertFromCouponToCouponResponse(bestCoupon) : null;
+    }
+
+    public Coupon selectBestCoupon(List<Coupon> coupons) {
+        return coupons.stream()
+                .filter(coupon -> isValidCoupon(coupon))
+                .max(Comparator.comparingInt(Coupon::getDiscountRate)
+                        .thenComparing(Coupon::getStartDate))
+                .orElse(null);
+    }
+
+    private boolean isValidCoupon(Coupon coupon) {
+        LocalDateTime now = LocalDateTime.now();
+        return (coupon.getStartDate().isBefore(now) || coupon.getStartDate().isEqual(now)) &&
+                coupon.getEndDate().isAfter(now);
+    }
 
 
     @Override
@@ -167,6 +215,8 @@ public class CouponServiceImpl implements CouponService{
                     assignCouponToProductRequestDTO.getCategory(),
                     assignCouponToProductRequestDTO.getProductName(),
                     assignCouponToProductRequestDTO.getContent(),
+                    assignCouponToProductRequestDTO.getColors(),   // 색상 필터 추가
+                    assignCouponToProductRequestDTO.getSizes(),    // 사이즈 필터 추가
                     pageable
             );
         } else if (assignCouponToProductRequestDTO.getAssignType() == AssignType.ALL) {
@@ -174,8 +224,6 @@ public class CouponServiceImpl implements CouponService{
         } else {
             throw new IllegalArgumentException("assign type을 확인해주세요. (SPECIFIC_PRODUCTS : 특정 상품(들)에 쿠폰 부여, ALL : 모든 상품에 쿠폰 부여.)");
         }
-
-
     }
 
     @Override
