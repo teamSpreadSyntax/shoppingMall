@@ -24,7 +24,7 @@ public class Coupon {
     private String name;
 
     @Column(name = "coupon_discount_rate", nullable = false)
-    private Integer discountRate;
+    private Integer discountRate = 0;
 
     @Column(nullable = false)
     private LocalDateTime startDate;
