@@ -1,5 +1,6 @@
 package home.project.service;
 
+import home.project.domain.Member;
 import home.project.domain.Product;
 import home.project.domain.ProductOrder;
 import home.project.domain.elasticsearch.ProductDocument;
@@ -19,6 +20,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,12 +43,15 @@ public class ProductServiceImpl implements ProductService {
     private final KafkaEventProducerService kafkaEventProducerService;
     private final IndexToElasticsearch indexToElasticsearch;
     private final ElasticsearchOperations elasticsearchOperations;
-
+    private final MemberService memberService;
 
 
     @Override
     @Transactional
     public void join(CreateProductRequestDTO createProductRequestDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
 
         Long currentStock = createProductRequestDTO.getStock();
         Long currentSoldQuantity = createProductRequestDTO.getSoldQuantity();
@@ -75,6 +81,7 @@ public class ProductServiceImpl implements ProductService {
         product.setImageUrl(createProductRequestDTO.getImageUrl());
         product.setSizes(createProductRequestDTO.getSizes());
         product.setColors(createProductRequestDTO.getColors());
+        product.setSeller(member.getSeller());
 
         boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
         if (productNumExists) {
