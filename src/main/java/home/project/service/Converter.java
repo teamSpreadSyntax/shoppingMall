@@ -572,10 +572,10 @@ public class Converter {
 
     public ProductDocument convertFromProductToProductDocument(Product product) {
         ProductDocument doc = new ProductDocument();
+        // 기본 필드 설정
         doc.setId(product.getId());
         doc.setName(product.getName());
         doc.setBrand(product.getBrand());
-        doc.setCategoryCode(product.getCategory().getCode());
         doc.setProductNum(product.getProductNum());
         doc.setStock(product.getStock());
         doc.setSoldQuantity(product.getSoldQuantity());
@@ -585,29 +585,255 @@ public class Converter {
         doc.setDescription(product.getDescription());
         doc.setCreateAt(product.getCreateAt());
         doc.setImageUrl(product.getImageUrl());
+
+        // Category 변환
+        if (product.getCategory() != null) {
+            ProductDocument.Category categoryDoc = new ProductDocument.Category();
+            categoryDoc.setId(product.getCategory().getId());
+            categoryDoc.setCode(product.getCategory().getCode());
+            categoryDoc.setName(product.getCategory().getName());
+            categoryDoc.setLevel(product.getCategory().getLevel());
+            categoryDoc.setParentId(product.getCategory().getParent() != null ?
+                    product.getCategory().getParent().getId() : null);
+            doc.setCategory(categoryDoc);
+        }
+
+        // ProductCoupons 변환
+        List<ProductDocument.ProductCoupon> productCoupons = product.getProductCoupons().stream()
+                .map(pc -> {
+                    ProductDocument.ProductCoupon pcDoc = new ProductDocument.ProductCoupon();
+                    pcDoc.setId(pc.getId());
+                    pcDoc.setProductId(product.getId());
+                    pcDoc.setIssuedAt(pc.getIssuedAt());
+                    pcDoc.setUsedAt(pc.getUsedAt());
+                    pcDoc.setUsed(pc.isUsed());
+                    if (pc.getCoupon() != null) {
+                        ProductDocument.Coupon couponDoc = new ProductDocument.Coupon();
+                        couponDoc.setId(pc.getCoupon().getId());
+                        couponDoc.setName(pc.getCoupon().getName());
+                        couponDoc.setDiscountRate(pc.getCoupon().getDiscountRate());
+                        couponDoc.setStartDate(pc.getCoupon().getStartDate());
+                        couponDoc.setEndDate(pc.getCoupon().getEndDate());
+                        couponDoc.setAssignBy(pc.getCoupon().getAssignBy());
+                        pcDoc.setCoupon(couponDoc);
+                    }
+                    return pcDoc;
+                })
+                .collect(Collectors.toList());
+        doc.setProductCoupons(productCoupons);
+
+        // ProductEvents 변환
+        List<ProductDocument.ProductEvent> productEvents = product.getProductEvents().stream()
+                .map(pe -> {
+                    ProductDocument.ProductEvent peDoc = new ProductDocument.ProductEvent();
+                    peDoc.setId(pe.getId());
+                    peDoc.setProductId(product.getId());
+                    peDoc.setCreatedAt(pe.getCreatedAt());
+                    if (pe.getEvent() != null) {
+                        ProductDocument.Event eventDoc = new ProductDocument.Event();
+                        eventDoc.setId(pe.getEvent().getId());
+                        eventDoc.setName(pe.getEvent().getName());
+                        eventDoc.setDiscountRate(pe.getEvent().getDiscountRate());
+                        eventDoc.setDescription(pe.getEvent().getDescription());
+                        eventDoc.setStartDate(pe.getEvent().getStartDate());
+                        eventDoc.setEndDate(pe.getEvent().getEndDate());
+                        eventDoc.setImage(pe.getEvent().getImage());
+                        peDoc.setEvent(eventDoc);
+                    }
+                    return peDoc;
+                })
+                .collect(Collectors.toList());
+        doc.setProductEvents(productEvents);
+
+        // ProductOrders 변환
+        List<ProductDocument.ProductOrder> productOrders = product.getProductOrder().stream()
+                .map(po -> {
+                    ProductDocument.ProductOrder poDoc = new ProductDocument.ProductOrder();
+                    poDoc.setId(po.getId());
+                    poDoc.setProductId(product.getId());
+                    poDoc.setQuantity(po.getQuantity());
+                    poDoc.setPrice(po.getPrice());
+                    poDoc.setDeliveryStatus(po.getDeliveryStatus());
+                    if (po.getOrders() != null) {
+                        ProductDocument.Order orderDoc = new ProductDocument.Order();
+                        orderDoc.setId(po.getOrders().getId());
+                        orderDoc.setOrderNum(po.getOrders().getOrderNum());
+                        orderDoc.setOrderDate(po.getOrders().getOrderDate());
+                        orderDoc.setAmount(po.getOrders().getAmount());
+                        orderDoc.setPointsUsed(po.getOrders().getPointsUsed());
+                        orderDoc.setPointsEarned(po.getOrders().getPointsEarned());
+                        poDoc.setOrder(orderDoc);
+                    }
+                    return poDoc;
+                })
+                .collect(Collectors.toList());
+        doc.setProductOrders(productOrders);
+
+        // WishLists 변환
+        List<ProductDocument.WishList> wishLists = product.getWishLists().stream()
+                .map(wl -> {
+                    ProductDocument.WishList wlDoc = new ProductDocument.WishList();
+                    wlDoc.setId(wl.getId());
+                    wlDoc.setProductId(product.getId());
+                    wlDoc.setCreateAt(wl.getCreateAt());
+                    if (wl.getMember() != null) {
+                        ProductDocument.Member memberDoc = new ProductDocument.Member();
+                        memberDoc.setId(wl.getMember().getId());
+                        memberDoc.setEmail(wl.getMember().getEmail());
+                        memberDoc.setName(wl.getMember().getName());
+                        memberDoc.setPhone(wl.getMember().getPhone());
+                        memberDoc.setGrade(wl.getMember().getGrade());
+                        wlDoc.setMember(memberDoc);
+                    }
+                    return wlDoc;
+                })
+                .collect(Collectors.toList());
+        doc.setWishLists(wishLists);
+
         return doc;
     }
 
     public MemberDocument convertFromMemberToMemberDocument(Member member) {
-        MemberDocument memberDocument = new MemberDocument();
-        memberDocument.setId(member.getId());
-        memberDocument.setEmail(member.getEmail());
-        memberDocument.setName(member.getName());
-        memberDocument.setPhone(member.getPhone());
-        memberDocument.setGender(member.getGender());
-        memberDocument.setBirthDate(member.getBirthDate());
-        memberDocument.setDefaultAddress(member.getDefaultAddress());
-        memberDocument.setSecondAddress(member.getSecondAddress());
-        memberDocument.setThirdAddress(member.getThirdAddress());
-        memberDocument.setRole(member.getRole());
-        memberDocument.setAccumulatedPurchase(member.getAccumulatedPurchase());
-        memberDocument.setGrade(member.getGrade());
-        memberDocument.setPoint(member.getPoint());
-        memberDocument.setMemberCoupons(new ArrayList<>());
-        memberDocument.setMemberEvents(new ArrayList<>());
-        memberDocument.setOrders(new ArrayList<>());
-        memberDocument.setWishLists(new ArrayList<>());
-        return memberDocument;
+        MemberDocument doc = new MemberDocument();
+        // 기본 필드 설정
+        doc.setId(member.getId());
+        doc.setEmail(member.getEmail());
+        doc.setName(member.getName());
+        doc.setPhone(member.getPhone());
+        doc.setGender(member.getGender());
+        doc.setBirthDate(member.getBirthDate());
+        doc.setDefaultAddress(member.getDefaultAddress());
+        doc.setSecondAddress(member.getSecondAddress());
+        doc.setThirdAddress(member.getThirdAddress());
+        doc.setRole(member.getRole());
+        doc.setAccumulatedPurchase(member.getAccumulatedPurchase());
+        doc.setGrade(member.getGrade());
+        doc.setPoint(member.getPoint());
+
+        // MemberCoupons 변환
+        List<MemberDocument.MemberCoupon> memberCoupons = member.getMemberCoupons().stream()
+                .map(mc -> {
+                    MemberDocument.MemberCoupon mcDoc = new MemberDocument.MemberCoupon();
+                    mcDoc.setId(mc.getId());
+                    mcDoc.setMemberId(member.getId());
+                    mcDoc.setIssuedAt(mc.getIssuedAt());
+                    mcDoc.setUsedAt(mc.getUsedAt());
+                    mcDoc.setUsed(mc.isUsed());
+                    if (mc.getCoupon() != null) {
+                        MemberDocument.Coupon couponDoc = new MemberDocument.Coupon();
+                        couponDoc.setId(mc.getCoupon().getId());
+                        couponDoc.setName(mc.getCoupon().getName());
+                        couponDoc.setDiscountRate(mc.getCoupon().getDiscountRate());
+                        couponDoc.setStartDate(mc.getCoupon().getStartDate());
+                        couponDoc.setEndDate(mc.getCoupon().getEndDate());
+                        couponDoc.setAssignBy(mc.getCoupon().getAssignBy());
+                        mcDoc.setCoupon(couponDoc);
+                    }
+                    return mcDoc;
+                })
+                .collect(Collectors.toList());
+        doc.setMemberCoupons(memberCoupons);
+
+        // MemberEvents 변환
+        List<MemberDocument.MemberEvent> memberEvents = member.getMemberEvents().stream()
+                .map(me -> {
+                    MemberDocument.MemberEvent meDoc = new MemberDocument.MemberEvent();
+                    meDoc.setId(me.getId());
+                    meDoc.setMemberId(member.getId());
+                    meDoc.setCreatedAt(me.getCreatedAt());
+                    if (me.getEvent() != null) {
+                        MemberDocument.Event eventDoc = new MemberDocument.Event();
+                        eventDoc.setId(me.getEvent().getId());
+                        eventDoc.setName(me.getEvent().getName());
+                        eventDoc.setDiscountRate(me.getEvent().getDiscountRate());
+                        eventDoc.setDescription(me.getEvent().getDescription());
+                        eventDoc.setStartDate(me.getEvent().getStartDate());
+                        eventDoc.setEndDate(me.getEvent().getEndDate());
+                        eventDoc.setImage(me.getEvent().getImage());
+                        meDoc.setEvent(eventDoc);
+                    }
+                    return meDoc;
+                })
+                .collect(Collectors.toList());
+        doc.setMemberEvents(memberEvents);
+
+        // Orders 변환
+        List<MemberDocument.Order> orders = member.getOrders().stream()
+                .map(o -> {
+                    MemberDocument.Order orderDoc = new MemberDocument.Order();
+                    orderDoc.setId(o.getId());
+                    orderDoc.setOrderNum(o.getOrderNum());
+                    orderDoc.setOrderDate(o.getOrderDate());
+                    orderDoc.setAmount(o.getAmount());
+                    orderDoc.setPointsUsed(o.getPointsUsed());
+                    orderDoc.setPointsEarned(o.getPointsEarned());
+                    orderDoc.setMemberId(member.getId());
+
+                    // Shipping 정보 변환
+                    if (o.getShipping() != null) {
+                        MemberDocument.Shipping shippingDoc = new MemberDocument.Shipping();
+                        shippingDoc.setId(o.getShipping().getId());
+                        shippingDoc.setOrderId(o.getId());
+                        shippingDoc.setDeliveryType(o.getShipping().getDeliveryType());
+                        shippingDoc.setDeliveryNum(o.getShipping().getDeliveryNum());
+                        shippingDoc.setDeliveryAddress(o.getShipping().getDeliveryAddress());
+                        shippingDoc.setArrivingDate(o.getShipping().getArrivingDate());
+                        shippingDoc.setArrivedDate(o.getShipping().getArrivedDate());
+                        shippingDoc.setDeliveryCost(o.getShipping().getDeliveryCost());
+                        shippingDoc.setDeliveryStatus(o.getShipping().getDeliveryStatus());
+                        orderDoc.setShipping(shippingDoc);
+                    }
+
+                    // ProductOrders 변환
+                    List<MemberDocument.ProductOrder> productOrders = o.getProductOrders().stream()
+                            .map(po -> {
+                                MemberDocument.ProductOrder poDoc = new MemberDocument.ProductOrder();
+                                poDoc.setId(po.getId());
+                                poDoc.setOrderId(o.getId());
+                                poDoc.setQuantity(po.getQuantity());
+                                poDoc.setPrice(po.getPrice());
+                                poDoc.setDeliveryStatus(po.getDeliveryStatus());
+                                if (po.getProduct() != null) {
+                                    MemberDocument.Product productDoc = new MemberDocument.Product();
+                                    productDoc.setId(po.getProduct().getId());
+                                    productDoc.setName(po.getProduct().getName());
+                                    productDoc.setBrand(po.getProduct().getBrand());
+                                    productDoc.setProductNum(po.getProduct().getProductNum());
+                                    productDoc.setPrice(po.getProduct().getPrice());
+                                    poDoc.setProduct(productDoc);
+                                }
+                                return poDoc;
+                            })
+                            .collect(Collectors.toList());
+                    orderDoc.setProductOrders(productOrders);
+
+                    return orderDoc;
+                })
+                .collect(Collectors.toList());
+        doc.setOrders(orders);
+
+        // WishList 변환
+        List<MemberDocument.WishList> wishLists = member.getWishLists().stream()
+                .map(wl -> {
+                    MemberDocument.WishList wlDoc = new MemberDocument.WishList();
+                    wlDoc.setId(wl.getId());
+                    wlDoc.setMemberId(member.getId());
+                    wlDoc.setCreateAt(wl.getCreateAt());
+                    if (wl.getProduct() != null) {
+                        MemberDocument.Product productDoc = new MemberDocument.Product();
+                        productDoc.setId(wl.getProduct().getId());
+                        productDoc.setName(wl.getProduct().getName());
+                        productDoc.setBrand(wl.getProduct().getBrand());
+                        productDoc.setProductNum(wl.getProduct().getProductNum());
+                        productDoc.setPrice(wl.getProduct().getPrice());
+                        wlDoc.setProduct(productDoc);
+                    }
+                    return wlDoc;
+                })
+                .collect(Collectors.toList());
+        doc.setWishLists(wishLists);
+
+        return doc;
     }
 
 }
