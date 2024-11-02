@@ -210,6 +210,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable) {
+        return null;
+    }
+
+    @Override
     public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
         String categoryCode = null;
 
