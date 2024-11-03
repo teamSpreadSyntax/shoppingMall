@@ -1,6 +1,7 @@
 package home.project.service;
 
 import home.project.domain.Member;
+import home.project.domain.MemberProduct;
 import home.project.domain.Product;
 import home.project.domain.ProductOrder;
 import home.project.domain.elasticsearch.ProductDocument;
@@ -10,14 +11,18 @@ import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.CategoryRepository;
+import home.project.repository.MemberProductRepository;
 import home.project.repository.ProductOrderRepository;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.repository.ProductRepository;
 import home.project.util.IndexToElasticsearch;
+import home.project.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.security.core.Authentication;
@@ -28,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static home.project.util.CategoryMapper.getCode;
 
@@ -44,6 +50,8 @@ public class ProductServiceImpl implements ProductService {
     private final IndexToElasticsearch indexToElasticsearch;
     private final ElasticsearchOperations elasticsearchOperations;
     private final MemberService memberService;
+    private final MemberProductRepository memberProductRepository;
+    private final PageUtil pageUtil;
 
 
     @Override
@@ -342,6 +350,7 @@ public class ProductServiceImpl implements ProductService {
         return converter.convertFromProductToProductResponse(product);
     }
 
+
     @Override
     @Transactional
     public String deleteById(Long productId) {
@@ -432,6 +441,185 @@ public class ProductServiceImpl implements ProductService {
         ProductOrder productOrder = productOrderRepository.findById(productOrderId)
                 .orElseThrow(() -> new IdNotFoundException(productOrderId + "(으)로 등록된 주문서가 없습니다."));
         return productOrder.getProduct();
+    }
+
+    @Override
+    public Page<ProductResponseForManager> findAllByIdReturnProductResponseForManager(Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Page<MemberProduct> memberProducts = memberProductRepository.findAllByMemberId(memberService.findByEmail(email).getId(), pageable);
+        return converter.convertFromPagedMemberProductToPagedProductResponseForManaging(memberProducts);
+    }
+
+
+    @Override
+    public Page<ProductResponseForManager> findProductsOnElasticForAdmin(String brand, String category, String productName, String content, Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        String categoryCode = null;
+        if (category != null && !category.isEmpty()) {
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {
+            categoryCode = getCode(content);
+        }
+
+        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
+
+        // 회원이 소유한 상품만 필터링하고 Page로 변환
+        List<Product> filteredProducts = pagedDocuments
+                .map(productDocument -> findById(productDocument.getId()))
+                .getContent()
+                .stream()
+                .filter(product -> memberProductRepository.existsByMemberIdAndProductId(member.getId(), product.getId()))
+                .collect(Collectors.toList());
+
+        return converter.convertFromPagedProductToPagedProductResponseForManaging(
+                new PageImpl<>(
+                        filteredProducts,
+                        pageable,
+                        filteredProducts.size()
+                )
+        );
+    }
+
+    @Override
+    @Transactional
+    public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO) {
+
+        if (confirmProductOwnership(updateProductRequestDTO.getName(), updateProductRequestDTO.getBrand())) {
+            return update(updateProductRequestDTO);
+        }
+
+        throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");
+
+    }
+
+    public boolean confirmProductOwnership(String productName, String brand) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Pageable pageable = pageUtil.pageable(PageRequest.of(1, 5));
+        Page<MemberProduct> memberProducts = memberProductRepository
+                .findAllByMemberId(memberService.findByEmail(email).getId(), pageable);
+
+        return memberProducts.stream()
+                .anyMatch(memberProduct ->
+                        memberProduct.getProduct().getName().equals(productName) &&
+                                memberProduct.getProduct().getBrand().equals(brand)
+                );
+    }
+
+    @Override
+    @Transactional
+    public String deleteByIdForAdmin(Long productId) {
+        Product product = findById(productId);
+        String name = product.getName();
+        if (confirmProductOwnership(name, product.getBrand())) {
+            productRepository.deleteById(productId);
+            elasticsearchOperations.delete(String.valueOf(productId), ProductDocument.class);
+            return name;
+        }
+        throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");
+    }
+
+    @Override
+    @Transactional
+    public ProductResponseForManager increaseStockForAdmin(Long productId, Long stock) {
+        if (stock < 0) {
+            throw new IllegalStateException("재고가 음수일 수 없습니다.");
+        }
+        Product product = findById(productId);
+        if (confirmProductOwnership(product.getName(), product.getBrand())) {
+            Long currentStock = product.getStock();
+            Long newStock = currentStock + stock;
+            product.setStock(newStock);
+            productRepository.save(product);
+            ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+            indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
+            return converter.convertFromProductToProductResponseForManaging(product);
+        }
+        throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");
+
+    }
+
+    @Override
+    @Transactional
+    public ProductResponseForManager decreaseStockForAdmin(Long productId, Long stock) {
+        Product product = findById(productId);
+        if (confirmProductOwnership(product.getName(), product.getBrand())) {
+            Long currentStock = product.getStock();
+            Long newStock = Math.max(currentStock - stock, 0);
+            if (currentStock <= 0 || stock > currentStock) {
+                throw new DataIntegrityViolationException("재고가 부족합니다.");
+            }
+            product.setStock(newStock);
+            productRepository.save(product);
+            ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+            indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
+            return converter.convertFromProductToProductResponseForManaging(product);
+        }
+        throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");
+    }
+
+    @Override
+    @Transactional
+    public ProductResponseForManager increaseSoldQuantityForAdmin(Long productId, Long quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("증가시킬 판매 수량은 음수일 수 없습니다.");
+        }
+        Product product = findById(productId);
+        if (confirmProductOwnership(product.getName(), product.getBrand())) {
+            Long currentSoldQuantity = product.getSoldQuantity();
+            Long newSoldQuantity = currentSoldQuantity + quantity;
+            product.setSoldQuantity(newSoldQuantity);
+            productRepository.save(product);
+            ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+            indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
+            return converter.convertFromProductToProductResponseForManaging(product);
+        }
+
+        throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");
+    }
+
+    @Override
+    @Transactional
+    public ProductResponseForManager decreaseSoldQuantityForAdmin(Long productId, Long quantity) {
+        if (quantity < 0) {
+            throw new IllegalArgumentException("감소시킬 판매 수량은 음수일 수 없습니다.");
+        }
+        Product product = findById(productId);
+        Long currentSoldQuantity = product.getSoldQuantity();
+        if (currentSoldQuantity < quantity) {
+            throw new DataIntegrityViolationException("감소시킬 판매 수량이 현재 판매 수량보다 많습니다.");
+        }
+        if (confirmProductOwnership(product.getName(), product.getBrand())) {
+            Long newSoldQuantity = currentSoldQuantity - quantity;
+            product.setSoldQuantity(newSoldQuantity);
+            productRepository.save(product);
+            ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+            indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
+            return converter.convertFromProductToProductResponseForManaging(product);
+        }
+
+        throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");
+
+    }
+
+
+
+    @Override
+    public Product findByProductOrderNumForAdmin(Long productOrderId) {
+        ProductOrder productOrder = productOrderRepository.findById(productOrderId)
+                .orElseThrow(() -> new IdNotFoundException(productOrderId + "(으)로 등록된 주문서가 없습니다."));
+
+        if (confirmProductOwnership(productOrder.getProduct().getName(), productOrder.getProduct().getBrand())) {
+            return productOrder.getProduct();
+        }
+
+        throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");
+
     }
 
 }

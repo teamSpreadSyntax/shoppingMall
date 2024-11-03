@@ -72,6 +72,10 @@ public class Member {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "member")
+    private List<MemberProduct> memberProducts = new ArrayList<>();
+
+    @JsonManagedReference
+    @OneToMany(mappedBy = "member")
     private List<MemberEvent> memberEvents = new ArrayList<>();
 
     @OneToMany(mappedBy = "member")

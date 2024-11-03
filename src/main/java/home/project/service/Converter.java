@@ -244,6 +244,25 @@ public class Converter {
         ));
     }
 
+    public Page<ProductResponseForManager> convertFromPagedMemberProductToPagedProductResponseForManaging(Page<MemberProduct> pagedMemberProduct){
+        return pagedMemberProduct.map(productResponseForManaging -> new ProductResponseForManager(
+                productResponseForManaging.getId(),
+                productResponseForManaging.getProduct().getName(),
+                productResponseForManaging.getProduct().getBrand(),
+                productResponseForManaging.getProduct().getCategory().getCode(),
+                productResponseForManaging.getProduct().getProductNum(),
+                productResponseForManaging.getProduct().getStock(),
+                productResponseForManaging.getProduct().getSoldQuantity(),
+                productResponseForManaging.getProduct().getPrice(),
+                productResponseForManaging.getProduct().getDiscountRate(),
+                productResponseForManaging.getProduct().getDefectiveStock(),
+                productResponseForManaging.getProduct().getDescription(),
+                productResponseForManaging.getProduct().getCreateAt(),
+                productResponseForManaging.getProduct().getImageUrl(),
+                convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProduct().getProductCoupons()),
+                convertFromListedProductEventToListedProductEventResponse(productResponseForManaging.getProduct().getProductEvents())
+        ));
+    }
     public Page<ProductResponse> convertFromPagedProductToPagedProductResponse(Page<Product> pagedProduct) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();

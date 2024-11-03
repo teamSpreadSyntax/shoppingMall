@@ -2,6 +2,8 @@ package home.project.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.*;
+import home.project.dto.CouponEventDTO;
+import home.project.dto.OrderEventDTO;
 import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.OrderResponse;
@@ -133,7 +135,7 @@ public class OrderServiceImpl implements OrderService{
         memberRepository.save(member);
         orderRepository.save(orders);
 
-        kafkaEventProducerService.sendPurchaseLog(orders.getId());
+        kafkaEventProducerService.sendOrderEvent(new OrderEventDTO("orders-events", orders.getOrderDate(), orders.getMember(), orders.getShipping(), orders.getProductOrders()));
 
         return converter.convertFromOrderToOrderResponse(orders);
     }

@@ -41,6 +41,12 @@ public class KafkaEventListenerService {
         elkLogSenderService.sendLogToElk("member-join-events", message);
     }
 
+    @KafkaListener(topics = "orders-events", groupId = "orders-group")
+    public void listenOrdersEvents(String message) {
+        System.out.println("orders-events: " + message);
+        elkLogSenderService.sendLogToElk("orders-events", message);
+    }
+
     private void handleCouponAssignedToMember(CouponEventDTO couponEventDTO) {
         // 쿠폰을 회원에게 할당하는 처리 로직
         webSocketNotificationService.sendNotification(
