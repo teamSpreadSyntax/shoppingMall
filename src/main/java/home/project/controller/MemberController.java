@@ -1,7 +1,6 @@
 package home.project.controller;
 
 
-import home.project.domain.*;
 import home.project.dto.requestDTO.*;
 import home.project.dto.responseDTO.MemberResponse;
 import home.project.dto.responseDTO.MemberResponseForUser;
@@ -10,7 +9,6 @@ import home.project.response.CustomResponseEntity;
 import home.project.service.MemberService;
 
 import home.project.util.PageUtil;
-import home.project.util.StringBuilderUtil;
 import home.project.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,12 +20,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -207,4 +199,28 @@ public class MemberController {
         return new CustomResponseEntity<>(response, "비밀번호 재설정 요청 성공", HttpStatus.OK);
     }
 
+    @Operation(summary = "비밀번호 재설정", description = "토큰을 검증하고 비밀번호를 재설정합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "비밀번호 재설정 성공",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "권한 없음",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "자원 없음",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @PostMapping("/reset_password")
+    public ResponseEntity<?> resetPassword(@RequestParam("token") String token,
+                                           @RequestBody @Valid PasswordResetDTO passwordResetDTO,
+                                           BindingResult bindingResult) {
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
+
+        memberService.resetPassword(token, passwordResetDTO.getNewPassword());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("successMessage", "비밀번호가 성공적으로 재설정되었습니다.");
+        return new CustomResponseEntity<>(response, "비밀번호 재설정 성공", HttpStatus.OK);
+    }
 }

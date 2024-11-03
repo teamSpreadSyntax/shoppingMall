@@ -25,6 +25,9 @@ public class WishList {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(name = "liked", nullable = false)
+    private boolean liked;
+
     @Column(name = "createAt_wishList", columnDefinition = "TIMESTAMP")
     private LocalDateTime createAt;
 

@@ -3,7 +3,6 @@ package home.project.service;
 import home.project.domain.Member;
 import home.project.domain.Product;
 import home.project.domain.WishList;
-import home.project.dto.requestDTO.AddWishRequestDTO;
 import home.project.dto.responseDTO.WishListDetailResponse;
 import home.project.dto.responseDTO.WishListResponse;
 import home.project.repository.WishListRepository;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -29,7 +29,7 @@ public class WishListServiceImpl implements WishListService {
 
     @Transactional
     @Override
-    public WishListResponse toggleWishList(Long productId) {
+    public WishListResponse toggleWishList(Long productId, boolean liked) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -39,15 +39,22 @@ public class WishListServiceImpl implements WishListService {
 
         WishList existingWishList = wishListRepository.findByMemberIdAndProductId(member.getId(), product.getId());
         if (existingWishList != null) {
-            wishListRepository.delete(existingWishList);
-            return new WishListResponse(existingWishList.getId(), product.getId(), "위시 리스트에서 삭제 되었습니다");
+
+            existingWishList.setLiked(liked);
+            wishListRepository.save(existingWishList);
+
+            String message = liked ? "좋아요가 설정되었습니다." : "좋아요가 해제되었습니다.";
+            return new WishListResponse(existingWishList.getId(), product.getId(), liked, message);
         } else {
             WishList newWishList = new WishList();
             newWishList.setMember(member);
             newWishList.setProduct(product);
             newWishList.setCreateAt(LocalDateTime.now());
+            newWishList.setLiked(liked);
             wishListRepository.save(newWishList);
-            return new WishListResponse(newWishList.getId(), product.getId(), "위시리스트에 저장되었습니다");
+
+            String message = "위시리스트에 저장되었습니다";
+            return new WishListResponse(newWishList.getId(), product.getId(), liked, message);
         }
     }
 
@@ -60,5 +67,9 @@ public class WishListServiceImpl implements WishListService {
 
         Page<WishList> pagedWishList = wishListRepository.findAllByMemberId(member.getId(), pageable);
         return converter.convertFromPagedWishListToPagedWishListResponse(pagedWishList);
+    }
+
+    public List<WishList> findByMemberId(Long memberId) {
+        return wishListRepository.findByMemberId(memberId);
     }
 }

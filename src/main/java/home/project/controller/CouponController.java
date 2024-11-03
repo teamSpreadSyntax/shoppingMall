@@ -128,7 +128,7 @@ public class CouponController {
     })
     @GetMapping("/best-coupon")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> getBestCoupon(
+    public CustomResponseEntity<?> getBestCoupon(
             @RequestParam("productId") Long productId) {
 
         CouponResponse bestCouponResponse = couponService.selectBestCouponForMember(productId);

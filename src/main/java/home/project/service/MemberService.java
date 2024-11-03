@@ -43,4 +43,7 @@ public interface MemberService {
 
     @Transactional
     void sendPasswordResetEmail(String email);
+
+    @Transactional
+    void resetPassword(String token, String newPassword);
 }

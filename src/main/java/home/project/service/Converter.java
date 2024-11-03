@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -27,6 +28,8 @@ public class Converter {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
+    private final WishListService wishListService;
+    private final MemberService memberService;
 
     public Member convertFromCreateMemberRequestDTOToMember(CreateMemberRequestDTO createMemberRequestDTO) {
         Member member = new Member();
@@ -193,6 +196,7 @@ public class Converter {
                         memberCoupon.getId(),
                         memberCoupon.getMember().getEmail(),
                         memberCoupon.getCoupon().getId(),
+                        memberCoupon.getCoupon().getDiscountRate(),
                         memberCoupon.getIssuedAt(),
                         memberCoupon.getUsedAt(),
                         memberCoupon.isUsed()
@@ -240,24 +244,45 @@ public class Converter {
         ));
     }
 
-    public Page<ProductResponse> convertFromPagedProductToPagedProductResponse(Page<Product> pagedProduct){
-        return pagedProduct.map(productResponse -> new ProductResponse(
-                productResponse.getId(),
-                productResponse.getName(),
-                productResponse.getBrand(),
-                productResponse.getCategory().getCode(),
-                productResponse.getProductNum(),
-                productResponse.getPrice(),
-                productResponse.getDiscountRate(),
-                productResponse.getDescription(),
-                productResponse.getImageUrl(),
-                productResponse.getSizes(),
-                productResponse.getColors(),
-                convertFromListedProductCouponProductCouponResponse(productResponse.getProductCoupons())
+    public Page<ProductResponse> convertFromPagedProductToPagedProductResponse(Page<Product> pagedProduct) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        List<WishList> wishLists = wishListService.findByMemberId(member.getId());
+
+        Set<Long> likedProductIds = wishLists.stream()
+                .map(wishList -> wishList.getProduct().getId())
+                .collect(Collectors.toSet());
+
+        return pagedProduct.map(product -> new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getCategory().getCode(),
+                product.getProductNum(),
+                product.getPrice(),
+                product.getDiscountRate(),
+                product.getDescription(),
+                product.getImageUrl(),
+                product.getSizes(),
+                product.getColors(),
+                likedProductIds.contains(product.getId()),
+                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
         ));
     }
 
     public ProductResponse convertFromProductToProductResponse(Product product) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        List<WishList> wishLists = wishListService.findByMemberId(member.getId());
+
+        Set<Long> likedProductIds = wishLists.stream()
+                .map(wishList -> wishList.getProduct().getId())
+                .collect(Collectors.toSet());
+
         return new ProductResponse(
                 product.getId(),
                 product.getName(),
@@ -270,6 +295,7 @@ public class Converter {
                 product.getImageUrl(),
                 product.getSizes(),
                 product.getColors(),
+                likedProductIds.contains(product.getId()),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
         );
     }
@@ -337,7 +363,7 @@ public class Converter {
     }
 
         public Page<MemberCouponResponse> convertFromPagedMemberAndCouponToPagedMemberCouponResponse(Page<Member> pagedMember, Coupon coupon) {
-        return pagedMember.map(member -> new MemberCouponResponse(null, member.getEmail(), coupon.getId(), LocalDateTime.now(), null, false));
+        return pagedMember.map(member -> new MemberCouponResponse(null, member.getEmail(), coupon.getId(),coupon.getDiscountRate(), LocalDateTime.now(), null, false));
     }
 
     public Page<ProductCouponResponse> convertFromPagedProductAndCouponToPagedProductCouponResponse(Page<Product> pagedProduct, Coupon coupon) {
@@ -547,6 +573,7 @@ public class Converter {
                 wishList.getProduct().getName(),
                 wishList.getProduct().getImageUrl(),
                 wishList.getProduct().getPrice(),
+                wishList.isLiked(),
                 wishList.getCreateAt()
         ));
     }
