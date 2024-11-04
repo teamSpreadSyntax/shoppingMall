@@ -8,11 +8,21 @@ public class FirebaseAuthenticationToken extends AbstractAuthenticationToken {
     private final String uid;  // Firebase 사용자 ID
     private final Object credentials;  // 토큰 정보
 
+    // 인증되지 않은 토큰 생성을 위한 생성자
     public FirebaseAuthenticationToken(String uid, Object credentials) {
         super(null);
         this.uid = uid;
         this.credentials = credentials;
-        setAuthenticated(true);  // 인증된 상태로 설정
+        setAuthenticated(false);
+    }
+
+    // 인증된 토큰 생성을 위한 생성자
+    public FirebaseAuthenticationToken(String uid, Object credentials,
+                                       Collection<? extends GrantedAuthority> authorities) {
+        super(authorities);
+        this.uid = uid;
+        this.credentials = credentials;
+        setAuthenticated(true);
     }
 
     @Override
@@ -23,10 +33,5 @@ public class FirebaseAuthenticationToken extends AbstractAuthenticationToken {
     @Override
     public Object getPrincipal() {
         return uid;
-    }
-
-    @Override
-    public Collection<GrantedAuthority> getAuthorities() {
-        return null;  // 권한 관리가 필요하면 설정
     }
 }

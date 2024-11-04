@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -50,14 +51,14 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final SecurityPermissionsConfig securityPermissions;
-    private final FirebaseAuthenticationProvider firebaseAuthenticationProvider; // Firebase Provider 추가
+    private final FirebaseAuthenticationProvider firebaseAuthenticationProvider;
 
 
     @Bean
     public AuthenticationManager firebaseAuthenticationManager() {
-        // AuthenticationManager에 tFirebaseAuhenticationProvider를 포함
         return new ProviderManager(Arrays.asList(firebaseAuthenticationProvider));
     }
+
     @Bean
     public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
         return new JwtAuthenticationEntryPoint();
@@ -76,7 +77,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
+    @Primary
+    public AuthenticationManager userDetailsAuthenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(userDetailsService);
@@ -106,6 +108,9 @@ public class SecurityConfig {
 
     @Bean
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        FirebaseAuthenticationFilter firebaseFilter = new FirebaseAuthenticationFilter(firebaseAuthenticationManager());
+        firebaseFilter.setPermitAllPaths(securityPermissions.getPermitAll());
+
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -113,6 +118,9 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(requests -> {
+                    // 소셜 로그인 경로는 Firebase 인증 사용
+                    requests.requestMatchers("/api/auth/social/**").permitAll();
+
                     securityPermissions.getPermitAll().forEach(pattern ->
                             requests.requestMatchers(pattern).permitAll()
                     );
@@ -129,7 +137,7 @@ public class SecurityConfig {
                             )
                     );
                     requests.requestMatchers("/v3/api-docs/**", "/swagger-ui/**").permitAll();
-                    requests.requestMatchers("/ws/**").permitAll();//웹소켓 보안 설정
+                    requests.requestMatchers("/ws/**").permitAll();
                     requests.anyRequest().permitAll();
                 })
                 .formLogin(formLogin -> formLogin
@@ -140,8 +148,9 @@ public class SecurityConfig {
                                 .authenticationEntryPoint(jwtAuthenticationEntryPoint())
                                 .accessDeniedHandler(accessDeniedHandler(objectMapper()))
                 )
+                // JWT 필터를 먼저 적용하고, Firebase 필터는 소셜 로그인 경로에만 적용
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new FirebaseAuthenticationFilter(firebaseAuthenticationManager(), securityPermissions.getPermitAll()), JwtAuthenticationFilter.class) // 필터에 permitAll 경로 전달
+                .addFilterBefore(firebaseFilter, JwtAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
                         .logoutSuccessHandler(new CustomLogoutSuccessHandler())

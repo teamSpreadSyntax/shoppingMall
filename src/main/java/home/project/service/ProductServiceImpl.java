@@ -89,7 +89,7 @@ public class ProductServiceImpl implements ProductService {
         product.setImageUrl(createProductRequestDTO.getImageUrl());
         product.setSizes(createProductRequestDTO.getSizes());
         product.setColors(createProductRequestDTO.getColors());
-        product.setSeller(member.getSeller());
+//        product.setSeller(member.getSeller());
 
         boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
         if (productNumExists) {
