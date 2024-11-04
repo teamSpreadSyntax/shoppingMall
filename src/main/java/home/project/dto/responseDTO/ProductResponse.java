@@ -17,6 +17,7 @@ public class ProductResponse {
     private Integer discountRate;
     private String description;
     private String imageUrl;
+    private boolean isLiked = false;
 
     private List<String> sizes;
     private List<String> colors;

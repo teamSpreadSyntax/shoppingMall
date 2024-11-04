@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import home.project.exceptions.CustomLogoutSuccessHandler;
 import home.project.util.CustomOptionalSerializer;
+import home.project.util.FirebaseAuthenticationFilter;
+import home.project.util.FirebaseAuthenticationProvider;
 import home.project.util.JwtAuthenticationFilter;
 import home.project.exceptions.CustomAccessDeniedHandler;
 import home.project.service.JwtTokenProvider;
@@ -48,8 +50,14 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final SecurityPermissionsConfig securityPermissions;
+    private final FirebaseAuthenticationProvider firebaseAuthenticationProvider; // Firebase Provider 추가
 
 
+    @Bean
+    public AuthenticationManager authenticationManager() {
+        // AuthenticationManager에 FirebaseAuthenticationProvider를 포함
+        return new ProviderManager(Arrays.asList(firebaseAuthenticationProvider));
+    }
     @Bean
     public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
         return new JwtAuthenticationEntryPoint();
@@ -133,6 +141,7 @@ public class SecurityConfig {
                                 .accessDeniedHandler(accessDeniedHandler(objectMapper()))
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new FirebaseAuthenticationFilter(authenticationManager()), JwtAuthenticationFilter.class) // Firebase 인증 필터 추가
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
                         .logoutSuccessHandler(new CustomLogoutSuccessHandler())
