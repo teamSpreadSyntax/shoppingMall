@@ -141,7 +141,7 @@ public class SecurityConfig {
                                 .accessDeniedHandler(accessDeniedHandler(objectMapper()))
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new FirebaseAuthenticationFilter(firebaseAuthenticationManager()), JwtAuthenticationFilter.class) // Firebase 인증 필터 추가
+                .addFilterBefore(new FirebaseAuthenticationFilter(firebaseAuthenticationManager(), securityPermissions.getPermitAll()), JwtAuthenticationFilter.class) // 필터에 permitAll 경로 전달
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
                         .logoutSuccessHandler(new CustomLogoutSuccessHandler())
