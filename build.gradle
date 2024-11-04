@@ -28,13 +28,13 @@ configurations {
 }
 
 repositories {
+    maven { url 'https://maven.google.com' }
+    // Firebase 관련 저장소 추가
+    maven { url 'https://google.artifactactory.releases.jfrog.io/artifactory/google-maven' }
     mavenCentral()
     maven { url "https://plugins.gradle.org/m2/" }
     maven { url 'https://repo.spring.io/release' }
     gradlePluginPortal()
-    maven { url 'https://maven.google.com' }
-    // Firebase 관련 저장소 추가
-    maven { url 'https://google.artifactactory.releases.jfrog.io/artifactory/google-maven' }
 }
 
 dependencies {
