@@ -55,7 +55,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager firebaseAuthenticationManager() {
-        // AuthenticationManager에 FirebaseAuthenticationProvider를 포함
+        // AuthenticationManager에 tFirebaseAuhenticationProvider를 포함
         return new ProviderManager(Arrays.asList(firebaseAuthenticationProvider));
     }
     @Bean
@@ -76,7 +76,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager firebaseAuthenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(userDetailsService);
