@@ -54,7 +54,7 @@ public class SecurityConfig {
 
 
     @Bean
-    public AuthenticationManager authenticationManager() {
+    public AuthenticationManager firebaseAuthenticationManager() {
         // AuthenticationManager에 FirebaseAuthenticationProvider를 포함
         return new ProviderManager(Arrays.asList(firebaseAuthenticationProvider));
     }
@@ -76,7 +76,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
+    public AuthenticationManager firebaseAuthenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) throws Exception {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder);
         provider.setUserDetailsService(userDetailsService);
@@ -141,7 +141,7 @@ public class SecurityConfig {
                                 .accessDeniedHandler(accessDeniedHandler(objectMapper()))
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new FirebaseAuthenticationFilter(authenticationManager()), JwtAuthenticationFilter.class) // Firebase 인증 필터 추가
+                .addFilterBefore(new FirebaseAuthenticationFilter(firebaseAuthenticationManager()), JwtAuthenticationFilter.class) // Firebase 인증 필터 추가
                 .logout(logout -> logout
                         .logoutUrl("/api/logout")
                         .logoutSuccessHandler(new CustomLogoutSuccessHandler())
