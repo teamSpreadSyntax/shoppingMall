@@ -153,6 +153,7 @@ public class CouponServiceImpl implements CouponService{
                     savedMemberCoupon.getId(),
                     member.getEmail(),
                     coupon.getId(),
+                    coupon.getDiscountRate(),
                     savedMemberCoupon.getIssuedAt(),
                     null,
                     false
@@ -215,8 +216,8 @@ public class CouponServiceImpl implements CouponService{
                     assignCouponToProductRequestDTO.getCategory(),
                     assignCouponToProductRequestDTO.getProductName(),
                     assignCouponToProductRequestDTO.getContent(),
-                    assignCouponToProductRequestDTO.getColors(),   // 색상 필터 추가
-                    assignCouponToProductRequestDTO.getSizes(),    // 사이즈 필터 추가
+                    assignCouponToProductRequestDTO.getColors(),
+                    assignCouponToProductRequestDTO.getSizes(),
                     pageable
             );
         } else if (assignCouponToProductRequestDTO.getAssignType() == AssignType.ALL) {

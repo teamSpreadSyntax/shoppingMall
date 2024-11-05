@@ -19,7 +19,6 @@ public interface CouponService {
 
     Coupon findById(Long couponId);
 
-    @Transactional
     CouponResponse updateCoupon(Long couponId, CreateCouponRequestDTO updateCouponRequestDTO);
 
     Page<CouponResponse> findAll(Pageable pageable);

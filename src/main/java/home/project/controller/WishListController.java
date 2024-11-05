@@ -54,11 +54,11 @@ public class WishListController {
     })
     @PostMapping("/toggle/{productId}")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> toggleWishList(@PathVariable Long productId) {
+    public ResponseEntity<?> toggleWishList(@PathVariable Long productId, @RequestParam boolean liked) {
 
-        WishListResponse wishListResponse = wishListService.toggleWishList(productId);
+        WishListResponse wishListResponse = wishListService.toggleWishList(productId, liked);
 
-        String successMessage = "wishList 에 추가 되었습니다.";
+        String successMessage = liked ? "제품이 위시리스트에 추가되었습니다." : "위시리스트에서 제품이 삭제되었습니다.";
 
         return new CustomResponseEntity<>(wishListResponse, successMessage, HttpStatus.OK);
     }

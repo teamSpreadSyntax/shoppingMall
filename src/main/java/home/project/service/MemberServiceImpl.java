@@ -278,11 +278,27 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(() -> new IdNotFoundException("등록된 이메일이 없습니다."));
 
         String token = jwtTokenProvider.generateResetToken(email); // 토큰 생성
-        String resetLink = "https://yourdomain.com/reset-password?token=" + token;
+        String resetLink = "https://www.projectkkk.com/reset-password?token=" + token;
 
         emailService.sendEmail(email, "비밀번호 재설정 요청",
                 "비밀번호 재설정을 원하시면 다음 링크를 클릭하세요: " + resetLink);
 
+        memberRepository.save(member);
+    }
+
+    @Override
+    @Transactional
+    public void resetPassword(String token, String newPassword) {
+
+        if (!jwtTokenProvider.validateToken(token)) {
+            throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+        }
+
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new IdNotFoundException("등록된 이메일이 없습니다."));
+
+        member.setPassword(passwordEncoder.encode(newPassword));
         memberRepository.save(member);
     }
 

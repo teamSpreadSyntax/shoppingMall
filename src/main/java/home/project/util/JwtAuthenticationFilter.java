@@ -48,11 +48,14 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
         String token = resolveToken(httpServletRequest);
 
+        logger.debug("Authorization Header: {}", httpServletRequest.getHeader("Authorization"));
+        logger.debug("Resolved token: {}", token);
 
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } else {
+            logger.debug("No valid JWT token found");
         }
         HttpServletResponse httpServletResponse = (HttpServletResponse) response;
         httpServletResponse.setHeader("Content-Type", "application/json");

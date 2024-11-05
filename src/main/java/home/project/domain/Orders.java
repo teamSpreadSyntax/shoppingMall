@@ -1,5 +1,6 @@
 package home.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,7 @@ public class Orders {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @JsonBackReference
     @OneToOne(mappedBy = "orders", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Shipping shipping;
 
@@ -41,6 +43,7 @@ public class Orders {
     @Column(name = "points_earned")
     private Long pointsEarned = 0L;
 
+    @JsonBackReference
     @OneToMany(mappedBy = "orders", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductOrder> productOrders = new ArrayList<>();
 

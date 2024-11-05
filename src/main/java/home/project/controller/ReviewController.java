@@ -125,7 +125,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PatchMapping("/increase-helpful")
+    @PatchMapping("/increase_helpful")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> increaseHelpfulCount(@RequestParam("reviewId") Long reviewId) {
 

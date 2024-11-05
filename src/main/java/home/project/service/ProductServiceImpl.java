@@ -10,11 +10,8 @@ import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
-import home.project.repository.CategoryRepository;
-import home.project.repository.MemberProductRepository;
-import home.project.repository.ProductOrderRepository;
+import home.project.repository.*;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
-import home.project.repository.ProductRepository;
 import home.project.util.IndexToElasticsearch;
 import home.project.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +49,7 @@ public class ProductServiceImpl implements ProductService {
     private final MemberService memberService;
     private final MemberProductRepository memberProductRepository;
     private final PageUtil pageUtil;
-
+    private final WishListRepository wishListRepository;
 
     @Override
     @Transactional
@@ -89,8 +86,6 @@ public class ProductServiceImpl implements ProductService {
         product.setImageUrl(createProductRequestDTO.getImageUrl());
         product.setSizes(createProductRequestDTO.getSizes());
         product.setColors(createProductRequestDTO.getColors());
-//        product.setSeller(member.getSeller());
-
         boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
         if (productNumExists) {
             throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
@@ -109,12 +104,33 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
+    /*private Member authentification(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+        if(authentification == null){
+            List<Long> likedProductIds =
+        }else {
 
+        }
+    }*/
     @Override
     public ProductResponse findByIdReturnProductResponse(Long productId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+        if (email.equals("anonymousUser")){
+            return converter.convertFromProductToProductResponse(findById(productId));
+        }
+
+        Member member = memberService.findByEmail(email);
+
         Product product = findById(productId);
+        List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
+
         kafkaEventProducerService.sendProductViewLog(productId);
-        return converter.convertFromProductToProductResponse(product);
+        return converter.convertFromProductToProductResponse2(product,likedProductIds);
     }
 
     @Override
@@ -141,8 +157,45 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponse> findAll(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
-        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+        if (email.equals("anonymousUser")){
+
+            return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+        }
+
+        Member member = memberService.findByEmail(email);
+
+        List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
+
+        return converter.convertFromPagedProductToPagedProductResponse2(pagedProduct,likedProductIds);
     }
+
+    /*public Product getProductWithLikeStatus(Long memberId, Long productId) {
+        Product product = findById(productId);
+
+        List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(memberId);
+        boolean isLiked = likedProductIds.contains(product.getId());
+        product.setLiked(isLiked); // 좋아요 상태 설정
+
+        return product;
+    }
+
+    public Page<Product> getProductsWithLikeStatus(Long memberId, Pageable pageable) {
+        Page<Product> pagedProduct = productRepository.findAll(pageable);
+
+        List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(memberId);
+
+        pagedProduct.forEach(product -> {
+            boolean isLiked = likedProductIds.contains(product.getId());
+            product.setLiked(isLiked); // isLiked 상태 설정
+        });
+
+        return pagedProduct;
+    }*/
+
 
     @Override
     public Page<ProductResponseForManager> findAllForManaging(Pageable pageable) {
@@ -151,23 +204,46 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> findNewProduct(Pageable pageable) {
+    public Page<ProductResponse> adminFindNewProduct(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
-    public Page<ProductResponse> findProducts(String brand, String category, String productName, String content,List<String> colors, List<String> sizes,  Pageable pageable) {
+    public Page<ProductResponse> findNewProduct(Pageable pageable) {
+        Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+        if (email.equals("anonymousUser")){
+
+            return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+        }
+
+        Member member = memberService.findByEmail(email);
+
+        List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
+
+        return converter.convertFromPagedProductToPagedProductResponse2(pagedProduct,likedProductIds);
+    }
+
+    @Override
+    public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
         String categoryCode = null;
 
-        if (category != null && !category.isEmpty()) {//?
+        if (category != null && !category.isEmpty()) {
             categoryCode = getCode(category);
         }
-        if (content != null && !content.isEmpty()) {//?
+        if (content != null && !content.isEmpty()) {
             categoryCode = getCode(content);
         }
 
-        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content,colors, sizes, pageable);
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, colors, sizes, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
@@ -187,7 +263,20 @@ public class ProductServiceImpl implements ProductService {
 
         Page<Product> pagedProduct = pagedDocuments.map(doc -> findById(doc.getId()));
 
-        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+        if (email.equals("anonymousUser")){
+
+            return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+        }
+
+        Member member = memberService.findByEmail(email);
+
+        List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
+
+        return converter.convertFromPagedProductToPagedProductResponse2(pagedProduct,likedProductIds);
+
     }
 
     @Override

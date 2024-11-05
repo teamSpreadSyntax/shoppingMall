@@ -193,6 +193,7 @@ public class Converter {
                         memberCoupon.getId(),
                         memberCoupon.getMember().getEmail(),
                         memberCoupon.getCoupon().getId(),
+                        memberCoupon.getCoupon().getDiscountRate(),
                         memberCoupon.getIssuedAt(),
                         memberCoupon.getUsedAt(),
                         memberCoupon.isUsed()
@@ -271,11 +272,32 @@ public class Converter {
                 productResponse.getDiscountRate(),
                 productResponse.getDescription(),
                 productResponse.getImageUrl(),
+                false,
                 productResponse.getSizes(),
                 productResponse.getColors(),
                 convertFromListedProductCouponProductCouponResponse(productResponse.getProductCoupons())
         ));
     }
+
+    public Page<ProductResponse> convertFromPagedProductToPagedProductResponse2(Page<Product> pagedProduct,List<Long> isLiked){
+
+        return pagedProduct.map(productResponse -> new ProductResponse(
+                productResponse.getId(),
+                productResponse.getName(),
+                productResponse.getBrand(),
+                productResponse.getCategory().getCode(),
+                productResponse.getProductNum(),
+                productResponse.getPrice(),
+                productResponse.getDiscountRate(),
+                productResponse.getDescription(),
+                productResponse.getImageUrl(),
+                isLiked.contains(productResponse.getId()),
+                productResponse.getSizes(),
+                productResponse.getColors(),
+                convertFromListedProductCouponProductCouponResponse(productResponse.getProductCoupons())
+        ));
+    }
+
 
     public ProductResponse convertFromProductToProductResponse(Product product) {
         return new ProductResponse(
@@ -288,6 +310,25 @@ public class Converter {
                 product.getDiscountRate(),
                 product.getDescription(),
                 product.getImageUrl(),
+                false,
+                product.getSizes(),
+                product.getColors(),
+                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
+        );
+    }
+
+    public ProductResponse convertFromProductToProductResponse2(Product product, List<Long> isLiked) {
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getCategory().getCode(),
+                product.getProductNum(),
+                product.getPrice(),
+                product.getDiscountRate(),
+                product.getDescription(),
+                product.getImageUrl(),
+                isLiked.contains(product.getId()),
                 product.getSizes(),
                 product.getColors(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
@@ -344,6 +385,7 @@ public class Converter {
     }
 
     public Page<CouponResponse> convertFromPagedCouponToPagedCouponResponse(Page<Coupon> pagedCoupon) {
+
         return pagedCoupon.map(coupon -> new CouponResponse(
                 coupon.getId(),
                 coupon.getName(),
@@ -357,7 +399,7 @@ public class Converter {
     }
 
         public Page<MemberCouponResponse> convertFromPagedMemberAndCouponToPagedMemberCouponResponse(Page<Member> pagedMember, Coupon coupon) {
-        return pagedMember.map(member -> new MemberCouponResponse(null, member.getEmail(), coupon.getId(), LocalDateTime.now(), null, false));
+        return pagedMember.map(member -> new MemberCouponResponse(null, member.getEmail(), coupon.getId(),coupon.getDiscountRate(), LocalDateTime.now(), null, false));
     }
 
     public Page<ProductCouponResponse> convertFromPagedProductAndCouponToPagedProductCouponResponse(Page<Product> pagedProduct, Coupon coupon) {
@@ -567,6 +609,7 @@ public class Converter {
                 wishList.getProduct().getName(),
                 wishList.getProduct().getImageUrl(),
                 wishList.getProduct().getPrice(),
+                wishList.isLiked(),
                 wishList.getCreateAt()
         ));
     }

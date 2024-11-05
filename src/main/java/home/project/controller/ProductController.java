@@ -1,10 +1,7 @@
 package home.project.controller;
 
 
-import home.project.dto.requestDTO.CreateProductRequestDTO;
-import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.ProductResponse;
-import home.project.dto.responseDTO.ProductResponseForManager;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.service.ProductService;
@@ -18,8 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -29,12 +24,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Tag(name = "상품", description = "상품관련 API입니다")
 @RequestMapping(path = "/api/product")
@@ -179,18 +169,4 @@ public class ProductController {
         return new CustomResponseEntity<>(pagedBrands.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "id로 특정 상품 주문 조회 메서드", description = "id로 상품 주문 조회 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-    })
-    @GetMapping("/productOrder")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findProductOrderId(@RequestParam("productOrderId") Long productOrderId) {
-        ProductResponse productResponse = productService.findByIdReturnProductResponse(productOrderId);
-        String successMessage = productOrderId + "에 해당하는 상품 입니다.";
-        return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
-    }
 }
