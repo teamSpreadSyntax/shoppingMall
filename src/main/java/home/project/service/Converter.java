@@ -659,6 +659,33 @@ public class Converter {
         ));
     }
 
+//    public SellerResponse convertFromSellerToSellerResponse(Seller seller) {
+//        return new SellerResponse(
+//                seller.getId(),
+//                seller.getName(),
+//                seller.getPhoneNumber(),
+//                seller.getEmail(),
+//                seller.getAddress()
+//        );
+//    }
+//
+//    public ProductSellerResponse convertFromProductToProductSellerResponse(Product product) {
+//        Seller seller = product.getSeller();
+//        return new ProductSellerResponse(
+//                product.getId(),
+//                product.getName(),
+//                product.getBrand(),
+//                product.getPrice(),
+//                product.getDescription(),
+//                product.getImageUrl(),
+//                seller.getId(),
+//                seller.getName(),
+//                seller.getPhoneNumber(),
+//                seller.getEmail(),
+//                seller.getAddress()
+//        );
+//    }
+
     public ProductDocument convertFromProductToProductDocument(Product product) {
         ProductDocument doc = new ProductDocument();
         // 기본 필드 설정

@@ -28,6 +28,7 @@ configurations {
 }
 
 repositories {
+    maven { url 'https://maven.google.com' }
     mavenCentral()
     maven { url "https://plugins.gradle.org/m2/" }
     maven { url 'https://repo.spring.io/release' }
@@ -69,7 +70,7 @@ dependencies {
     implementation 'org.apache.httpcomponents:httpcore:4.4.16'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-
+    implementation 'com.google.firebase:firebase-admin:9.2.0'  // 최신 안정화 버전
 }
 
 def querydslSrcDir = 'src/main/generated'
