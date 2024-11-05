@@ -19,7 +19,7 @@ public interface WishListRepository extends JpaRepository<WishList, Long> {
     List<WishList> findByMemberId(Long memberId);
 
 
-    @Query("SELECT w.product.id FROM WishList w WHERE w.member.id = :memberId AND w.liked = true")
+    @Query("SELECT w.product.id FROM WishList w WHERE w.member.id = :memberId")
     List<Long> findProductIdsByMemberId(@Param("memberId") Long memberId);
 
 }

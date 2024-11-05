@@ -141,8 +141,4 @@ public class Product {
     @CollectionTable(name = "product_color", joinColumns = @JoinColumn(name = "product_id"))
     @Column(name = "color")
     private List<String> colors = new ArrayList<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
-    private Seller seller;
 }

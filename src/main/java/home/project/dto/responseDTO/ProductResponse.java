@@ -17,14 +17,14 @@ public class ProductResponse {
     private Integer discountRate;
     private String description;
     private String imageUrl;
+    private boolean isLiked;
 
     private List<String> sizes;
     private List<String> colors;
-    private boolean liked;
 
     private List<ProductCouponResponse> productCouponResponse;
 
-    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, List<String> sizes, List<String> colors, boolean liked, List<ProductCouponResponse> productCouponResponse) {
+    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, boolean isLiked, List<String> sizes, List<String> colors, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -34,9 +34,9 @@ public class ProductResponse {
         this.discountRate = discountRate;
         this.description = description;
         this.imageUrl = imageUrl;
+        this.isLiked = isLiked;
         this.sizes = sizes;
         this.colors = colors;
-        this.liked = liked;
         this.productCouponResponse = productCouponResponse;
     }
 }

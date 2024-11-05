@@ -27,11 +27,14 @@ public interface ProductService {
 
     Page<ProductResponse> findAll(Pageable pageable);
 
+
     Page<ProductResponseForManager> findAllForManaging(Pageable pageable);
+
+    Page<ProductResponse> adminFindNewProduct(Pageable pageable);
 
     Page<ProductResponse> findNewProduct(Pageable pageable);
 
-    Page<ProductResponse> findProducts(String brand, String category, String productName, String content,List<String> colors, List<String> sizes, Pageable pageable);
+    Page<ProductResponse> findProducts(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable);
 
     Page<ProductResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable);
 

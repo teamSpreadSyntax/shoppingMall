@@ -15,6 +15,4 @@ public interface WishListService {
     WishListResponse toggleWishList(Long productId, boolean liked);
 
     Page<WishListDetailResponse> findAllMyWishList(Pageable pageable);
-
-    List<WishList> findByMemberId(Long memberId);
 }

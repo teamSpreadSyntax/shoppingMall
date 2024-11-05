@@ -136,7 +136,7 @@ public class AdminProductController {
                     {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductResponse> productPage = productService.findNewProduct(pageable);
+        Page<ProductResponse> productPage = productService.adminFindNewProduct(pageable);
 
         long totalCount = productPage.getTotalElements();
 

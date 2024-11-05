@@ -69,7 +69,4 @@ public class WishListServiceImpl implements WishListService {
         return converter.convertFromPagedWishListToPagedWishListResponse(pagedWishList);
     }
 
-    public List<WishList> findByMemberId(Long memberId) {
-        return wishListRepository.findByMemberId(memberId);
-    }
 }
