@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -216,8 +215,8 @@ public class CouponServiceImpl implements CouponService{
                     assignCouponToProductRequestDTO.getCategory(),
                     assignCouponToProductRequestDTO.getProductName(),
                     assignCouponToProductRequestDTO.getContent(),
-                    assignCouponToProductRequestDTO.getColors(),
-                    assignCouponToProductRequestDTO.getSizes(),
+                    assignCouponToProductRequestDTO.getColor(),
+                    assignCouponToProductRequestDTO.getSize(),
                     pageable
             );
         } else if (assignCouponToProductRequestDTO.getAssignType() == AssignType.ALL) {

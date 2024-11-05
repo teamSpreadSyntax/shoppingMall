@@ -23,7 +23,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
-    public Page<Product> findProducts(String brand, String categoryCode, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
+    public Page<Product> findProducts(String brand, String categoryCode, String productName, String content, String colors, String sizes, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (brand != null && !brand.isEmpty()) {
@@ -41,10 +41,10 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                     .or(product.name.lower().like("%" + content.toLowerCase() + "%"));
         }
         if (colors != null && !colors.isEmpty()) {
-            builder.and(product.colors.any().in(colors));
+            builder.and(product.color.equalsIgnoreCase(colors)); // 단일 color 조건
         }
         if (sizes != null && !sizes.isEmpty()) {
-            builder.and(product.sizes.any().in(sizes));
+            builder.and(product.size.equalsIgnoreCase(sizes)); // 단일 size 조건
         }
 
         List<Product> results = queryFactory
@@ -64,7 +64,7 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
-    public Page<Product> findSoldProducts(String brand, String categoryCode, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
+    public Page<Product> findSoldProducts(String brand, String categoryCode, String productName, String content, String colors, String sizes, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (brand != null && !brand.isEmpty()) {
@@ -82,12 +82,11 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                     .or(product.name.lower().like("%" + content.toLowerCase() + "%"));
         }
         if (colors != null && !colors.isEmpty()) {
-            builder.and(product.colors.any().in(colors));
+            builder.and(product.color.equalsIgnoreCase(colors)); // 단일 color 조건
         }
         if (sizes != null && !sizes.isEmpty()) {
-            builder.and(product.sizes.any().in(sizes));
+            builder.and(product.size.equalsIgnoreCase(sizes)); // 단일 size 조건
         }
-
         builder.and(product.productOrder.any().orders.shipping.deliveryStatus.eq(DeliveryStatusType.PURCHASE_CONFIRMED));
 
         List<Product> results = queryFactory

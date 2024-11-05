@@ -26,7 +26,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final QCategory category;
 
-    public final ListPath<String, StringPath> colors = this.<String, StringPath>createList("colors", String.class, StringPath.class, PathInits.DIRECT2);
+    public final StringPath color = createString("color");
 
     public final DateTimePath<java.time.LocalDateTime> createAt = createDateTime("createAt", java.time.LocalDateTime.class);
 
@@ -52,7 +52,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final ListPath<ProductOrder, QProductOrder> productOrder = this.<ProductOrder, QProductOrder>createList("productOrder", ProductOrder.class, QProductOrder.class, PathInits.DIRECT2);
 
-    public final ListPath<String, StringPath> sizes = this.<String, StringPath>createList("sizes", String.class, StringPath.class, PathInits.DIRECT2);
+    public final StringPath size = createString("size");
 
     public final NumberPath<Long> soldQuantity = createNumber("soldQuantity", Long.class);
 

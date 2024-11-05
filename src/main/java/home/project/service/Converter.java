@@ -121,7 +121,9 @@ public class Converter {
         return new ProductDTOForOrder(
                 orderProduct.getId(),
                 orderProduct.getPrice(),
-                orderProduct.getQuantity()
+                orderProduct.getQuantity(),
+                orderProduct.getProduct().getSize(),
+                orderProduct.getProduct().getColor()
         );
     }
 
@@ -171,7 +173,9 @@ public class Converter {
                 .map(orderProduct -> new ProductDTOForOrder(
                         orderProduct.getProduct().getId(),
                         orderProduct.getPrice(),
-                        orderProduct.getQuantity()
+                        orderProduct.getQuantity(),
+                        orderProduct.getProduct().getSize(),
+                        orderProduct.getProduct().getColor()
                 ))
                 .collect(Collectors.toList());
     }
@@ -216,8 +220,36 @@ public class Converter {
                 product.getDescription(),
                 product.getCreateAt(),
                 product.getImageUrl(),
+                product.getSize(),
+                product.getColor(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
                 convertFromListedProductEventToListedProductEventResponse(product.getProductEvents())
+
+        );
+    }
+
+    public ProductWithQnAAndReviewResponseForManager convertFromProductToProductWithQnAAndReviewResponseForManager(Product product, Page<QnA> qnAs, Page<Review> reviews){
+        return new ProductWithQnAAndReviewResponseForManager(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getCategory().getCode(),
+                product.getProductNum(),
+                product.getStock(),
+                product.getSoldQuantity(),
+                product.getPrice(),
+                product.getDiscountRate(),
+                product.getDefectiveStock(),
+                product.getDescription(),
+                product.getCreateAt(),
+                product.getImageUrl(),
+                product.getSize(),
+                product.getColor(),
+                convertFromPagedQnAToPagedQnADetailResponse(qnAs),
+                convertFromPagedReviewToPagedReviewDetailResponse(reviews),
+                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
+                convertFromListedProductEventToListedProductEventResponse(product.getProductEvents())
+
         );
     }
 
@@ -236,6 +268,8 @@ public class Converter {
                 productResponseForManaging.getDescription(),
                 productResponseForManaging.getCreateAt(),
                 productResponseForManaging.getImageUrl(),
+                productResponseForManaging.getSize(),
+                productResponseForManaging.getColor(),
                 convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProductCoupons()),
                 convertFromListedProductEventToListedProductEventResponse(productResponseForManaging.getProductEvents())
         ));
@@ -256,6 +290,8 @@ public class Converter {
                 productResponseForManaging.getProduct().getDescription(),
                 productResponseForManaging.getProduct().getCreateAt(),
                 productResponseForManaging.getProduct().getImageUrl(),
+                productResponseForManaging.getProduct().getSize(),
+                productResponseForManaging.getProduct().getColor(),
                 convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProduct().getProductCoupons()),
                 convertFromListedProductEventToListedProductEventResponse(productResponseForManaging.getProduct().getProductEvents())
         ));
@@ -273,8 +309,8 @@ public class Converter {
                 productResponse.getDescription(),
                 productResponse.getImageUrl(),
                 false,
-                productResponse.getSizes(),
-                productResponse.getColors(),
+                productResponse.getSize(),
+                productResponse.getColor(),
                 convertFromListedProductCouponProductCouponResponse(productResponse.getProductCoupons())
         ));
     }
@@ -292,8 +328,8 @@ public class Converter {
                 productResponse.getDescription(),
                 productResponse.getImageUrl(),
                 isLiked.contains(productResponse.getId()),
-                productResponse.getSizes(),
-                productResponse.getColors(),
+                productResponse.getSize(),
+                productResponse.getColor(),
                 convertFromListedProductCouponProductCouponResponse(productResponse.getProductCoupons())
         ));
     }
@@ -311,9 +347,29 @@ public class Converter {
                 product.getDescription(),
                 product.getImageUrl(),
                 false,
-                product.getSizes(),
-                product.getColors(),
+                product.getSize(),
+                product.getColor(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
+        );
+    }
+
+    public ProductWithQnAAndReviewResponse convertFromProductToProductWithQnAAndReviewResponse(Product product, Page<QnA> qnAs, Page<Review> reviews) {
+        return new ProductWithQnAAndReviewResponse(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getCategory().getCode(),
+                product.getProductNum(),
+                product.getPrice(),
+                product.getDiscountRate(),
+                product.getDescription(),
+                product.getImageUrl(),
+                false,
+                product.getSize(),
+                product.getColor(),
+                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
+                convertFromPagedQnAToPagedQnADetailResponse(qnAs),
+                convertFromPagedReviewToPagedReviewDetailResponse(reviews)
         );
     }
 
@@ -329,10 +385,91 @@ public class Converter {
                 product.getDescription(),
                 product.getImageUrl(),
                 isLiked.contains(product.getId()),
-                product.getSizes(),
-                product.getColors(),
+                product.getSize(),
+                product.getColor(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
         );
+    }
+
+    public ProductWithQnAAndReviewResponse convertFromProductToProductWithQnAAndReviewResponse2(Product product, List<Long> isLiked, Page<QnA> qnAs, Page<Review> reviews) {
+        return new ProductWithQnAAndReviewResponse(
+                product.getId(),
+                product.getName(),
+                product.getBrand(),
+                product.getCategory().getCode(),
+                product.getProductNum(),
+                product.getPrice(),
+                product.getDiscountRate(),
+                product.getDescription(),
+                product.getImageUrl(),
+                isLiked.contains(product.getId()),
+                product.getSize(),
+                product.getColor(),
+                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
+                convertFromPagedQnAToPagedQnADetailResponse(qnAs),
+                convertFromPagedReviewToPagedReviewDetailResponse(reviews)
+        );
+    }
+
+    public Page<ReviewDetailResponse> convertFromPagedReviewToPagedReviewDetailResponse(Page<Review> pagedReview) {
+        return pagedReview.map(review -> new ReviewDetailResponse(
+                review.getId(),
+                review.getMember().getEmail(),
+                review.getProduct().getName(),
+                review.getCreateAt(),
+                review.getRating(),
+                review.getDescription(),
+                review.getImageUrl1(),
+                review.getImageUrl2(),
+                review.getImageUrl3(),
+                review.getHelpful()
+        ));
+    }
+
+
+    public List<QnADetailResponse> convertFromListedQnAToListedQnADetailResponse(List<QnA> qnAs) {
+        if (qnAs == null) {
+            return new ArrayList<>(); // null 체크
+        }
+
+        return qnAs.stream()
+                .map(qnA -> new QnADetailResponse(
+                        qnA.getId(),
+                        qnA.getQnAType(),
+                        qnA.getSubject(),
+                        qnA.getProduct() != null ? qnA.getProduct().getProductNum() : null,
+                        qnA.getOrders() != null ? qnA.getOrders().getOrderNum() : null,
+                        qnA.getDescription(),
+                        qnA.getMember().getEmail(),
+                        qnA.getCreateAt(),
+                        qnA.getAnswer(),
+                        qnA.getAnswerDate(),
+                        qnA.getAnswerer() != null ? qnA.getAnswerer().getEmail() : null,
+                        qnA.getAnswerStatus()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    // Review 리스트를 ReviewDetailResponse 리스트로 변환하는 메서드
+    public List<ReviewDetailResponse> convertFromListedReviewToReviewLitedDetailResponse(List<Review> reviews) {
+        if (reviews == null) {
+            return new ArrayList<>(); // null 체크
+        }
+
+        return reviews.stream()
+                .map(review -> new ReviewDetailResponse(
+                        review.getId(),
+                        review.getMember().getEmail(),
+                        review.getProduct().getName(),
+                        review.getCreateAt(),
+                        review.getRating(),
+                        review.getDescription(),
+                        review.getImageUrl1(),
+                        review.getImageUrl2(),
+                        review.getImageUrl3(),
+                        review.getHelpful()
+                ))
+                .collect(Collectors.toList());
     }
 
     public List<ProductCouponResponse> convertFromListedProductCouponProductCouponResponse(List<ProductCoupon> listedProductCoupon){
@@ -566,7 +703,9 @@ public class Converter {
                     .map(productCart -> new ProductDTOForOrder(
                             productCart.getProduct().getId(),
                             productCart.getProduct().getPrice(),
-                            productCart.getQuantity()
+                            productCart.getQuantity(),
+                            productCart.getProduct().getSize(),
+                            productCart.getProduct().getColor()
                     ))
                     .collect(Collectors.toList());
     }

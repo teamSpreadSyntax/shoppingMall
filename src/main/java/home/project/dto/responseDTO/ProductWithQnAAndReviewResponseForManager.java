@@ -1,21 +1,16 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.ProductCoupon;
-import home.project.domain.ProductEvent;
-import jakarta.persistence.Column;
-import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
+import org.springframework.data.domain.Page;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
 @Setter
-public class ProductResponseForManager {
+public class ProductWithQnAAndReviewResponseForManager {
 
     /**
      * 상품의 고유 식별자입니다.
@@ -95,13 +90,16 @@ public class ProductResponseForManager {
 
     private String color;
 
+    private Page<QnADetailResponse> qnADetailResponses;
+
+    private Page<ReviewDetailResponse> reviewDetailResponses;
 
     private List<ProductCouponResponse> productCouponResponse;
 
     private List<ProductEventResponse> productEventResponse;
 
 
-    public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<ProductCouponResponse> productCouponResponse, List<ProductEventResponse> productEventResponse) {
+    public ProductWithQnAAndReviewResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, Page<QnADetailResponse> qnADetailResponses, Page<ReviewDetailResponse> reviewDetailResponses, List<ProductCouponResponse> productCouponResponse, List<ProductEventResponse> productEventResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -117,6 +115,8 @@ public class ProductResponseForManager {
         this.imageUrl = imageUrl;
         this.size = size;
         this.color = color;
+        this.qnADetailResponses = qnADetailResponses;
+        this.reviewDetailResponses = reviewDetailResponses;
         this.productCouponResponse = productCouponResponse;
         this.productEventResponse = productEventResponse;
     }

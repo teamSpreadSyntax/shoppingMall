@@ -1,9 +1,6 @@
 package home.project.service;
 
-import home.project.domain.Member;
-import home.project.domain.MemberProduct;
-import home.project.domain.Product;
-import home.project.domain.ProductOrder;
+import home.project.domain.*;
 import home.project.domain.elasticsearch.ProductDocument;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
@@ -50,6 +47,8 @@ public class ProductServiceImpl implements ProductService {
     private final MemberProductRepository memberProductRepository;
     private final PageUtil pageUtil;
     private final WishListRepository wishListRepository;
+    private final QnARepository qnARepository;
+    private final ReviewRepository reviewRepository;
 
     @Override
     @Transactional
@@ -86,8 +85,8 @@ public class ProductServiceImpl implements ProductService {
         product.setDescription(createProductRequestDTO.getDescription());
         product.setCreateAt(LocalDateTime.now());
         product.setImageUrl(createProductRequestDTO.getImageUrl());
-        product.setSizes(createProductRequestDTO.getSizes());
-        product.setColors(createProductRequestDTO.getColors());
+        product.setSize(createProductRequestDTO.getSize());
+        product.setColor(createProductRequestDTO.getColor());
 
         boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
         if (productNumExists) {
@@ -121,13 +120,17 @@ public class ProductServiceImpl implements ProductService {
         }
     }*/
     @Override
-    public ProductResponse findByIdReturnProductResponse(Long productId) {
+    public ProductWithQnAAndReviewResponse findByIdReturnProductResponse(Long productId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        Pageable pageable = pageUtil.pageable(PageRequest.of(1, 5));
+        Page<QnA> qnAs = qnARepository.findAllByProductId(productId, pageable);
+        Page<Review> reviews = reviewRepository.findAllByProductId(productId, pageable);
+
         String email = authentication.getName();
         if (email.equals("anonymousUser")){
-            return converter.convertFromProductToProductResponse(findById(productId));
+            return converter.convertFromProductToProductWithQnAAndReviewResponse(findById(productId), qnAs, reviews);
         }
 
         Member member = memberService.findByEmail(email);
@@ -136,13 +139,16 @@ public class ProductServiceImpl implements ProductService {
         List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
 
         kafkaEventProducerService.sendProductViewLog(productId);
-        return converter.convertFromProductToProductResponse2(product,likedProductIds);
+        return converter.convertFromProductToProductWithQnAAndReviewResponse2(product,likedProductIds, qnAs, reviews);
     }
 
     @Override
-    public ProductResponseForManager findByIdReturnProductResponseForManager(Long productId) {
+    public ProductWithQnAAndReviewResponseForManager findByIdReturnProductResponseForManager(Long productId) {
         Product product = findById(productId);
-        return converter.convertFromProductToProductResponseForManaging(product);
+        Pageable pageable = pageUtil.pageable(PageRequest.of(1, 5));
+        Page<QnA> qnAs = qnARepository.findAllByProductId(productId, pageable);
+        Page<Review> reviews = reviewRepository.findAllByProductId(productId, pageable);
+        return converter.convertFromProductToProductWithQnAAndReviewResponseForManager(product, qnAs, reviews);
     }
 
     @Override
@@ -235,7 +241,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
+    public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
@@ -249,7 +255,7 @@ public class ProductServiceImpl implements ProductService {
             categoryCode = getCode(content);
         }
 
-        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, colors, sizes, pageable);
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
@@ -286,7 +292,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content,List<String> colors, List<String> sizes,  Pageable pageable) {
+    public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content,String color, String size,  Pageable pageable) {
         String categoryCode = null;
 
         if (category != null && !category.isEmpty()) {
@@ -296,7 +302,7 @@ public class ProductServiceImpl implements ProductService {
             categoryCode = getCode(content);
         }
 
-        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content,colors, sizes, pageable);
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
@@ -325,7 +331,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable) {
+    public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable) {
         String categoryCode = null;
 
         if (category != null && !category.isEmpty()) {
@@ -335,7 +341,7 @@ public class ProductServiceImpl implements ProductService {
             categoryCode = getCode(content);
         }
 
-        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, colors, sizes, pageable);
+        Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
@@ -416,12 +422,12 @@ public class ProductServiceImpl implements ProductService {
             isCategoryModified = true;
         }
 
-        if (updateProductRequestDTO.getSizes() != null && !updateProductRequestDTO.getSizes().isEmpty()) {
-            existingProduct.setSizes(updateProductRequestDTO.getSizes());
+        if (updateProductRequestDTO.getSize() != null && !updateProductRequestDTO.getSize().isEmpty()) {
+            existingProduct.setSize(updateProductRequestDTO.getSize());
         }
 
-        if (updateProductRequestDTO.getColors() != null && !updateProductRequestDTO.getColors().isEmpty()) {
-            existingProduct.setColors(updateProductRequestDTO.getColors());
+        if (updateProductRequestDTO.getColor() != null && !updateProductRequestDTO.getColor().isEmpty()) {
+            existingProduct.setColor(updateProductRequestDTO.getColor());
         }
 
         if (existingProduct.equals(beforeUpdate)) {

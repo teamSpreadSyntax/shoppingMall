@@ -13,4 +13,6 @@ public interface QnARepository extends JpaRepository<QnA, Long>, QnARepositoryCu
 
     Page<QnA> findByAnswerStatus(AnswerStatus answerStatus, Pageable pageable);
 
+    Page<QnA> findAllByProductId(Long productId, Pageable pageable);
+
 }
