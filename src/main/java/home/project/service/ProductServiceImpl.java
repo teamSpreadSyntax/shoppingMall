@@ -67,8 +67,10 @@ public class ProductServiceImpl implements ProductService {
         }
 
         LocalDateTime now = LocalDateTime.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        String timeStamp = now.format(formatter);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String formattedDate = now.format(formatter);
+        String timeStamp = formattedDate.substring(2, 4) + formattedDate.substring(6, 8) +
+                formattedDate.substring(10, 11) + formattedDate.substring(12, 13);
 
         Product product = new Product();
         product.setName(createProductRequestDTO.getName());
@@ -86,15 +88,19 @@ public class ProductServiceImpl implements ProductService {
         product.setImageUrl(createProductRequestDTO.getImageUrl());
         product.setSizes(createProductRequestDTO.getSizes());
         product.setColors(createProductRequestDTO.getColors());
+
         boolean productNumExists = productRepository.existsByProductNum(product.getProductNum());
         if (productNumExists) {
             throw new DataIntegrityViolationException("이미 사용 중인 품번입니다.");
         }
 
         productRepository.save(product);
+        MemberProduct memberProduct = new MemberProduct();
+        memberProduct.setProduct(product);
+        memberProduct.setMember(member);
+        memberProductRepository.save(memberProduct);
 
         ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
-
 
         try {
             indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
