@@ -19,11 +19,11 @@ public class ShippingMessage {
     @Column(nullable = false)
     private String content; // 메시지 내용
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TIMESTAMP")
     private LocalDateTime createdAt; // 메시지 생성 날짜
 
     @JsonBackReference
     @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_id")
     private Member member;
 }

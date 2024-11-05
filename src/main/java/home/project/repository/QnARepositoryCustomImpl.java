@@ -1,6 +1,8 @@
 package home.project.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import home.project.domain.QCart;
+import home.project.domain.QMember;
 import jakarta.persistence.EntityManager;
 
 public class QnARepositoryCustomImpl implements QnARepositoryCustom  {

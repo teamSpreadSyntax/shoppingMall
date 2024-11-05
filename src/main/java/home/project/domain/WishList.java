@@ -1,5 +1,6 @@
 package home.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,10 +18,12 @@ public class WishList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
