@@ -42,6 +42,8 @@ public class QShipping extends EntityPathBase<Shipping> {
 
     public final QOrders orders;
 
+    public final StringPath shippingMessage = createString("shippingMessage");
+
     public QShipping(String variable) {
         this(Shipping.class, forVariable(variable), INITS);
     }

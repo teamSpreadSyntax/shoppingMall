@@ -1,9 +1,13 @@
 package home.project.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -45,6 +49,9 @@ public class Shipping {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "orders_id")
     private Orders orders;
+
+    @Column(name = "shippingMessage")
+    private String shippingMessage;
 
 
 }

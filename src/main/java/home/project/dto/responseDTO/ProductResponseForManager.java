@@ -1,16 +1,10 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.ProductCoupon;
-import home.project.domain.ProductEvent;
-import jakarta.persistence.Column;
-import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -98,10 +92,9 @@ public class ProductResponseForManager {
 
     private List<ProductCouponResponse> productCouponResponse;
 
-    private List<ProductEventResponse> productEventResponse;
 
 
-    public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<ProductCouponResponse> productCouponResponse, List<ProductEventResponse> productEventResponse) {
+    public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -118,6 +111,6 @@ public class ProductResponseForManager {
         this.size = size;
         this.color = color;
         this.productCouponResponse = productCouponResponse;
-        this.productEventResponse = productEventResponse;
+
     }
 }

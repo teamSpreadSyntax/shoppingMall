@@ -49,7 +49,7 @@ public interface ProductService {
 
     Page<ProductResponse> findAllBySoldQuantity(Pageable pageable);
 
-    Page<ProductResponse> brandList(Pageable pageable);
+    Page<String> brandList(Pageable pageable);
 
     ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO);
 

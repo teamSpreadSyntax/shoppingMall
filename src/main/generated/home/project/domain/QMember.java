@@ -36,8 +36,6 @@ public class QMember extends EntityPathBase<Member> {
 
     public final ListPath<MemberCoupon, QMemberCoupon> memberCoupons = this.<MemberCoupon, QMemberCoupon>createList("memberCoupons", MemberCoupon.class, QMemberCoupon.class, PathInits.DIRECT2);
 
-    public final ListPath<MemberEvent, QMemberEvent> memberEvents = this.<MemberEvent, QMemberEvent>createList("memberEvents", MemberEvent.class, QMemberEvent.class, PathInits.DIRECT2);
-
     public final ListPath<MemberProduct, QMemberProduct> memberProducts = this.<MemberProduct, QMemberProduct>createList("memberProducts", MemberProduct.class, QMemberProduct.class, PathInits.DIRECT2);
 
     public final StringPath name = createString("name");
@@ -53,8 +51,6 @@ public class QMember extends EntityPathBase<Member> {
     public final EnumPath<RoleType> role = createEnum("role", RoleType.class);
 
     public final StringPath secondAddress = createString("secondAddress");
-
-    public final ListPath<ShippingMessage, QShippingMessage> shippingMessages = this.<ShippingMessage, QShippingMessage>createList("shippingMessages", ShippingMessage.class, QShippingMessage.class, PathInits.DIRECT2);
 
     public final StringPath thirdAddress = createString("thirdAddress");
 

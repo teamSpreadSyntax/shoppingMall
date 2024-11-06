@@ -164,7 +164,7 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
 
         pageable = pageUtil.pageable(pageable);
-        Page<ProductResponse> pagedBrands = productService.brandList(pageable);
+        Page<String> pagedBrands = productService.brandList(pageable);
         String successMessage = "전체 브랜드 입니다.";
         long totalCount = pagedBrands.getTotalElements();
         int page = pagedBrands.getNumber();

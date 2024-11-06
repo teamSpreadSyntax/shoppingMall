@@ -17,10 +17,6 @@ public class CreateEventRequestDTO {
     @Schema(description = "이벤트 이름", required = true)
     private String name;
 
-    @NotNull(message = "할인율을 입력해주세요.")
-    @Schema(description = "할인율", required = true)
-    private Integer discountRate;
-
     @NotNull(message = "이벤트 내용을 입력해주세요.")
     @Schema(description = "이벤트 내용", required = true)
     private String description;

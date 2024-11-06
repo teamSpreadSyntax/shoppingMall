@@ -11,42 +11,40 @@ import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
- * QShippingMessage is a Querydsl query type for ShippingMessage
+ * QMemberMessage is a Querydsl query type for MemberMessage
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QShippingMessage extends EntityPathBase<ShippingMessage> {
+public class QMemberMessage extends EntityPathBase<MemberMessage> {
 
-    private static final long serialVersionUID = 2063399571L;
+    private static final long serialVersionUID = 868117159L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QShippingMessage shippingMessage = new QShippingMessage("shippingMessage");
+    public static final QMemberMessage memberMessage = new QMemberMessage("memberMessage");
 
     public final StringPath content = createString("content");
-
-    public final DateTimePath<java.time.LocalDateTime> createdAt = createDateTime("createdAt", java.time.LocalDateTime.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final QMember member;
 
-    public QShippingMessage(String variable) {
-        this(ShippingMessage.class, forVariable(variable), INITS);
+    public QMemberMessage(String variable) {
+        this(MemberMessage.class, forVariable(variable), INITS);
     }
 
-    public QShippingMessage(Path<? extends ShippingMessage> path) {
+    public QMemberMessage(Path<? extends MemberMessage> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QShippingMessage(PathMetadata metadata) {
+    public QMemberMessage(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QShippingMessage(PathMetadata metadata, PathInits inits) {
-        this(ShippingMessage.class, metadata, inits);
+    public QMemberMessage(PathMetadata metadata, PathInits inits) {
+        this(MemberMessage.class, metadata, inits);
     }
 
-    public QShippingMessage(Class<? extends ShippingMessage> type, PathMetadata metadata, PathInits inits) {
+    public QMemberMessage(Class<? extends MemberMessage> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
     }

@@ -37,9 +37,6 @@ public class EventRepositoryCustomImpl implements EventRepositoryCustom  {
             LocalDateTime parsedEndDate = LocalDateTime.parse(endDate, DateTimeFormatter.ISO_DATE_TIME);
             builder.and(event.endDate.loe(parsedEndDate));
         }
-        if (discountRate != null) {
-            builder.and(event.discountRate.eq(discountRate));
-        }
         if (StringUtils.hasText(content)) {
             String[] keywords = content.toLowerCase().split("\\s+");
             for (String keyword : keywords) {
@@ -47,7 +44,6 @@ public class EventRepositoryCustomImpl implements EventRepositoryCustom  {
                         event.name.toLowerCase().contains(keyword)
                                 .or(event.startDate.stringValue().toLowerCase().contains(keyword))
                                 .or(event.endDate.stringValue().toLowerCase().contains(keyword))
-                                .or(event.discountRate.stringValue().toLowerCase().contains(keyword))
                 );
             }
         }
