@@ -57,6 +57,12 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword)
     private String imageUrl;
 
+    @Field(type = FieldType.Keyword)
+    private String size;
+
+    @Field(type = FieldType.Keyword)
+    private String color;
+
     @Field(type = FieldType.Nested)
     private List<ProductCoupon> productCoupons = new ArrayList<>();
 
@@ -145,7 +151,7 @@ public class ProductDocument {
         private DeliveryStatusType deliveryStatus;
 
         @Field(type = FieldType.Nested)
-        private Order order;
+        private Orders orders;
     }
 
     @Getter
@@ -157,6 +163,9 @@ public class ProductDocument {
         @Field(type = FieldType.Long)
         private Long productId;  // 순환참조 방지
 
+        @Field(type = FieldType.Boolean)
+        private boolean liked;
+
         @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime createAt;
 
@@ -166,15 +175,18 @@ public class ProductDocument {
 
     @Getter
     @Setter
-    public static class Order {
+    public static class Orders {
         @Field(type = FieldType.Long)
         private Long id;
+
+        @Field(type = FieldType.Long)
+        private Long memberId;  // 순환참조 방지
 
         @Field(type = FieldType.Keyword)
         private String orderNum;
 
         @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-        private LocalDateTime orderDate;
+        private LocalDateTime deliveryDate;
 
         @Field(type = FieldType.Long)
         private Long amount;
@@ -184,6 +196,46 @@ public class ProductDocument {
 
         @Field(type = FieldType.Long)
         private Long pointsEarned;
+
+        @Field(type = FieldType.Nested)
+        private Shipping shipping;
+
+        @Field(type = FieldType.Nested)
+        private List<ProductOrder> productOrders = new ArrayList<>();
+    }
+
+    @Getter
+    @Setter
+    public static class Shipping {
+        @Field(type = FieldType.Long)
+        private Long id;
+
+        @Field(type = FieldType.Long)
+        private Long orderId;  // 순환참조 방지
+
+        @Field(type = FieldType.Keyword)
+        private DeliveryType deliveryType;
+
+        @Field(type = FieldType.Keyword)
+        private String deliveryNum;
+
+        @Field(type = FieldType.Keyword)
+        private String deliveryAddress;
+
+        @Field(type = FieldType.Keyword)
+        private String arrivingDate;
+
+        @Field(type = FieldType.Keyword)
+        private String arrivedDate;
+
+        @Field(type = FieldType.Keyword)
+        private String departureDate;
+
+        @Field(type = FieldType.Long)
+        private Long deliveryCost;
+
+        @Field(type = FieldType.Keyword)
+        private DeliveryStatusType deliveryStatus;
     }
 
     @Getter

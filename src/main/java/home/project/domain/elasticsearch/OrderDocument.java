@@ -25,7 +25,7 @@ public class OrderDocument {
     private String orderNum;
 
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime orderDate;
+    private LocalDateTime deliveryDate;
 
     @Field(type = FieldType.Long)
     private Long amount;
@@ -35,6 +35,9 @@ public class OrderDocument {
 
     @Field(type = FieldType.Long)
     private Long pointsEarned;
+
+    @Field(type = FieldType.Long)
+    private Long memberId;  // 순환참조 방지
 
     @Field(type = FieldType.Nested)
     private Member member;
@@ -91,10 +94,54 @@ public class OrderDocument {
         private List<MemberCoupon> memberCoupons = new ArrayList<>();
 
         @Field(type = FieldType.Nested)
+        private List<MemberProduct> memberProducts = new ArrayList<>();
+
+        @Field(type = FieldType.Nested)
         private List<MemberEvent> memberEvents = new ArrayList<>();
 
         @Field(type = FieldType.Nested)
         private List<WishList> wishLists = new ArrayList<>();
+
+        @Field(type = FieldType.Nested)
+        private List<ShippingMessage> shippingMessages = new ArrayList<>();
+    }
+
+    @Getter
+    @Setter
+    public static class MemberProduct {
+        @Field(type = FieldType.Long)
+        private Long id;
+
+        @Field(type = FieldType.Long)
+        private Long memberId;  // 순환참조 방지
+
+        @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private LocalDateTime createAt;
+
+        @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private LocalDateTime deleteAt;
+
+        @Field(type = FieldType.Boolean)
+        private boolean isDeleted;
+
+        @Field(type = FieldType.Nested)
+        private Product product;
+    }
+
+    @Getter
+    @Setter
+    public static class ShippingMessage {
+        @Field(type = FieldType.Long)
+        private Long id;
+
+        @Field(type = FieldType.Long)
+        private Long memberId;  // 순환참조 방지
+
+        @Field(type = FieldType.Text, analyzer = "nori")
+        private String content;
+
+        @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        private LocalDateTime createdAt;
     }
 
     @Getter
@@ -144,6 +191,9 @@ public class OrderDocument {
         @Field(type = FieldType.Long)
         private Long memberId;  // 순환참조 방지
 
+        @Field(type = FieldType.Boolean)
+        private boolean liked;
+
         @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis, pattern = "yyyy-MM-dd'T'HH:mm:ss")
         private LocalDateTime createAt;
 
@@ -174,6 +224,9 @@ public class OrderDocument {
 
         @Field(type = FieldType.Keyword)
         private String arrivedDate;
+
+        @Field(type = FieldType.Keyword)
+        private String departureDate;
 
         @Field(type = FieldType.Long)
         private Long deliveryCost;
@@ -242,6 +295,12 @@ public class OrderDocument {
 
         @Field(type = FieldType.Keyword)
         private String imageUrl;
+
+        @Field(type = FieldType.Keyword)
+        private String size;
+
+        @Field(type = FieldType.Keyword)
+        private String color;
 
         @Field(type = FieldType.Nested)
         private Category category;
