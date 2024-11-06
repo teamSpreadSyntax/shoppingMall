@@ -76,10 +76,10 @@ public class UpdateProductRequestDTO {
     /**
      * 상품의 사이즈 옵션 리스트입니다.
      */
-    private List<String> sizes;
+    private String size;
 
     /**
      * 상품의 색상 옵션 리스트입니다.
      */
-    private List<String> colors;
+    private String color;
 }

@@ -2,11 +2,13 @@ package home.project.dto.responseDTO;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Page;
+
 import java.util.List;
 
 @Getter
 @Setter
-public class ProductResponse {
+public class ProductWithQnAAndReviewResponse {
 
     private Long id;
     private String name;
@@ -22,11 +24,14 @@ public class ProductResponse {
     private String size;
     private String color;
 
-    private List<ProductCouponResponse> productCouponResponse;
+    private List<ProductCouponResponse> productCouponResponses;
+
+    private Page<QnADetailResponse> qnADetailResponses;
+
+    private Page<ReviewDetailResponse> reviewDetailResponses;
 
 
-
-    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponse) {
+    public ProductWithQnAAndReviewResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponses, Page<QnADetailResponse> qnADetailResponses, Page<ReviewDetailResponse> reviewDetailResponses) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -39,6 +44,8 @@ public class ProductResponse {
         this.isLiked = isLiked;
         this.size = size;
         this.color = color;
-        this.productCouponResponse = productCouponResponse;
+        this.productCouponResponses = productCouponResponses;
+        this.qnADetailResponses = qnADetailResponses;
+        this.reviewDetailResponses = reviewDetailResponses;
     }
 }

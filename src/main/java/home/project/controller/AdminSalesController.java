@@ -59,8 +59,8 @@ public class AdminSalesController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "productName", required = false) String productName,
             @RequestParam(value = "content", required = false) String content,
-            @RequestParam(value = "colors", required = false) List<String> colors,
-            @RequestParam(value = "sizes", required = false) List<String> sizes,
+            @RequestParam(value = "colors", required = false) String colors,
+            @RequestParam(value = "sizes", required = false) String sizes,
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "soldQuantity", direction = Sort.Direction.DESC)

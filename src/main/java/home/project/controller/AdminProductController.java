@@ -5,6 +5,7 @@ import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.ProductResponse;
 import home.project.dto.responseDTO.ProductResponseForManager;
+import home.project.dto.responseDTO.ProductWithQnAAndReviewResponseForManager;
 import home.project.response.CustomResponseEntity;
 import home.project.service.CategoryService;
 import home.project.service.ProductService;
@@ -86,7 +87,7 @@ public class AdminProductController {
     @GetMapping("/product")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findProductByIdForManaging(@RequestParam("productId") Long productId) {
-        ProductResponseForManager productResponseForManager = productService.findByIdReturnProductResponseForManager(productId);
+        ProductWithQnAAndReviewResponseForManager productResponseForManager = productService.findByIdReturnProductResponseForManager(productId);
         String successMessage = productId + "에 해당하는 상품 입니다.";
         return new CustomResponseEntity<>(productResponseForManager, successMessage, HttpStatus.OK);
     }

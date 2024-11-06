@@ -39,6 +39,9 @@ public class CreateProductRequestDTO {
     @NotBlank(message = "상품의 이미지를 입력해주세요.")
     private String imageUrl;
 
-    private List<String> sizes;
-    private List<String> colors;
+    @NotBlank(message = "상품의 사이즈를 입력해주세요.")
+    private String size;
+
+    @NotBlank(message = "상품의 색깔을 입력해주세요.")
+    private String color;
 }

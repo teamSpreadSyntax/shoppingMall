@@ -10,10 +10,10 @@ import java.util.List;
 public interface ProductRepositoryCustom {
 
 
-    Page<Product> findProducts(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable);
+    Page<Product> findProducts(String brand, String category, String productName, String content, String colors, String sizes, Pageable pageable);
 
 
-    Page<Product> findSoldProducts(String brand, String category, String productName, String content, List<String> colors, List<String> sizes, Pageable pageable);
+    Page<Product> findSoldProducts(String brand, String category, String productName, String content, String colors, String sizes, Pageable pageable);
 
     Page<Product> findAllBySoldQuantity(Pageable pageable);
 
