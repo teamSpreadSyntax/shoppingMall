@@ -828,115 +828,91 @@ public class Converter {
     public ProductDocument convertFromProductToProductDocument(Product product) {
         ProductDocument doc = new ProductDocument();
 
-        // 기본 필드 매핑
         doc.setId(product.getId());
         doc.setName(product.getName());
         doc.setBrand(product.getBrand());
         doc.setProductNum(product.getProductNum());
-        doc.setStock(product.getStock());
-        doc.setSoldQuantity(product.getSoldQuantity());
         doc.setPrice(product.getPrice());
         doc.setDiscountRate(product.getDiscountRate());
-        doc.setDefectiveStock(product.getDefectiveStock());
         doc.setDescription(product.getDescription());
-        doc.setCreateAt(product.getCreateAt());
         doc.setImageUrl(product.getImageUrl());
+        doc.setStock(product.getStock());
+        doc.setSoldQuantity(product.getSoldQuantity());
+        doc.setDefectiveStock(product.getDefectiveStock());
+        doc.setCreateAt(product.getCreateAt());
+        doc.setSize(product.getSize());
+        doc.setColor(product.getColor());
 
-        // Category 매핑
-        if (product.getCategory() != null) {
-            ProductDocument.Category categoryDoc = new ProductDocument.Category();
-            categoryDoc.setId(product.getCategory().getId());
-            categoryDoc.setCode(product.getCategory().getCode());
-            categoryDoc.setName(product.getCategory().getName());
-            categoryDoc.setLevel(product.getCategory().getLevel());
-            if (product.getCategory().getParent() != null) {
-                categoryDoc.setParentId(product.getCategory().getParent().getId());
-            }
-            doc.setCategory(categoryDoc);
-        }
+        List<ProductDocument.ProductCoupon> productCoupons = product.getProductCoupons().stream()
+                .map(pc -> {
+                    ProductDocument.ProductCoupon pcDoc = new ProductDocument.ProductCoupon();
+                    pcDoc.setId(pc.getId());
+                    pcDoc.setIssuedAt(pc.getIssuedAt());
+                    pcDoc.setUsedAt(pc.getUsedAt());
+                    pcDoc.setUsed(pc.isUsed());
 
-        // ProductOrders 매핑
-        List<ProductDocument.ProductOrder> productOrders = product.getProductOrder().stream()
-                .map(po -> {
-                    ProductDocument.ProductOrder poDoc = new ProductDocument.ProductOrder();
-                    poDoc.setId(po.getId());
-                    poDoc.setProductId(product.getId());
-                    poDoc.setQuantity(po.getQuantity());
-                    poDoc.setPrice(po.getPrice());
-                    poDoc.setDeliveryStatus(po.getDeliveryStatus());
-
-                    // Orders 매핑
-                    if (po.getOrders() != null) {
-                        ProductDocument.Orders ordersDoc = new ProductDocument.Orders();
-                        Orders order = po.getOrders();
-                        ordersDoc.setId(order.getId());
-                        ordersDoc.setOrderNum(order.getOrderNum());
-                        ordersDoc.setDeliveryDate(order.getOrderDate()); // 수정된 부분
-                        ordersDoc.setAmount(order.getAmount());
-                        ordersDoc.setPointsUsed(order.getPointsUsed());
-                        ordersDoc.setPointsEarned(order.getPointsEarned());
-                        poDoc.setOrders(ordersDoc);
+                    if (pc.getCoupon() != null) {
+                        ProductDocument.ProductCoupon.Coupon couponDoc = new ProductDocument.ProductCoupon.Coupon();
+                        couponDoc.setId(pc.getCoupon().getId());
+                        couponDoc.setName(pc.getCoupon().getName());
+                        couponDoc.setDiscountRate(pc.getCoupon().getDiscountRate());
+                        couponDoc.setStartDate(pc.getCoupon().getStartDate());
+                        couponDoc.setEndDate(pc.getCoupon().getEndDate());
+                        couponDoc.setAssignBy(pc.getCoupon().getAssignBy());
+                        pcDoc.setCoupon(couponDoc);
                     }
-                    return poDoc;
+                    return pcDoc;
                 })
                 .collect(Collectors.toList());
-        doc.setProductOrders(productOrders);
+        doc.setProductCoupons(productCoupons);
 
         return doc;
     }
+
+
 
     public MemberDocument convertFromMemberToMemberDocument(Member member) {
         MemberDocument doc = new MemberDocument();
 
-        // 기본 필드 매핑
         doc.setId(member.getId());
         doc.setEmail(member.getEmail());
         doc.setName(member.getName());
         doc.setPhone(member.getPhone());
-        doc.setGender(member.getGender());
-        doc.setBirthDate(member.getBirthDate());
         doc.setDefaultAddress(member.getDefaultAddress());
         doc.setSecondAddress(member.getSecondAddress());
         doc.setThirdAddress(member.getThirdAddress());
-        doc.setRole(member.getRole());
+        doc.setRole(member.getRole().toString());
         doc.setAccumulatedPurchase(member.getAccumulatedPurchase());
-        doc.setGrade(member.getGrade());
         doc.setPoint(member.getPoint());
+        doc.setGrade(member.getGrade().toString());
+        doc.setBirthDate(member.getBirthDate().atStartOfDay());
 
-        // Orders 매핑
-        List<MemberDocument.Orders> orders = member.getOrders().stream()
-                .map(o -> {
-                    MemberDocument.Orders orderDoc = new MemberDocument.Orders();
-                    orderDoc.setId(o.getId());
-                    orderDoc.setOrderNum(o.getOrderNum());
-                    orderDoc.setDeliveryDate(o.getOrderDate()); // 수정된 부분
-                    orderDoc.setAmount(o.getAmount());
-                    orderDoc.setPointsUsed(o.getPointsUsed());
-                    orderDoc.setPointsEarned(o.getPointsEarned());
+        List<MemberDocument.MemberCoupon> memberCoupons = member.getMemberCoupons().stream()
+                .map(mc -> {
+                    MemberDocument.MemberCoupon mcDoc = new MemberDocument.MemberCoupon();
+                    mcDoc.setId(mc.getId());
+                    mcDoc.setIssuedAt(mc.getIssuedAt());
+                    mcDoc.setUsedAt(mc.getUsedAt());
+                    mcDoc.setUsed(mc.isUsed());
 
-                    // Shipping 매핑
-                    if (o.getShipping() != null) {
-                        MemberDocument.Shipping shippingDoc = new MemberDocument.Shipping();
-                        Shipping shipping = o.getShipping();
-                        shippingDoc.setId(shipping.getId());
-                        shippingDoc.setOrderId(o.getId());
-                        shippingDoc.setDeliveryType(shipping.getDeliveryType());
-                        shippingDoc.setDeliveryNum(shipping.getDeliveryNum());
-                        shippingDoc.setDeliveryAddress(shipping.getDeliveryAddress());
-                        shippingDoc.setArrivingDate(shipping.getArrivingDate());
-                        shippingDoc.setArrivedDate(shipping.getArrivedDate());
-                        shippingDoc.setDeliveryCost(shipping.getDeliveryCost());
-                        shippingDoc.setDeliveryStatus(shipping.getDeliveryStatus());
-                        orderDoc.setShipping(shippingDoc);
+                    if (mc.getCoupon() != null) {
+                        MemberDocument.MemberCoupon.Coupon couponDoc = new MemberDocument.MemberCoupon.Coupon();
+                        couponDoc.setId(mc.getCoupon().getId());
+                        couponDoc.setName(mc.getCoupon().getName());
+                        couponDoc.setDiscountRate(mc.getCoupon().getDiscountRate());
+                        couponDoc.setStartDate(mc.getCoupon().getStartDate());
+                        couponDoc.setEndDate(mc.getCoupon().getEndDate());
+                        couponDoc.setAssignBy(mc.getCoupon().getAssignBy());
+                        mcDoc.setCoupon(couponDoc);
                     }
-
-                    return orderDoc;
+                    return mcDoc;
                 })
                 .collect(Collectors.toList());
-        doc.setOrders(orders);
+        doc.setMemberCoupons(memberCoupons);
 
         return doc;
     }
+
 
 
 }
