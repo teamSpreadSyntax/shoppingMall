@@ -797,51 +797,6 @@ public class Converter {
                 .collect(Collectors.toList());
         doc.setProductCoupons(productCoupons);
 
-        // ProductOrders 변환
-        List<ProductDocument.ProductOrder> productOrders = product.getProductOrder().stream()
-                .map(po -> {
-                    ProductDocument.ProductOrder poDoc = new ProductDocument.ProductOrder();
-                    poDoc.setId(po.getId());
-                    poDoc.setProductId(product.getId());
-                    poDoc.setQuantity(po.getQuantity());
-                    poDoc.setPrice(po.getPrice());
-                    poDoc.setDeliveryStatus(po.getDeliveryStatus());
-                    if (po.getOrders() != null) {
-                        ProductDocument.Order orderDoc = new ProductDocument.Order();
-                        orderDoc.setId(po.getOrders().getId());
-                        orderDoc.setOrderNum(po.getOrders().getOrderNum());
-                        orderDoc.setOrderDate(po.getOrders().getOrderDate());
-                        orderDoc.setAmount(po.getOrders().getAmount());
-                        orderDoc.setPointsUsed(po.getOrders().getPointsUsed());
-                        orderDoc.setPointsEarned(po.getOrders().getPointsEarned());
-                        poDoc.setOrder(orderDoc);
-                    }
-                    return poDoc;
-                })
-                .collect(Collectors.toList());
-        doc.setProductOrders(productOrders);
-
-        // WishLists 변환
-        List<ProductDocument.WishList> wishLists = product.getWishLists().stream()
-                .map(wl -> {
-                    ProductDocument.WishList wlDoc = new ProductDocument.WishList();
-                    wlDoc.setId(wl.getId());
-                    wlDoc.setProductId(product.getId());
-                    wlDoc.setCreateAt(wl.getCreateAt());
-                    if (wl.getMember() != null) {
-                        ProductDocument.Member memberDoc = new ProductDocument.Member();
-                        memberDoc.setId(wl.getMember().getId());
-                        memberDoc.setEmail(wl.getMember().getEmail());
-                        memberDoc.setName(wl.getMember().getName());
-                        memberDoc.setPhone(wl.getMember().getPhone());
-                        memberDoc.setGrade(wl.getMember().getGrade());
-                        wlDoc.setMember(memberDoc);
-                    }
-                    return wlDoc;
-                })
-                .collect(Collectors.toList());
-        doc.setWishLists(wishLists);
-
         return doc;
     }
 
