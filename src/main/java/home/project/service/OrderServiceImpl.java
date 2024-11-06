@@ -130,6 +130,7 @@ public class OrderServiceImpl implements OrderService{
 
         Long pointsEarned = (long) (orders.getAmount() * 0.05);
         orders.setPointsEarned(pointsEarned);
+        member.setPoint(member.getPoint() - pointsUsed);
 
 
         memberRepository.save(member);

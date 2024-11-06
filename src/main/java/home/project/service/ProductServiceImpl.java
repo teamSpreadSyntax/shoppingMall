@@ -341,9 +341,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> brandList(Pageable pageable) {
+    public Page<String> brandList(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAllByOrderByBrandAsc(pageable);
-        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+        return converter.convertFromPagedProductToPagedBrand(pagedProduct);
     }
 
     @Override

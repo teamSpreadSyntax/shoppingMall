@@ -240,6 +240,9 @@ public class Converter {
                 convertFromListedProductEventToListedProductEventResponse(productResponseForManaging.getProductEvents())
         ));
     }
+    public Page<String> convertFromPagedProductToPagedBrand(Page<Product> pagedProduct) {
+        return pagedProduct.map(Product::getBrand);
+    }
 
     public Page<ProductResponseForManager> convertFromPagedMemberProductToPagedProductResponseForManaging(Page<MemberProduct> pagedMemberProduct){
         return pagedMemberProduct.map(productResponseForManaging -> new ProductResponseForManager(
