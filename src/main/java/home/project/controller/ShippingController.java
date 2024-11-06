@@ -1,7 +1,7 @@
 package home.project.controller;
 
 import home.project.domain.DeliveryStatusType;
-import home.project.dto.requestDTO.CreateShippingRequestDTO;
+
 import home.project.dto.responseDTO.ShippingResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.ShippingService;

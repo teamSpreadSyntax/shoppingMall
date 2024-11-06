@@ -76,18 +76,10 @@ public class Member {
 
     @JsonManagedReference
     @OneToMany(mappedBy = "member")
-    private List<MemberEvent> memberEvents = new ArrayList<>();
-
-    @JsonManagedReference
-    @OneToMany(mappedBy = "member")
     private List<Orders> orders = new ArrayList<>();
 
     @JsonManagedReference
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WishList> wishLists = new ArrayList<>();
-
-    @JsonManagedReference
-    @OneToMany(mappedBy = "member")
-    private List<ShippingMessage> shippingMessages = new ArrayList<>();
 
 }

@@ -96,10 +96,9 @@ public class ProductWithQnAAndReviewResponseForManager {
 
     private List<ProductCouponResponse> productCouponResponse;
 
-    private List<ProductEventResponse> productEventResponse;
 
 
-    public ProductWithQnAAndReviewResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, Page<QnADetailResponse> qnADetailResponses, Page<ReviewDetailResponse> reviewDetailResponses, List<ProductCouponResponse> productCouponResponse, List<ProductEventResponse> productEventResponse) {
+    public ProductWithQnAAndReviewResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, Page<QnADetailResponse> qnADetailResponses, Page<ReviewDetailResponse> reviewDetailResponses, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -118,6 +117,5 @@ public class ProductWithQnAAndReviewResponseForManager {
         this.qnADetailResponses = qnADetailResponses;
         this.reviewDetailResponses = reviewDetailResponses;
         this.productCouponResponse = productCouponResponse;
-        this.productEventResponse = productEventResponse;
     }
 }

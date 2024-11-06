@@ -1,15 +1,13 @@
 package home.project.dto.requestDTO;
 
 import home.project.domain.DeliveryAddressType;
-import home.project.domain.DeliveryStatusType;
 import home.project.domain.DeliveryType;
+import home.project.domain.ShippingMessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDateTime;
 
 
 @Getter
@@ -29,4 +27,10 @@ public class CreateShippingRequestDTO {
     @Schema(description = "새 배송지", required = true)
     private String deliveryAddress;
 
+    @NotNull(message = "배송메세지를 선택해주세요.")
+    @Schema(description = "배송메세지", required = true)
+    private ShippingMessageType shippingMessages;
+
+    @Schema(description = "커스텀메세지")
+    private String customMessage = null;
 }

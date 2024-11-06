@@ -222,9 +222,7 @@ public class Converter {
                 product.getImageUrl(),
                 product.getSize(),
                 product.getColor(),
-                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
-                convertFromListedProductEventToListedProductEventResponse(product.getProductEvents())
-
+                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
         );
     }
 
@@ -247,9 +245,7 @@ public class Converter {
                 product.getColor(),
                 convertFromPagedQnAToPagedQnADetailResponse(qnAs),
                 convertFromPagedReviewToPagedReviewDetailResponse(reviews),
-                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
-                convertFromListedProductEventToListedProductEventResponse(product.getProductEvents())
-
+                convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
         );
     }
 
@@ -270,8 +266,7 @@ public class Converter {
                 productResponseForManaging.getImageUrl(),
                 productResponseForManaging.getSize(),
                 productResponseForManaging.getColor(),
-                convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProductCoupons()),
-                convertFromListedProductEventToListedProductEventResponse(productResponseForManaging.getProductEvents())
+                convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProductCoupons())
         ));
     }
     public Page<String> convertFromPagedProductToPagedBrand(Page<Product> pagedProduct) {
@@ -295,8 +290,7 @@ public class Converter {
                 productResponseForManaging.getProduct().getImageUrl(),
                 productResponseForManaging.getProduct().getSize(),
                 productResponseForManaging.getProduct().getColor(),
-                convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProduct().getProductCoupons()),
-                convertFromListedProductEventToListedProductEventResponse(productResponseForManaging.getProduct().getProductEvents())
+                convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProduct().getProductCoupons())
         ));
     }
 
@@ -492,25 +486,6 @@ public class Converter {
                 .collect(Collectors.toList());
     }
 
-
-    public List<ProductEventResponse> convertFromListedProductEventToListedProductEventResponse(List<ProductEvent> listedProductEvent){
-        if (listedProductEvent == null) {
-
-            return new ArrayList<>();
-        }
-
-        return listedProductEvent.stream()
-                .map(productEvent -> new ProductEventResponse(
-                        productEvent.getId(),
-                        productEvent.getProduct().getProductNum(),
-                        productEvent.getEvent().getId(),
-                        productEvent.getProduct().getCreateAt()
-                ))
-                .collect(Collectors.toList());
-    }
-
-
-
     public CouponResponse convertFromCouponToCouponResponse(Coupon coupon){
         return new CouponResponse(
                 coupon.getId(),
@@ -550,13 +525,10 @@ public class Converter {
         return new EventResponse(
                 event.getId(),
                 event.getName(),
-                event.getDiscountRate(),
                 event.getDescription(),
                 event.getStartDate(),
                 event.getEndDate(),
-                event.getImage(),
-                convertFromListedProductEventToListedProductEventResponse(event.getProductEvents()),
-                convertFromListedMemberEventToMemberEventResponse(event.getMemberEvents())
+                event.getImage()
         );
     }
 
@@ -564,46 +536,14 @@ public class Converter {
         return pagedEvent.map(event -> new EventResponse(
                 event.getId(),
                 event.getName(),
-                event.getDiscountRate(),
                 event.getDescription(),
                 event.getStartDate(),
                 event.getEndDate(),
-                event.getImage(),
-                convertFromListedProductEventToProductEventResponse(event.getProductEvents()),
-                convertFromListedMemberEventToMemberEventResponse(event.getMemberEvents())
+                event.getImage()
         ));
     }
 
-    public List<ProductEventResponse> convertFromListedProductEventToProductEventResponse(List<ProductEvent> listedProductEvent){
-        if (listedProductEvent == null) {
 
-            return new ArrayList<>(); // 또는 null을 반환할 수 있습니다, 비즈니스 로직에 따라 결정
-        }
-
-        return listedProductEvent.stream()
-                .map(productEvent -> new ProductEventResponse(
-                        productEvent.getId(),
-                        productEvent.getProduct().getProductNum(),
-                        productEvent.getEvent().getId(),
-                        productEvent.getCreatedAt()
-                ))
-                .collect(Collectors.toList());
-    }
-
-    public List<MemberEventResponse> convertFromListedMemberEventToMemberEventResponse(List<MemberEvent> listedMemberEvent){
-        if (listedMemberEvent == null) {
-            return new ArrayList<>(); // 또는 null을 반환할 수 있습니다, 비즈니스 로직에 따라 결정
-        }
-
-        return listedMemberEvent.stream()
-                .map(memberEvent -> new MemberEventResponse(
-                        memberEvent.getId(),
-                        memberEvent.getMember().getEmail(),
-                        memberEvent.getEvent().getId(),
-                        memberEvent.getCreatedAt()
-                ))
-                .collect(Collectors.toList());
-    }
 
     public Shipping convertFromCreateOrderRequestDTOToShipping(CreateOrderRequestDTO createOrderRequestDTO){
 
@@ -637,7 +577,11 @@ public class Converter {
             shipping.setArrivingDate(LocalDateTime.now().plusDays(7).toString());
             shipping.setDeliveryCost(5000L);
         }
-
+        if (createShippingRequestDTO.getShippingMessages() == ShippingMessageType.CUSTOM) {
+            shipping.setShippingMessage(createShippingRequestDTO.getCustomMessage());
+        } else {
+            shipping.setShippingMessage(createShippingRequestDTO.getShippingMessages().getDefaultMessage());
+        }
         return shipping;
 
     }
@@ -783,23 +727,7 @@ public class Converter {
         );
     }
 
-    public ShippingMessageResponse convertFromShippingMessageToShippingMessageResponse(ShippingMessage shippingMessage) {
-        return new ShippingMessageResponse(
-                shippingMessage.getId(),
-                shippingMessage.getContent(),
-                shippingMessage.getCreatedAt(),
-                shippingMessage.getMember()
-        );
-    }
 
-    public Page<ShippingMessageResponse> convertFromPagedShippingMessageToPagedShippingMessageResponse(Page<ShippingMessage> pagedShippingMessage) {
-        return pagedShippingMessage.map(shippingMessage -> new ShippingMessageResponse(
-                shippingMessage.getId(),
-                shippingMessage.getContent(),
-                shippingMessage.getCreatedAt(),
-                shippingMessage.getMember()
-        ));
-    }
 
 //    public SellerResponse convertFromSellerToSellerResponse(Seller seller) {
 //        return new SellerResponse(
@@ -879,29 +807,6 @@ public class Converter {
                 })
                 .collect(Collectors.toList());
         doc.setProductCoupons(productCoupons);
-
-        // ProductEvents 변환
-        List<ProductDocument.ProductEvent> productEvents = product.getProductEvents().stream()
-                .map(pe -> {
-                    ProductDocument.ProductEvent peDoc = new ProductDocument.ProductEvent();
-                    peDoc.setId(pe.getId());
-                    peDoc.setProductId(product.getId());
-                    peDoc.setCreatedAt(pe.getCreatedAt());
-                    if (pe.getEvent() != null) {
-                        ProductDocument.Event eventDoc = new ProductDocument.Event();
-                        eventDoc.setId(pe.getEvent().getId());
-                        eventDoc.setName(pe.getEvent().getName());
-                        eventDoc.setDiscountRate(pe.getEvent().getDiscountRate());
-                        eventDoc.setDescription(pe.getEvent().getDescription());
-                        eventDoc.setStartDate(pe.getEvent().getStartDate());
-                        eventDoc.setEndDate(pe.getEvent().getEndDate());
-                        eventDoc.setImage(pe.getEvent().getImage());
-                        peDoc.setEvent(eventDoc);
-                    }
-                    return peDoc;
-                })
-                .collect(Collectors.toList());
-        doc.setProductEvents(productEvents);
 
         // ProductOrders 변환
         List<ProductDocument.ProductOrder> productOrders = product.getProductOrder().stream()
@@ -991,29 +896,6 @@ public class Converter {
                 })
                 .collect(Collectors.toList());
         doc.setMemberCoupons(memberCoupons);
-
-        // MemberEvents 변환
-        List<MemberDocument.MemberEvent> memberEvents = member.getMemberEvents().stream()
-                .map(me -> {
-                    MemberDocument.MemberEvent meDoc = new MemberDocument.MemberEvent();
-                    meDoc.setId(me.getId());
-                    meDoc.setMemberId(member.getId());
-                    meDoc.setCreatedAt(me.getCreatedAt());
-                    if (me.getEvent() != null) {
-                        MemberDocument.Event eventDoc = new MemberDocument.Event();
-                        eventDoc.setId(me.getEvent().getId());
-                        eventDoc.setName(me.getEvent().getName());
-                        eventDoc.setDiscountRate(me.getEvent().getDiscountRate());
-                        eventDoc.setDescription(me.getEvent().getDescription());
-                        eventDoc.setStartDate(me.getEvent().getStartDate());
-                        eventDoc.setEndDate(me.getEvent().getEndDate());
-                        eventDoc.setImage(me.getEvent().getImage());
-                        meDoc.setEvent(eventDoc);
-                    }
-                    return meDoc;
-                })
-                .collect(Collectors.toList());
-        doc.setMemberEvents(memberEvents);
 
         // Orders 변환
         List<MemberDocument.Order> orders = member.getOrders().stream()

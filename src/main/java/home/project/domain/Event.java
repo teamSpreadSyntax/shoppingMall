@@ -22,9 +22,6 @@ public class Event {
     @Column(name = "event_name", nullable = false)
     private String name;
 
-    @Column(name = "coupon_discount_rate", nullable = false)
-    private Integer discountRate;
-
     @Column(nullable = false)
     private String description;
 
@@ -37,10 +34,4 @@ public class Event {
     @Column(nullable = false)
     private String image;
 
-    @OneToMany(mappedBy = "event")
-    private List<ProductEvent> productEvents = new ArrayList<>();
-
-    @JsonManagedReference
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MemberEvent> memberEvents = new ArrayList<>();
 }

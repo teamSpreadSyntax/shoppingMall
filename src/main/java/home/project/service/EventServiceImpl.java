@@ -36,7 +36,6 @@ public class EventServiceImpl implements EventService{
     public EventResponse join(CreateEventRequestDTO createEventRequestDTO){
         Event event = new Event();
         event.setName(createEventRequestDTO.getName());
-        event.setDiscountRate(createEventRequestDTO.getDiscountRate());
         event.setDescription(createEventRequestDTO.getDescription());
         event.setStartDate(createEventRequestDTO.getStartDate());
         event.setEndDate(createEventRequestDTO.getEndDate());
@@ -67,11 +66,6 @@ public class EventServiceImpl implements EventService{
 
         if (updateEventRequestDTO.getName() != null && !updateEventRequestDTO.getName().equals(existingEvent.getName())) {
             existingEvent.setName(updateEventRequestDTO.getName());
-            isModified = true;
-        }
-
-        if (updateEventRequestDTO.getDiscountRate() != null && !updateEventRequestDTO.getDiscountRate().equals(existingEvent.getDiscountRate())) {
-            existingEvent.setDiscountRate(updateEventRequestDTO.getDiscountRate());
             isModified = true;
         }
 

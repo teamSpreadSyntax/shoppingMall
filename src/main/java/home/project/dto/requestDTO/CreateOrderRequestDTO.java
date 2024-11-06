@@ -1,6 +1,7 @@
 package home.project.dto.requestDTO;
 
 import home.project.domain.Coupon;
+import home.project.domain.ShippingMessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
