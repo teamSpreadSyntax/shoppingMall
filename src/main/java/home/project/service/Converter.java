@@ -121,9 +121,7 @@ public class Converter {
         return new ProductDTOForOrder(
                 orderProduct.getId(),
                 orderProduct.getPrice(),
-                orderProduct.getQuantity(),
-                orderProduct.getProduct().getSize(),
-                orderProduct.getProduct().getColor()
+                orderProduct.getQuantity()
         );
     }
 
@@ -173,9 +171,7 @@ public class Converter {
                 .map(orderProduct -> new ProductDTOForOrder(
                         orderProduct.getProduct().getId(),
                         orderProduct.getPrice(),
-                        orderProduct.getQuantity(),
-                        orderProduct.getProduct().getSize(),
-                        orderProduct.getProduct().getColor()
+                        orderProduct.getQuantity()
                 ))
                 .collect(Collectors.toList());
     }
@@ -650,9 +646,7 @@ public class Converter {
                     .map(productCart -> new ProductDTOForOrder(
                             productCart.getProduct().getId(),
                             productCart.getProduct().getPrice(),
-                            productCart.getQuantity(),
-                            productCart.getProduct().getSize(),
-                            productCart.getProduct().getColor()
+                            productCart.getQuantity()
                     ))
                     .collect(Collectors.toList());
     }

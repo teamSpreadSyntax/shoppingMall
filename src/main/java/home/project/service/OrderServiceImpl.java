@@ -136,7 +136,11 @@ public class OrderServiceImpl implements OrderService{
         memberRepository.save(member);
         orderRepository.save(orders);
 
-        kafkaEventProducerService.sendOrderEvent(new OrderEventDTO("orders-events", orders.getOrderDate(), orders.getMember(), orders.getShipping(), orders.getProductOrders()));
+        List<Long> productOrderIds = orders.getProductOrders().stream()
+                .map(ProductOrder::getId)
+                .collect(Collectors.toList());
+
+        kafkaEventProducerService.sendOrderEvent(new OrderEventDTO("orders-events", orders.getOrderDate(), orders.getMember().getId(), orders.getShipping().getId(), productOrderIds));
 
         return converter.convertFromOrderToOrderResponse(orders);
     }
