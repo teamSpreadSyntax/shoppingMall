@@ -39,22 +39,31 @@ public class WishListServiceImpl implements WishListService {
 
         WishList existingWishList = wishListRepository.findByMemberIdAndProductId(member.getId(), product.getId());
         if (existingWishList != null) {
-
-            existingWishList.setLiked(liked);
-            wishListRepository.save(existingWishList);
-
-            String message = liked ? "좋아요가 설정되었습니다." : "좋아요가 해제되었습니다.";
-            return new WishListResponse(existingWishList.getId(), product.getId(), liked, message);
+            if (!liked) {
+                // 좋아요가 해제된 경우, 위시리스트에서 항목을 삭제
+                wishListRepository.delete(existingWishList);
+                return new WishListResponse(existingWishList.getId(), product.getId(), false, "위시리스트에서 제거되었습니다");
+            } else {
+                // 좋아요가 설정된 경우, 상태만 업데이트
+                existingWishList.setLiked(true);
+                wishListRepository.save(existingWishList);
+                return new WishListResponse(existingWishList.getId(), product.getId(), true, "좋아요가 설정되었습니다.");
+            }
         } else {
-            WishList newWishList = new WishList();
-            newWishList.setMember(member);
-            newWishList.setProduct(product);
-            newWishList.setCreateAt(LocalDateTime.now());
-            newWishList.setLiked(liked);
-            wishListRepository.save(newWishList);
+            // 새로운 위시리스트 항목 추가
+            if (liked) {
+                WishList newWishList = new WishList();
+                newWishList.setMember(member);
+                newWishList.setProduct(product);
+                newWishList.setCreateAt(LocalDateTime.now());
+                newWishList.setLiked(true);
+                wishListRepository.save(newWishList);
 
-            String message = "위시리스트에 저장되었습니다";
-            return new WishListResponse(newWishList.getId(), product.getId(), liked, message);
+                return new WishListResponse(newWishList.getId(), product.getId(), true, "위시리스트에 저장되었습니다");
+            } else {
+                // 좋아요가 설정되지 않은 상태로는 위시리스트에 추가하지 않음
+                return new WishListResponse(null, product.getId(), false, "좋아요가 설정되지 않았습니다.");
+            }
         }
     }
 

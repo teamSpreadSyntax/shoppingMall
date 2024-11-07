@@ -18,7 +18,9 @@ public class KafkaEventProducerService {
     public void sendCouponEvent(CouponEventDTO event) {
         try {
             String message = objectMapper.writeValueAsString(event);
+            //CouponEventDTO 객체를 받아서 json 으로 변환후 message 변수에 저장
             kafkaTemplate.send("coupon-events", message);
+            //coupon-events 라는 토픽 상자를 만들고 message 내용을 그안에 넣는다.
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
