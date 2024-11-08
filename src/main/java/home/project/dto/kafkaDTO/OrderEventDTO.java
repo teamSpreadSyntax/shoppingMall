@@ -1,15 +1,11 @@
-package home.project.dto;
+package home.project.dto.kafkaDTO;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import home.project.domain.Member;
-import home.project.domain.ProductOrder;
-import home.project.domain.Shipping;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter

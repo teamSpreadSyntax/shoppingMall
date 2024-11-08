@@ -4,7 +4,7 @@
 //import org.springframework.kafka.annotation.KafkaListener;
 //import org.springframework.stereotype.Service;
 //import com.fasterxml.jackson.databind.ObjectMapper;
-//import home.project.dto.CouponEventDTO;
+//import home.project.dto.kafkaDTO.CouponEventDTO;
 //
 //
 //@RequiredArgsConstructor

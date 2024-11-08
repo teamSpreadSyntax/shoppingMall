@@ -2,7 +2,7 @@ package home.project.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.project.dto.CouponEventDTO;
+import home.project.dto.kafkaDTO.CouponEventDTO;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;

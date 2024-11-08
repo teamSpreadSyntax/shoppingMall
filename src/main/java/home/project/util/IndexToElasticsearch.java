@@ -58,4 +58,16 @@ public class IndexToElasticsearch {
             throw e;
         }
     }
+    public <T> void deleteDocumentFromElasticsearch(Long documentId, Class<T> documentClass) {
+        try {
+            // Long 타입의 ID를 String으로 변환하여 Elasticsearch에서 문서 삭제
+            elasticsearchOperations.delete(String.valueOf(documentId), documentClass);
+            System.out.println("Document with ID " + documentId + " deleted successfully.");
+        } catch (Exception e) {
+            System.out.println("Error occurred while deleting document: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
 }

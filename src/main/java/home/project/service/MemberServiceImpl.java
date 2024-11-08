@@ -3,7 +3,7 @@ package home.project.service;
 import home.project.domain.Member;
 import home.project.domain.RoleType;
 import home.project.domain.elasticsearch.MemberDocument;
-import home.project.dto.MemberEventDTO;
+import home.project.dto.kafkaDTO.MemberEventDTO;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
@@ -236,6 +236,7 @@ public class MemberServiceImpl implements MemberService {
         String email = findById(memberId).getEmail();
         memberRepository.deleteById(memberId);
         elasticsearchOperations.delete(String.valueOf(memberId), MemberDocument.class);
+
         return email;
     }
 

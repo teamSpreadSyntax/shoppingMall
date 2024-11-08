@@ -1,6 +1,5 @@
 package home.project.domain.elasticsearch;
 
-import home.project.domain.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -9,7 +8,6 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.annotation.Id;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,17 +22,20 @@ public class ProductDocument {
     @Field(type = FieldType.Text, analyzer = "nori")
     private String name;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text, analyzer = "nori")
     private String brand;
 
     @Field(type = FieldType.Keyword)
     private String productNum;
 
+    @Field(type = FieldType.Nested)
+    private CategoryInfo category;
+
     @Field(type = FieldType.Long)
     private Long price;
 
     @Field(type = FieldType.Integer)
-    private Integer discountRate;
+    private Integer discountRate = 0;
 
     @Field(type = FieldType.Text, analyzer = "nori")
     private String description;
@@ -46,10 +47,10 @@ public class ProductDocument {
     private Long stock;
 
     @Field(type = FieldType.Long)
-    private Long soldQuantity;
+    private Long soldQuantity = 0L;
 
     @Field(type = FieldType.Long)
-    private Long defectiveStock;
+    private Long defectiveStock = 0L;
 
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis)
     private LocalDateTime createAt;
@@ -62,6 +63,31 @@ public class ProductDocument {
 
     @Field(type = FieldType.Nested)
     private List<ProductCoupon> productCoupons = new ArrayList<>();
+
+    @Getter
+    @Setter
+    public static class CategoryInfo {
+        @Field(type = FieldType.Long)
+        private Long id;
+
+        @Field(type = FieldType.Keyword)
+        private String code;
+
+        @Field(type = FieldType.Text, analyzer = "nori")
+        private String name;
+
+        @Field(type = FieldType.Integer)
+        private Integer level;
+
+        @Field(type = FieldType.Long)
+        private Long parentId;
+
+        @Field(type = FieldType.Text, analyzer = "nori")
+        private String parentName;
+
+        @Field(type = FieldType.Keyword)
+        private String parentCode;
+    }
 
     @Getter
     @Setter
@@ -87,7 +113,7 @@ public class ProductDocument {
             @Field(type = FieldType.Long)
             private Long id;
 
-            @Field(type = FieldType.Text)
+            @Field(type = FieldType.Text, analyzer = "nori")
             private String name;
 
             @Field(type = FieldType.Integer)
@@ -104,4 +130,3 @@ public class ProductDocument {
         }
     }
 }
-

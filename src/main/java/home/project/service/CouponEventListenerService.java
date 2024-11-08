@@ -3,7 +3,7 @@
 //import com.fasterxml.jackson.core.JsonProcessingException;
 //import com.fasterxml.jackson.databind.ObjectMapper;
 //import home.project.domain.Coupon;
-//import home.project.dto.CouponEventDTO;
+//import home.project.dto.kafkaDTO.CouponEventDTO;
 //import home.project.domain.Member;
 //import home.project.domain.Product;
 //import home.project.repository.CouponRepository;

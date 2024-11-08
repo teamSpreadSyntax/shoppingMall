@@ -1,17 +1,22 @@
 package home.project.service;
 
 import home.project.domain.*;
-import home.project.dto.CouponEventDTO;
+import home.project.domain.elasticsearch.CouponDocument;
+import home.project.domain.elasticsearch.MemberDocument;
+import home.project.dto.kafkaDTO.CouponEventDTO;
 import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
 import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
 import home.project.dto.requestDTO.CreateCouponRequestDTO;
 import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.*;
+import home.project.util.IndexToElasticsearch;
 import home.project.util.StringBuilderUtil;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -36,6 +41,8 @@ public class CouponServiceImpl implements CouponService{
     private final SimpMessagingTemplate messagingTemplate;
     private final KafkaEventProducerService kafkaEventProducerService;
     private final MemberService memberService;
+    private final IndexToElasticsearch indexToElasticsearch;
+    private final ElasticsearchOperations elasticsearchOperations;
 
 
     @Override
@@ -47,6 +54,15 @@ public class CouponServiceImpl implements CouponService{
         coupon.setStartDate(createCouponRequestDTO.getStartDate());
         coupon.setEndDate(createCouponRequestDTO.getEndDate());
         couponRepository.save(coupon);
+
+        CouponDocument couponDocument = converter.convertFromCouponToCouponDocument(coupon);
+        try {
+            indexToElasticsearch.indexDocumentToElasticsearch(couponDocument, CouponDocument.class);
+
+        } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
 
         kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
 
@@ -68,6 +84,14 @@ public class CouponServiceImpl implements CouponService{
         coupon.setEndDate(updateCouponRequestDTO.getEndDate());
 
         couponRepository.save(coupon);
+
+        CouponDocument couponDocument = converter.convertFromCouponToCouponDocument(coupon);
+        try {
+            indexToElasticsearch.indexDocumentToElasticsearch(couponDocument, CouponDocument.class);
+        } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
         return converter.convertFromCouponToCouponResponse(coupon);
 
     }
@@ -146,8 +170,15 @@ public class CouponServiceImpl implements CouponService{
 
             MemberCoupon savedMemberCoupon = memberCouponRepository.save(memberCoupon);
 
-            kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_member", coupon.getId(), member.getId()));
+            CouponDocument couponDocument = converter.convertFromCouponToCouponDocument(coupon);
+            try {
+                indexToElasticsearch.indexDocumentToElasticsearch(couponDocument, CouponDocument.class);
+            } catch (Exception e) {
+                System.out.println("에러 발생: " + e.getMessage());
+                e.printStackTrace();
+            }
 
+            kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_member", coupon.getId(), member.getId()));
             return new MemberCouponResponse(
                     savedMemberCoupon.getId(),
                     member.getEmail(),
@@ -179,8 +210,15 @@ public class CouponServiceImpl implements CouponService{
 
             ProductCoupon savedProductCoupon = productCouponRepository.save(productCoupon);
 
-            kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_product", coupon.getId(), null, product.getId()));
+            CouponDocument couponDocument = converter.convertFromCouponToCouponDocument(coupon);
+            try {
+                indexToElasticsearch.indexDocumentToElasticsearch(couponDocument, CouponDocument.class);
+            } catch (Exception e) {
+                System.out.println("에러 발생: " + e.getMessage());
+                e.printStackTrace();
+            }
 
+            kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_product", coupon.getId(), null, product.getId()));
             return new ProductCouponResponse(
                     savedProductCoupon.getId(),
                     product.getProductNum(),
@@ -231,6 +269,9 @@ public class CouponServiceImpl implements CouponService{
     public String deleteById(Long couponId) {
         String name = findById(couponId).getName();
         couponRepository.deleteById(couponId);
+
+        elasticsearchOperations.delete(String.valueOf(couponId), CouponDocument.class);
+
         return name;
     }
 

@@ -1,4 +1,4 @@
-package home.project.dto;
+package home.project.dto.kafkaDTO;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

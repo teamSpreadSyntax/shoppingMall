@@ -1,6 +1,5 @@
 package home.project.domain.elasticsearch;
 
-import home.project.domain.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
@@ -9,7 +8,6 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.annotation.Id;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,32 +28,35 @@ public class MemberDocument {
     @Field(type = FieldType.Keyword)
     private String phone;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text)
     private String defaultAddress;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text)
     private String secondAddress;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Text)
     private String thirdAddress;
 
     @Field(type = FieldType.Keyword)
-    private String role;
+    private String role;  // RoleType enum: user, admin, center
 
-    @Field(type = FieldType.Long)
-    private Long accumulatedPurchase;
+    @Field(type = FieldType.Long, docValues = true)
+    private Long accumulatedPurchase = 0L;
 
-    @Field(type = FieldType.Long)
-    private Long point;
+    @Field(type = FieldType.Long, docValues = true)
+    private Long point = 0L;
 
     @Field(type = FieldType.Keyword)
-    private String grade;
+    private String grade;  // MemberGradeType enum: BRONZE, SILVER, GOLD, PLATINUM
 
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis)
     private LocalDateTime birthDate;
 
     @Field(type = FieldType.Nested)
     private List<MemberCoupon> memberCoupons = new ArrayList<>();
+
+    @Field(type = FieldType.Nested)
+    private List<OrderInfo> orders = new ArrayList<>();
 
     @Getter
     @Setter
@@ -81,7 +82,7 @@ public class MemberDocument {
             @Field(type = FieldType.Long)
             private Long id;
 
-            @Field(type = FieldType.Text)
+            @Field(type = FieldType.Text, analyzer = "nori")
             private String name;
 
             @Field(type = FieldType.Integer)
@@ -97,5 +98,29 @@ public class MemberDocument {
             private String assignBy;
         }
     }
-}
 
+    @Getter
+    @Setter
+    public static class OrderInfo {
+        @Field(type = FieldType.Long)
+        private Long id;
+
+        @Field(type = FieldType.Keyword)
+        private String orderNum;
+
+        @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis)
+        private LocalDateTime orderDate;
+
+        @Field(type = FieldType.Long)
+        private Long amount;
+
+        @Field(type = FieldType.Long)
+        private Long pointsUsed;
+
+        @Field(type = FieldType.Long)
+        private Long pointsEarned;
+
+        @Field(type = FieldType.Keyword)
+        private String deliveryStatus; // DeliveryStatusType enum의 description
+    }
+}

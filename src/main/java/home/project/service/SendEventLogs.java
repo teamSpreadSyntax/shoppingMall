@@ -2,8 +2,8 @@
 //
 //import com.fasterxml.jackson.core.JsonProcessingException;
 //import com.fasterxml.jackson.databind.ObjectMapper;
-//import home.project.dto.CouponEventDTO;
-//import home.project.dto.MemberEventDTO;
+//import home.project.dto.kafkaDTO.CouponEventDTO;
+//import home.project.dto.kafkaDTO.MemberEventDTO;
 //import home.project.dto.responseDTO.MemberResponse;
 //import lombok.RequiredArgsConstructor;
 //import org.springframework.kafka.core.KafkaTemplate;

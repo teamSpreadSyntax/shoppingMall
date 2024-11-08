@@ -1,7 +1,9 @@
 package home.project.service;
 
 import home.project.domain.*;
+import home.project.domain.elasticsearch.CouponDocument;
 import home.project.domain.elasticsearch.MemberDocument;
+import home.project.domain.elasticsearch.OrdersDocument;
 import home.project.domain.elasticsearch.ProductDocument;
 import home.project.dto.requestDTO.*;
 import home.project.dto.responseDTO.*;
@@ -750,9 +752,72 @@ public class Converter {
 //        );
 //    }
 
+    public MemberDocument convertFromMemberToMemberDocument(Member member) {
+        MemberDocument doc = new MemberDocument();
+        doc.setId(member.getId());
+        doc.setEmail(member.getEmail());
+        doc.setName(member.getName());
+        doc.setPhone(member.getPhone());
+        doc.setDefaultAddress(member.getDefaultAddress());
+        doc.setSecondAddress(member.getSecondAddress());
+        doc.setThirdAddress(member.getThirdAddress());
+        doc.setRole(member.getRole().toString());  // RoleType enum: user, admin, center
+        doc.setAccumulatedPurchase(member.getAccumulatedPurchase());
+        doc.setPoint(member.getPoint());
+        doc.setGrade(member.getGrade().toString());  // MemberGradeType enum: BRONZE, SILVER, GOLD, PLATINUM
+        doc.setBirthDate(member.getBirthDate().atStartOfDay());
+
+        // 쿠폰 정보 변환
+        if (member.getMemberCoupons() != null) {
+            List<MemberDocument.MemberCoupon> memberCoupons = member.getMemberCoupons().stream()
+                    .map(mc -> {
+                        MemberDocument.MemberCoupon mcDoc = new MemberDocument.MemberCoupon();
+                        mcDoc.setId(mc.getId());
+                        mcDoc.setIssuedAt(mc.getIssuedAt());
+                        mcDoc.setUsedAt(mc.getUsedAt());
+                        mcDoc.setUsed(mc.isUsed());
+
+                        if (mc.getCoupon() != null) {
+                            MemberDocument.MemberCoupon.Coupon couponDoc = new MemberDocument.MemberCoupon.Coupon();
+                            couponDoc.setId(mc.getCoupon().getId());
+                            couponDoc.setName(mc.getCoupon().getName());
+                            couponDoc.setDiscountRate(mc.getCoupon().getDiscountRate());
+                            couponDoc.setStartDate(mc.getCoupon().getStartDate());
+                            couponDoc.setEndDate(mc.getCoupon().getEndDate());
+                            couponDoc.setAssignBy(mc.getCoupon().getAssignBy());
+                            mcDoc.setCoupon(couponDoc);
+                        }
+                        return mcDoc;
+                    })
+                    .collect(Collectors.toList());
+            doc.setMemberCoupons(memberCoupons);
+        }
+
+        // 주문 정보 변환
+        if (member.getOrders() != null) {
+            List<MemberDocument.OrderInfo> orderInfos = member.getOrders().stream()
+                    .map(order -> {
+                        MemberDocument.OrderInfo orderInfo = new MemberDocument.OrderInfo();
+                        orderInfo.setId(order.getId());
+                        orderInfo.setOrderNum(order.getOrderNum());
+                        orderInfo.setOrderDate(order.getOrderDate());
+                        orderInfo.setAmount(order.getAmount());
+                        orderInfo.setPointsUsed(order.getPointsUsed());
+                        orderInfo.setPointsEarned(order.getPointsEarned());
+                        if (order.getShipping() != null) {
+                            orderInfo.setDeliveryStatus(order.getShipping().getDeliveryStatus().getDescription());
+                        }
+                        return orderInfo;
+                    })
+                    .collect(Collectors.toList());
+            doc.setOrders(orderInfos);
+        }
+
+        return doc;
+    }
+
     public ProductDocument convertFromProductToProductDocument(Product product) {
         ProductDocument doc = new ProductDocument();
-
         doc.setId(product.getId());
         doc.setName(product.getName());
         doc.setBrand(product.getBrand());
@@ -768,76 +833,200 @@ public class Converter {
         doc.setSize(product.getSize());
         doc.setColor(product.getColor());
 
-        List<ProductDocument.ProductCoupon> productCoupons = product.getProductCoupons().stream()
-                .map(pc -> {
-                    ProductDocument.ProductCoupon pcDoc = new ProductDocument.ProductCoupon();
-                    pcDoc.setId(pc.getId());
-                    pcDoc.setIssuedAt(pc.getIssuedAt());
-                    pcDoc.setUsedAt(pc.getUsedAt());
-                    pcDoc.setUsed(pc.isUsed());
+        // 카테고리 정보 변환
+        if (product.getCategory() != null) {
+            ProductDocument.CategoryInfo categoryInfo = new ProductDocument.CategoryInfo();
+            categoryInfo.setId(product.getCategory().getId());
+            categoryInfo.setCode(product.getCategory().getCode());
+            categoryInfo.setName(product.getCategory().getName());
+            categoryInfo.setLevel(product.getCategory().getLevel());
 
-                    if (pc.getCoupon() != null) {
-                        ProductDocument.ProductCoupon.Coupon couponDoc = new ProductDocument.ProductCoupon.Coupon();
-                        couponDoc.setId(pc.getCoupon().getId());
-                        couponDoc.setName(pc.getCoupon().getName());
-                        couponDoc.setDiscountRate(pc.getCoupon().getDiscountRate());
-                        couponDoc.setStartDate(pc.getCoupon().getStartDate());
-                        couponDoc.setEndDate(pc.getCoupon().getEndDate());
-                        couponDoc.setAssignBy(pc.getCoupon().getAssignBy());
-                        pcDoc.setCoupon(couponDoc);
-                    }
-                    return pcDoc;
-                })
-                .collect(Collectors.toList());
-        doc.setProductCoupons(productCoupons);
+            if (product.getCategory().getParent() != null) {
+                categoryInfo.setParentId(product.getCategory().getParent().getId());
+                categoryInfo.setParentName(product.getCategory().getParent().getName());
+                categoryInfo.setParentCode(product.getCategory().getParent().getCode());
+            }
+            doc.setCategory(categoryInfo);
+        }
 
-        return doc;
-    }
+        // 쿠폰 정보 변환
+        if (product.getProductCoupons() != null) {
+            List<ProductDocument.ProductCoupon> productCoupons = product.getProductCoupons().stream()
+                    .map(pc -> {
+                        ProductDocument.ProductCoupon pcDoc = new ProductDocument.ProductCoupon();
+                        pcDoc.setId(pc.getId());
+                        pcDoc.setIssuedAt(pc.getIssuedAt());
+                        pcDoc.setUsedAt(pc.getUsedAt());
+                        pcDoc.setUsed(pc.isUsed());
 
-
-
-    public MemberDocument convertFromMemberToMemberDocument(Member member) {
-        MemberDocument doc = new MemberDocument();
-
-        doc.setId(member.getId());
-        doc.setEmail(member.getEmail());
-        doc.setName(member.getName());
-        doc.setPhone(member.getPhone());
-        doc.setDefaultAddress(member.getDefaultAddress());
-        doc.setSecondAddress(member.getSecondAddress());
-        doc.setThirdAddress(member.getThirdAddress());
-        doc.setRole(member.getRole().toString());
-        doc.setAccumulatedPurchase(member.getAccumulatedPurchase());
-        doc.setPoint(member.getPoint());
-        doc.setGrade(member.getGrade().toString());
-        doc.setBirthDate(member.getBirthDate().atStartOfDay());
-
-        List<MemberDocument.MemberCoupon> memberCoupons = member.getMemberCoupons().stream()
-                .map(mc -> {
-                    MemberDocument.MemberCoupon mcDoc = new MemberDocument.MemberCoupon();
-                    mcDoc.setId(mc.getId());
-                    mcDoc.setIssuedAt(mc.getIssuedAt());
-                    mcDoc.setUsedAt(mc.getUsedAt());
-                    mcDoc.setUsed(mc.isUsed());
-
-                    if (mc.getCoupon() != null) {
-                        MemberDocument.MemberCoupon.Coupon couponDoc = new MemberDocument.MemberCoupon.Coupon();
-                        couponDoc.setId(mc.getCoupon().getId());
-                        couponDoc.setName(mc.getCoupon().getName());
-                        couponDoc.setDiscountRate(mc.getCoupon().getDiscountRate());
-                        couponDoc.setStartDate(mc.getCoupon().getStartDate());
-                        couponDoc.setEndDate(mc.getCoupon().getEndDate());
-                        couponDoc.setAssignBy(mc.getCoupon().getAssignBy());
-                        mcDoc.setCoupon(couponDoc);
-                    }
-                    return mcDoc;
-                })
-                .collect(Collectors.toList());
-        doc.setMemberCoupons(memberCoupons);
+                        if (pc.getCoupon() != null) {
+                            ProductDocument.ProductCoupon.Coupon couponDoc = new ProductDocument.ProductCoupon.Coupon();
+                            couponDoc.setId(pc.getCoupon().getId());
+                            couponDoc.setName(pc.getCoupon().getName());
+                            couponDoc.setDiscountRate(pc.getCoupon().getDiscountRate());
+                            couponDoc.setStartDate(pc.getCoupon().getStartDate());
+                            couponDoc.setEndDate(pc.getCoupon().getEndDate());
+                            couponDoc.setAssignBy(pc.getCoupon().getAssignBy());
+                            pcDoc.setCoupon(couponDoc);
+                        }
+                        return pcDoc;
+                    })
+                    .collect(Collectors.toList());
+            doc.setProductCoupons(productCoupons);
+        }
 
         return doc;
     }
 
+    public OrdersDocument convertFromOrderToOrdersDocument(Orders orders) {
+        OrdersDocument doc = new OrdersDocument();
 
+        doc.setId(orders.getId());
+        doc.setOrderNum(orders.getOrderNum());
+        doc.setOrderDate(orders.getOrderDate());
+        doc.setAmount(orders.getAmount());
+        doc.setPointsUsed(orders.getPointsUsed());
+        doc.setPointsEarned(orders.getPointsEarned());
+
+        // Member 정보 변환
+        if (orders.getMember() != null) {
+            OrdersDocument.MemberInfo memberInfo = new OrdersDocument.MemberInfo();
+            memberInfo.setId(orders.getMember().getId());
+            memberInfo.setEmail(orders.getMember().getEmail());
+            memberInfo.setName(orders.getMember().getName());
+            memberInfo.setPhone(orders.getMember().getPhone());
+            memberInfo.setDefaultAddress(orders.getMember().getDefaultAddress());
+            memberInfo.setRole(orders.getMember().getRole().toString());
+            memberInfo.setGrade(orders.getMember().getGrade().toString());
+            doc.setMember(memberInfo);
+        }
+
+        // Shipping 정보 변환
+        if (orders.getShipping() != null) {
+            OrdersDocument.ShippingInfo shippingInfo = new OrdersDocument.ShippingInfo();
+            shippingInfo.setId(orders.getShipping().getId());
+            shippingInfo.setDeliveryType(orders.getShipping().getDeliveryType().toString());
+            shippingInfo.setDeliveryNum(orders.getShipping().getDeliveryNum());
+            shippingInfo.setDeliveryAddress(orders.getShipping().getDeliveryAddress());
+            shippingInfo.setArrivingDate(orders.getShipping().getArrivingDate());
+            shippingInfo.setArrivedDate(orders.getShipping().getArrivedDate());
+            shippingInfo.setDepartureDate(orders.getShipping().getDepartureDate());
+            shippingInfo.setDeliveryCost(orders.getShipping().getDeliveryCost());
+            shippingInfo.setDeliveryStatus(orders.getShipping().getDeliveryStatus().getDescription());
+            shippingInfo.setShippingMessage(orders.getShipping().getShippingMessage());
+            doc.setShipping(shippingInfo);
+        }
+
+        // ProductOrder 정보 변환
+        if (orders.getProductOrders() != null) {
+            List<OrdersDocument.ProductOrderInfo> productOrderInfos = orders.getProductOrders().stream()
+                    .map(po -> {
+                        OrdersDocument.ProductOrderInfo info = new OrdersDocument.ProductOrderInfo();
+                        info.setId(po.getId());
+                        info.setQuantity(po.getQuantity());
+                        info.setPrice(po.getPrice());
+                        info.setDeliveryStatus(po.getDeliveryStatus().getDescription());
+
+                        Product product = po.getProduct();
+                        if (product != null) {
+                            info.setProductId(product.getId());
+                            info.setProductName(product.getName());
+                            info.setProductNum(product.getProductNum());
+                            info.setBrand(product.getBrand());
+
+                            if (product.getCategory() != null) {
+                                OrdersDocument.CategoryInfo categoryInfo = new OrdersDocument.CategoryInfo();
+                                categoryInfo.setId(product.getCategory().getId());
+                                categoryInfo.setCode(product.getCategory().getCode());
+                                categoryInfo.setName(product.getCategory().getName());
+                                categoryInfo.setLevel(product.getCategory().getLevel());
+
+                                if (product.getCategory().getParent() != null) {
+                                    categoryInfo.setParentId(product.getCategory().getParent().getId());
+                                    categoryInfo.setParentName(product.getCategory().getParent().getName());
+                                    categoryInfo.setParentCode(product.getCategory().getParent().getCode());
+                                }
+                                info.setCategory(categoryInfo);
+                            }
+                        }
+                        return info;
+                    })
+                    .collect(Collectors.toList());
+            doc.setProductOrders(productOrderInfos);
+        }
+
+        return doc;
+    }
+
+    public CouponDocument convertFromCouponToCouponDocument(Coupon coupon) {
+        CouponDocument doc = new CouponDocument();
+        doc.setId(coupon.getId());
+        doc.setName(coupon.getName());
+        doc.setDiscountRate(coupon.getDiscountRate());
+        doc.setStartDate(coupon.getStartDate());
+        doc.setEndDate(coupon.getEndDate());
+        doc.setAssignBy(coupon.getAssignBy());
+
+        // ProductCouponInfo 변환
+        if (coupon.getProductCoupons() != null) {
+            List<CouponDocument.ProductCouponInfo> productCouponInfos = coupon.getProductCoupons().stream()
+                    .map(pc -> {
+                        CouponDocument.ProductCouponInfo info = new CouponDocument.ProductCouponInfo();
+                        info.setId(pc.getId());
+                        info.setIssuedAt(pc.getIssuedAt());
+                        info.setUsedAt(pc.getUsedAt());
+                        info.setUsed(pc.isUsed());
+
+                        if (pc.getProduct() != null) {
+                            info.setProductId(pc.getProduct().getId());
+                            info.setProductName(pc.getProduct().getName());
+                            info.setProductNum(pc.getProduct().getProductNum());
+                            info.setBrand(pc.getProduct().getBrand());
+
+                            if (pc.getProduct().getCategory() != null) {
+                                CouponDocument.CategoryInfo categoryInfo = new CouponDocument.CategoryInfo();
+                                categoryInfo.setId(pc.getProduct().getCategory().getId());
+                                categoryInfo.setCode(pc.getProduct().getCategory().getCode());
+                                categoryInfo.setName(pc.getProduct().getCategory().getName());
+                                categoryInfo.setLevel(pc.getProduct().getCategory().getLevel());
+
+                                if (pc.getProduct().getCategory().getParent() != null) {
+                                    categoryInfo.setParentId(pc.getProduct().getCategory().getParent().getId());
+                                    categoryInfo.setParentName(pc.getProduct().getCategory().getParent().getName());
+                                    categoryInfo.setParentCode(pc.getProduct().getCategory().getParent().getCode());
+                                }
+                                info.setCategory(categoryInfo);
+                            }
+                        }
+                        return info;
+                    })
+                    .collect(Collectors.toList());
+            doc.setProductCoupons(productCouponInfos);
+        }
+
+        // MemberCouponInfo 변환
+        if (coupon.getMemberCoupons() != null) {
+            List<CouponDocument.MemberCouponInfo> memberCouponInfos = coupon.getMemberCoupons().stream()
+                    .map(mc -> {
+                        CouponDocument.MemberCouponInfo info = new CouponDocument.MemberCouponInfo();
+                        info.setId(mc.getId());
+                        info.setIssuedAt(mc.getIssuedAt());
+                        info.setUsedAt(mc.getUsedAt());
+                        info.setUsed(mc.isUsed());
+
+                        if (mc.getMember() != null) {
+                            info.setMemberId(mc.getMember().getId());
+                            info.setEmail(mc.getMember().getEmail());
+                            info.setName(mc.getMember().getName());
+                            info.setGrade(mc.getMember().getGrade().toString());
+                        }
+                        return info;
+                    })
+                    .collect(Collectors.toList());
+            doc.setMemberCoupons(memberCouponInfos);
+        }
+
+        return doc;
+    }
 
 }

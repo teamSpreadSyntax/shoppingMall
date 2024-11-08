@@ -2,17 +2,21 @@ package home.project.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.*;
-import home.project.dto.CouponEventDTO;
-import home.project.dto.OrderEventDTO;
+import home.project.domain.elasticsearch.MemberDocument;
+import home.project.domain.elasticsearch.OrdersDocument;
+import home.project.dto.kafkaDTO.OrderEventDTO;
 import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.OrderResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.InvalidCouponException;
 import home.project.repository.*;
+import home.project.repositoryForElasticsearch.OrdersElasticsearchRepository;
+import home.project.util.IndexToElasticsearch;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -42,6 +46,10 @@ public class OrderServiceImpl implements OrderService{
     private final ObjectMapper objectMapper;
     private final Converter converter;
     private final KafkaEventProducerService kafkaEventProducerService;
+    private final IndexToElasticsearch indexToElasticsearch;
+    private final OrdersElasticsearchRepository ordersElasticsearchRepository;
+    private final ElasticsearchOperations elasticsearchOperations;
+
 
 
     @Override
@@ -136,6 +144,22 @@ public class OrderServiceImpl implements OrderService{
         memberRepository.save(member);
         orderRepository.save(orders);
 
+        OrdersDocument ordersDocument = converter.convertFromOrderToOrdersDocument(orders);
+        try {
+            indexToElasticsearch.indexDocumentToElasticsearch(ordersDocument, OrdersDocument.class);
+        } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        MemberDocument memberDocument = converter.convertFromMemberToMemberDocument(member);
+        try {
+            indexToElasticsearch.indexDocumentToElasticsearch(memberDocument, MemberDocument.class);
+        } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         List<Long> productOrderIds = orders.getProductOrders().stream()
                 .map(ProductOrder::getId)
                 .collect(Collectors.toList());
@@ -190,9 +214,13 @@ public class OrderServiceImpl implements OrderService{
 
     @Override
     public Page<OrderResponse> findOrders(String orderNum, String orderDate, String productNumber, String email, String content, Pageable pageable) {
+        // Elasticsearch 검색 수행
+        Page<OrdersDocument> pagedDocuments = ordersElasticsearchRepository.findOrders(orderNum, orderDate, productNumber, email, content, pageable);
 
-        Page<Orders> pagedOrder = orderRepository.findOrders(orderNum, orderDate, productNumber, email, content, pageable);
+        // OrdersDocument를 Orders 엔티티로 변환
+        Page<Orders> pagedOrder = pagedDocuments.map(ordersDocument -> findById(ordersDocument.getId()));
 
+        // Orders를 OrderResponse로 변환
         return converter.convertFromPagedOrderToPagedOrderResponse(pagedOrder);
     }
 
@@ -229,6 +257,8 @@ public class OrderServiceImpl implements OrderService{
         orderRepository.deleteById(orderId);
         memberRepository.save(member);
 
+        elasticsearchOperations.delete(String.valueOf(orderId), OrdersDocument.class);
+
         return orderNum;
     }
     @Override
@@ -241,6 +271,13 @@ public class OrderServiceImpl implements OrderService{
             if (productOrder.getDeliveryStatus() == DeliveryStatusType.DELIVERY_COMPLETED) {
                 productOrder.setDeliveryStatus(DeliveryStatusType.PURCHASE_CONFIRMED);
             }
+        }
+        OrdersDocument ordersDocument = converter.convertFromOrderToOrdersDocument(order);
+        try {
+            indexToElasticsearch.indexDocumentToElasticsearch(ordersDocument, OrdersDocument.class);
+        } catch (Exception e) {
+            System.out.println("에러 발생: " + e.getMessage());
+            e.printStackTrace();
         }
 
         orderRepository.save(order);
