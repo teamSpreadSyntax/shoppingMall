@@ -2,10 +2,7 @@ package home.project.domain.elasticsearch;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
@@ -19,10 +16,20 @@ public class ProductDocument {
     @Id
     private Long id;
 
-    @Field(type = FieldType.Text, analyzer = "nori")
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String name;
 
-    @Field(type = FieldType.Text, analyzer = "nori")
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String brand;
 
     @Field(type = FieldType.Keyword)
@@ -37,7 +44,12 @@ public class ProductDocument {
     @Field(type = FieldType.Integer)
     private Integer discountRate = 0;
 
-    @Field(type = FieldType.Text, analyzer = "nori")
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String description;
 
     @Field(type = FieldType.Keyword)
@@ -73,7 +85,12 @@ public class ProductDocument {
         @Field(type = FieldType.Keyword)
         private String code;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String name;
 
         @Field(type = FieldType.Integer)
@@ -82,7 +99,12 @@ public class ProductDocument {
         @Field(type = FieldType.Long)
         private Long parentId;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String parentName;
 
         @Field(type = FieldType.Keyword)
@@ -113,7 +135,12 @@ public class ProductDocument {
             @Field(type = FieldType.Long)
             private Long id;
 
-            @Field(type = FieldType.Text, analyzer = "nori")
+            @MultiField(
+                    mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                    otherFields = {
+                            @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                    }
+            )
             private String name;
 
             @Field(type = FieldType.Integer)

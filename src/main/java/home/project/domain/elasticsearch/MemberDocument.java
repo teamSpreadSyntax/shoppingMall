@@ -2,15 +2,18 @@ package home.project.domain.elasticsearch;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
+import org.springframework.data.elasticsearch.annotations.*;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
-import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.InnerField;
+import org.springframework.data.elasticsearch.annotations.MultiField;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 @Getter
 @Setter
@@ -22,19 +25,42 @@ public class MemberDocument {
     @Field(type = FieldType.Keyword)
     private String email;
 
-    @Field(type = FieldType.Text, analyzer = "nori")
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String name;
 
     @Field(type = FieldType.Keyword)
     private String phone;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Keyword)
+    private String gender;
+
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String defaultAddress;
 
-    @Field(type = FieldType.Text)
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String secondAddress;
 
-    @Field(type = FieldType.Text)
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String thirdAddress;
 
     @Field(type = FieldType.Keyword)
@@ -82,7 +108,12 @@ public class MemberDocument {
             @Field(type = FieldType.Long)
             private Long id;
 
-            @Field(type = FieldType.Text, analyzer = "nori")
+            @MultiField(
+                    mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                    otherFields = {
+                            @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                    }
+            )
             private String name;
 
             @Field(type = FieldType.Integer)
@@ -94,7 +125,12 @@ public class MemberDocument {
             @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis)
             private LocalDateTime endDate;
 
-            @Field(type = FieldType.Text)
+            @MultiField(
+                    mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                    otherFields = {
+                            @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                    }
+            )
             private String assignBy;
         }
     }

@@ -2,10 +2,7 @@ package home.project.domain.elasticsearch;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 import org.springframework.data.annotation.Id;
 
 import java.time.LocalDateTime;
@@ -53,7 +50,12 @@ public class OrdersDocument {
         @Field(type = FieldType.Keyword)
         private String email;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String name;
 
         @Field(type = FieldType.Keyword)
@@ -82,7 +84,12 @@ public class OrdersDocument {
         @Field(type = FieldType.Keyword)
         private String deliveryNum;
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String deliveryAddress;
 
         @Field(type = FieldType.Keyword)
@@ -100,7 +107,12 @@ public class OrdersDocument {
         @Field(type = FieldType.Keyword)
         private String deliveryStatus;  // DeliveryStatusType enum의 description
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String shippingMessage;
     }
 
@@ -123,13 +135,23 @@ public class OrdersDocument {
         @Field(type = FieldType.Long)
         private Long productId;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String productName;
 
         @Field(type = FieldType.Keyword)
         private String productNum;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String brand;
 
         @Field(type = FieldType.Nested)
@@ -146,7 +168,12 @@ public class OrdersDocument {
         @Field(type = FieldType.Keyword)
         private String code;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String name;
 
         @Field(type = FieldType.Integer)
@@ -155,7 +182,12 @@ public class OrdersDocument {
         @Field(type = FieldType.Long)
         private Long parentId;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String parentName;
 
         @Field(type = FieldType.Keyword)

@@ -45,8 +45,6 @@ public class MemberServiceImpl implements MemberService {
     private final IndexToElasticsearch indexToElasticsearch;
     private final ElasticsearchOperations elasticsearchOperations;
     private final MemberElasticsearchRepository memberElasticsearchRepository;
-    private final KafkaEventProducerService kafkaEventProducerService;
-
     private final EmailService emailService;
 
 
@@ -79,8 +77,6 @@ public class MemberServiceImpl implements MemberService {
             System.out.println("에러 발생: " + e.getMessage());
             e.printStackTrace();
         }
-
-        kafkaEventProducerService.sendMemberJoinEvent(new MemberEventDTO("member-join", member.getGender(), Period.between(member.getBirthDate(), LocalDate.now()).getYears()));
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
         TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);

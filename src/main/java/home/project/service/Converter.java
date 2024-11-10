@@ -758,6 +758,7 @@ public class Converter {
         doc.setEmail(member.getEmail());
         doc.setName(member.getName());
         doc.setPhone(member.getPhone());
+        doc.setGender(member.getGender().toString());
         doc.setDefaultAddress(member.getDefaultAddress());
         doc.setSecondAddress(member.getSecondAddress());
         doc.setThirdAddress(member.getThirdAddress());

@@ -39,7 +39,6 @@ public class CouponServiceImpl implements CouponService{
     private final ProductRepository productRepository;
     private final Converter converter;
     private final SimpMessagingTemplate messagingTemplate;
-    private final KafkaEventProducerService kafkaEventProducerService;
     private final MemberService memberService;
     private final IndexToElasticsearch indexToElasticsearch;
     private final ElasticsearchOperations elasticsearchOperations;
@@ -64,7 +63,9 @@ public class CouponServiceImpl implements CouponService{
             e.printStackTrace();
         }
 
+/*
         kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
+*/
 
         messagingTemplate.convertAndSend("/topic/coupons", "New Coupon Created: " + coupon.getName());
 
@@ -178,7 +179,9 @@ public class CouponServiceImpl implements CouponService{
                 e.printStackTrace();
             }
 
+/*
             kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_member", coupon.getId(), member.getId()));
+*/
             return new MemberCouponResponse(
                     savedMemberCoupon.getId(),
                     member.getEmail(),
@@ -218,7 +221,9 @@ public class CouponServiceImpl implements CouponService{
                 e.printStackTrace();
             }
 
+/*
             kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_product", coupon.getId(), null, product.getId()));
+*/
             return new ProductCouponResponse(
                     savedProductCoupon.getId(),
                     product.getProductNum(),

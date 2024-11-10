@@ -12,7 +12,6 @@ import java.util.Map;
 
 @Configuration
 public class KafkaTopicConfig {
-
     @Bean
     public KafkaAdmin kafkaAdmin() {
         Map<String, Object> configs = new HashMap<>();
@@ -21,9 +20,17 @@ public class KafkaTopicConfig {
     }
 
     @Bean
-    public NewTopic createTopic() {
-        return TopicBuilder.name("my-topic")
-                .partitions(3)
+    public NewTopic kafkaLogsTopic() {  // application logs용 토픽
+        return TopicBuilder.name("kafka-logs")
+                .partitions(1)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic errorLogsTopic() {  // error logs용 토픽
+        return TopicBuilder.name("error-logs")
+                .partitions(1)
                 .replicas(1)
                 .build();
     }

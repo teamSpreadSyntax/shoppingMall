@@ -3,10 +3,7 @@ package home.project.domain.elasticsearch;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.elasticsearch.annotations.DateFormat;
-import org.springframework.data.elasticsearch.annotations.Document;
-import org.springframework.data.elasticsearch.annotations.Field;
-import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,7 +16,12 @@ public class CouponDocument {
     @Id
     private Long id;
 
-    @Field(type = FieldType.Text, analyzer = "nori")
+    @MultiField(
+            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            otherFields = {
+                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
+            }
+    )
     private String name;
 
     @Field(type = FieldType.Integer)
@@ -58,13 +60,23 @@ public class CouponDocument {
         @Field(type = FieldType.Long)
         private Long productId;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String productName;
 
         @Field(type = FieldType.Keyword)
         private String productNum;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String brand;
 
         @Field(type = FieldType.Nested)
@@ -92,7 +104,12 @@ public class CouponDocument {
         @Field(type = FieldType.Keyword)
         private String email;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String name;
 
         @Field(type = FieldType.Keyword)
@@ -108,7 +125,12 @@ public class CouponDocument {
         @Field(type = FieldType.Keyword)
         private String code;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String name;
 
         @Field(type = FieldType.Integer)
@@ -117,7 +139,12 @@ public class CouponDocument {
         @Field(type = FieldType.Long)
         private Long parentId;
 
-        @Field(type = FieldType.Text, analyzer = "nori")
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String parentName;
 
         @Field(type = FieldType.Keyword)

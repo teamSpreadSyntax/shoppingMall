@@ -45,7 +45,6 @@ public class OrderServiceImpl implements OrderService{
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final Converter converter;
-    private final KafkaEventProducerService kafkaEventProducerService;
     private final IndexToElasticsearch indexToElasticsearch;
     private final OrdersElasticsearchRepository ordersElasticsearchRepository;
     private final ElasticsearchOperations elasticsearchOperations;
@@ -159,12 +158,9 @@ public class OrderServiceImpl implements OrderService{
             System.out.println("에러 발생: " + e.getMessage());
             e.printStackTrace();
         }
-
-        List<Long> productOrderIds = orders.getProductOrders().stream()
-                .map(ProductOrder::getId)
-                .collect(Collectors.toList());
-
+/*
         kafkaEventProducerService.sendOrderEvent(new OrderEventDTO("orders-events", orders.getOrderDate(), orders.getMember().getId(), orders.getShipping().getId(), productOrderIds));
+*/
 
         return converter.convertFromOrderToOrderResponse(orders);
     }

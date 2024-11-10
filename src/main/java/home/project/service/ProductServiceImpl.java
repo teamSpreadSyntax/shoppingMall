@@ -40,7 +40,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductOrderRepository productOrderRepository;
     private final ProductElasticsearchRepository productElasticsearchRepository;
     private final Converter converter;
-    private final KafkaEventProducerService kafkaEventProducerService;
     private final IndexToElasticsearch indexToElasticsearch;
     private final ElasticsearchOperations elasticsearchOperations;
     private final MemberService memberService;
@@ -138,7 +137,9 @@ public class ProductServiceImpl implements ProductService {
         Product product = findById(productId);
         List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
 
+/*
         kafkaEventProducerService.sendProductViewLog(productId);
+*/
         return converter.convertFromProductToProductWithQnAAndReviewResponse2(product,likedProductIds, qnAs, reviews);
     }
 

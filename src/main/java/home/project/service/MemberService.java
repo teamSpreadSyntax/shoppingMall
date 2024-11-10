@@ -41,9 +41,7 @@ public interface MemberService {
 
     String findEmail(String name, String phone);
 
-    @Transactional
     void sendPasswordResetEmail(String email);
 
-    @Transactional
     void resetPassword(String token, String newPassword);
 }
