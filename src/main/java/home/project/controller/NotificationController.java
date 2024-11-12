@@ -50,7 +50,7 @@ public class NotificationController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/notifications")
+    @GetMapping("/all")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findAll(
             @PageableDefault(page = 1, size = 5)

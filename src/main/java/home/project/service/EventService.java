@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface EventService {
     EventResponse join(CreateEventRequestDTO createEventRequestDTO);
 
-    @Transactional
     EventResponse updateEvent(Long eventId, CreateEventRequestDTO updateEventRequestDTO);
 
     Page<EventResponse> findAll(Pageable pageable);

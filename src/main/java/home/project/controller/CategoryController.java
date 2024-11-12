@@ -43,7 +43,6 @@ import java.util.Optional;
 public class CategoryController {
     private final PageUtil pageUtil;
     private final CategoryService categoryService;
-    private final ValidationCheck validationCheck;
 
     @Operation(summary = "id로 카테고리 조회 메서드", description = "id로 카테고리 조회 메서드입니다.")
     @ApiResponses(value = {

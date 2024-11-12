@@ -35,15 +35,9 @@ public class OrderServiceImpl implements OrderService{
     private final OrderRepository orderRepository;
     private final MemberService memberService;
     private final ProductService productService;
-//    private final MemberOrderRepository memberOrderRepository;
-//    private final ProductOrderRepository productOrderRepository;
     private final MemberRepository memberRepository;
     private final MemberCouponRepository memberCouponRepository;
     private final CouponService couponService;
-    private final ShippingRepository shippingRepository;
-//    private final ProductRepository productRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
     private final Converter converter;
     private final IndexToElasticsearch indexToElasticsearch;
     private final OrdersElasticsearchRepository ordersElasticsearchRepository;

@@ -49,18 +49,18 @@
 
     <Loggers>
         <!-- Root Logger -->
-        <Root level="INFO">
+        <Root level="DEBUG">
             <AppenderRef ref="ConsoleAppender" />
             <AppenderRef ref="FileAppender" />
-            <AppenderRef ref="ApplicationKafkaAppender" level="INFO" />
+            <AppenderRef ref="ApplicationKafkaAppender" level="DEBUG" />
             <AppenderRef ref="ErrorKafkaAppender" level="ERROR" />
         </Root>
 
         <!-- Application Logger -->
-        <Logger name="home.project" level="INFO" additivity="false">
+        <Logger name="home.project" level="DEBUG" additivity="false">
             <AppenderRef ref="ConsoleAppender" />
             <AppenderRef ref="FileAppender" />
-            <AppenderRef ref="ApplicationKafkaAppender" level="INFO" />
+            <AppenderRef ref="ApplicationKafkaAppender" level="DEBUG" />
             <AppenderRef ref="ErrorKafkaAppender" level="ERROR" />
         </Logger>
 
