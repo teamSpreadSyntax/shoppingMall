@@ -684,16 +684,22 @@ public class Converter {
         ));
     }
 
-    public Page<WishListDetailResponse> convertFromPagedWishListToPagedWishListResponse(Page<WishList> pagedWishList) {
-        return pagedWishList.map(wishList -> new WishListDetailResponse(
-                wishList.getId(),
+    public Page<ProductResponse> convertFromPagedWishListToProductResponseResponse(Page<WishList> pagedWishList) {
+        return pagedWishList.map(wishList -> new ProductResponse(
                 wishList.getProduct().getId(),
                 wishList.getProduct().getName(),
-                wishList.getProduct().getImageUrl(),
+                wishList.getProduct().getBrand(),
+                wishList.getProduct().getCategory().getCode(),
+                wishList.getProduct().getProductNum(),
                 wishList.getProduct().getPrice(),
+                wishList.getProduct().getDiscountRate(),
+                wishList.getProduct().getDescription(),
+                wishList.getProduct().getImageUrl(),
                 wishList.isLiked(),
-                wishList.getCreateAt()
-        ));
+                wishList.getProduct().getSize(),
+                wishList.getProduct().getColor(),
+                convertFromListedProductCouponProductCouponResponse(wishList.getProduct().getProductCoupons()))
+        );
     }
 
     public NotificationResponse convertFromNotificationToNotificationResponse(Notification notification){

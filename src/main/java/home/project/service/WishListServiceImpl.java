@@ -3,7 +3,7 @@ package home.project.service;
 import home.project.domain.Member;
 import home.project.domain.Product;
 import home.project.domain.WishList;
-import home.project.dto.responseDTO.WishListDetailResponse;
+import home.project.dto.responseDTO.ProductResponse;
 import home.project.dto.responseDTO.WishListResponse;
 import home.project.repository.WishListRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -40,17 +39,14 @@ public class WishListServiceImpl implements WishListService {
         WishList existingWishList = wishListRepository.findByMemberIdAndProductId(member.getId(), product.getId());
         if (existingWishList != null) {
             if (!liked) {
-                // 좋아요가 해제된 경우, 위시리스트에서 항목을 삭제
                 wishListRepository.delete(existingWishList);
                 return new WishListResponse(existingWishList.getId(), product.getId(), false, "위시리스트에서 제거되었습니다");
             } else {
-                // 좋아요가 설정된 경우, 상태만 업데이트
                 existingWishList.setLiked(true);
                 wishListRepository.save(existingWishList);
                 return new WishListResponse(existingWishList.getId(), product.getId(), true, "좋아요가 설정되었습니다.");
             }
         } else {
-            // 새로운 위시리스트 항목 추가
             if (liked) {
                 WishList newWishList = new WishList();
                 newWishList.setMember(member);
@@ -68,14 +64,14 @@ public class WishListServiceImpl implements WishListService {
     }
 
     @Override
-    public Page<WishListDetailResponse> findAllMyWishList(Pageable pageable){
+    public Page<ProductResponse> findAllMyWishList(Pageable pageable){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
 
         Page<WishList> pagedWishList = wishListRepository.findAllByMemberId(member.getId(), pageable);
-        return converter.convertFromPagedWishListToPagedWishListResponse(pagedWishList);
+        return converter.convertFromPagedWishListToProductResponseResponse(pagedWishList);
     }
 
 }

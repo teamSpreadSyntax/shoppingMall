@@ -126,8 +126,6 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<ProductOrder> productOrder = new ArrayList<>();
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WishList> wishLists = new ArrayList<>();
 
     @Column(name = "size")
     private String size;

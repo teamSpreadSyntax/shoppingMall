@@ -1,6 +1,7 @@
 package home.project.controller;
 
 import home.project.dto.requestDTO.AddWishRequestDTO;
+import home.project.dto.responseDTO.ProductResponse;
 import home.project.dto.responseDTO.ReviewResponse;
 import home.project.dto.responseDTO.WishListDetailResponse;
 import home.project.dto.responseDTO.WishListResponse;
@@ -80,7 +81,7 @@ public class WishListController {
                     {@SortDefault(sort = "wishListId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<WishListDetailResponse> pagedWishList = wishListService.findAllMyWishList(pageable);
+        Page<ProductResponse> pagedWishList = wishListService.findAllMyWishList(pageable);
 
         long totalCount = pagedWishList.getTotalElements();
 
