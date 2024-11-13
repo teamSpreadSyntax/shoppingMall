@@ -1,7 +1,7 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.MemberGenderType;
-import home.project.domain.MemberGradeType;
+import home.project.domain.member.MemberGenderType;
+import home.project.domain.member.MemberGradeType;
 import lombok.Getter;
 import lombok.Setter;
 

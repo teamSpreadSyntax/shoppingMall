@@ -4,8 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-@Getter
 
+@Getter
 @Setter
 public class NotificationDetailResponse {
     private String subject;

@@ -1,6 +1,6 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.Rating;
+import home.project.domain.common.Rating;
 import lombok.Getter;
 import lombok.Setter;
 

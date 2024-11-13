@@ -2,9 +2,9 @@
 
 package home.project.service;
 
-import home.project.domain.Member;
-import home.project.domain.RoleType;
-import home.project.repository.MemberRepository;
+import home.project.domain.member.Member;
+import home.project.domain.member.RoleType;
+import home.project.repository.member.MemberRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

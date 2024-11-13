@@ -1,8 +1,8 @@
 package home.project.dto.requestDTO;
 
-import home.project.domain.DeliveryAddressType;
-import home.project.domain.DeliveryType;
-import home.project.domain.ShippingMessageType;
+import home.project.domain.delivery.DeliveryAddressType;
+import home.project.domain.delivery.DeliveryType;
+import home.project.domain.delivery.ShippingMessageType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

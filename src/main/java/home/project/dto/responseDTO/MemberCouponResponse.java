@@ -1,7 +1,5 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.Coupon;
-import home.project.domain.Member;
 import lombok.Getter;
 import lombok.Setter;
 

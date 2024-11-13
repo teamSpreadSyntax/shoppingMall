@@ -1,7 +1,7 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.DeliveryStatusType;
-import home.project.domain.DeliveryType;
+import home.project.domain.delivery.DeliveryStatusType;
+import home.project.domain.delivery.DeliveryType;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import lombok.Getter;
 import lombok.Setter;

@@ -1,6 +1,6 @@
 package home.project.dto.requestDTO;
 
-import home.project.domain.Rating;
+import home.project.domain.common.Rating;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

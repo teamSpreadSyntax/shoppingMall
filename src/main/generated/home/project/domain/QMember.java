@@ -8,6 +8,10 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
+import home.project.domain.common.WishList;
+import home.project.domain.member.*;
+import home.project.domain.order.Orders;
+import home.project.domain.product.MemberCoupon;
 
 
 /**

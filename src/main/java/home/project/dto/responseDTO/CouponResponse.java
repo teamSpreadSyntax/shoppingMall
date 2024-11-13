@@ -1,12 +1,9 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.MemberCoupon;
-import home.project.domain.ProductCoupon;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter

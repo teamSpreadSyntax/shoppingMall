@@ -1,12 +1,8 @@
 package home.project.dto.requestDTO;
 
-import home.project.domain.AssignType;
+import home.project.domain.product.AssignType;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.domain.Pageable;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Getter
 @Setter

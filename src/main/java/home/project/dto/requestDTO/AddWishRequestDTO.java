@@ -9,7 +9,8 @@ import lombok.Setter;
 @Setter
 public class AddWishRequestDTO {
 
-    @Schema(description = "제품 id")
-    private Long productId = null;
+    @NotNull(message = "제품 ID는 필수입니다")
+    @Schema(description = "제품 id", required = true)
+    private Long productId;
 
 }

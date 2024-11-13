@@ -1,6 +1,5 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.Category;
 import lombok.Getter;
 import lombok.Setter;
 

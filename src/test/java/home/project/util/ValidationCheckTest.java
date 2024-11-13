@@ -2,7 +2,7 @@
 //
 //import home.project.response.CustomOptionalResponseBody;
 //import home.project.response.CustomOptionalResponseEntity;
-//import home.project.util.ValidationCheck;
+//import home.project.service.util.ValidationCheck;
 //import org.junit.jupiter.api.Test;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.boot.test.context.SpringBootTest;

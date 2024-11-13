@@ -8,6 +8,9 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
+import home.project.domain.product.Coupon;
+import home.project.domain.product.MemberCoupon;
+import home.project.domain.product.ProductCoupon;
 
 
 /**

@@ -1,14 +1,14 @@
 /*
 package home.project.service;
 
-import home.project.domain.Category;
+import home.project.domain.product.Category;
 import home.project.dto.requestDTO.CreateCategoryRequestDTO;
 import home.project.dto.requestDTO.UpdateCategoryRequestDTO;
 import home.project.dto.responseDTO.CategoryResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
-import home.project.repository.CategoryRepository;
-import home.project.repository.ProductRepository;
+import home.project.repository.product.CategoryRepository;
+import home.project.repository.product.ProductRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

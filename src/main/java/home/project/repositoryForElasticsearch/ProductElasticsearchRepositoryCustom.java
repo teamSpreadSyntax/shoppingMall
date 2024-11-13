@@ -1,6 +1,5 @@
 package home.project.repositoryForElasticsearch;
 
-import home.project.domain.Product;
 import home.project.domain.elasticsearch.ProductDocument;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

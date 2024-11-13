@@ -2,7 +2,7 @@ package home.project.dto.kafkaDTO;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import home.project.domain.MemberGenderType;
+import home.project.domain.member.MemberGenderType;
 import lombok.Getter;
 import lombok.Setter;
 

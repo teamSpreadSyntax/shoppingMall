@@ -1,6 +1,5 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.Product;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import lombok.Getter;
 import lombok.Setter;
