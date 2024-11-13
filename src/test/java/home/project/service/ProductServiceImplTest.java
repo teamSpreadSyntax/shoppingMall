@@ -1,10 +1,10 @@
 //package home.project.service;
 //
-//import home.project.domain.Member;
-//import home.project.domain.Product;
+//import home.project.domain.member.Member;
+//import home.project.domain.product.Product;
 //import home.project.exceptions.exception.IdNotFoundException;
 //import home.project.exceptions.exception.NoChangeException;
-//import home.project.repository.ProductRepository;
+//import home.project.repository.product.ProductRepository;
 //import org.assertj.core.api.Assertions;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.Nested;

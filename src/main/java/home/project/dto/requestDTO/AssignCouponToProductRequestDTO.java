@@ -1,6 +1,6 @@
 package home.project.dto.requestDTO;
 
-import home.project.domain.AssignType;
+import home.project.domain.product.AssignType;
 import lombok.Getter;
 import lombok.Setter;
 

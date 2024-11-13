@@ -1,6 +1,6 @@
 package home.project.dto.requestDTO;
 
-import home.project.util.RegexPatterns;
+import home.project.service.util.RegexPatterns;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;

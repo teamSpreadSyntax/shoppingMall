@@ -1,6 +1,6 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.Member;
+import home.project.domain.member.Member;
 import lombok.Getter;
 import lombok.Setter;
 

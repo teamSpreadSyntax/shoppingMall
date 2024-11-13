@@ -1,12 +1,9 @@
 package home.project.response;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import home.project.util.CustomOptionalSerializer;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 @Setter

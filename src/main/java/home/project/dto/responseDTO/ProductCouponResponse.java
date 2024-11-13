@@ -1,9 +1,5 @@
 package home.project.dto.responseDTO;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import home.project.domain.Coupon;
-import home.project.domain.Product;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 

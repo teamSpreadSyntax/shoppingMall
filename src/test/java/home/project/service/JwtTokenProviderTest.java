@@ -1,8 +1,8 @@
 /*
 package home.project.service;
 
-import home.project.domain.Member;
-import home.project.domain.RoleType;
+import home.project.domain.member.Member;
+import home.project.domain.member.RoleType;
 import home.project.dto.responseDTO.TokenResponse;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;

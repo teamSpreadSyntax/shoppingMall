@@ -1,6 +1,5 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.Member;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +11,7 @@ public class NotificationResponse {
 
     private Long id;
 
-    private Member member;
+    private Long memberId;
 
     private String subject;
 
@@ -20,9 +19,9 @@ public class NotificationResponse {
 
     private LocalDateTime createdAt;
 
-    public NotificationResponse(Long id, Member member, String subject, String description, LocalDateTime createdAt) {
+    public NotificationResponse(Long id, Long memberId, String subject, String description, LocalDateTime createdAt) {
         this.id = id;
-        this.member = member;
+        this.memberId = memberId;
         this.subject = subject;
         this.description = description;
         this.createdAt = createdAt;

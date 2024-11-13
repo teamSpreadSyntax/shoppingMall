@@ -1,6 +1,6 @@
 package home.project.dto.requestDTO;
 
-import home.project.util.RegexPatterns;
+import home.project.service.util.RegexPatterns;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;

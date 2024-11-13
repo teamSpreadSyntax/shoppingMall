@@ -1,18 +1,10 @@
 package home.project.dto.requestDTO;
 
-import home.project.domain.Member;
-import home.project.domain.Orders;
-import home.project.domain.Product;
-import home.project.domain.QnAType;
+import home.project.domain.common.QnAType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 
 @Getter

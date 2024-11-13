@@ -2,16 +2,16 @@
 package home.project.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.project.config.SecurityConfig;
+import home.project.config.security.SecurityConfig;
 import home.project.domain.*;
 import home.project.dto.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.response.CustomOptionalResponseBody;
 import home.project.response.CustomOptionalResponseEntity;
-import home.project.service.JwtTokenProvider;
-import home.project.service.MemberService;
+import home.project.service.util.JwtTokenProvider;
+import home.project.service.member.MemberService;
 import home.project.service.RoleService;
-import home.project.util.ValidationCheck;
+import home.project.service.util.ValidationCheck;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

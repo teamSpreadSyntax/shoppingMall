@@ -1,12 +1,12 @@
 /*
 package home.project.service;
 
-import home.project.domain.Member;
-import home.project.domain.RoleType;
+import home.project.domain.member.Member;
+import home.project.domain.member.RoleType;
 import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.dto.responseDTO.RoleResponse;
 import home.project.dto.responseDTO.TokenResponse;
-import home.project.repository.MemberRepository;
+import home.project.repository.member.MemberRepository;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;

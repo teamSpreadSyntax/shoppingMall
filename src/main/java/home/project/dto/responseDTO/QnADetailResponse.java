@@ -1,7 +1,7 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.AnswerStatus;
-import home.project.domain.QnAType;
+import home.project.domain.common.AnswerStatus;
+import home.project.domain.common.QnAType;
 import lombok.Getter;
 import lombok.Setter;
 
