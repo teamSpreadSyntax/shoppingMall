@@ -1,6 +1,6 @@
 package home.project.controller.user;
 
-import home.project.dto.responseDTO.*;
+import home.project.dto.responseDTO.CouponResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.promotion.CouponService;
 import home.project.service.util.PageUtil;
@@ -21,7 +21,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "쿠폰", description = "쿠폰관련 API입니다")
 @RequestMapping("/api/coupon")

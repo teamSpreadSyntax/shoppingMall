@@ -2,9 +2,9 @@ package home.project.service.member;
 
 import home.project.domain.member.Member;
 import home.project.domain.member.RoleType;
+import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.dto.responseDTO.RoleResponse;
 import home.project.dto.responseDTO.TokenResponse;
-import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.repository.member.MemberRepository;
 import home.project.service.util.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;

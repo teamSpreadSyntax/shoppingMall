@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.product;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,20 +8,19 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.product.ProductCoupon;
 
 
 /**
- * QProductCoupon is a Querydsl query type for ProductCoupon
+ * QMemberCoupon is a Querydsl query type for MemberCoupon
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QProductCoupon extends EntityPathBase<ProductCoupon> {
+public class QMemberCoupon extends EntityPathBase<MemberCoupon> {
 
-    private static final long serialVersionUID = 2023063695L;
+    private static final long serialVersionUID = 1317555749L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
-    public static final QProductCoupon productCoupon = new QProductCoupon("productCoupon");
+    public static final QMemberCoupon memberCoupon = new QMemberCoupon("memberCoupon");
 
     public final QCoupon coupon;
 
@@ -31,30 +30,30 @@ public class QProductCoupon extends EntityPathBase<ProductCoupon> {
 
     public final BooleanPath isUsed = createBoolean("isUsed");
 
-    public final QProduct product;
+    public final home.project.domain.member.QMember member;
 
     public final DateTimePath<java.time.LocalDateTime> usedAt = createDateTime("usedAt", java.time.LocalDateTime.class);
 
-    public QProductCoupon(String variable) {
-        this(ProductCoupon.class, forVariable(variable), INITS);
+    public QMemberCoupon(String variable) {
+        this(MemberCoupon.class, forVariable(variable), INITS);
     }
 
-    public QProductCoupon(Path<? extends ProductCoupon> path) {
+    public QMemberCoupon(Path<? extends MemberCoupon> path) {
         this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
-    public QProductCoupon(PathMetadata metadata) {
+    public QMemberCoupon(PathMetadata metadata) {
         this(metadata, PathInits.getFor(metadata, INITS));
     }
 
-    public QProductCoupon(PathMetadata metadata, PathInits inits) {
-        this(ProductCoupon.class, metadata, inits);
+    public QMemberCoupon(PathMetadata metadata, PathInits inits) {
+        this(MemberCoupon.class, metadata, inits);
     }
 
-    public QProductCoupon(Class<? extends ProductCoupon> type, PathMetadata metadata, PathInits inits) {
+    public QMemberCoupon(Class<? extends MemberCoupon> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.coupon = inits.isInitialized("coupon") ? new QCoupon(forProperty("coupon")) : null;
-        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.member = inits.isInitialized("member") ? new home.project.domain.member.QMember(forProperty("member")) : null;
     }
 
 }

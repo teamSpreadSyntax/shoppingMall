@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.delivery;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,9 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.delivery.DeliveryStatusType;
-import home.project.domain.delivery.DeliveryType;
-import home.project.domain.delivery.Shipping;
 
 
 /**
@@ -19,7 +16,7 @@ import home.project.domain.delivery.Shipping;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QShipping extends EntityPathBase<Shipping> {
 
-    private static final long serialVersionUID = -166918444L;
+    private static final long serialVersionUID = -1484207038L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -43,7 +40,7 @@ public class QShipping extends EntityPathBase<Shipping> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final QOrders orders;
+    public final home.project.domain.order.QOrders orders;
 
     public final StringPath shippingMessage = createString("shippingMessage");
 
@@ -65,7 +62,7 @@ public class QShipping extends EntityPathBase<Shipping> {
 
     public QShipping(Class<? extends Shipping> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.orders = inits.isInitialized("orders") ? new QOrders(forProperty("orders"), inits.get("orders")) : null;
+        this.orders = inits.isInitialized("orders") ? new home.project.domain.order.QOrders(forProperty("orders"), inits.get("orders")) : null;
     }
 
 }

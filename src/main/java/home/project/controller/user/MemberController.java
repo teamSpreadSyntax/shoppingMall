@@ -7,12 +7,10 @@ import home.project.dto.responseDTO.MemberResponseForUser;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.member.MemberService;
-
 import home.project.service.util.PageUtil;
 import home.project.service.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

@@ -1,9 +1,9 @@
 package home.project.domain.member;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import home.project.domain.common.WishList;
 import home.project.domain.notification.Notification;
 import home.project.domain.order.Orders;
-import home.project.domain.common.WishList;
 import home.project.domain.product.MemberCoupon;
 import jakarta.persistence.*;
 import lombok.Getter;

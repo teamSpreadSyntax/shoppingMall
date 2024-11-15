@@ -2,10 +2,10 @@ package home.project.repository.product;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import home.project.domain.*;
 import home.project.domain.delivery.DeliveryStatusType;
-import home.project.domain.product.Category;
-import home.project.domain.product.Product;
+import home.project.domain.delivery.QShipping;
+import home.project.domain.order.QOrders;
+import home.project.domain.product.*;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

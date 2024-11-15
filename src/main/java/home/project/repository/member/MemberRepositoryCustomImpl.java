@@ -3,7 +3,7 @@ package home.project.repository.member;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import home.project.domain.member.Member;
-import home.project.domain.QMember;
+import home.project.domain.member.QMember;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

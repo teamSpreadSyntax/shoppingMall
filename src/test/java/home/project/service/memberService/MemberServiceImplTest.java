@@ -1,3 +1,29 @@
+import home.project.domain.member.Member;
+import home.project.domain.member.RoleType;
+import home.project.dto.requestDTO.CreateMemberRequestDTO;
+import home.project.dto.requestDTO.UpdateMemberRequestDTO;
+import home.project.dto.responseDTO.TokenResponse;
+import home.project.repository.member.MemberRepository;
+import home.project.service.member.MemberService;
+import home.project.service.util.JwtTokenProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static org.hamcrest.Matchers.any;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 //package home.project.service;
 //
 //import home.project.domain.member.Member;

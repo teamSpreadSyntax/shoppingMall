@@ -2,8 +2,11 @@ package home.project.repository.order;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import home.project.domain.*;
+import home.project.domain.member.QMember;
 import home.project.domain.order.Orders;
+import home.project.domain.order.QOrders;
+import home.project.domain.product.QProduct;
+import home.project.domain.product.QProductOrder;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

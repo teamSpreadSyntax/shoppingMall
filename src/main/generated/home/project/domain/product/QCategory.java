@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.product;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,8 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.product.Category;
-import home.project.domain.product.Product;
 
 
 /**
@@ -18,7 +16,7 @@ import home.project.domain.product.Product;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QCategory extends EntityPathBase<Category> {
 
-    private static final long serialVersionUID = 399828516L;
+    private static final long serialVersionUID = -1880178109L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

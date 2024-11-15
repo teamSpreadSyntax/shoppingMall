@@ -3,7 +3,7 @@ package home.project.repository.promotion;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import home.project.domain.promotion.Event;
-import home.project.domain.QEvent;
+import home.project.domain.promotion.QEvent;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

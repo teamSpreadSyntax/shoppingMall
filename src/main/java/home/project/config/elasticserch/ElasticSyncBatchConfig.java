@@ -1,13 +1,13 @@
 package home.project.config.elasticserch;
 
-import home.project.domain.product.Coupon;
-import home.project.domain.member.Member;
-import home.project.domain.order.Orders;
-import home.project.domain.product.Product;
 import home.project.domain.elasticsearch.CouponDocument;
 import home.project.domain.elasticsearch.MemberDocument;
 import home.project.domain.elasticsearch.OrdersDocument;
 import home.project.domain.elasticsearch.ProductDocument;
+import home.project.domain.member.Member;
+import home.project.domain.order.Orders;
+import home.project.domain.product.Coupon;
+import home.project.domain.product.Product;
 import home.project.service.util.Converter;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.RequiredArgsConstructor;

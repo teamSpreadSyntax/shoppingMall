@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.promotion;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,7 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.promotion.EventCoupon;
 
 
 /**
@@ -17,13 +16,13 @@ import home.project.domain.promotion.EventCoupon;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QEventCoupon extends EntityPathBase<EventCoupon> {
 
-    private static final long serialVersionUID = -546121606L;
+    private static final long serialVersionUID = 504950575L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QEventCoupon eventCoupon = new QEventCoupon("eventCoupon");
 
-    public final QCoupon coupon;
+    public final home.project.domain.product.QCoupon coupon;
 
     public final QEvent event;
 
@@ -49,7 +48,7 @@ public class QEventCoupon extends EntityPathBase<EventCoupon> {
 
     public QEventCoupon(Class<? extends EventCoupon> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.coupon = inits.isInitialized("coupon") ? new QCoupon(forProperty("coupon")) : null;
+        this.coupon = inits.isInitialized("coupon") ? new home.project.domain.product.QCoupon(forProperty("coupon")) : null;
         this.event = inits.isInitialized("event") ? new QEvent(forProperty("event")) : null;
     }
 

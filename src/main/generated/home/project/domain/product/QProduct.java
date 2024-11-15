@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.product;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,10 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.common.WishList;
-import home.project.domain.product.Product;
-import home.project.domain.product.ProductCoupon;
-import home.project.domain.product.ProductOrder;
 
 
 /**
@@ -20,7 +16,7 @@ import home.project.domain.product.ProductOrder;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QProduct extends EntityPathBase<Product> {
 
-    private static final long serialVersionUID = -2099321079L;
+    private static final long serialVersionUID = -233207030L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -59,8 +55,6 @@ public class QProduct extends EntityPathBase<Product> {
     public final NumberPath<Long> soldQuantity = createNumber("soldQuantity", Long.class);
 
     public final NumberPath<Long> stock = createNumber("stock", Long.class);
-
-    public final ListPath<WishList, QWishList> wishLists = this.<WishList, QWishList>createList("wishLists", WishList.class, QWishList.class, PathInits.DIRECT2);
 
     public QProduct(String variable) {
         this(Product.class, forVariable(variable), INITS);

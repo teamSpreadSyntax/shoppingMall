@@ -2,8 +2,8 @@ package home.project.domain.elasticsearch;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.elasticsearch.annotations.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.elasticsearch.annotations.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,21 +12,24 @@ import java.util.List;
 @Getter
 @Setter
 @Document(indexName = "products")
+@Setting(settingPath = "elasticsearch/product-settings.json")
 public class ProductDocument {
     @Id
     private Long id;
 
     @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer"),
             otherFields = {
+                    @InnerField(suffix = "eng", type = FieldType.Text, analyzer = "korean_english_analyzer"),
                     @InnerField(suffix = "keyword", type = FieldType.Keyword)
             }
     )
     private String name;
 
     @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer"),
             otherFields = {
+                    @InnerField(suffix = "eng", type = FieldType.Text, analyzer = "korean_english_analyzer"),
                     @InnerField(suffix = "keyword", type = FieldType.Keyword)
             }
     )
@@ -45,8 +48,9 @@ public class ProductDocument {
     private Integer discountRate = 0;
 
     @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+            mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer"),
             otherFields = {
+                    @InnerField(suffix = "eng", type = FieldType.Text, analyzer = "korean_english_analyzer"),
                     @InnerField(suffix = "keyword", type = FieldType.Keyword)
             }
     )
@@ -86,8 +90,9 @@ public class ProductDocument {
         private String code;
 
         @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer"),
                 otherFields = {
+                        @InnerField(suffix = "eng", type = FieldType.Text, analyzer = "korean_english_analyzer"),
                         @InnerField(suffix = "keyword", type = FieldType.Keyword)
                 }
         )
@@ -100,8 +105,9 @@ public class ProductDocument {
         private Long parentId;
 
         @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer"),
                 otherFields = {
+                        @InnerField(suffix = "eng", type = FieldType.Text, analyzer = "korean_english_analyzer"),
                         @InnerField(suffix = "keyword", type = FieldType.Keyword)
                 }
         )
@@ -136,8 +142,9 @@ public class ProductDocument {
             private Long id;
 
             @MultiField(
-                    mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                    mainField = @Field(type = FieldType.Text, analyzer = "nori_analyzer"),
                     otherFields = {
+                            @InnerField(suffix = "eng", type = FieldType.Text, analyzer = "korean_english_analyzer"),
                             @InnerField(suffix = "keyword", type = FieldType.Keyword)
                     }
             )

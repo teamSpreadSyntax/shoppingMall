@@ -1,8 +1,8 @@
 package home.project.service.member;
 
+import home.project.domain.elasticsearch.MemberDocument;
 import home.project.domain.member.Member;
 import home.project.domain.member.RoleType;
-import home.project.domain.elasticsearch.MemberDocument;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
@@ -15,8 +15,8 @@ import home.project.repository.member.MemberRepository;
 import home.project.repositoryForElasticsearch.MemberElasticsearchRepository;
 import home.project.service.util.Converter;
 import home.project.service.util.EmailService;
-import home.project.service.util.JwtTokenProvider;
 import home.project.service.util.IndexToElasticsearch;
+import home.project.service.util.JwtTokenProvider;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
