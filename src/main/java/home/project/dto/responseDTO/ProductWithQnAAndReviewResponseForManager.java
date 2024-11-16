@@ -90,15 +90,13 @@ public class ProductWithQnAAndReviewResponseForManager {
 
     private String color;
 
-    private Page<QnADetailResponse> qnADetailResponses;
+    private List<QnADetailResponse> qnADetailResponses;
 
-    private Page<ReviewDetailResponse> reviewDetailResponses;
+    private List<ReviewDetailResponse> reviewDetailResponses;
 
     private List<ProductCouponResponse> productCouponResponse;
 
-
-
-    public ProductWithQnAAndReviewResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, Page<QnADetailResponse> qnADetailResponses, Page<ReviewDetailResponse> reviewDetailResponses, List<ProductCouponResponse> productCouponResponse) {
+    public ProductWithQnAAndReviewResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;

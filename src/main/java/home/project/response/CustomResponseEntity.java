@@ -1,11 +1,13 @@
 package home.project.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
+@JsonIgnoreProperties({"headers", "statusCode", "statusCodeValue"})
 public class CustomResponseEntity<T> extends ResponseEntity<CustomResponseBody<T>> {
 
     public CustomResponseEntity(List<T> content, String responseMessage, HttpStatus status, long totalCount, int page) {

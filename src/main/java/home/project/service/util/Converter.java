@@ -156,6 +156,25 @@ public class Converter {
         ));
     }
 
+    public List<QnADetailResponse> convertFromPagedQnAToListQnADetailResponse(Page<QnA> pagedQna) {
+        return pagedQna.stream()
+                .map(qnA -> new QnADetailResponse(
+                        qnA.getId(),
+                        qnA.getQnAType(),
+                        qnA.getSubject(),
+                        qnA.getProduct() != null ? qnA.getProduct().getProductNum() : null,
+                        qnA.getOrders() != null ? qnA.getOrders().getOrderNum() : null,
+                        qnA.getDescription(),
+                        qnA.getMember().getEmail(),
+                        qnA.getCreateAt(),
+                        qnA.getAnswer(),
+                        qnA.getAnswerDate(),
+                        qnA.getAnswerer() != null ? qnA.getAnswerer().getEmail() : null,
+                        qnA.getAnswerStatus()
+                ))
+                .toList(); // Stream을 List로 변환
+    }
+
     public Page<QnADetailResponse> convertFromPagedQnAToPagedQnADetailResponse(Page<QnA> pagedQna) {
         return pagedQna.map(qnA -> new QnADetailResponse(
                 qnA.getId(),
@@ -172,6 +191,7 @@ public class Converter {
                 qnA.getAnswerStatus()
         ));
     }
+
 
     public Page<QnAResponse> convertFromPagedQnAToPagedQnAResponse(Page<QnA> pagedQna) {
         return pagedQna.map(qnA -> new QnAResponse(
@@ -257,8 +277,8 @@ public class Converter {
                 product.getImageUrl(),
                 product.getSize(),
                 product.getColor(),
-                convertFromPagedQnAToPagedQnADetailResponse(qnAs),
-                convertFromPagedReviewToPagedReviewDetailResponse(reviews),
+                convertFromPagedQnAToListQnADetailResponse(qnAs),
+                convertFromPagedReviewToListReviewDetailResponse(reviews),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
         );
     }
@@ -379,8 +399,8 @@ public class Converter {
                 product.getSize(),
                 product.getColor(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
-                convertFromPagedQnAToPagedQnADetailResponse(qnAs),
-                convertFromPagedReviewToPagedReviewDetailResponse(reviews)
+                convertFromPagedQnAToListQnADetailResponse(qnAs),
+                convertFromPagedReviewToListReviewDetailResponse(reviews)
         );
     }
 
@@ -417,28 +437,30 @@ public class Converter {
                 product.getSize(),
                 product.getColor(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons()),
-                convertFromPagedQnAToPagedQnADetailResponse(qnAs),
-                convertFromPagedReviewToPagedReviewDetailResponse(reviews)
+                convertFromListedQnAToListedQnADetailResponse(qnAs),
+                convertFromPagedReviewToListReviewDetailResponse(reviews)
         );
     }
 
-    public Page<ReviewDetailResponse> convertFromPagedReviewToPagedReviewDetailResponse(Page<Review> pagedReview) {
-        return pagedReview.map(review -> new ReviewDetailResponse(
-                review.getId(),
-                review.getMember().getEmail(),
-                review.getProduct().getName(),
-                review.getCreateAt(),
-                review.getRating(),
-                review.getDescription(),
-                review.getImageUrl1(),
-                review.getImageUrl2(),
-                review.getImageUrl3(),
-                review.getHelpful()
-        ));
+    public List<ReviewDetailResponse> convertFromPagedReviewToListReviewDetailResponse(Page<Review> pagedReview) {
+        return pagedReview.stream()
+                .map(review -> new ReviewDetailResponse(
+                        review.getId(),
+                        review.getMember().getEmail(),
+                        review.getProduct().getName(),
+                        review.getCreateAt(),
+                        review.getRating(),
+                        review.getDescription(),
+                        review.getImageUrl1(),
+                        review.getImageUrl2(),
+                        review.getImageUrl3(),
+                        review.getHelpful()
+                ))
+                .toList(); // Stream을 List로 변환
     }
 
 
-    public List<QnADetailResponse> convertFromListedQnAToListedQnADetailResponse(List<QnA> qnAs) {
+    public List<QnADetailResponse> convertFromListedQnAToListedQnADetailResponse(Page<QnA> qnAs) {
         if (qnAs == null) {
             return new ArrayList<>(); // null 체크
         }

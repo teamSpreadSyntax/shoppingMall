@@ -124,7 +124,8 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    /*private Member authentification(){
+    /*
+        private Member authentification(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
