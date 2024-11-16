@@ -21,6 +21,7 @@ public class WebSocketNotificationService {
 
     @MessageMapping("/chat/send")
     public void sendMsg(@Payload Map<String,Object> data){
+        System.out.println("Received message on /chat/send: " + data);
         messagingTemplate.convertAndSend("/topic/1",data);
     }
 }
