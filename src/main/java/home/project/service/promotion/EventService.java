@@ -1,7 +1,7 @@
 package home.project.service.promotion;
 
 import home.project.dto.requestDTO.CreateEventRequestDTO;
-import home.project.dto.responseDTO.*;
+import home.project.dto.responseDTO.EventResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

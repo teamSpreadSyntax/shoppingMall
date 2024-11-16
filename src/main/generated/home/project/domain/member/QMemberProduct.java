@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.member;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,7 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.member.MemberProduct;
 
 
 /**
@@ -17,7 +16,7 @@ import home.project.domain.member.MemberProduct;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QMemberProduct extends EntityPathBase<MemberProduct> {
 
-    private static final long serialVersionUID = -396281969L;
+    private static final long serialVersionUID = 1928619143L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -27,7 +26,7 @@ public class QMemberProduct extends EntityPathBase<MemberProduct> {
 
     public final QMember member;
 
-    public final QProduct product;
+    public final home.project.domain.product.QProduct product;
 
     public QMemberProduct(String variable) {
         this(MemberProduct.class, forVariable(variable), INITS);
@@ -48,7 +47,7 @@ public class QMemberProduct extends EntityPathBase<MemberProduct> {
     public QMemberProduct(Class<? extends MemberProduct> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
-        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.product = inits.isInitialized("product") ? new home.project.domain.product.QProduct(forProperty("product"), inits.get("product")) : null;
     }
 
 }

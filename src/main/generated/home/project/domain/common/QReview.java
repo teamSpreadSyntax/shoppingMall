@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.common;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,8 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.common.Rating;
-import home.project.domain.common.Review;
 
 
 /**
@@ -18,7 +16,7 @@ import home.project.domain.common.Review;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QReview extends EntityPathBase<Review> {
 
-    private static final long serialVersionUID = 1640313342L;
+    private static final long serialVersionUID = 556785557L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -38,9 +36,9 @@ public class QReview extends EntityPathBase<Review> {
 
     public final StringPath imageUrl3 = createString("imageUrl3");
 
-    public final QMember member;
+    public final home.project.domain.member.QMember member;
 
-    public final QProduct product;
+    public final home.project.domain.product.QProduct product;
 
     public final EnumPath<Rating> rating = createEnum("rating", Rating.class);
 
@@ -62,8 +60,8 @@ public class QReview extends EntityPathBase<Review> {
 
     public QReview(Class<? extends Review> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
-        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.member = inits.isInitialized("member") ? new home.project.domain.member.QMember(forProperty("member")) : null;
+        this.product = inits.isInitialized("product") ? new home.project.domain.product.QProduct(forProperty("product"), inits.get("product")) : null;
     }
 
 }

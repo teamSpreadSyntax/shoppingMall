@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.common;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,7 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.common.WishList;
 
 
 /**
@@ -17,7 +16,7 @@ import home.project.domain.common.WishList;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QWishList extends EntityPathBase<WishList> {
 
-    private static final long serialVersionUID = -620276981L;
+    private static final long serialVersionUID = 1786574562L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -29,9 +28,9 @@ public class QWishList extends EntityPathBase<WishList> {
 
     public final BooleanPath liked = createBoolean("liked");
 
-    public final QMember member;
+    public final home.project.domain.member.QMember member;
 
-    public final QProduct product;
+    public final home.project.domain.product.QProduct product;
 
     public QWishList(String variable) {
         this(WishList.class, forVariable(variable), INITS);
@@ -51,8 +50,8 @@ public class QWishList extends EntityPathBase<WishList> {
 
     public QWishList(Class<? extends WishList> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
-        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.member = inits.isInitialized("member") ? new home.project.domain.member.QMember(forProperty("member")) : null;
+        this.product = inits.isInitialized("product") ? new home.project.domain.product.QProduct(forProperty("product"), inits.get("product")) : null;
     }
 
 }

@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.member;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,10 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.common.WishList;
-import home.project.domain.member.*;
-import home.project.domain.order.Orders;
-import home.project.domain.product.MemberCoupon;
 
 
 /**
@@ -20,7 +16,7 @@ import home.project.domain.product.MemberCoupon;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QMember extends EntityPathBase<Member> {
 
-    private static final long serialVersionUID = 1496892736L;
+    private static final long serialVersionUID = 1921105736L;
 
     public static final QMember member = new QMember("member1");
 
@@ -38,13 +34,15 @@ public class QMember extends EntityPathBase<Member> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ListPath<MemberCoupon, QMemberCoupon> memberCoupons = this.<MemberCoupon, QMemberCoupon>createList("memberCoupons", MemberCoupon.class, QMemberCoupon.class, PathInits.DIRECT2);
+    public final ListPath<home.project.domain.product.MemberCoupon, home.project.domain.product.QMemberCoupon> memberCoupons = this.<home.project.domain.product.MemberCoupon, home.project.domain.product.QMemberCoupon>createList("memberCoupons", home.project.domain.product.MemberCoupon.class, home.project.domain.product.QMemberCoupon.class, PathInits.DIRECT2);
 
     public final ListPath<MemberProduct, QMemberProduct> memberProducts = this.<MemberProduct, QMemberProduct>createList("memberProducts", MemberProduct.class, QMemberProduct.class, PathInits.DIRECT2);
 
     public final StringPath name = createString("name");
 
-    public final ListPath<Orders, QOrders> orders = this.<Orders, QOrders>createList("orders", Orders.class, QOrders.class, PathInits.DIRECT2);
+    public final ListPath<home.project.domain.notification.Notification, home.project.domain.notification.QNotification> notifications = this.<home.project.domain.notification.Notification, home.project.domain.notification.QNotification>createList("notifications", home.project.domain.notification.Notification.class, home.project.domain.notification.QNotification.class, PathInits.DIRECT2);
+
+    public final ListPath<home.project.domain.order.Orders, home.project.domain.order.QOrders> orders = this.<home.project.domain.order.Orders, home.project.domain.order.QOrders>createList("orders", home.project.domain.order.Orders.class, home.project.domain.order.QOrders.class, PathInits.DIRECT2);
 
     public final StringPath password = createString("password");
 
@@ -58,7 +56,7 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath thirdAddress = createString("thirdAddress");
 
-    public final ListPath<WishList, QWishList> wishLists = this.<WishList, QWishList>createList("wishLists", WishList.class, QWishList.class, PathInits.DIRECT2);
+    public final ListPath<home.project.domain.common.WishList, home.project.domain.common.QWishList> wishLists = this.<home.project.domain.common.WishList, home.project.domain.common.QWishList>createList("wishLists", home.project.domain.common.WishList.class, home.project.domain.common.QWishList.class, PathInits.DIRECT2);
 
     public QMember(String variable) {
         super(Member.class, forVariable(variable));

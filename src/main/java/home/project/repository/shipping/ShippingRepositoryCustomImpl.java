@@ -2,7 +2,8 @@ package home.project.repository.shipping;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import home.project.domain.QShipping;
+
+import home.project.domain.delivery.QShipping;
 import home.project.domain.delivery.Shipping;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;

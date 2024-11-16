@@ -1,11 +1,11 @@
 package home.project.dto.requestDTO;
 
+import home.project.service.util.RegexPatterns;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.Setter;
-import home.project.service.util.RegexPatterns;
 
 /**
  * 회원 정보 업데이트를 위한 요청 데이터 전송 객체(DTO)입니다.

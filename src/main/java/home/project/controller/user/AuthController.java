@@ -1,7 +1,7 @@
 package home.project.controller.user;
 
-import home.project.dto.responseDTO.TokenResponse;
 import home.project.dto.requestDTO.LoginRequestDTO;
+import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.member.AuthService;
 import home.project.service.util.PageUtil;
@@ -12,12 +12,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 
 @Tag(name = "로그인, 로그아웃, 권한", description = "로그인, 로그아웃, 권한 관련 API입니다.")
 @RequestMapping(path = "/api/auth")

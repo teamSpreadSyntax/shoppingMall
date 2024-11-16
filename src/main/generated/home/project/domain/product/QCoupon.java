@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.product;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,9 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.product.Coupon;
-import home.project.domain.product.MemberCoupon;
-import home.project.domain.product.ProductCoupon;
 
 
 /**
@@ -19,7 +16,7 @@ import home.project.domain.product.ProductCoupon;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QCoupon extends EntityPathBase<Coupon> {
 
-    private static final long serialVersionUID = 1220088524L;
+    private static final long serialVersionUID = 864643755L;
 
     public static final QCoupon coupon = new QCoupon("coupon");
 

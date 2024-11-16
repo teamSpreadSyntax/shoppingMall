@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.common;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,9 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.common.AnswerStatus;
-import home.project.domain.common.QnA;
-import home.project.domain.common.QnAType;
 
 
 /**
@@ -19,7 +16,7 @@ import home.project.domain.common.QnAType;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QQnA extends EntityPathBase<QnA> {
 
-    private static final long serialVersionUID = 1742204126L;
+    private static final long serialVersionUID = -123535705L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
@@ -29,7 +26,7 @@ public class QQnA extends EntityPathBase<QnA> {
 
     public final DateTimePath<java.time.LocalDateTime> answerDate = createDateTime("answerDate", java.time.LocalDateTime.class);
 
-    public final QMember answerer;
+    public final home.project.domain.member.QMember answerer;
 
     public final EnumPath<AnswerStatus> answerStatus = createEnum("answerStatus", AnswerStatus.class);
 
@@ -39,11 +36,11 @@ public class QQnA extends EntityPathBase<QnA> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final QMember member;
+    public final home.project.domain.member.QMember member;
 
-    public final QOrders orders;
+    public final home.project.domain.order.QOrders orders;
 
-    public final QProduct product;
+    public final home.project.domain.product.QProduct product;
 
     public final EnumPath<QnAType> qnAType = createEnum("qnAType", QnAType.class);
 
@@ -67,10 +64,10 @@ public class QQnA extends EntityPathBase<QnA> {
 
     public QQnA(Class<? extends QnA> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.answerer = inits.isInitialized("answerer") ? new QMember(forProperty("answerer")) : null;
-        this.member = inits.isInitialized("member") ? new QMember(forProperty("member")) : null;
-        this.orders = inits.isInitialized("orders") ? new QOrders(forProperty("orders"), inits.get("orders")) : null;
-        this.product = inits.isInitialized("product") ? new QProduct(forProperty("product"), inits.get("product")) : null;
+        this.answerer = inits.isInitialized("answerer") ? new home.project.domain.member.QMember(forProperty("answerer")) : null;
+        this.member = inits.isInitialized("member") ? new home.project.domain.member.QMember(forProperty("member")) : null;
+        this.orders = inits.isInitialized("orders") ? new home.project.domain.order.QOrders(forProperty("orders"), inits.get("orders")) : null;
+        this.product = inits.isInitialized("product") ? new home.project.domain.product.QProduct(forProperty("product"), inits.get("product")) : null;
     }
 
 }

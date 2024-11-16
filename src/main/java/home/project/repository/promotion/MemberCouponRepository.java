@@ -1,8 +1,8 @@
 package home.project.repository.promotion;
 
 
-import home.project.domain.product.Coupon;
 import home.project.domain.member.Member;
+import home.project.domain.product.Coupon;
 import home.project.domain.product.MemberCoupon;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -3,7 +3,7 @@ package home.project.repository.promotion;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import home.project.domain.product.Coupon;
-import home.project.domain.QCoupon;
+import home.project.domain.product.QCoupon;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

@@ -1,4 +1,4 @@
-package home.project.domain;
+package home.project.domain.member;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -8,7 +8,6 @@ import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathInits;
-import home.project.domain.member.MemberMessage;
 
 
 /**
@@ -17,7 +16,7 @@ import home.project.domain.member.MemberMessage;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QMemberMessage extends EntityPathBase<MemberMessage> {
 
-    private static final long serialVersionUID = 868117159L;
+    private static final long serialVersionUID = -1101949025L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 

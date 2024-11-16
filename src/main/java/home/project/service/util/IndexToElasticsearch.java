@@ -1,7 +1,5 @@
 package home.project.service.util;
 
-import home.project.domain.elasticsearch.MemberDocument;
-import home.project.domain.elasticsearch.ProductDocument;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
