@@ -50,6 +50,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public TokenResponse socialLogin(String email) {
+        UserDetails member = userDetailsService.loadUserByUsername(email);
+
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, "null"));
+        TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
+
+        Long id = memberService.findByEmail(email).getId();
+        RoleType role = memberService.findById(id).getRole();
+        TokenResponse.setRole(role);
+        return TokenResponse;
+    }
+
+    @Override
     public TokenResponse refreshToken(String refreshToken) {
         TokenResponse newTokenDto = jwtTokenProvider.refreshAccessToken(refreshToken);
 

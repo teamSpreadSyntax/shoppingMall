@@ -2,6 +2,7 @@ package home.project.service.member;
 
 import home.project.domain.member.Member;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
+import home.project.dto.requestDTO.CreateSocialMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
 import home.project.dto.responseDTO.MemberResponse;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 public interface MemberService {
 
     TokenResponse join(CreateMemberRequestDTO member);
+
+    TokenResponse socialJoin(CreateSocialMemberRequestDTO member);
 
     MemberResponse memberInfo();
 

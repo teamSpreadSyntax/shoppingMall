@@ -18,10 +18,7 @@ import home.project.domain.order.Cart;
 import home.project.domain.order.Orders;
 import home.project.domain.product.*;
 import home.project.domain.promotion.Event;
-import home.project.dto.requestDTO.CreateMemberRequestDTO;
-import home.project.dto.requestDTO.CreateOrderRequestDTO;
-import home.project.dto.requestDTO.CreateShippingRequestDTO;
-import home.project.dto.requestDTO.ProductDTOForOrder;
+import home.project.dto.requestDTO.*;
 import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.member.MemberRepository;
@@ -55,6 +52,17 @@ public class Converter {
         member.setGender(createMemberRequestDTO.getGender());
         member.setBirthDate(createMemberRequestDTO.getBirthDate());
         member.setDefaultAddress(createMemberRequestDTO.getDefaultAddress());
+        return member;
+    }
+    public Member convertFromCreateSocialMemberRequestDTOToMember(CreateSocialMemberRequestDTO createSocialMemberRequestDTO) {
+        Member member = new Member();
+        member.setEmail(createSocialMemberRequestDTO.getEmail());
+        member.setPassword(null);
+        member.setName(createSocialMemberRequestDTO.getName());
+        member.setPhone(createSocialMemberRequestDTO.getPhone());
+        member.setGender(createSocialMemberRequestDTO.getGender());
+        member.setBirthDate(createSocialMemberRequestDTO.getBirthDate());
+        member.setDefaultAddress(createSocialMemberRequestDTO.getDefaultAddress());
         return member;
     }
 
