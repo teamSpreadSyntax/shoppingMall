@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 public interface AuthService {
     TokenResponse login(LoginRequestDTO loginRequestDTO);
 
+    TokenResponse socialLogin(String email);
+
     TokenResponse refreshToken(String refreshToken);
 
     void addAuthority(Long id, RoleType authority);

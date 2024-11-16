@@ -4,6 +4,7 @@ import home.project.domain.elasticsearch.MemberDocument;
 import home.project.domain.member.Member;
 import home.project.domain.member.RoleType;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
+import home.project.dto.requestDTO.CreateSocialMemberRequestDTO;
 import home.project.dto.requestDTO.UpdateMemberRequestDTO;
 import home.project.dto.requestDTO.VerifyUserRequestDTO;
 import home.project.dto.responseDTO.MemberResponse;
@@ -84,6 +85,27 @@ public class MemberServiceImpl implements MemberService {
         TokenResponse.setRole(savedRole);
 
         return TokenResponse;
+    }
+
+    @Override
+    @Transactional
+    public TokenResponse socialJoin(CreateSocialMemberRequestDTO createSocialMemberRequestDTO) {
+
+        CreateMemberRequestDTO createMemberRequestDTO = new CreateMemberRequestDTO();
+        createMemberRequestDTO.setPassword("null");
+        createMemberRequestDTO.setPasswordConfirm("null");
+        createMemberRequestDTO.setEmail(createSocialMemberRequestDTO.getEmail());
+        createMemberRequestDTO.setName(createSocialMemberRequestDTO.getName());
+        createMemberRequestDTO.setPhone(createSocialMemberRequestDTO.getPhone());
+        createMemberRequestDTO.setGender(createSocialMemberRequestDTO.getGender());
+        createMemberRequestDTO.setBirthDate(createSocialMemberRequestDTO.getBirthDate());
+        createMemberRequestDTO.setDefaultAddress(createSocialMemberRequestDTO.getDefaultAddress());
+
+        return join(createMemberRequestDTO);
+
+
+
+
     }
 
     @Override

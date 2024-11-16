@@ -114,6 +114,15 @@ public class CouponServiceImpl implements CouponService{
         return converter.convertFromCouponToCouponResponse(findById(couponId));
     }
 
+    @Override
+    public Page<CouponResponse> findAllByMemberIdReturnCouponResponse(Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Long memberId = memberService.findByEmail(email).getId();
+        Page<Coupon> pagedCoupon = couponRepository.findAllByMemberId(memberId, pageable);
+        return converter.convertFromPagedCouponToPagedCouponResponse(pagedCoupon);
+    }
+
 
 
 
