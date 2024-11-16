@@ -26,12 +26,11 @@ public class ProductWithQnAAndReviewResponse {
 
     private List<ProductCouponResponse> productCouponResponses;
 
-    private Page<QnADetailResponse> qnADetailResponses;
+    private List<QnADetailResponse> qnADetailResponses;
 
-    private Page<ReviewDetailResponse> reviewDetailResponses;
+    private List<ReviewDetailResponse> reviewDetailResponses;
 
-
-    public ProductWithQnAAndReviewResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponses, Page<QnADetailResponse> qnADetailResponses, Page<ReviewDetailResponse> reviewDetailResponses) {
+    public ProductWithQnAAndReviewResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponses, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses) {
         this.id = id;
         this.name = name;
         this.brand = brand;

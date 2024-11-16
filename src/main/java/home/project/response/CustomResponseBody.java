@@ -8,8 +8,6 @@ import java.util.List;
 @Getter
 @Setter
 public class CustomResponseBody<T> {
-
-
     private Object result;
     private String responseMessage;
     private int status;

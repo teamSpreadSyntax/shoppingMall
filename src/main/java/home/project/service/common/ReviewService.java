@@ -14,6 +14,7 @@ public interface ReviewService {
     ReviewDetailResponse join(Long productOrderId, CreateReviewRequestDTO createReviewRequestDTO);
 
     Page<ReviewResponse> findAllMyReview(Pageable pageable);
+
     ReviewDetailResponse increaseHelpfulCount(Long reviewId);
 
     void deleteById(Long ReviewId);

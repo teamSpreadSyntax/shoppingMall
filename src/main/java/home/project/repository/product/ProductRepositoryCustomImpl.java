@@ -1,6 +1,7 @@
 package home.project.repository.product;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import home.project.domain.delivery.DeliveryStatusType;
 import home.project.domain.delivery.QShipping;
@@ -134,15 +135,24 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
 
     @Override
     public Page<Product> findAllByOrderByBrandAsc(Pageable pageable) {
+        // 결과 리스트 쿼리
         List<Product> results = queryFactory
                 .selectFrom(product)
-                .orderBy(product.brand.asc())
+                .where(product.id.in(
+                        JPAExpressions.select(product.id.min())
+                                .from(product)
+                                .groupBy(product.brand) // 브랜드별 그룹화
+                ))
+                .orderBy(product.brand.asc()) // 브랜드 기준 정렬
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        // 전체 브랜드 수 카운트
         long total = queryFactory
-                .selectFrom(product)
+                .select(product.brand)
+                .distinct()
+                .from(product)
                 .fetchCount();
 
         return new PageImpl<>(results, pageable, total);
