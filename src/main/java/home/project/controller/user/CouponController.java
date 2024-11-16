@@ -54,6 +54,31 @@ public class CouponController {
         return new CustomResponseEntity<>(couponResponse, successMessage, HttpStatus.OK);
     }
 
+    @Operation(summary = "회원 id로 쿠폰 조회 메서드", description = "회원 id로 쿠폰 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @GetMapping("/mycoupon")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findAllCouponByMemberId(
+            @PageableDefault(page = 1, size = 5)
+    @SortDefault.SortDefaults(
+            {@SortDefault(sort = "startDate", direction = Sort.Direction.ASC)})
+    @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<CouponResponse> pagedCouponResponse = couponService.findAllByMemberIdReturnCouponResponse(pageable);
+        long totalCount = pagedCouponResponse.getTotalElements();
+
+        int page = pagedCouponResponse.getNumber();
+
+        String successMessage = "내 전체 쿠폰입니다.";
+
+        return new CustomResponseEntity<>(pagedCouponResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
     @Operation(summary = "전체 쿠폰 조회 메서드", description = "전체 쿠폰 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",

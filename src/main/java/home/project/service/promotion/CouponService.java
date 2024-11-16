@@ -10,6 +10,8 @@ import home.project.dto.responseDTO.ProductCouponResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface CouponService {
     CouponResponse join(CreateCouponRequestDTO createCouponRequestDTO);
 
@@ -22,6 +24,8 @@ public interface CouponService {
     Page<CouponResponse> findCoupons(String name, String startDate, String endDate, String assignBy, String content, Pageable pageable);
 
     CouponResponse findByIdReturnCouponResponse(Long couponId);
+
+    Page<CouponResponse> findAllByMemberIdReturnCouponResponse(Pageable pageable);
 
     CouponResponse selectBestCouponForMember(Long productId);
 

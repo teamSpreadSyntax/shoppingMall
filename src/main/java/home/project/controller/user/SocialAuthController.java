@@ -3,6 +3,7 @@ package home.project.controller.user;
 import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.CreateSocialMemberRequestDTO;
 import home.project.dto.requestDTO.LoginRequestDTO;
+import home.project.dto.requestDTO.SocialLoginRequestDTO;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.member.AuthService;
@@ -48,7 +49,11 @@ public class SocialAuthController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
     })
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestParam("email") String email) {
+    public ResponseEntity<?> login(@RequestBody @Valid SocialLoginRequestDTO socialLoginRequestDTO, BindingResult bindingResult) {
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+        if (validationResponse != null) return validationResponse;
+
+        String email = socialLoginRequestDTO.getEmail();
 
         memberService.findByEmail(email);
 
