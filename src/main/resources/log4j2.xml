@@ -4,6 +4,7 @@
         <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</Property>
         <Property name="LOG_PATH">./logs</Property>
     </Properties>
+
     <Appenders>
         <!-- Console Appender -->
         <Console name="ConsoleAppender" target="SYSTEM_OUT">
@@ -27,8 +28,10 @@
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <Property name="bootstrap.servers">kafka:9092</Property>
             <Property name="compression.type">snappy</Property>
-            <Property name="batch.size">16384</Property>
-            <Property name="linger.ms">1000</Property>  <!-- 값을 증가시켜 배치 처리 향상 -->
+            <Property name="batch.size">32768</Property>
+            <Property name="linger.ms">2000</Property>
+            <Property name="buffer.memory">33554432</Property>
+            <Property name="max.block.ms">5000</Property>
             <Property name="client.id">application-logs-appender</Property>
             <Property name="acks">1</Property>
             <Property name="retries">3</Property>
@@ -39,8 +42,10 @@
             <PatternLayout pattern="${LOG_PATTERN}"/>
             <Property name="bootstrap.servers">kafka:9092</Property>
             <Property name="compression.type">snappy</Property>
-            <Property name="batch.size">16384</Property>
-            <Property name="linger.ms">1000</Property>  <!-- 값을 증가시켜 배치 처리 향상 -->
+            <Property name="batch.size">32768</Property>
+            <Property name="linger.ms">2000</Property>
+            <Property name="buffer.memory">33554432</Property>
+            <Property name="max.block.ms">5000</Property>
             <Property name="client.id">error-logs-appender</Property>
             <Property name="acks">1</Property>
             <Property name="retries">3</Property>
@@ -49,24 +54,52 @@
 
     <Loggers>
         <!-- Root Logger -->
-        <Root level="DEBUG">
+        <Root level="INFO">
             <AppenderRef ref="ConsoleAppender" />
             <AppenderRef ref="FileAppender" />
-            <AppenderRef ref="ApplicationKafkaAppender" level="DEBUG" />
+            <AppenderRef ref="ApplicationKafkaAppender" level="INFO" />
             <AppenderRef ref="ErrorKafkaAppender" level="ERROR" />
         </Root>
 
         <!-- Application Logger -->
-        <Logger name="home.project" level="DEBUG" additivity="false">
+        <Logger name="home.project" level="INFO" additivity="false">
             <AppenderRef ref="ConsoleAppender" />
             <AppenderRef ref="FileAppender" />
-            <AppenderRef ref="ApplicationKafkaAppender" level="DEBUG" />
+            <AppenderRef ref="ApplicationKafkaAppender" level="INFO" />
             <AppenderRef ref="ErrorKafkaAppender" level="ERROR" />
         </Logger>
 
-        <!-- Kafka 관련 로그 레벨 조정 -->
-        <Logger name="org.apache.kafka" level="ERROR" additivity="false">  <!-- WARN에서 ERROR로 변경 -->
+        <!-- Framework Loggers -->
+        <Logger name="org.springframework" level="WARN" additivity="false">
             <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+
+        <Logger name="org.hibernate" level="WARN" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+
+        <Logger name="org.apache.kafka" level="ERROR" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+
+        <!-- Security Related Loggers -->
+        <Logger name="org.springframework.security" level="WARN" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+
+        <!-- Database Related Loggers -->
+        <Logger name="org.hibernate.SQL" level="WARN" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender" />
+        </Logger>
+
+        <Logger name="org.hibernate.type.descriptor.sql" level="WARN" additivity="false">
+            <AppenderRef ref="ConsoleAppender" />
+            <AppenderRef ref="FileAppender" />
         </Logger>
     </Loggers>
 </Configuration>
