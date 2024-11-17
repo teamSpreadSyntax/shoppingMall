@@ -35,7 +35,7 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 
 # Add Let’s Encrypt SSL certificates
-COPY keystore.jks /app/keystore.jks
+COPY pojectkkk.p12 /app/pojectkkk.p12
 
 
 # wait-for-it.sh script for dependency checks
@@ -48,4 +48,4 @@ RUN chmod +x /app/wait-for-it.sh
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.ssl.key-store=/app/keystore.jks", "-Dserver.ssl.key-store-password=changeit", "-Dserver.ssl.key-store-type=JKS", "-Dserver.ssl.key-alias=tomcat", "-jar", "app.jar"]
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.ssl.key-store=/app/pojectkkk.p12", "-Dserver.ssl.key-store-password=changeit", "-Dserver.ssl.key-store-type=p12",  "-jar", "app.jar"]
