@@ -255,7 +255,7 @@ services:
         condition: service_healthy
     volumes:
       - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12:ro
-      - /path/to/certificates:/app/certificates:ro
+      - /etc/ssl/certs:/etc/ssl/certs:ro
     networks:
       - project_default
 
