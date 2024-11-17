@@ -241,18 +241,11 @@ services:
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /app/springboot.p12
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
-      SERVER_PORT: "443"
-      SERVER_SSL_ENABLED: "true"
-      SERVER_SSL_KEY_STORE: "/app/springboot.p12"
-      SERVER_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
-      SERVER_SSL_KEY_STORE_TYPE: "PKCS12"
-      SERVER_SSL_KEY_ALIAS: "springboot"
-      # HSTS 비활성화 설정 추가
-      SERVER_HSTS_ENABLED: "false"
-      SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
-      SERVER_HSTS_PRELOAD: "false"
-      KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
-
+      SERVER_SSL_ENABLED: true
+      SERVER_SSL_KEY_STORE: /app/projectkkk.p12
+      SERVER_SSL_KEY_STORE_PASSWORD: changeit
+      SERVER_SSL_KEY_STORE_TYPE: PKCS12
+      SERVER_PORT: 443
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -262,7 +255,7 @@ services:
         condition: service_healthy
     volumes:
       - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12:ro
-      - ./springboot.p12:/app/springboot.p12:ro
+      - /etc/ssl/certs:/etc/ssl/certs:ro
     networks:
       - project_default
 
