@@ -254,6 +254,7 @@ services:
       logstash:
         condition: service_healthy
     volumes:
+      - ./projectkkk.p12:/app/projectkkk.p12:ro
       - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12:ro
       - /etc/ssl/certs:/etc/ssl/certs:ro
     networks:
