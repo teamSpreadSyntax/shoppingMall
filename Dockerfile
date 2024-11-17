@@ -48,4 +48,4 @@ RUN chmod +x /app/wait-for-it.sh
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.ssl.key-store=/app/projectkkk.p12", "-Dserver.ssl.key-store-password=changeit", "-Dserver.ssl.key-store-type=p12",  "-jar", "app.jar"]
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.ssl.key-store=/app/projectkkk.p12", "-Dserver.ssl.key-store-password=changeit", "-Dserver.ssl.key-store-type=PKCS12",  "-jar", "app.jar"]
