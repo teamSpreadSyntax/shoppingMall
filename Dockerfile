@@ -35,7 +35,7 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 
 # Add Let’s Encrypt SSL certificates
-COPY pojectkkk.p12 /app/pojectkkk.p12
+COPY projectkkk.p12 /app/projectkkk.p12
 
 
 # wait-for-it.sh script for dependency checks
