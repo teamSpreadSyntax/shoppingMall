@@ -240,11 +240,11 @@ services:
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: PKCS12
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /app/projectkkk.jks
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
-      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
-      SERVER_SSL_ENABLED: true
+      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: JKS
+      SERVER_SSL_ENABLED: "true"
       SERVER_SSL_KEY_STORE: /app/projectkkk.jks
       SERVER_SSL_KEY_STORE_PASSWORD: changeit
-      SERVER_SSL_KEY_STORE_TYPE: PKCS12
+      SERVER_SSL_KEY_STORE_TYPE: JKS
       SERVER_PORT: 443
     depends_on:
       elasticsearch:
@@ -254,7 +254,7 @@ services:
       logstash:
         condition: service_healthy
     volumes:
-      - ./projectkkk.p12:/app/projectkkk.jks:ro
+      - ./projectkkk.jks:/app/projectkkk.jks:ro
       - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12:ro
       - /etc/ssl/certs:/etc/ssl/certs:ro
     networks:
