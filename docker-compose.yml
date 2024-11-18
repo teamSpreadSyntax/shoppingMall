@@ -36,17 +36,19 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
       - bootstrap.memory_lock=true
       - xpack.security.transport.ssl.enabled=true
-      - xpack.security.transport.ssl.keystore.type=JKS
-      - xpack.security.transport.ssl.keystore.path=elasticsearch.jks
-      - xpack.security.transport.ssl.truststore.type=JKS
-      - xpack.security.transport.ssl.truststore.path=elastic-stack-ca.jks
+      - xpack.security.transport.ssl.keystore.type=PKCS12
+      - xpack.security.transport.ssl.keystore.path=elasticsearch.p12
+      - xpack.security.transport.ssl.truststore.type=PKCS12
+      - xpack.security.transport.ssl.truststore.path=elastic-stack-ca.p12
       - xpack.security.transport.ssl.truststore.secure_password=${TRUSTSTORE_PASSWORD}
+      - xpack.security.transport.ssl.verification_mode=none
       - xpack.security.http.ssl.enabled=true
-      - xpack.security.http.ssl.keystore.type=JKS
-      - xpack.security.http.ssl.keystore.path=elasticsearch.jks
-      - xpack.security.http.ssl.truststore.type=JKS
-      - xpack.security.http.ssl.truststore.path=elastic-stack-ca.jks
+      - xpack.security.http.ssl.keystore.type=PKCS12
+      - xpack.security.http.ssl.keystore.path=elasticsearch.p12
+      - xpack.security.http.ssl.truststore.type=PKCS12
+      - xpack.security.http.ssl.truststore.path=elastic-stack-ca.p12    # 수정: 경로 변경
       - xpack.security.http.ssl.truststore.secure_password=${TRUSTSTORE_PASSWORD}
+      - xpack.security.http.ssl.verification_mode=none  # SSL 검증 활성화
       - ingest.geoip.downloader.enabled=true
       - KIBANA_SYSTEM_PASSWORD=Ccenter123456!
       - xpack.license.self_generated.type=basic
@@ -57,16 +59,70 @@ services:
       - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
       - TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD}
     volumes:
-      - ./elasticsearch.jks:/usr/share/elasticsearch/config/elasticsearch.jks
-      - ./elastic-stack-ca.jks:/usr/share/elasticsearch/config/elastic-stack-ca.jks
+      - ./elasticsearch.p12:/usr/share/elasticsearch/config/elasticsearch.p12    # 수정: 인증서 파일 마운트 경로 변경
+      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
       - /dev/urandom:/dev/random
       - es-data:/usr/share/elasticsearch/data
       - token-volume:/usr/share/elasticsearch/config
     ports:
       - "9200:9200"
       - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     networks:
       - project_default
+    command: >
+      /bin/bash -c "
+          # 키스토어가 존재하지 않으면 생성
+          if [ ! -f config/elasticsearch.keystore ]; then
+            echo 'Elasticsearch 키스토어가 존재하지 않습니다. 키스토어를 생성합니다.';
+            bin/elasticsearch-keystore create;
+          fi;
+
+          # 키스토어에 보안 설정 추가 (환경 변수 사용)
+          echo '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.keystore.secure_password;
+          echo '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.truststore.secure_password;
+          echo '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.keystore.secure_password;
+          echo '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.truststore.secure_password;
+
+          # analysis-nori 플러그인 설치
+          if [ ! -d '/usr/share/elasticsearch/plugins/analysis-nori' ]; then
+            bin/elasticsearch-plugin install --batch analysis-nori;
+          fi;
+
+          # Elasticsearch 시작
+          /usr/local/bin/docker-entrypoint.sh eswrapper &
+          echo 'Elasticsearch 시작 대기 중...'
+          while ! curl -s -k https://localhost:9200 > /dev/null; do
+            sleep 5
+          done
+
+          echo 'Elasticsearch가 실행 중입니다. 사용자 비밀번호 설정 중...'
+
+          # elastic 사용자 비밀번호 변경
+          curl -k -X POST 'https://localhost:9200/_security/user/elastic/_password' -u \"elastic:${ELASTIC_PASSWORD}\" -H 'Content-Type: application/json' -d '{\"password\": \"${ELASTIC_PASSWORD}\"}'
+
+          # kibana_system 사용자 비밀번호 변경
+          curl -k -X POST 'https://localhost:9200/_security/user/kibana_system/_password' -u \"elastic:${ELASTIC_PASSWORD}\" -H 'Content-Type: application/json' -d '{\"password\": \"${KIBANA_PASSWORD}\"}'
+
+          echo '서비스 토큰 생성 중...'
+          bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/elasticsearch/config/token.env
+
+          if [ -s /usr/share/elasticsearch/config/token.env ]; then
+            echo '서비스 토큰이 성공적으로 생성되었습니다.'
+            echo '토큰이 성공적으로 저장되었습니다.'
+          else
+            echo '토큰생성에 실패했습니다. Elasticsearch 로그를 확인하세요.'
+          fi;
+          wait"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
+      interval: 60s
+      timeout: 120s
+      retries: 10
+      start_period: 300s
 
   logstash:
     image: docker.elastic.co/logstash/logstash:8.10.4
@@ -74,9 +130,9 @@ services:
     user: root
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - ./elastic-stack-ca.jks:/usr/share/logstash/config/elastic-stack-ca.jks
+      - ./elastic-stack-ca.p12:/usr/share/logstash/config/elastic-stack-ca.p12
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash.jks:/usr/share/logstash/config/logstash.jks
+      - ./logstash.p12:/usr/share/logstash/config/logstash.p12
     ports:
       - "5000:5000"
       - "9600:9600"
@@ -84,15 +140,25 @@ services:
       ELASTICSEARCH_HOSTS: "https://elasticsearch:9200"
       ELASTICSEARCH_USER: "elastic"
       ELASTICSEARCH_PASSWORD: "${ELASTICSEARCH_PASSWORD}"
-      LOGSTASH_KEYSTORE_PATH: "/usr/share/logstash/config/logstash.jks"
+      LOGSTASH_KEYSTORE_PATH: "/usr/share/logstash/config/logstash.p12"
       LOGSTASH_KEYSTORE_PASSWORD: "${LOGSTASH_KEYSTORE_PASSWORD}"
-      LOGSTASH_KEYSTORE_TYPE: "JKS"
-      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/usr/share/logstash/config/elastic-stack-ca.jks -Djavax.net.ssl.trustStorePassword=${TRUSTSTORE_PASSWORD}"
+      LOGSTASH_KEYSTORE_TYPE: "PKCS12"
+      XPACK_MONITORING_ENABLED: "true"
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "https://elasticsearch:9200"
+      XPACK_MONITORING_ELASTICSEARCH_USERNAME: "elastic"
+      XPACK_MONITORING_ELASTICSEARCH_PASSWORD: "${ELASTICSEARCH_PASSWORD}"
+      CA_PASSWORD: "${CA_PASSWORD}"
+      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/usr/share/logstash/config/elastic-stack-ca.p12 -Djavax.net.ssl.trustStorePassword=${CA_PASSWORD}"
     depends_on:
       elasticsearch:
         condition: service_healthy
       kafka:
         condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9600/_node/stats"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - project_default
 
@@ -103,17 +169,49 @@ services:
       ELASTICSEARCH_HOSTS: https://elasticsearch:9200
       ELASTICSEARCH_USERNAME: kibana_system
       ELASTICSEARCH_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
-      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/kibana/config/elastic-stack-ca.jks
-      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES_PASSWORD: ${TRUSTSTORE_PASSWORD}
-      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES_TYPE: JKS
-      SERVER_SSL_KEYSTORE_PATH: /usr/share/kibana/config/kibana.jks
+      ELASTICSEARCH_SSL_VERIFICATIONMODE: none
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/kibana/config/elastic-stack-ca.p12    # 수정: CA 인증서 경로 설정
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES_PASSWORD: ${CA_PASSWORD}    # 추가: CA 인증서 비밀번호 설정
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES_TYPE: PKCS12    # 추가: CA 인증서 타입 설정
+      ELASTICSEARCH_SSL_KEYSTORE_PATH: /usr/share/kibana/config/kibana.p12
+      ELASTICSEARCH_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
+      ELASTICSEARCH_SSL_KEYSTORE_TYPE: PKCS12
+      ELASTICSEARCH_STARTUP_TIMEOUT: "600s"
+      xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
+      xpack.reporting.kibanaServer.hostname: "localhost"
+      XPACK_SECURITY_ENCRYPTIONKEY: "something_at_least_32_characters"
+      XPACK_ENCRYPTEDUSAVEDOBJECTS_ENCRYPTIONKEY: "something_at_least_32_characters"
+      XPACK_REPORTING_ENCRYPTIONKEY: "something_at_least_32_characters"
+      XPACK_REPORTING_ROLES_ENABLED: "false"
+      LOGGING_LEVEL: debug
+      SERVER_SSL_ENABLED: "true"
+      SERVER_SSL_KEYSTORE_PATH: /usr/share/kibana/config/kibana.p12
       SERVER_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
-      SERVER_SSL_KEYSTORE_TYPE: JKS
+      SERVER_SSL_KEYSTORE_TYPE: PKCS12
+      KIBANA_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
     ports:
       - "5601:5601"
     depends_on:
       elasticsearch:
         condition: service_healthy
+    restart: unless-stopped
+    command: >
+      /bin/bash -c "
+                    while [ ! -f /usr/share/kibana/config/token.env ]; do
+                      sleep 1
+                    done
+                    /usr/local/bin/kibana-docker --allow-root &
+                    wait"
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s https://localhost:5601/api/status | grep -q 'Looking good'" ]
+      interval: 10s
+      timeout: 10s
+      retries: 120
+    volumes:
+      - ./elastic-stack-ca.p12:/usr/share/kibana/config/elastic-stack-ca.p12
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      -  token-volume:/usr/share/kibana/config
+      - ./kibana.p12:/usr/share/kibana/config/kibana.p12
     networks:
       - project_default
 
@@ -121,32 +219,44 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    dns:
+      - 8.8.8.8
     container_name: springboot
     ports:
       - "443:443"
     environment:
+      SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB
       SPRING_DATASOURCE_USERNAME: Kang
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SPRING_ELASTICSEARCH_REST_URIS: https://elasticsearch:9200
-      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /app/elastic-stack-ca.jks
-      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${TRUSTSTORE_PASSWORD}
-      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: JKS
+      SPRING_ELASTICSEARCH_REST_USERNAME: elastic
+      SPRING_ELASTICSEARCH_REST_PASSWORD: ${ELASTIC_PASSWORD}
+      SPRING_ELASTICSEARCH_REST_SSL_ENABLED: "true"
+      SPRING_ELASTICSEARCH_REST_SSL_VERIFICATION_MODE: none
+      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /app/elastic-stack-ca.p12
+      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
+      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: PKCS12
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /app/projectkkk.jks
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
+      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
       SERVER_SSL_ENABLED: true
       SERVER_SSL_KEY_STORE: /app/projectkkk.jks
       SERVER_SSL_KEY_STORE_PASSWORD: changeit
-      SERVER_SSL_KEY_STORE_TYPE: JKS
+      SERVER_SSL_KEY_STORE_TYPE: PKCS12
       SERVER_PORT: 443
     depends_on:
       elasticsearch:
         condition: service_healthy
       kafka:
         condition: service_started
+      logstash:
+        condition: service_healthy
     volumes:
-      - ./projectkkk.jks:/app/projectkkk.jks:ro
-      - ./elastic-stack-ca.jks:/app/elastic-stack-ca.jks:ro
+      - ./projectkkk.p12:/app/projectkkk.jks:ro
+      - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12:ro
+      - /etc/ssl/certs:/etc/ssl/certs:ro
     networks:
       - project_default
 
