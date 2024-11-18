@@ -41,10 +41,10 @@ RUN chmod +x /app/wait-for-it.sh
 
 # SSL 인증서 복사
 COPY elastic-stack-ca.p12 /app/elastic-stack-ca.p12
-COPY projectkkk.jks /app/projectkkk.jks
+COPY springboot.p12 /app/springboot.p12
 
 # Expose port 443 for the application
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/projectkkk.jks", "-Dserver.ssl.key-store-password=${KEYSTORE_PASSWORD}", "-Dserver.ssl.key-store-type=JKS", "-jar", "app.jar"]
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/springboot.p12", "-Dserver.ssl.key-store-password=changeit", "-Dserver.ssl.key-store-type=PKCS12", "-jar", "app.jar"]
