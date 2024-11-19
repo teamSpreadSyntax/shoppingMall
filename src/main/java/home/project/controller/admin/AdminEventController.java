@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@Tag(name = "이벤트", description = "이벤트 관련 API입니다")
+@Tag(name = "관리자 이벤트", description = "관리자를 위한 이벤트 관련 API입니다")
 @RequestMapping("/api/admin/event")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "Internal server error",
