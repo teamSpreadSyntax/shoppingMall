@@ -19,7 +19,7 @@
 
     const connect = () => {
         // HTTPS를 사용하고 443 포트로 연결
-        const socket = new SockJS('https://localhost/ws');
+        const socket = new SockJS('https://www.projectkkk.com/ws');
         stompClient = Stomp.over(socket);
 
         console.log('Attempting to connect to WebSocket...');
