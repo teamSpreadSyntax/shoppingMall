@@ -18,10 +18,8 @@
     let stompClient = null;
 
     const connect = () => {
-        const socketUrl = window.location.protocol === 'https:'
-            ? 'https://localhost/ws'
-            : 'http://localhost/ws'; // HTTP/HTTPS 동적 처리
-        const socket = new SockJS(socketUrl);
+        // HTTPS를 사용하고 443 포트로 연결
+        const socket = new SockJS('https://localhost/ws');
         stompClient = Stomp.over(socket);
 
         console.log('Attempting to connect to WebSocket...');
@@ -29,7 +27,6 @@
         stompClient.connect({}, frame => {
             console.log('Connected: ' + frame);
 
-            // /topic/logs 구독
             stompClient.subscribe('/topic/logs', message => {
                 const output = document.getElementById('output');
                 const log = document.createElement('p');
