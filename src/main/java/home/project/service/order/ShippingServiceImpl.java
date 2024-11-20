@@ -10,6 +10,8 @@ import home.project.domain.product.ProductOrder;
 import home.project.dto.responseDTO.ShippingResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.member.MemberRepository;
+import home.project.repository.order.OrderRepository;
+import home.project.repository.order.ProductOrderRepository;
 import home.project.repository.shipping.ShippingRepository;
 import home.project.service.member.MemberService;
 import home.project.service.product.ProductService;
@@ -36,6 +38,9 @@ public class ShippingServiceImpl implements ShippingService{
     private final MemberRepository memberRepository;
     private final ShippingRepository shippingRepository;
     private final Converter converter;
+    private final OrderRepository orderRepository;
+    private final ProductOrderRepository productOrderRepository;
+    private final OrderService orderService;
 
     @Override
     @Transactional
@@ -55,8 +60,13 @@ public class ShippingServiceImpl implements ShippingService{
             shipping.setDepartureDate(LocalDateTime.now().toString());
         }
 
+        for (ProductOrder productOrder : order.getProductOrders()) {
+            productOrder.setDeliveryStatus(deliveryStatusType);
+        }
+
         shipping.setDeliveryStatus(deliveryStatusType);
         shippingRepository.save(shipping);
+        productOrderRepository.saveAll(order.getProductOrders());
         return converter.convertFromShippingToShippingResponse(shipping);
     }
 
