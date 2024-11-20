@@ -122,8 +122,34 @@ tasks.withType(JavaCompile) {
     options.generatedSourceOutputDirectory = file(querydslSrcDir)
 }
 
+// Q클래스 생성만을 위한 별도의 task
+task generateQuerydsl(type: JavaCompile, group: 'build') {
+    source = sourceSets.main.java
+    classpath = configurations.compileClasspath
+    destinationDirectory = file(querydslSrcDir)
+    options.annotationProcessorPath = configurations.annotationProcessor
+    options.compilerArgs = [
+            "-proc:only",
+            "-processor", "com.querydsl.apt.jpa.JPAAnnotationProcessor"
+    ]
+}
+
+// clean task 수정
 clean {
-    delete file(querydslSrcDir)
+    // Q클래스는 남기고 다른 캐시만 삭제
+    delete file("${buildDir}/tmp")
+    delete file("${buildDir}/classes")
+    delete file("${buildDir}/resources")
+    delete file("${buildDir}/reports")
+    // Q클래스가 있는 generated 폴더는 삭제하지 않음
+    delete file("${buildDir}/distributions")
+}
+
+// 기존 캐시만 삭제하는 새로운 task 추가
+task cleanCache(type: Delete) {
+    delete fileTree(dir: "${rootDir}/.gradle/caches")
+    delete fileTree(dir: "${rootDir}/.gradle/native")
+    delete fileTree(dir: "${rootDir}/.gradle/wrapper")
 }
 
 wrapper {
