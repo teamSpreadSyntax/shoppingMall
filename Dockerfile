@@ -40,7 +40,6 @@ COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
 
 # SSL 인증서 복사
-COPY elastic-stack-ca.p12 /app/elastic-stack-ca.p12
 COPY springboot.p12 /app/springboot.p12
 
 # Expose port 443 for the application
