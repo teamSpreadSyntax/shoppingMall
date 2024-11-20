@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+</head>
+<body>
+<h1>WebSocket Test</h1>
+<button id="connect">Connect</button>
+<button id="disconnect">Disconnect</button>
+<button id="send">Send Test Log</button>
+<div id="output"></div>
+
+<script>
+    let stompClient = null;
+
+    const connect = () => {
+        // HTTPS를 사용하고 443 포트로 연결
+        const socket = new SockJS('https://www.projectkkk.com/ws');
+        stompClient = Stomp.over(socket);
+
+        console.log('Attempting to connect to WebSocket...');
+
+        stompClient.connect({}, frame => {
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe('/topic/logs', message => {
+                const output = document.getElementById('output');
+                const log = document.createElement('p');
+                log.textContent = 'Received: ' + message.body;
+                output.appendChild(log);
+            });
+        }, error => {
+            console.error('WebSocket connection error:', error);
+        });
+    };
+
+    const disconnect = () => {
+        if (stompClient) {
+            stompClient.disconnect(() => {
+                console.log('Disconnected');
+            });
+        }
+    };
+
+    const sendLog = () => {
+        if (stompClient) {
+            stompClient.send('/app/log', {}, 'Test log message');
+            console.log('Test log message sent');
+        }
+    };
+
+    document.getElementById('connect').addEventListener('click', connect);
+    document.getElementById('disconnect').addEventListener('click', disconnect);
+    document.getElementById('send').addEventListener('click', sendLog);
+</script>
+</body>
+</html>

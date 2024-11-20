@@ -1,6 +1,7 @@
 package home.project.controller.admin;
 
 import home.project.dto.responseDTO.QnADetailResponse;
+import home.project.dto.responseDTO.QnAResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.common.QnAService;
 import home.project.service.util.PageUtil;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -85,28 +87,57 @@ public class AdminQnAController {
         return new CustomResponseEntity<>(responseMap, "답변 삭제 성공", HttpStatus.OK);
     }
 
-    @Operation(summary = "관리자 전체 QnA 답변 대기 목록 조회 메서드", description = "답변 대기중인 전체 QnA 목록을 조회하는 메서드입니다.")
+//    @Operation(summary = "관리자 전체 QnA 답변 대기 목록 조회 메서드", description = "답변 대기중인 전체 QnA 목록을 조회하는 메서드입니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful operation",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedQnAListResponseSchema"))),
+//            @ApiResponse(responseCode = "400", description = "Bad Request",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+//    })
+//    @GetMapping("/waiting")
+//    @SecurityRequirement(name = "bearerAuth")
+//    public CustomResponseEntity<?> findAllWaitingQnA(
+//            @PageableDefault(page = 1, size = 5)
+//            @SortDefault.SortDefaults({
+//                    @SortDefault(sort = "createAt", direction = Sort.Direction.DESC)
+//            }) @ParameterObject Pageable pageable) {
+//
+//        pageable = pageUtil.pageable(pageable);
+//
+//        Page<QnADetailResponse> pagedQnA = qnAService.findAllWaitingQnA(pageable);
+//
+//        long totalCount = pagedQnA.getTotalElements();
+//        int page = pagedQnA.getNumber();
+//
+//        return new CustomResponseEntity<>(pagedQnA.getContent(), "답변 대기중인 QnA 목록입니다.", HttpStatus.OK, totalCount, page);
+//    }
+
+    @Operation(summary = "전체 QnA 조회 메서드", description = "전체 QnA 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedQnAListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/waiting")
+    @GetMapping("/qnas")
     @SecurityRequirement(name = "bearerAuth")
-    public CustomResponseEntity<?> findAllWaitingQnA(
+    public ResponseEntity<?> findAll(
             @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults({
-                    @SortDefault(sort = "createAt", direction = Sort.Direction.DESC)
-            }) @ParameterObject Pageable pageable) {
-
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "qnaId", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-
-        Page<QnADetailResponse> pagedQnA = qnAService.findAllWaitingQnA(pageable);
+        Page<QnADetailResponse> pagedQnA = qnAService.findAllForManager(pageable);
 
         long totalCount = pagedQnA.getTotalElements();
+
         int page = pagedQnA.getNumber();
 
-        return new CustomResponseEntity<>(pagedQnA.getContent(), "답변 대기중인 QnA 목록입니다.", HttpStatus.OK, totalCount, page);
+        String successMessage = "모든 QnA 입니다.";
+
+        return new CustomResponseEntity<>(pagedQnA.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
+
 }

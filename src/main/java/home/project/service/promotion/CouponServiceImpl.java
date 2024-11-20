@@ -16,6 +16,7 @@ import home.project.repository.promotion.CouponRepository;
 import home.project.repository.promotion.MemberCouponRepository;
 import home.project.repository.promotion.ProductCouponRepository;
 import home.project.service.member.MemberService;
+import home.project.service.notification.WebSocketNotificationService;
 import home.project.service.util.Converter;
 import home.project.service.util.IndexToElasticsearch;
 import home.project.service.util.StringBuilderUtil;
@@ -48,6 +49,9 @@ public class CouponServiceImpl implements CouponService{
     private final MemberService memberService;
     private final IndexToElasticsearch indexToElasticsearch;
     private final ElasticsearchOperations elasticsearchOperations;
+    private final WebSocketNotificationService webSocketNotificationService;
+
+
 
 
     @Override
@@ -194,6 +198,8 @@ public class CouponServiceImpl implements CouponService{
                 e.printStackTrace();
             }
 
+
+            webSocketNotificationService.sendNotification("/topic/coupons", "쿠폰이 발행되었습니다.");
 /*
             kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_member", coupon.getId(), member.getId()));
 */

@@ -1,5 +1,6 @@
 package home.project.service.order;
 
+import com.google.api.gax.rpc.InvalidArgumentException;
 import home.project.domain.delivery.DeliveryStatusType;
 import home.project.domain.delivery.Shipping;
 import home.project.domain.elasticsearch.MemberDocument;
@@ -18,6 +19,7 @@ import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.InvalidCouponException;
 import home.project.repository.member.MemberRepository;
 import home.project.repository.order.OrderRepository;
+import home.project.repository.order.ProductOrderRepository;
 import home.project.repository.promotion.MemberCouponRepository;
 import home.project.repositoryForElasticsearch.OrdersElasticsearchRepository;
 import home.project.service.member.MemberService;
@@ -53,7 +55,7 @@ public class OrderServiceImpl implements OrderService{
     private final IndexToElasticsearch indexToElasticsearch;
     private final OrdersElasticsearchRepository ordersElasticsearchRepository;
     private final ElasticsearchOperations elasticsearchOperations;
-
+    private final ProductOrderRepository productOrderRepository;
 
 
     @Override
@@ -271,6 +273,9 @@ public class OrderServiceImpl implements OrderService{
         for (ProductOrder productOrder : order.getProductOrders()) {
             if (productOrder.getDeliveryStatus() == DeliveryStatusType.DELIVERY_COMPLETED) {
                 productOrder.setDeliveryStatus(DeliveryStatusType.PURCHASE_CONFIRMED);
+//                productOrderRepository.save(productOrder);
+            }else {
+                throw new IllegalStateException("배송이 완료된 상품만 구매 확정이 가능합니다.");
             }
         }
         OrdersDocument ordersDocument = converter.convertFromOrderToOrdersDocument(order);
