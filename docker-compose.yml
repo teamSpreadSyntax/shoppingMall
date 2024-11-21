@@ -130,9 +130,10 @@ services:
     user: root
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - ./elastic-stack-ca.p12:/usr/share/logstash/config/elastic-stack-ca.p12
+      - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12
+      - ./springboot.p12:/app/springboot.p12
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash.p12:/usr/share/logstash/config/logstash.p12
+      - ./logstash.p12:/app/logstash.p12
     ports:
       - "5000:5000"
       - "9600:9600"
@@ -140,7 +141,7 @@ services:
       ELASTICSEARCH_HOSTS: "https://elasticsearch:9200"
       ELASTICSEARCH_USER: "elastic"
       ELASTICSEARCH_PASSWORD: "${ELASTICSEARCH_PASSWORD}"
-      LOGSTASH_KEYSTORE_PATH: "/usr/share/logstash/config/logstash.p12"
+      LOGSTASH_KEYSTORE_PATH: "/app/logstash.p12"
       LOGSTASH_KEYSTORE_PASSWORD: "${LOGSTASH_KEYSTORE_PASSWORD}"
       LOGSTASH_KEYSTORE_TYPE: "PKCS12"
       XPACK_MONITORING_ENABLED: "true"
@@ -148,7 +149,7 @@ services:
       XPACK_MONITORING_ELASTICSEARCH_USERNAME: "elastic"
       XPACK_MONITORING_ELASTICSEARCH_PASSWORD: "${ELASTICSEARCH_PASSWORD}"
       CA_PASSWORD: "${CA_PASSWORD}"
-      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/usr/share/logstash/config/elastic-stack-ca.p12 -Djavax.net.ssl.trustStorePassword=${CA_PASSWORD}"
+      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/app/elastic-stack-ca.p12 -Djavax.net.ssl.trustStorePassword=${CA_PASSWORD}"
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -208,7 +209,7 @@ services:
       timeout: 10s
       retries: 120
     volumes:
-      - ./elastic-stack-ca.p12:/usr/share/kibana/config/elastic-stack-ca.p12
+      - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       -  token-volume:/usr/share/kibana/config
       - ./kibana.p12:/usr/share/kibana/config/kibana.p12
@@ -239,12 +240,12 @@ services:
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: PKCS12
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /app/springboot.p12
-      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
+      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
       SERVER_PORT: "443"
       SERVER_SSL_ENABLED: "true"
       SERVER_SSL_KEY_STORE: "/app/springboot.p12"
-      SERVER_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
+      SERVER_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
       SERVER_SSL_KEY_STORE_TYPE: "PKCS12"
       # HSTS 비활성화 설정 추가
       SERVER_HSTS_ENABLED: "false"

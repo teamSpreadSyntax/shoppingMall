@@ -26,7 +26,7 @@ spring:
         trust-store: ./src/main/resources/elastic-stack-ca.p12
         trust-store-password: ${CA_PASSWORD}
         key-store: ./src/main/resources/springboot.p12
-        key-store-password: ${KEYSTORE_PASSWORD}
+        key-store-password: ${SPRINGBOOT_PASSWORD}
         key-store-type: PKCS12
   data:
     elasticsearch:
@@ -56,7 +56,7 @@ spring:
         trust-store: /app/elastic-stack-ca.p12
         trust-store-password: ${CA_PASSWORD}
         key-store: /app/springboot.p12
-        key-store-password: ${KEYSTORE_PASSWORD}
+        key-store-password: ${SPRINGBOOT_PASSWORD}
         key-store-type: PKCS12
   data:
     elasticsearch:
@@ -86,7 +86,7 @@ server:
   ssl:
     enabled: true
     key-store: /app/springboot.p12
-    key-store-password: ${KEYSTORE_PASSWORD}
+    key-store-password: ${SPRINGBOOT_PASSWORD}
     key-store-type: PKCS12
     key-alias: springboot
   security:
