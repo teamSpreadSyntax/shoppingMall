@@ -82,30 +82,12 @@ services:
             bin/elasticsearch-keystore create --force;
           fi;
 
-          # 키스토어에 보안 설정 추가 (존재 여부 확인)
-          if ! bin/elasticsearch-keystore has-seed xpack.security.transport.ssl.keystore.secure_password; then
-            echo -n '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.keystore.secure_password --stdin --silent;
-          else
-            echo 'xpack.security.transport.ssl.keystore.secure_password 설정이 이미 존재합니다.';
-          fi
+          # 키스토어에 보안 설정 추가 (환경 변수 사용)
+          echo -n '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.keystore.secure_password --stdin --force --silent;
+          echo -n '${TRUSTSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.truststore.secure_password --stdin --force --silent;
 
-          if ! bin/elasticsearch-keystore has-seed xpack.security.transport.ssl.truststore.secure_password; then
-            echo -n '${TRUSTSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.truststore.secure_password --stdin --silent;
-          else
-            echo 'xpack.security.transport.ssl.truststore.secure_password 설정이 이미 존재합니다.';
-          fi
-
-          if ! bin/elasticsearch-keystore has-seed xpack.security.http.ssl.keystore.secure_password; then
-            echo -n '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.keystore.secure_password --stdin --silent;
-          else
-            echo 'xpack.security.http.ssl.keystore.secure_password 설정이 이미 존재합니다.';
-          fi
-
-          if ! bin/elasticsearch-keystore has-seed xpack.security.http.ssl.truststore.secure_password; then
-            echo -n '${TRUSTSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.truststore.secure_password --stdin --silent;
-          else
-            echo 'xpack.security.http.ssl.truststore.secure_password 설정이 이미 존재합니다.';
-          fi
+          echo -n '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.keystore.secure_password --stdin --force --silent;
+          echo -n '${TRUSTSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.truststore.secure_password --stdin --force --silent;
 
           # analysis-nori 플러그인 설치
           if [ ! -d '/usr/share/elasticsearch/plugins/analysis-nori' ]; then
