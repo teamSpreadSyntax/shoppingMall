@@ -37,18 +37,18 @@ services:
       - bootstrap.memory_lock=true
       - xpack.security.transport.ssl.enabled=true
       - xpack.security.transport.ssl.keystore.type=PKCS12
-      - xpack.security.transport.ssl.keystore.path=elasticsearch.p12
+      - xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/elasticsearch.p12
       - xpack.security.transport.ssl.truststore.type=PKCS12
-      - xpack.security.transport.ssl.truststore.path=elastic-stack-ca.p12
+      - xpack.security.transport.ssl.truststore.path=/usr/share/elasticsearch/config/elastic-truststore.p12
       - xpack.security.transport.ssl.truststore.secure_password=${TRUSTSTORE_PASSWORD}
-      - xpack.security.transport.ssl.verification_mode=none
+      - xpack.security.transport.ssl.verification_mode=full
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.keystore.type=PKCS12
-      - xpack.security.http.ssl.keystore.path=elasticsearch.p12
+      - xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/elasticsearch.p12
       - xpack.security.http.ssl.truststore.type=PKCS12
-      - xpack.security.http.ssl.truststore.path=elastic-stack-ca.p12    # 수정: 경로 변경
+      - xpack.security.http.ssl.truststore.path=/usr/share/elasticsearch/config/elastic-truststore.p12    # 수정: 경로 변경
       - xpack.security.http.ssl.truststore.secure_password=${TRUSTSTORE_PASSWORD}
-      - xpack.security.http.ssl.verification_mode=none  # SSL 검증 활성화
+      - xpack.security.http.ssl.verification_mode=full  # SSL 검증 활성화
       - ingest.geoip.downloader.enabled=true
       - KIBANA_SYSTEM_PASSWORD=Ccenter123456!
       - xpack.license.self_generated.type=basic
@@ -59,8 +59,9 @@ services:
       - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
       - TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD}
     volumes:
-      - ./elasticsearch.p12:/usr/share/elasticsearch/config/elasticsearch.p12    # 수정: 인증서 파일 마운트 경로 변경
-      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
+      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12  # SSL CA 인증서 경로 수정
+      - ./elasticsearch.p12:/usr/share/elasticsearch/config/elasticsearch.p12
+      - ./elastic-truststore.p12:/usr/share/elasticsearch/config/elastic-truststore.p12
       - /dev/urandom:/dev/random
       - es-data:/usr/share/elasticsearch/data
       - token-volume:/usr/share/elasticsearch/config
@@ -76,16 +77,17 @@ services:
     command: >
       /bin/bash -c "
           # 키스토어가 존재하지 않으면 생성
-          if [ ! -f config/elasticsearch.keystore ]; then
+          if [ ! -f /usr/share/elasticsearch/config/elasticsearch.p12 ]; then
             echo 'Elasticsearch 키스토어가 존재하지 않습니다. 키스토어를 생성합니다.';
-            bin/elasticsearch-keystore create;
+            bin/elasticsearch-keystore create --force;
           fi;
 
           # 키스토어에 보안 설정 추가 (환경 변수 사용)
-          echo '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.keystore.secure_password;
-          echo '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.truststore.secure_password;
-          echo '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.keystore.secure_password;
-          echo '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.truststore.secure_password;
+          echo -n '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.keystore.secure_password --stdin --silent;
+          echo -n '${TRUSTSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.truststore.secure_password --stdin --silent;
+
+          echo -n '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.keystore.secure_password --stdin --silent;
+          echo -n '${TRUSTSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.truststore.secure_password --stdin --silent;
 
           # analysis-nori 플러그인 설치
           if [ ! -d '/usr/share/elasticsearch/plugins/analysis-nori' ]; then
@@ -130,10 +132,10 @@ services:
     user: root
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12
-      - ./springboot.p12:/app/springboot.p12
+      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
+      - ./springboot.p12:/usr/share/springboot/config/springboot.p12
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./logstash.p12:/app/logstash.p12
+      - ./logstash.p12:/usr/share/logstash/config/logstash.p12
     ports:
       - "5000:5000"
       - "9600:9600"
@@ -141,7 +143,7 @@ services:
       ELASTICSEARCH_HOSTS: "https://elasticsearch:9200"
       ELASTICSEARCH_USER: "elastic"
       ELASTICSEARCH_PASSWORD: "${ELASTICSEARCH_PASSWORD}"
-      LOGSTASH_KEYSTORE_PATH: "/app/logstash.p12"
+      LOGSTASH_KEYSTORE_PATH: "/usr/share/logstash/config/logstash.p12"
       LOGSTASH_KEYSTORE_PASSWORD: "${LOGSTASH_KEYSTORE_PASSWORD}"
       LOGSTASH_KEYSTORE_TYPE: "PKCS12"
       XPACK_MONITORING_ENABLED: "true"
@@ -149,7 +151,7 @@ services:
       XPACK_MONITORING_ELASTICSEARCH_USERNAME: "elastic"
       XPACK_MONITORING_ELASTICSEARCH_PASSWORD: "${ELASTICSEARCH_PASSWORD}"
       CA_PASSWORD: "${CA_PASSWORD}"
-      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/app/elastic-stack-ca.p12 -Djavax.net.ssl.trustStorePassword=${CA_PASSWORD}"
+      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/elastic-stack-ca.p12 -Djavax.net.ssl.trustStorePassword=${CA_PASSWORD}"
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -170,8 +172,8 @@ services:
       ELASTICSEARCH_HOSTS: https://elasticsearch:9200
       ELASTICSEARCH_USERNAME: kibana_system
       ELASTICSEARCH_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
-      ELASTICSEARCH_SSL_VERIFICATIONMODE: none
-      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/kibana/config/elastic-stack-ca.p12    # 수정: CA 인증서 경로 설정
+      ELASTICSEARCH_SSL_VERIFICATIONMODE: full
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/elasticsearch/config/elastic-stack-ca.p12  # 경로 수정    # 수정: CA 인증서 경로 설정
       ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES_PASSWORD: ${CA_PASSWORD}    # 추가: CA 인증서 비밀번호 설정
       ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES_TYPE: PKCS12    # 추가: CA 인증서 타입 설정
       ELASTICSEARCH_SSL_KEYSTORE_PATH: /usr/share/kibana/config/kibana.p12
@@ -209,7 +211,7 @@ services:
       timeout: 10s
       retries: 120
     volumes:
-      - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12
+      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       -  token-volume:/usr/share/kibana/config
       - ./kibana.p12:/usr/share/kibana/config/kibana.p12
@@ -235,16 +237,16 @@ services:
       SPRING_ELASTICSEARCH_REST_USERNAME: elastic
       SPRING_ELASTICSEARCH_REST_PASSWORD: ${ELASTIC_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_ENABLED: "true"
-      SPRING_ELASTICSEARCH_REST_SSL_VERIFICATION_MODE: none
-      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /app/elastic-stack-ca.p12
+      SPRING_ELASTICSEARCH_REST_SSL_VERIFICATION_MODE: full
+      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/elasticsearch/config/elastic-stack-ca.p12
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: PKCS12
-      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /app/springboot.p12
+      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /usr/share/springboot/config/springboot.p12
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
       SERVER_PORT: "443"
       SERVER_SSL_ENABLED: "true"
-      SERVER_SSL_KEY_STORE: "/app/springboot.p12"
+      SERVER_SSL_KEY_STORE: "/usr/share/springboot/config/springboot.p12"
       SERVER_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
       SERVER_SSL_KEY_STORE_TYPE: "PKCS12"
       # HSTS 비활성화 설정 추가
@@ -261,8 +263,8 @@ services:
       logstash:
         condition: service_healthy
     volumes:
-      - ./elastic-stack-ca.p12:/app/elastic-stack-ca.p12:ro
-      - ./springboot.p12:/app/springboot.p12:ro
+      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12:ro
+      - ./springboot.p12:/usr/share/springboot/config/springboot.p12:ro
     networks:
       - project_default
 
