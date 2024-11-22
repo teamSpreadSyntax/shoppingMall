@@ -11,7 +11,7 @@ server.ssl.keystore.password: ${KIBANA_KEYSTORE_PASSWORD}
 
 # Elasticsearch configuration
 elasticsearch.hosts: ["https://elasticsearch:9200"]
-elasticsearch.ssl.verificationMode: none
+elasticsearch.ssl.verificationMode: certificate
 elasticsearch.username: "kibana_system"
 elasticsearch.password: "Ccenter123456!"
 

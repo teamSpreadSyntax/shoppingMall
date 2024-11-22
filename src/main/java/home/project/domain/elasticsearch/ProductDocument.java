@@ -16,20 +16,10 @@ public class ProductDocument {
     @Id
     private Long id;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
+    @Field(type = FieldType.Text)
     private String name;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
+    @Field(type = FieldType.Text)
     private String brand;
 
     @Field(type = FieldType.Keyword)
@@ -44,12 +34,7 @@ public class ProductDocument {
     @Field(type = FieldType.Integer)
     private Integer discountRate = 0;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
+    @Field(type = FieldType.Text)
     private String description;
 
     @Field(type = FieldType.Keyword)
@@ -85,12 +70,7 @@ public class ProductDocument {
         @Field(type = FieldType.Keyword)
         private String code;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Text)
         private String name;
 
         @Field(type = FieldType.Integer)
@@ -99,12 +79,7 @@ public class ProductDocument {
         @Field(type = FieldType.Long)
         private Long parentId;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Text)
         private String parentName;
 
         @Field(type = FieldType.Keyword)
@@ -135,12 +110,7 @@ public class ProductDocument {
             @Field(type = FieldType.Long)
             private Long id;
 
-            @MultiField(
-                    mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                    otherFields = {
-                            @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                    }
-            )
+            @Field(type = FieldType.Text)
             private String name;
 
             @Field(type = FieldType.Integer)

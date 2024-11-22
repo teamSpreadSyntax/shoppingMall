@@ -39,6 +39,10 @@ COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 # 권한 설정
 RUN chmod +x /app/wait-for-it.sh
 
+# Keystore 파일 복사 및 권한 설정
+COPY elasticsearch.keystore /usr/share/elasticsearch/config/elasticsearch.keystore
+RUN chown 1000:1000 /usr/share/elasticsearch/config/elasticsearch.keystore
+
 # SSL 인증서 복사
 COPY springboot.p12 /app/springboot.p12
 

@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-
 @Getter
 @Setter
 @Document(indexName = "members")
@@ -20,12 +19,7 @@ public class MemberDocument {
     @Field(type = FieldType.Keyword)
     private String email;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
+    @Field(type = FieldType.Text)
     private String name;
 
     @Field(type = FieldType.Keyword)
@@ -34,32 +28,17 @@ public class MemberDocument {
     @Field(type = FieldType.Keyword)
     private String gender;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
+    @Field(type = FieldType.Text)
     private String defaultAddress;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
+    @Field(type = FieldType.Text)
     private String secondAddress;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
+    @Field(type = FieldType.Text)
     private String thirdAddress;
 
     @Field(type = FieldType.Keyword)
-    private String role;  // RoleType enum: user, admin, center
+    private String role; // RoleType enum: user, admin, center
 
     @Field(type = FieldType.Long, docValues = true)
     private Long accumulatedPurchase = 0L;
@@ -68,7 +47,7 @@ public class MemberDocument {
     private Long point = 0L;
 
     @Field(type = FieldType.Keyword)
-    private String grade;  // MemberGradeType enum: BRONZE, SILVER, GOLD, PLATINUM
+    private String grade; // MemberGradeType enum: BRONZE, SILVER, GOLD, PLATINUM
 
     @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis)
     private LocalDateTime birthDate;
@@ -103,12 +82,7 @@ public class MemberDocument {
             @Field(type = FieldType.Long)
             private Long id;
 
-            @MultiField(
-                    mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                    otherFields = {
-                            @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                    }
-            )
+            @Field(type = FieldType.Text)
             private String name;
 
             @Field(type = FieldType.Integer)
@@ -120,12 +94,7 @@ public class MemberDocument {
             @Field(type = FieldType.Date, format = DateFormat.date_hour_minute_second_millis)
             private LocalDateTime endDate;
 
-            @MultiField(
-                    mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                    otherFields = {
-                            @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                    }
-            )
+            @Field(type = FieldType.Text)
             private String assignBy;
         }
     }

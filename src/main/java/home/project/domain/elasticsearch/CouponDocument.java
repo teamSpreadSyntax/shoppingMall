@@ -16,12 +16,7 @@ public class CouponDocument {
     @Id
     private Long id;
 
-    @MultiField(
-            mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-            otherFields = {
-                    @InnerField(suffix = "keyword", type = FieldType.Keyword)
-            }
-    )
+    @Field(type = FieldType.Text)
     private String name;
 
     @Field(type = FieldType.Integer)
@@ -60,23 +55,13 @@ public class CouponDocument {
         @Field(type = FieldType.Long)
         private Long productId;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Text)
         private String productName;
 
         @Field(type = FieldType.Keyword)
         private String productNum;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Text)
         private String brand;
 
         @Field(type = FieldType.Nested)
@@ -104,12 +89,7 @@ public class CouponDocument {
         @Field(type = FieldType.Keyword)
         private String email;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Text)
         private String name;
 
         @Field(type = FieldType.Keyword)
@@ -125,12 +105,7 @@ public class CouponDocument {
         @Field(type = FieldType.Keyword)
         private String code;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Text)
         private String name;
 
         @Field(type = FieldType.Integer)
@@ -139,12 +114,7 @@ public class CouponDocument {
         @Field(type = FieldType.Long)
         private Long parentId;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Text)
         private String parentName;
 
         @Field(type = FieldType.Keyword)

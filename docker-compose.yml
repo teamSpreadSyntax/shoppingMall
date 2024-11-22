@@ -37,26 +37,22 @@ services:
       - bootstrap.memory_lock=true
       - xpack.security.transport.ssl.enabled=true
       - xpack.security.transport.ssl.keystore.type=PKCS12
-      - xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/springboot.p12  # springboot.p12 인증서 사용
-      - xpack.security.transport.ssl.verification_mode=none
+      - xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/springboot.p12
+      - xpack.security.transport.ssl.keystore.password=${KEYSTORE_PASSWORD}
+      - xpack.security.transport.ssl.verification_mode=certificate
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.keystore.type=PKCS12
-      - xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/springboot.p12  # springboot.p12 인증서 사용
-      - xpack.security.http.ssl.verification_mode=none  # SSL 검증 활성화
+      - xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/springboot.p12
+      - xpack.security.http.ssl.keystore.password=${KEYSTORE_PASSWORD}
+      - xpack.security.http.ssl.verification_mode=certificate
       - ingest.geoip.downloader.enabled=true
-      - KIBANA_SYSTEM_PASSWORD=Ccenter123456!
+      - KIBANA_SYSTEM_PASSWORD=${KIBANA_SYSTEM_PASSWORD}
       - xpack.license.self_generated.type=basic
-      - xpack.security.authc.token.enabled=true
       - ES_JAVA_OPTS=-Xms4g -Xmx4g -Djava.security.egd=file:/dev/urandom
-      - "node.store.allow_mmap=false"
-      - ELASTIC_USERNAME=elastic
-      - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
-      - TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD}
+      - node.store.allow_mmap=false
     volumes:
-      - ./springboot.p12:/usr/share/elasticsearch/config/springboot.p12  # springboot.p12 인증서 마운트
-      - /dev/urandom:/dev/random
+      - ./springboot.p12:/usr/share/elasticsearch/config/springboot.p12
       - es-data:/usr/share/elasticsearch/data
-      - token-volume:/usr/share/elasticsearch/config
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -94,7 +90,7 @@ services:
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./springboot.p12:/usr/share/logstash/config/springboot.p12  # springboot.p12 인증서 사용
+      - ./springboot.p12:/usr/share/logstash/config/springboot.p12
     ports:
       - "5000:5000"
       - "9600:9600"
@@ -102,10 +98,7 @@ services:
       ELASTICSEARCH_HOSTS: "https://elasticsearch:9200"
       ELASTICSEARCH_USER: "elastic"
       ELASTICSEARCH_PASSWORD: "${ELASTIC_PASSWORD}"
-      XPACK_MONITORING_ENABLED: "true"
-      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "https://elasticsearch:9200"
-      XPACK_MONITORING_ELASTICSEARCH_USERNAME: "elastic"
-      XPACK_MONITORING_ELASTICSEARCH_PASSWORD: "${ELASTIC_PASSWORD}"
+      KEYSTORE_PASSWORD: "${KEYSTORE_PASSWORD}"
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -124,9 +117,7 @@ services:
       ELASTICSEARCH_HOSTS: https://elasticsearch:9200
       ELASTICSEARCH_USERNAME: kibana_system
       ELASTICSEARCH_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
-      ELASTICSEARCH_SSL_VERIFICATIONMODE: none
-      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/kibana/config/springboot.p12  # springboot.p12 인증서 사용
-      ELASTICSEARCH_SSL_KEYSTORE_PATH: /usr/share/kibana/config/springboot.p12  # springboot.p12 인증서 사용
+      ELASTICSEARCH_SSL_VERIFICATION: certificate
     ports:
       - "5601:5601"
     depends_on:
@@ -139,7 +130,7 @@ services:
       timeout: 10s
       retries: 120
     volumes:
-      - ./springboot.p12:/usr/share/kibana/config/springboot.p12  # springboot.p12 인증서 사용
+      - ./springboot.p12:/usr/share/kibana/config/springboot.p12
     networks:
       - project_default
 
@@ -162,21 +153,15 @@ services:
       SPRING_ELASTICSEARCH_REST_USERNAME: elastic
       SPRING_ELASTICSEARCH_REST_PASSWORD: ${ELASTIC_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_ENABLED: "true"
-      SPRING_ELASTICSEARCH_REST_SSL_VERIFICATION_MODE: none
-      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /app/springboot.p12  # springboot.p12 인증서 사용
+      SPRING_ELASTICSEARCH_REST_SSL_VERIFICATION_MODE: certificate
+      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /app/springboot.p12
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
       SERVER_PORT: "443"
       SERVER_SSL_ENABLED: "true"
-      SERVER_SSL_KEY_STORE: "/app/springboot.p12"  # springboot.p12 인증서 사용
+      SERVER_SSL_KEY_STORE: "/app/springboot.p12"
       SERVER_SSL_KEY_STORE_PASSWORD: ${KEYSTORE_PASSWORD}
       SERVER_SSL_KEY_STORE_TYPE: PKCS12
-      # HSTS 비활성화 설정 추가
-      SERVER_HSTS_ENABLED: "false"
-      SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
-      SERVER_HSTS_PRELOAD: "false"
-      KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
-
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -185,14 +170,11 @@ services:
       logstash:
         condition: service_healthy
     volumes:
-      - ./springboot.p12:/app/springboot.p12:ro  # springboot.p12 인증서 사용
+      - ./springboot.p12:/app/springboot.p12:ro
     networks:
       - project_default
 
 volumes:
-  elasticsearch-data:
-  kibana-data:
-  token-volume:
   es-data:
 
 networks:
