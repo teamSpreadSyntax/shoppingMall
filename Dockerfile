@@ -44,6 +44,7 @@ COPY elasticsearch.keystore /usr/share/elasticsearch/config/elasticsearch.keysto
 RUN chown 1000:1000 /usr/share/elasticsearch/config/elasticsearch.keystore
 
 # SSL 인증서 복사
+COPY elastic-stack-ca.p12 /app/elastic-stack-ca.p12
 COPY springboot.p12 /app/springboot.p12
 
 # Expose port 443 for the application
