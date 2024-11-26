@@ -39,7 +39,7 @@ COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 # SSL 인증서 복사
 #COPY elastic-truststore.p12 /usr/share/elasticsearch/config/elastic-truststore.p12
 #COPY elastic-stack-ca.p12 /usr/share/elasticsearch/config/elastic-stack-ca.p12
-COPY springboot.p12 /app/springboot.p12
+COPY www.projectkkk.com.pfx /app/www.projectkkk.com.pfx
 
 # 권한 설정
 RUN chmod +x /app/wait-for-it.sh
@@ -50,4 +50,4 @@ RUN chmod +x /app/wait-for-it.sh
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/springboot.p12", "-Dserver.ssl.key-store-password=changeit", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/elastic-truststore.p12", "-Djavax.net.ssl.trustStorePassword=Ccenter123456!", "-Djavax.net.ssl.trustStoreType=PKCS12", "-jar", "app.jar"]
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store==/app/www.projectkkk.com.pfx", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/elastic-truststore.p12", "-Djavax.net.ssl.trustStorePassword=Ccenter123456!", "-Djavax.net.ssl.trustStoreType=PKCS12", "-jar", "app.jar"]
