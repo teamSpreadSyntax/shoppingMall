@@ -248,7 +248,7 @@ services:
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
       SERVER_PORT: "443"
       SERVER_SSL_ENABLED: "true"
-      SERVER_SSL_KEY_STORE: "classpath:www.projectkkk.com.pkcs12"
+      SERVER_SSL_KEY_STORE: "/app/www.projectkkk.com.pkcs12"
       SERVER_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
       SERVER_SSL_KEY_STORE_TYPE: "PKCS12"
       # HSTS 비활성화 설정 추가
