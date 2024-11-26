@@ -3,6 +3,5 @@ xpack.monitoring.elasticsearch.password: Ccenter123456!
 xpack.monitoring.elasticsearch.ssl.truststore.password: Ccenter123456!
 xpack.monitoring.elasticsearch.ssl.truststore.path: /usr/share/elasticsearch/config/elastic-truststore.p12
 xpack.monitoring.elasticsearch.ssl.verification_mode: full
-xpack.monitoring.elasticsearch.ssl.ca: /usr/share/elasticsearch/config/elastic-stack-ca.p12
 xpack.monitoring.elasticsearch.username: elastic
 xpack.monitoring.enabled: true
