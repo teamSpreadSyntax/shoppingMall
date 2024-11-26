@@ -40,6 +40,7 @@ COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 #COPY elastic-truststore.p12 /usr/share/elasticsearch/config/elastic-truststore.p12
 #COPY elastic-stack-ca.p12 /usr/share/elasticsearch/config/elastic-stack-ca.p12
 COPY www.projectkkk.com.pkcs12 /app/www.projectkkk.com.pkcs12
+RUN chmod 644 /app/www.projectkkk.com.pkcs12
 
 # 권한 설정
 RUN chmod +x /app/wait-for-it.sh
