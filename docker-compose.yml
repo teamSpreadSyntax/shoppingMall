@@ -65,6 +65,7 @@ services:
       - /dev/urandom:/dev/random
       - es-data:/usr/share/elasticsearch/data
       - token-volume:/usr/share/elasticsearch/config
+      - ./www.projectkkk.com.pfx:/usr/share/elasticsearch/config/www.projectkkk.com.pfx
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -135,6 +136,8 @@ services:
       - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
       - ./www.projectkkk.com.pfx:/usr/share/logstash/config/logstash.p12
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./elastic-truststore.p12:/usr/share/elasticsearch/config/elastic-truststore.p12
+      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
     ports:
       - "5000:5000"
       - "9600:9600"
@@ -253,7 +256,6 @@ services:
       SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
       SERVER_HSTS_PRELOAD: "false"
       KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
-
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -264,6 +266,8 @@ services:
     volumes:
       - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12:ro
       - ./springboot.p12:/usr/share/springboot/config/springboot.p12:ro
+      - ./www.projectkkk.com.pfx:/app/www.projectkkk.com.pfx
+      - ./elastic-truststore.p12:/usr/share/springboot/config/elastic-truststore.p12
     networks:
       - project_default
 
