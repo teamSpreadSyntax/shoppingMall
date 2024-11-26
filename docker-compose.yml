@@ -14,7 +14,7 @@ services:
       - "9092:9092"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://34.64.208.105:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://0.0.0.0:9093
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:9093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
@@ -137,6 +137,7 @@ services:
       - ./www.projectkkk.com.pfx:/usr/share/logstash/config/logstash.p12
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./elastic-truststore.p12:/usr/share/elasticsearch/config/elastic-truststore.p12
+      - ./elastic-truststore.p12:/usr/share/logstash/config/elastic-truststore.p12
     ports:
       - "5000:5000"
       - "9600:9600"

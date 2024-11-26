@@ -90,7 +90,7 @@ server:
     trust-store-type: PKCS12
     trust-store: /usr/share/elasticsearch/config/elastic-truststore.p12
     trust-store-password: ${CA_PASSWORD}
-    key-store: classpath:www.projectkkk.com.pfx
+    key-store: /app/www.projectkkk.com.pfx
     key-store-password: ${SPRINGBOOT_PASSWORD}
     key-store-type: PKCS12
     key-alias: springboot
