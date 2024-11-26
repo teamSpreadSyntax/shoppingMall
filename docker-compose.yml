@@ -137,7 +137,6 @@ services:
       - ./www.projectkkk.com.pfx:/usr/share/logstash/config/logstash.p12
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./elastic-truststore.p12:/usr/share/elasticsearch/config/elastic-truststore.p12
-      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
     ports:
       - "5000:5000"
       - "9600:9600"
