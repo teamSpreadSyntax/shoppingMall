@@ -37,16 +37,16 @@ services:
       - bootstrap.memory_lock=true
       - xpack.security.transport.ssl.enabled=true
       - xpack.security.transport.ssl.keystore.type=PKCS12
-      - xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/elasticsearch.p12
+      - xpack.security.transport.ssl.keystore.path=/usr/share/elasticsearch/config/www.projectkkk.pkcs12
       - xpack.security.transport.ssl.truststore.type=PKCS12
-      - xpack.security.transport.ssl.truststore.path=/usr/share/elasticsearch/config/elastic-truststore.p12
+      - xpack.security.transport.ssl.truststore.path=/usr/share/elasticsearch/config/www.projectkkk.pkcs12
       - xpack.security.transport.ssl.truststore.secure_password=${TRUSTSTORE_PASSWORD}
       - xpack.security.transport.ssl.verification_mode=full
       - xpack.security.http.ssl.enabled=true
       - xpack.security.http.ssl.keystore.type=PKCS12
-      - xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/elasticsearch.p12
+      - xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/www.projectkkk.pkcs12
       - xpack.security.http.ssl.truststore.type=PKCS12
-      - xpack.security.http.ssl.truststore.path=/usr/share/elasticsearch/config/elastic-truststore.p12    # 수정: 경로 변경
+      - xpack.security.http.ssl.truststore.path=/usr/share/elasticsearch/config/www.projectkkk.pkcs12    # 수정: 경로 변경
       - xpack.security.http.ssl.truststore.secure_password=${TRUSTSTORE_PASSWORD}
       - xpack.security.http.ssl.verification_mode=full  # SSL 검증 활성화
       - ingest.geoip.downloader.enabled=true
@@ -59,9 +59,9 @@ services:
       - KEYSTORE_PASSWORD=${KEYSTORE_PASSWORD}
       - TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD}
     volumes:
-      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12  # SSL CA 인증서 경로 수정
-      - ./elasticsearch.p12:/usr/share/elasticsearch/config/elasticsearch.p12
-      - ./elastic-truststore.p12:/usr/share/elasticsearch/config/elastic-truststore.p12
+      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12  # SSL CA 인증서 경로 수정
+      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
+      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
       - /dev/urandom:/dev/random
       - es-data:/usr/share/elasticsearch/data
       - token-volume:/usr/share/elasticsearch/config
@@ -78,7 +78,7 @@ services:
     command: >
       /bin/bash -c "
           # 키스토어가 존재하지 않으면 생성
-          if [ ! -f /usr/share/elasticsearch/config/elasticsearch.p12 ]; then
+          if [ ! -f /usr/share/elasticsearch/config/www.projectkkk.pkcs12 ]; then
             echo 'Elasticsearch 키스토어가 존재하지 않습니다. 키스토어를 생성합니다.';
             bin/elasticsearch-keystore create --force;
           fi;
@@ -133,11 +133,9 @@ services:
     user: root
     volumes:
       - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
-      - ./www.projectkkk.pkcs12:/usr/share/logstash/config/logstash.p12
+      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
+      - ./www.projectkkk.pkcs12:/usr/share/logstash/config/www.projectkkk.pkcs12
       - ./logstash.yml:/usr/share/logstash/config/logstash.yml
-      - ./elastic-truststore.p12:/usr/share/elasticsearch/config/elastic-truststore.p12
-      - ./elastic-truststore.p12:/usr/share/logstash/config/elastic-truststore.p12
     ports:
       - "5000:5000"
       - "9600:9600"
@@ -145,7 +143,7 @@ services:
       ELASTICSEARCH_HOSTS: "https://elasticsearch:9200"
       ELASTICSEARCH_USER: "elastic"
       ELASTICSEARCH_PASSWORD: "${ELASTICSEARCH_PASSWORD}"
-      LOGSTASH_KEYSTORE_PATH: "/usr/share/logstash/config/logstash.p12"
+      LOGSTASH_KEYSTORE_PATH: "/usr/share/logstash/config/www.projectkkk.pkcs12"
       LOGSTASH_KEYSTORE_PASSWORD: "${LOGSTASH_KEYSTORE_PASSWORD}"
       LOGSTASH_KEYSTORE_TYPE: "PKCS12"
       XPACK_MONITORING_ENABLED: "true"
@@ -153,7 +151,7 @@ services:
       XPACK_MONITORING_ELASTICSEARCH_USERNAME: "elastic"
       XPACK_MONITORING_ELASTICSEARCH_PASSWORD: "${ELASTICSEARCH_PASSWORD}"
       CA_PASSWORD: "${CA_PASSWORD}"
-      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/elastic-stack-ca.p12 -Djavax.net.ssl.trustStorePassword=${CA_PASSWORD}"
+      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12 -Djavax.net.ssl.trustStorePassword=${CA_PASSWORD}"
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -175,10 +173,10 @@ services:
       ELASTICSEARCH_USERNAME: kibana_system
       ELASTICSEARCH_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
       ELASTICSEARCH_SSL_VERIFICATIONMODE: full
-      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/elasticsearch/config/elastic-stack-ca.p12  # 경로 수정    # 수정: CA 인증서 경로 설정
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/elasticsearch/config/www.projectkkk.pkcs12  # 경로 수정    # 수정: CA 인증서 경로 설정
       ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES_PASSWORD: ${CA_PASSWORD}    # 추가: CA 인증서 비밀번호 설정
       ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES_TYPE: PKCS12    # 추가: CA 인증서 타입 설정
-      ELASTICSEARCH_SSL_KEYSTORE_PATH: /usr/share/kibana/config/kibana.p12
+      ELASTICSEARCH_SSL_KEYSTORE_PATH: /usr/share/kibana/config/www.projectkkk.pkcs12
       ELASTICSEARCH_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       ELASTICSEARCH_SSL_KEYSTORE_TYPE: PKCS12
       ELASTICSEARCH_STARTUP_TIMEOUT: "600s"
@@ -213,7 +211,7 @@ services:
       timeout: 10s
       retries: 120
     volumes:
-      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12
+      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       -  token-volume:/usr/share/kibana/config
       - ./www.projectkkk.pkcs12:/usr/share/kibana/config/www.projectkkk.pkcs12
@@ -240,7 +238,7 @@ services:
       SPRING_ELASTICSEARCH_REST_PASSWORD: ${ELASTIC_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_ENABLED: "true"
       SPRING_ELASTICSEARCH_REST_SSL_VERIFICATION_MODE: full
-      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/elasticsearch/config/elastic-stack-ca.p12
+      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: PKCS12
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /usr/share/springboot/config/www.projectkkk.pkcs12
@@ -264,10 +262,10 @@ services:
       logstash:
         condition: service_healthy
     volumes:
-      - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12:ro
+      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/app/www.projectkkk.pkcs12
-      - ./elastic-truststore.p12:/usr/share/springboot/config/elastic-truststore.p12
+      - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12
     networks:
       - project_default
 
