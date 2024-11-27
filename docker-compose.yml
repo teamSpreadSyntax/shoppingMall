@@ -262,7 +262,6 @@ services:
       - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/app/www.projectkkk.pkcs12
-      - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12
     networks:
       - project_default
 
