@@ -243,7 +243,7 @@ services:
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/elasticsearch/config/elastic-stack-ca.p12
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: PKCS12
-      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /usr/share/springboot/config/springboot.p12
+      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /usr/share/springboot/config/www.projectkkk.com.pkcs12
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
       SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
       SERVER_PORT: "443"
@@ -265,7 +265,7 @@ services:
         condition: service_healthy
     volumes:
       - ./elastic-stack-ca.p12:/usr/share/elasticsearch/config/elastic-stack-ca.p12:ro
-      - ./springboot.p12:/usr/share/springboot/config/springboot.p12:ro
+      - ./www.projectkkk.com.pkcs12:/usr/share/springboot/config/www.projectkkk.com.pkcs12:ro
       - ./www.projectkkk.com.pkcs12:/app/www.projectkkk.com.pkcs12
       - ./elastic-truststore.p12:/usr/share/springboot/config/elastic-truststore.p12
     networks:
