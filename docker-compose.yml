@@ -60,12 +60,9 @@ services:
       - TRUSTSTORE_PASSWORD=${TRUSTSTORE_PASSWORD}
     volumes:
       - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12  # SSL CA 인증서 경로 수정
-      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
-      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
       - /dev/urandom:/dev/random
       - es-data:/usr/share/elasticsearch/data
       - token-volume:/usr/share/elasticsearch/config
-      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
     ports:
       - "9200:9200"
       - "9300:9300"
