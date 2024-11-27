@@ -12,7 +12,7 @@ server.ssl.keystore.password: "Ccenter123456!"
 # Elasticsearch configuration
 elasticsearch.hosts: ["https://elasticsearch:9200"]
 elasticsearch.ssl.verificationMode: full
-elasticsearch.ssl.certificateAuthorities: ["/usr/share/elasticsearch/config/elastic-stack-ca.p12"]
+elasticsearch.ssl.certificateAuthorities: ["/home/shared/shoppingMall/ca.crt"]
 elasticsearch.username: "kibana_system"
 elasticsearch.password: "Ccenter123456!"
 
