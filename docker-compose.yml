@@ -175,6 +175,7 @@ services:
       ELASTICSEARCH_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       ELASTICSEARCH_SSL_KEYSTORE_TYPE: PKCS12
       ELASTICSEARCH_STARTUP_TIMEOUT: "600s"
+      server.publicBaseUrl: "https://www.projectkkk.com" # 추가
       xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
       xpack.reporting.kibanaServer.hostname: "www.projectkkk.com"
       XPACK_SECURITY_ENCRYPTIONKEY: "something_at_least_32_characters"
