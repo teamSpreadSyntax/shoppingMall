@@ -182,6 +182,7 @@ services:
       ELASTICSEARCH_SSL_KEYSTORE_TYPE: PKCS12
       ELASTICSEARCH_STARTUP_TIMEOUT: "600s"
       ELASTICSEARCH_SSL_CERTIFICATE: /usr/share/kibana/config/www.projectkkk.pkcs12
+      SERVER_PUBLICBASEURL: "https://www.projectkkk.com"
       xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
       xpack.reporting.kibanaServer.hostname: "www.projectkkk.com"
       XPACK_SECURITY_ENCRYPTIONKEY: "something_at_least_32_characters"
