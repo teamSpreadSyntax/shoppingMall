@@ -267,7 +267,9 @@ services:
       - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/app/www.projectkkk.pkcs12
     networks:
-      - project_default
+      project_default:
+        aliases:
+          - www.projectkkk.com
 
 volumes:
   elasticsearch-data:
