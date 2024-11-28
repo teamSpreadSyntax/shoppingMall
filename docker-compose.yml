@@ -235,10 +235,9 @@ services:
       timeout: 10s
       retries: 120
     volumes:
-      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
-      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
-      -  token-volume:/usr/share/kibana/config:rw
       - ./www.projectkkk.pkcs12:/usr/share/kibana/config/www.projectkkk.pkcs12
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+      - token-volume:/usr/share/kibana/config:rw
       - ./www.projectkkk.com.pem:/usr/share/elasticsearch/config/www.projectkkk.com.pem
     networks:
       project_default:
