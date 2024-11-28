@@ -26,7 +26,7 @@ services:
       - project_default
 
   elasticsearch:
-    user: root
+    user: 1000:1000
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
     container_name: elasticsearch
     restart: unless-stopped
@@ -84,7 +84,7 @@ services:
           fi;
       
           echo '2. 파일 권한 설정 시작...';
-          chown -R root:root /usr/share/elasticsearch/config;  # 수정: elasticsearch:elasticsearch에서 root:root로 변경
+          chown -R 1000:1000 /usr/share/elasticsearch/config;  # 수정: elasticsearch:elasticsearch에서 root:root로 변경
           chmod 750 /usr/share/elasticsearch/config;
       
           # 키스토어가 존재하지 않으면 생성
@@ -140,7 +140,7 @@ services:
       
               # Kibana로 토큰 복사 및 권한 설정
               cp /usr/share/elasticsearch/config/token.env /usr/share/kibana/config/token.env;
-              chown root:root /usr/share/kibana/config/token.env;  # 수정: elasticsearch:elasticsearch에서 root:root로 변경
+              chown 1000:1000 /usr/share/kibana/config/token.env;  # 수정: elasticsearch:elasticsearch에서 root:root로 변경
               chmod 600 /usr/share/kibana/config/token.env;
       
               if [ -s /usr/share/elasticsearch/config/token.env ]; then
