@@ -15,6 +15,9 @@ elasticsearch.ssl.verificationMode: full
 elasticsearch.ssl.certificateAuthorities: ["/usr/share/elasticsearch/config/www.projectkkk.com.pem"]
 #elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/r10.crt"]
 
+elasticsearch.ssl.certificate: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+elasticsearch.ssl.key: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+
 elasticsearch.username: "kibana_system"
 elasticsearch.password: "Ccenter123456!"
 
