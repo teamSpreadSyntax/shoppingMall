@@ -40,6 +40,7 @@ COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 COPY www.projectkkk.pkcs12 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 COPY www.projectkkk.pkcs12 /usr/share/logstash/config/www.projectkkk.pkcs12
 COPY www.projectkkk.pkcs12 /usr/share/kibana/config/www.projectkkk.pkcs12
+#COPY r10.crt /usr/share/kibana/config/r10.crt
 COPY www.projectkkk.pkcs12 /usr/share/kafka/config/www.projectkkk.pkcs12
 COPY www.projectkkk.pkcs12 /usr/share/springboot/config/www.projectkkk.pkcs12
 COPY www.projectkkk.pkcs12 /app/www.projectkkk.pkcs12
@@ -56,6 +57,7 @@ RUN chmod 644 /app/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/logstash/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/kibana/config/www.projectkkk.pkcs12
+#RUN chmod 600 /usr/share/kibana/config/r10.crt
 RUN chmod 600 /usr/share/kafka/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/logstash/pipeline/logstash.conf

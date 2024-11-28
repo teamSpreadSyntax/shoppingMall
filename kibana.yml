@@ -13,6 +13,8 @@ server.ssl.keystore.password: "Ccenter123456!"
 elasticsearch.hosts: ["https://elasticsearch.www.projectkkk.com:9200"]
 elasticsearch.ssl.verificationMode: full
 elasticsearch.ssl.certificateAuthorities: ["/usr/share/elasticsearch/config/www.projectkkk.pkcs12"]
+#elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/r10.crt"]
+
 elasticsearch.username: "kibana_system"
 elasticsearch.password: "Ccenter123456!"
 

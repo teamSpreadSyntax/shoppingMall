@@ -178,8 +178,9 @@ services:
       ELASTICSEARCH_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       ELASTICSEARCH_SSL_KEYSTORE_TYPE: PKCS12
       ELASTICSEARCH_STARTUP_TIMEOUT: "600s"
+      #elasticsearch.ssl.certificateAuthorities: "/usr/share/kibana/config/r10.crt"
       xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
-      xpack.reporting.kibanaServer.hostname: "localhost"
+      xpack.reporting.kibanaServer.hostname: "www.projectkkk.com"
       XPACK_SECURITY_ENCRYPTIONKEY: "something_at_least_32_characters"
       XPACK_ENCRYPTEDUSAVEDOBJECTS_ENCRYPTIONKEY: "something_at_least_32_characters"
       XPACK_REPORTING_ENCRYPTIONKEY: "something_at_least_32_characters"
