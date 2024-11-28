@@ -112,12 +112,12 @@ services:
           echo '서비스 토큰 생성 중...'
           bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/elasticsearch/config/token.env
 
-          if [ -s /usr/share/elasticsearch/config/token.env ]; then
-            echo '서비스 토큰이 성공적으로 생성되었습니다.'
-            echo '토큰이 성공적으로 저장되었습니다.'
+          if [ ! -s /usr/share/elasticsearch/config/token.env ]; then
+              echo '서비스 토큰 생성 중...'
+              bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/elasticsearch/config/token.env
           else
-            echo '토큰생성에 실패했습니다. Elasticsearch 로그를 확인하세요.'
-          fi;
+              echo '기존 서비스 토큰을 사용합니다.'
+          fi
           wait"
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
