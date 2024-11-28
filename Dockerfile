@@ -39,6 +39,7 @@ COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 # SSL 인증서 복사
 COPY www.projectkkk.pkcs12 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 COPY www.projectkkk.com.pem /usr/share/elasticsearch/config/www.projectkkk.com.pem
+COPY www.projectkkk.com.pem /usr/share/kibana/config/www.projectkkk.com.pem
 COPY www.projectkkk.pkcs12 /usr/share/logstash/config/www.projectkkk.pkcs12
 COPY www.projectkkk.pkcs12 /usr/share/kibana/config/www.projectkkk.pkcs12
 COPY kibana.yml /usr/share/kibana/config/kibana.yml
@@ -58,6 +59,7 @@ RUN chmod 644 /app/www.projectkkk.pkcs12
 #RUN chmod 600 /usr/share/elasticsearch/config/elastic-truststore.p12
 RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.com.pem
+RUN chmod 600 /usr/share/kibana/config/www.projectkkk.com.pem
 RUN chmod 600 /usr/share/logstash/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/kibana/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/kibana/config/kibana.yml

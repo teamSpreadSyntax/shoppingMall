@@ -239,6 +239,7 @@ services:
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       - token-volume:/usr/share/kibana/config:rw
       - ./www.projectkkk.com.pem:/usr/share/elasticsearch/config/www.projectkkk.com.pem
+      - ./www.projectkkk.com.pem:/usr/share/kibana/config/www.projectkkk.com.pem
     networks:
       project_default:
         aliases:
