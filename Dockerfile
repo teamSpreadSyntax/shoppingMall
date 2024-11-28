@@ -41,7 +41,7 @@ RUN mkdir -p /usr/share/elasticsearch/config \
     /usr/share/logstash/config \
     /usr/share/logstash/pipeline \
     /usr/share/kafka/config \
-    /usr/share/springboot/config \
+    /usr/share/springboot/config
 
 RUN chown -R 1000:1000 /usr/share/elasticsearch/config \
     /usr/share/kibana/config \
@@ -63,6 +63,14 @@ COPY www.projectkkk.pkcs12 /usr/share/springboot/config/www.projectkkk.pkcs12
 COPY www.projectkkk.pkcs12 /app/www.projectkkk.pkcs12
 COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
 COPY logstash.yml /usr/share/logstash/config/logstash.yml
+
+RUN chown -R 1000:1000 \
+    /usr/share/elasticsearch/config/* \
+    /usr/share/kibana/config/* \
+    /usr/share/logstash/config/* \
+    /usr/share/logstash/pipeline/* \
+    /usr/share/kafka/config/* \
+    /usr/share/springboot/config/*
 
 RUN chmod 755 /usr/share/elasticsearch/config \
     /usr/share/kibana/config \
