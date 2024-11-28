@@ -56,7 +56,7 @@ RUN chmod 644 /app/www.projectkkk.pkcs12
 # 권한 설정
 #RUN chmod 600 /usr/share/elasticsearch/config/elastic-truststore.p12
 RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
-RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.com.pem12
+RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.com.pem
 RUN chmod 600 /usr/share/logstash/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/kibana/config/www.projectkkk.pkcs12
 #RUN chmod 600 /usr/share/kibana/config/r10.crt
