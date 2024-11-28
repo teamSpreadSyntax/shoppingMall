@@ -36,6 +36,20 @@ COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 # wait-for-it.sh 스크립트를 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
+RUN mkdir -p /usr/share/elasticsearch/config \
+    /usr/share/kibana/config \
+    /usr/share/logstash/config \
+    /usr/share/logstash/pipeline \
+    /usr/share/kafka/config \
+    /usr/share/springboot/config \
+
+RUN chown -R 1000:1000 /usr/share/elasticsearch/config \
+    /usr/share/kibana/config \
+    /usr/share/logstash/config \
+    /usr/share/logstash/pipeline \
+    /usr/share/kafka/config \
+    /usr/share/springboot/config
+
 # SSL 인증서 복사
 COPY www.projectkkk.pkcs12 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 COPY www.projectkkk.com.pem /usr/share/elasticsearch/config/www.projectkkk.com.pem
@@ -50,7 +64,12 @@ COPY www.projectkkk.pkcs12 /app/www.projectkkk.pkcs12
 COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
 COPY logstash.yml /usr/share/logstash/config/logstash.yml
 
-
+RUN chmod 755 /usr/share/elasticsearch/config \
+    /usr/share/kibana/config \
+    /usr/share/logstash/config \
+    /usr/share/logstash/pipeline \
+    /usr/share/kafka/config \
+    /usr/share/springboot/config
 
 RUN chmod +x /app/wait-for-it.sh
 RUN chmod 644 /app/www.projectkkk.pkcs12
