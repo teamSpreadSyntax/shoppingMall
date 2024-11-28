@@ -62,7 +62,7 @@ services:
       - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12  # SSL CA 인증서 경로 수정
       - /dev/urandom:/dev/random
       - es-data:/usr/share/elasticsearch/data
-      - token-volume:/usr/share/elasticsearch/config
+      - token-volume:/usr/share/kibana/config
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -112,7 +112,7 @@ services:
           echo '서비스 토큰 생성 중...'
           # 토큰 파일이 없거나 비어 있는 경우에만 생성
           if [ ! -s /usr/share/elasticsearch/config/token.env ]; then
-              bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/elasticsearch/config/token.env
+              bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/kibana/config/token.env
       
               if [ -s /usr/share/elasticsearch/config/token.env ]; then
                   echo '서비스 토큰이 성공적으로 생성되었습니다.'
