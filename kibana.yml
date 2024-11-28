@@ -8,6 +8,11 @@ server.ssl.enabled: true
 server.ssl.keystore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
 server.ssl.keystore.password: "Ccenter123456!"
 
+elasticsearch.ssl.keystore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
+elasticsearch.ssl.truststore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
+elasticsearch.ssl.keystore.password: "${KIBANA_KEYSTORE_PASSWORD}"
+elasticsearch.ssl.truststore.password: "${KIBANA_KEYSTORE_PASSWORD}"
+
 # Elasticsearch configuration
 elasticsearch.hosts: ["https://elasticsearch.www.projectkkk.com:9200"]
 elasticsearch.ssl.verificationMode: full
@@ -18,6 +23,11 @@ elasticsearch.ssl.key: /usr/share/kibana/config/www.projectkkk.pkcs12
 
 elasticsearch.username: "kibana_system"
 elasticsearch.password: "Ccenter123456!"
+
+server.cors.enabled: true
+server.cors.allowCredentials: true
+server.cors.allowOrigin: ["https://www.projectkkk.com"]
+xpack.security.secureCookies: true
 
 # Security settings
 xpack.security.enabled: true
