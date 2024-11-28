@@ -76,56 +76,75 @@ services:
           - elasticsearch.www.projectkkk.com
     command: >
       /bin/bash -c "
-      chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/config
-            chmod 750 /usr/share/elasticsearch/config
+          echo '1. 환경 변수 검증 시작...';
+          if [ -z \"${ELASTIC_PASSWORD}\" ] || [ -z \"${KEYSTORE_PASSWORD}\" ] || [ -z \"${TRUSTSTORE_PASSWORD}\" ]; then
+              echo '필수 환경 변수가 설정되지 않았습니다. 실행 중단.';
+              exit 1;
+          fi;
+
+          echo '2. 파일 권한 설정 시작...';
+          chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/config;
+          chmod 750 /usr/share/elasticsearch/config;
+
           # 키스토어가 존재하지 않으면 생성
           if [ ! -f /usr/share/elasticsearch/config/www.projectkkk.pkcs12 ]; then
-            echo 'Elasticsearch 키스토어가 존재하지 않습니다. 키스토어를 생성합니다.';
-            bin/elasticsearch-keystore create --force;
+              echo 'Elasticsearch 키스토어가 존재하지 않습니다. 키스토어를 생성합니다.';
+              bin/elasticsearch-keystore create --force;
           fi;
-      
-          # 키스토어에 보안 설정 추가 (환경 변수 사용)
+
+          # 키스토어에 보안 설정 추가
           echo -n '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.keystore.secure_password --stdin --force --silent;
           echo -n '${TRUSTSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.truststore.secure_password --stdin --force --silent;
-      
           echo -n '${KEYSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.keystore.secure_password --stdin --force --silent;
           echo -n '${TRUSTSTORE_PASSWORD}' | bin/elasticsearch-keystore add -x xpack.security.http.ssl.truststore.secure_password --stdin --force --silent;
-      
+
           # analysis-nori 플러그인 설치
           if [ ! -d '/usr/share/elasticsearch/plugins/analysis-nori' ]; then
-            bin/elasticsearch-plugin install --batch analysis-nori;
+              bin/elasticsearch-plugin install --batch analysis-nori;
           fi;
-      
+
           # Elasticsearch 시작
           /usr/local/bin/docker-entrypoint.sh eswrapper &
-          echo 'Elasticsearch 시작 대기 중...'
-          while ! curl -s -k https://localhost:9200 > /dev/null; do
-            sleep 5
-          done
-      
-          echo 'Elasticsearch가 실행 중입니다. 사용자 비밀번호 설정 중...'
-      
-          # elastic 사용자 비밀번호 변경
-          curl -k -X POST 'https://localhost:9200/_security/user/elastic/_password' -u \"elastic:${ELASTIC_PASSWORD}\" -H 'Content-Type: application/json' -d '{\"password\": \"${ELASTIC_PASSWORD}\"}'
-      
-          # kibana_system 사용자 비밀번호 변경
-          curl -k -X POST 'https://localhost:9200/_security/user/kibana_system/_password' -u \"elastic:${ELASTIC_PASSWORD}\" -H 'Content-Type: application/json' -d '{\"password\": \"${KIBANA_PASSWORD}\"}'
-      
-          echo '서비스 토큰 생성 중...'
-          # 토큰 파일이 없거나 비어 있는 경우에만 생성
+          echo '3. Elasticsearch 시작 대기 중...';
+          for i in {1..20}; do
+              if curl -s -k https://localhost:9200 > /dev/null; then
+                  echo 'Elasticsearch가 실행 중입니다.';
+                  break;
+              fi
+              echo 'Elasticsearch가 아직 준비되지 않았습니다. 재시도 중...';
+              sleep 5;
+          done;
+
+          # Elasticsearch 준비 완료 확인
+          if ! curl -s -k https://localhost:9200 > /dev/null; then
+              echo 'Elasticsearch가 준비되지 않았습니다. 실행 중단.';
+              exit 1;
+          fi;
+
+          echo '4. 사용자 비밀번호 설정 중...';
+          curl -k -X POST 'https://localhost:9200/_security/user/elastic/_password' -u \"elastic:${ELASTIC_PASSWORD}\" \
+               -H 'Content-Type: application/json' -d '{\"password\": \"${ELASTIC_PASSWORD}\"}';
+          curl -k -X POST 'https://localhost:9200/_security/user/kibana_system/_password' -u \"elastic:${ELASTIC_PASSWORD}\" \
+               -H 'Content-Type: application/json' -d '{\"password\": \"${KIBANA_PASSWORD}\"}';
+
+          echo '5. 서비스 토큰 생성 중...';
           if [ ! -s /usr/share/elasticsearch/config/token.env ]; then
-              bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/kibana/config/token.env
-      chown elasticsearch:elasticsearch /usr/share/kibana/config/token.env
-                chmod 600 /usr/share/kibana/config/token.env
+              bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/elasticsearch/config/token.env;
+
+              # Kibana로 토큰 복사 및 권한 설정
+              cp /usr/share/elasticsearch/config/token.env /usr/share/kibana/config/token.env;
+              chown elasticsearch:elasticsearch /usr/share/kibana/config/token.env;
+              chmod 600 /usr/share/kibana/config/token.env;
+
               if [ -s /usr/share/elasticsearch/config/token.env ]; then
-                  echo '서비스 토큰이 성공적으로 생성되었습니다.'
+                  echo '서비스 토큰이 성공적으로 생성되었습니다.';
               else
-                  echo '토큰 생성에 실패했습니다. Elasticsearch 로그를 확인하세요.'
+                  echo '토큰 생성에 실패했습니다. Elasticsearch 로그를 확인하세요.';
               fi;
           else
-              echo '기존 서비스 토큰이 유효합니다. 새로 생성하지 않습니다.'
+              echo '기존 서비스 토큰이 유효합니다. 새로 생성하지 않습니다.';
           fi;
-      
+
           wait"
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
