@@ -62,7 +62,7 @@ services:
       - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12  # SSL CA 인증서 경로 수정
       - /dev/urandom:/dev/random
       - es-data:/usr/share/elasticsearch/data
-      - token-volume:/usr/share/kibana/config
+      - token-volume:/usr/share/kibana/config:rw
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -237,7 +237,7 @@ services:
     volumes:
       - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
-      -  token-volume:/usr/share/kibana/config
+      -  token-volume:/usr/share/kibana/config:rw
       - ./www.projectkkk.pkcs12:/usr/share/kibana/config/www.projectkkk.pkcs12
       - ./www.projectkkk.com.pem:/usr/share/elasticsearch/config/www.projectkkk.com.pem
     networks:
