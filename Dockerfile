@@ -37,16 +37,30 @@ COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
 # SSL 인증서 복사
-#COPY elastic-truststore.p12 /usr/share/elasticsearch/config/elastic-truststore.p12
-#COPY elastic-stack-ca.p12 /usr/share/elasticsearch/config/elastic-stack-ca.p12
-COPY www.projectkkk.com.pkcs12 /app/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /usr/share/logstash/config/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /usr/share/kibana/config/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /usr/share/kafka/config/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /usr/share/springboot/config/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /app/www.projectkkk.pkcs12
+COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
+COPY logstash.yml /usr/share/logstash/config/logstash.yml
+
+
 
 RUN chmod +x /app/wait-for-it.sh
 RUN chmod 644 /app/www.projectkkk.pkcs12
 
 # 권한 설정
 #RUN chmod 600 /usr/share/elasticsearch/config/elastic-truststore.p12
-#RUN chmod 600 /usr/share/elasticsearch/config/elastic-stack-ca.p12
+RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/logstash/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/kibana/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/kafka/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/logstash/pipeline/logstash.conf
+RUN chmod 600 /usr/share/logstash/config/logstash.yml
+
 
 # Expose port 443 for the application
 EXPOSE 443
