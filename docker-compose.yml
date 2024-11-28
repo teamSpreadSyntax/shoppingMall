@@ -76,6 +76,8 @@ services:
           - elasticsearch.www.projectkkk.com
     command: >
       /bin/bash -c "
+      chown -R elasticsearch:elasticsearch /usr/share/elasticsearch/config
+            chmod 750 /usr/share/elasticsearch/config
           # 키스토어가 존재하지 않으면 생성
           if [ ! -f /usr/share/elasticsearch/config/www.projectkkk.pkcs12 ]; then
             echo 'Elasticsearch 키스토어가 존재하지 않습니다. 키스토어를 생성합니다.';
@@ -113,7 +115,8 @@ services:
           # 토큰 파일이 없거나 비어 있는 경우에만 생성
           if [ ! -s /usr/share/elasticsearch/config/token.env ]; then
               bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/kibana/config/token.env
-      
+      chown elasticsearch:elasticsearch /usr/share/kibana/config/token.env
+                chmod 600 /usr/share/kibana/config/token.env
               if [ -s /usr/share/elasticsearch/config/token.env ]; then
                   echo '서비스 토큰이 성공적으로 생성되었습니다.'
               else
