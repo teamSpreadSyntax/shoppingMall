@@ -112,12 +112,12 @@ services:
           echo '서비스 토큰 생성 중...'
           bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/elasticsearch/config/token.env
 
-          if [ ! -s /usr/share/elasticsearch/config/token.env ]; then
-              echo '서비스 토큰 생성 중...'
-              bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/elasticsearch/config/token.env
+          if [ -s /usr/share/elasticsearch/config/token.env ]; then
+            echo '서비스 토큰이 성공적으로 생성되었습니다.'
+            echo '토큰이 성공적으로 저장되었습니다.'
           else
-              echo '기존 서비스 토큰을 사용합니다.'
-          fi
+            echo '토큰생성에 실패했습니다. Elasticsearch 로그를 확인하세요.'
+          fi;
           wait"
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
@@ -171,11 +171,12 @@ services:
       ELASTICSEARCH_USERNAME: kibana_system
       ELASTICSEARCH_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
       ELASTICSEARCH_SSL_VERIFICATIONMODE: full
+      ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
       ELASTICSEARCH_SSL_KEYSTORE_PATH: /usr/share/kibana/config/www.projectkkk.pkcs12
       ELASTICSEARCH_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       ELASTICSEARCH_SSL_KEYSTORE_TYPE: PKCS12
       ELASTICSEARCH_STARTUP_TIMEOUT: "600s"
-      server.publicBaseUrl: "https://www.projectkkk.com" # 추가
+      ELASTICSEARCH_SSL_CERTIFICATE: /usr/share/kibana/config/www.projectkkk.pkcs12
       xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
       xpack.reporting.kibanaServer.hostname: "www.projectkkk.com"
       XPACK_SECURITY_ENCRYPTIONKEY: "something_at_least_32_characters"
@@ -187,6 +188,7 @@ services:
       SERVER_SSL_KEYSTORE_PATH: /usr/share/kibana/config/www.projectkkk.pkcs12
       SERVER_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       SERVER_SSL_KEYSTORE_TYPE: PKCS12
+      KIBANA_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
     ports:
       - "5601:5601"
     depends_on:
