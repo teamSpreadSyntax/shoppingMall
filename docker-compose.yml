@@ -82,29 +82,25 @@ services:
               echo '필수 환경 변수가 설정되지 않았습니다. 실행 중단.';
               exit 1;
           fi;
-      
+
           echo '2. 파일 권한 설정 시작...';
-          chown -R 1000:1000 /usr/share/elasticsearch/config;  # 수정: elasticsearch:elasticsearch에서 root:root로 변경
+          chown -R 1000:1000 /usr/share/elasticsearch/config;  
           chmod 750 /usr/share/elasticsearch/config;
-      
-          # 키스토어가 존재하지 않으면 생성
+
           if [ ! -f /usr/share/elasticsearch/config/www.projectkkk.pkcs12 ]; then
               echo 'Elasticsearch 키스토어가 존재하지 않습니다. 키스토어를 생성합니다.';
               bin/elasticsearch-keystore create --force;
           fi;
-      
-          # 키스토어에 보안 설정 추가
+
           echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.keystore.secure_password --stdin --force --silent;
           echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.truststore.secure_password --stdin --force --silent;
           echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add -x xpack.security.http.ssl.keystore.secure_password --stdin --force --silent;
           echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add -x xpack.security.http.ssl.truststore.secure_password --stdin --force --silent;
-      
-          # analysis-nori 플러그인 설치
+
           if [ ! -d '/usr/share/elasticsearch/plugins/analysis-nori' ]; then
               bin/elasticsearch-plugin install --batch analysis-nori;
           fi;
-      
-          # Elasticsearch 시작
+
           /usr/local/bin/docker-entrypoint.sh eswrapper &
           echo '3. Elasticsearch 시작 대기 중...';
           for i in {1..20}; do
@@ -115,34 +111,40 @@ services:
               echo 'Elasticsearch가 아직 준비되지 않았습니다. 재시도 중...';
               sleep 5;
           done;
-      
-          # Elasticsearch 준비 완료 확인
+
           if ! curl -s -k https://localhost:9200 > /dev/null; then
               echo 'Elasticsearch가 준비되지 않았습니다. 실행 중단.';
               exit 1;
           fi;
-      
+
           echo '4. 사용자 비밀번호 설정 중...';
-          # 수정: curl 명령어 구문 수정
+
+          echo 'Elastic 사용자 비밀번호 설정';
           curl -k -X POST -H 'Content-Type: application/json' \
                -u \"elastic:${ELASTIC_PASSWORD}\" \
                -d \"{\\\"password\\\":\\\"${ELASTIC_PASSWORD}\\\"}\" \
-               'https://localhost:9200/_security/user/elastic/_password'
-      
+               'https://localhost:9200/_security/user/elastic/_password' || {
+                   echo 'Elastic 사용자 비밀번호 설정에 실패했습니다.';
+                   exit 1;
+               }
+
+          echo 'Kibana 사용자 비밀번호 설정';
           curl -k -X POST -H 'Content-Type: application/json' \
                -u \"elastic:${ELASTIC_PASSWORD}\" \
                -d \"{\\\"password\\\":\\\"${KIBANA_PASSWORD}\\\"}\" \
-               'https://localhost:9200/_security/user/kibana_system/_password'
-      
+               'https://localhost:9200/_security/user/kibana_system/_password' || {
+                   echo 'Kibana 사용자 비밀번호 설정에 실패했습니다.';
+                   exit 1;
+               }
+
           echo '5. 서비스 토큰 생성 중...';
           if [ ! -s /usr/share/elasticsearch/config/token.env ]; then
               bin/elasticsearch-service-tokens create elastic/kibana kibana-token | tail -n1 | tr -d '\n' > /usr/share/elasticsearch/config/token.env;
-      
-              # Kibana로 토큰 복사 및 권한 설정
+
               cp /usr/share/elasticsearch/config/token.env /usr/share/kibana/config/token.env;
-              chown 1000:1000 /usr/share/kibana/config/token.env;  # 수정: elasticsearch:elasticsearch에서 root:root로 변경
+              chown 1000:1000 /usr/share/kibana/config/token.env;  
               chmod 600 /usr/share/kibana/config/token.env;
-      
+
               if [ -s /usr/share/elasticsearch/config/token.env ]; then
                   echo '서비스 토큰이 성공적으로 생성되었습니다.';
               else
@@ -151,8 +153,9 @@ services:
           else
               echo '기존 서비스 토큰이 유효합니다. 새로 생성하지 않습니다.';
           fi;
-      
+
           wait"
+
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
       interval: 60s
