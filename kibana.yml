@@ -1,18 +1,20 @@
+# kibana.yml
 # Server configuration
 server.host: "0.0.0.0"
 server.port: 5601
 
 # SSL configuration
 server.ssl.enabled: true
-server.ssl.certificate: "/usr/share/kibana/config/www.projectkkk.com.pem"
-server.ssl.key: "/usr/share/kibana/config/www.projectkkk.com.pem"
+server.ssl.keystore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
+server.ssl.keystore.password: "${KIBANA_KEYSTORE_PASSWORD}"
 
 # Elasticsearch configuration
 elasticsearch.hosts: ["https://elasticsearch.www.projectkkk.com:9200"]
 elasticsearch.username: "kibana_system"
 elasticsearch.password: "Ccenter123456!"
-elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/www.projectkkk.com.pem"]
 elasticsearch.ssl.verificationMode: "full"
+elasticsearch.ssl.keystore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
+elasticsearch.ssl.keystore.password: "${KIBANA_KEYSTORE_PASSWORD}"
 
 # Security settings
 xpack.security.enabled: true
