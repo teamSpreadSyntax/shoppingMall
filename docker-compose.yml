@@ -95,12 +95,6 @@ services:
       if ! bin/elasticsearch-keystore list | grep -q 'xpack.security.transport.ssl.truststore.secure_password'; then
           echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add -x xpack.security.transport.ssl.truststore.secure_password --stdin --force --silent || echo 'Transport SSL Truststore 설정 실패';
       fi;
-      if ! bin/elasticsearch-keystore list | grep -q 'xpack.security.http.ssl.keystore.secure_password'; then
-          echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add -x xpack.security.http.ssl.keystore.secure_password --stdin --force --silent || echo 'HTTP SSL Keystore 설정 실패';
-      fi;
-      if ! bin/elasticsearch-keystore list | grep -q 'xpack.security.http.ssl.truststore.secure_password'; then
-          echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add -x xpack.security.http.ssl.truststore.secure_password --stdin --force --silent || echo 'HTTP SSL Truststore 설정 실패';
-      fi;
 
       echo '4. Elasticsearch 시작 중...';
       /usr/local/bin/docker-entrypoint.sh eswrapper &
@@ -121,18 +115,18 @@ services:
 
       echo '5. 사용자 비밀번호 설정 시작...';
 
-      curl -k -X POST -H 'Content-Type: application/json' \
-           -u \"elastic:${ELASTIC_PASSWORD}\" \
-           -d \"{\\\"password\\\":\\\"${ELASTIC_PASSWORD}\\\"}\" \
-           'https://localhost:9200/_security/user/elastic/_password' || {
+      curl -k -X POST -u "elastic:${ELASTIC_PASSWORD}" \
+           -H "Content-Type: application/json" \
+           -d "{\"password\":\"${ELASTIC_PASSWORD}\"}" \
+           "https://localhost:9200/_security/user/elastic/_password" || {
                echo 'Elastic 사용자 비밀번호 설정 실패';
                exit 1;
            }
 
-      curl -k -X POST -H 'Content-Type: application/json' \
-           -u \"elastic:${ELASTIC_PASSWORD}\" \
-           -d \"{\\\"password\\\":\\\"${KIBANA_PASSWORD}\\\"}\" \
-           'https://localhost:9200/_security/user/kibana_system/_password' || {
+      curl -k -X POST -u "elastic:${ELASTIC_PASSWORD}" \
+           -H "Content-Type: application/json" \
+           -d "{\"password\":\"${KIBANA_PASSWORD}\"}" \
+           "https://localhost:9200/_security/user/kibana_system/_password" || {
                echo 'Kibana 사용자 비밀번호 설정 실패';
                exit 1;
            }
@@ -154,6 +148,7 @@ services:
       fi;
 
       wait"
+
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
       interval: 60s
