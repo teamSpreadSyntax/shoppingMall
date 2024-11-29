@@ -205,8 +205,8 @@ services:
       ELASTICSEARCH_USERNAME: kibana_system
       ELASTICSEARCH_PASSWORD: ${KIBANA_SYSTEM_PASSWORD}
       ELASTICSEARCH_SSL_VERIFICATIONMODE: full
-      ELASTICSEARCH_SSL_KEYSTORE_PATH: /usr/share/kibana/config/www.projectkkk.pkcs12  # 추가: 명시적 키스토어 경로 설정
-      ELASTICSEARCH_SSL_TRUSTSTORE_PATH: /usr/share/kibana/config/www.projectkkk.pkcs12  # 추가: 명시적 트러스트스토어 경로 설정
+      ELASTICSEARCH_SSL_KEYSTORE_PATH: /usr/share/kibana/config/www.projectkkk.pkcs12
+      ELASTICSEARCH_SSL_TRUSTSTORE_PATH: /usr/share/kibana/config/www.projectkkk.pkcs12
       ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES: /usr/share/elasticsearch/config/www.projectkkk.com.pem
       ELASTICSEARCH_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       ELASTICSEARCH_SSL_KEYSTORE_TYPE: PKCS12
@@ -225,8 +225,8 @@ services:
       SERVER_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       SERVER_SSL_KEYSTORE_TYPE: PKCS12
       KIBANA_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
-      SERVER_CORS_ENABLED: "true"  # 추가: CORS 활성화
-      SERVER_CORS_ALLOW_CREDENTIALS: "true"  # 추가: 자격 증명 허용
+      SERVER_CORS_ENABLED: "true"
+      SERVER_CORS_ALLOW_CREDENTIALS: "true"
       SERVER_CORS_ALLOW_ORIGIN: "https://www.projectkkk.com"
     ports:
       - "5601:5601"
