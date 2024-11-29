@@ -5,27 +5,19 @@ server.port: 5601
 # SSL configuration
 server.ssl.enabled: true
 server.ssl.keystore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
-server.ssl.keystore.password: "Ccenter123456!"
+server.ssl.keystore.password: "${KIBANA_KEYSTORE_PASSWORD}"
 
 # Elasticsearch configuration
 elasticsearch.hosts: ["https://elasticsearch.www.projectkkk.com:9200"]
 elasticsearch.username: "kibana_system"
-elasticsearch.password: "Ccenter123456!"
+elasticsearch.password: "${KIBANA_SYSTEM_PASSWORD}"
 elasticsearch.ssl.verificationMode: "full"
 elasticsearch.ssl.keystore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
-elasticsearch.ssl.keystore.password: "Ccenter123456!"
-elasticsearch.ssl.truststore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
-elasticsearch.ssl.truststore.password: "Ccenter123456!"
-elasticsearch.ssl.certificateAuthorities: ["/usr/share/kibana/config/www.projectkkk.pkcs12"]
+elasticsearch.ssl.keystore.password: "${KIBANA_KEYSTORE_PASSWORD}"
 
 # Security settings
 xpack.security.enabled: true
-xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
-
-# Reporting settings
-xpack.reporting.encryptionKey: "something_at_least_32_characters"
-xpack.reporting.roles.enabled: false
-xpack.reporting.kibanaServer.hostname: "kibana.www.projectkkk.com"
+xpack.encryptedSavedObjects.encryptionKey: "${XPACK_SECURITY_ENCRYPTIONKEY}"
 
 # CORS settings
 server.cors.enabled: true
