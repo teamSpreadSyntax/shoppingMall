@@ -14,7 +14,7 @@ elasticsearch.username: "kibana_system"
 elasticsearch.password: "Ccenter123456!"
 elasticsearch.ssl.verificationMode: "full"
 elasticsearch.ssl.keystore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
-elasticsearch.ssl.keystore.password: "${KIBANA_KEYSTORE_PASSWORD}"
+elasticsearch.ssl.keystore.password: "Ccenter123456!"
 
 # Security settings
 xpack.security.enabled: true
