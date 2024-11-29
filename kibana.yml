@@ -22,7 +22,3 @@ xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
 server.cors.enabled: true
 server.cors.allowCredentials: true
 server.cors.allowOrigin: ["https://www.projectkkk.com"]
-
-# Node.js options
-node.options:
-  - --openssl-legacy-provider

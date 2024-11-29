@@ -215,6 +215,7 @@ services:
       SERVER_CORS_ENABLED: "true"
       SERVER_CORS_ALLOW_CREDENTIALS: "true"
       SERVER_CORS_ALLOW_ORIGIN: "https://www.projectkkk.com"
+      NODE_OPTIONS: "--openssl-legacy-provider"
     ports:
       - "5601:5601"
     depends_on:
