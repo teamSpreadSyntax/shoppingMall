@@ -75,62 +75,52 @@ services:
         aliases:
           - elasticsearch.www.projectkkk.com
     command: >
-      /bin/bash -c "
-      echo '1. 환경 변수 검증 시작...';
-      if [ -z \"${ELASTIC_PASSWORD}\" ] || [ -z \"${KIBANA_PASSWORD}\" ] || [ -z \"${KEYSTORE_PASSWORD}\" ] || [ -z \"${TRUSTSTORE_PASSWORD}\" ]; then
-          echo '필수 환경 변수가 설정되지 않았습니다. 실행 중단.';
-          exit 1;
-      fi;
+      /bin/bash -c '
+      echo "1. 환경 변수 검증 시작..."
+      if [ -z "${ELASTIC_PASSWORD}" ] || [ -z "${KIBANA_PASSWORD}" ] || [ -z "${KEYSTORE_PASSWORD}" ] || [ -z "${TRUSTSTORE_PASSWORD}" ]; then
+          echo "필수 환경 변수가 설정되지 않았습니다. 실행 중단."
+          exit 1
+      fi
 
-      echo '2. 키스토어 설정 시작...';
+      echo "2. 키스토어 설정 시작..."
       if [ ! -f /usr/share/elasticsearch/config/elasticsearch.keystore ]; then
-          echo 'Elasticsearch 키스토어 생성 중...';
-          bin/elasticsearch-keystore create;
-      fi;
+          echo "Elasticsearch 키스토어 생성 중..."
+          bin/elasticsearch-keystore create
+      fi
 
-      echo '3. 보안 설정을 Elasticsearch 키스토어에 추가...';
-      echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.http.ssl.keystore.secure_password --stdin --force;
-      echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.http.ssl.truststore.secure_password --stdin --force;
-      echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password --stdin --force;
-      echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password --stdin --force;
+      echo "3. 보안 설정을 Elasticsearch 키스토어에 추가..."
+      echo "${KEYSTORE_PASSWORD}" | bin/elasticsearch-keystore add xpack.security.http.ssl.keystore.secure_password --stdin --force
+      echo "${TRUSTSTORE_PASSWORD}" | bin/elasticsearch-keystore add xpack.security.http.ssl.truststore.secure_password --stdin --force
+      echo "${KEYSTORE_PASSWORD}" | bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password --stdin --force
+      echo "${TRUSTSTORE_PASSWORD}" | bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password --stdin --force
 
-      echo '4. Elasticsearch 시작...';
+      echo "4. Elasticsearch 시작..."
       /usr/local/bin/docker-entrypoint.sh eswrapper &
+      ES_PID=$!
 
+      echo "5. Elasticsearch 실행 상태 확인..."
       for i in {1..20}; do
-          if curl -s -k https://localhost:9200 > /dev/null; then
-              echo 'Elasticsearch가 실행 중입니다.';
-              break;
+          if curl -s -k https://localhost:9200 >/dev/null; then
+              echo "Elasticsearch가 실행 중입니다."
+              break
           fi
-          echo 'Elasticsearch가 아직 준비되지 않았습니다. 재시도 중...';
-          sleep 5;
-      done;
+          echo "Elasticsearch가 아직 준비되지 않았습니다. 재시도 중..."
+          sleep 5
+      done
 
-      if ! curl -s -k https://localhost:9200 > /dev/null; then
-          echo 'Elasticsearch가 준비되지 않았습니다. 실행 중단.';
-          exit 1;
-      fi;
-
-      echo '5. 사용자 비밀번호 설정 시작...';
+      echo "6. 사용자 비밀번호 설정..."
       curl -k -X POST -u "elastic:${ELASTIC_PASSWORD}" \
-           -H "Content-Type: application/json" \
-           -d "{\"password\":\"${ELASTIC_PASSWORD}\"}" \
-           "https://localhost:9200/_security/user/elastic/_password" || {
-               echo 'Elastic 사용자 비밀번호 설정 실패';
-               exit 1;
-           }
+          -H "Content-Type: application/json" \
+          -d "{\"password\":\"${ELASTIC_PASSWORD}\"}" \
+          "https://localhost:9200/_security/user/elastic/_password"
 
       curl -k -X POST -u "elastic:${ELASTIC_PASSWORD}" \
-           -H "Content-Type: application/json" \
-           -d "{\"password\":\"${KIBANA_PASSWORD}\"}" \
-           "https://localhost:9200/_security/user/kibana_system/_password" || {
-               echo 'Kibana 사용자 비밀번호 설정 실패';
-               exit 1;
-           }
+          -H "Content-Type: application/json" \
+          -d "{\"password\":\"${KIBANA_PASSWORD}\"}" \
+          "https://localhost:9200/_security/user/kibana_system/_password"
 
-      echo '6. Elasticsearch 설정 완료.';
-      wait"
-
+      wait $ES_PID
+      '
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
       interval: 60s
