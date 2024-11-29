@@ -85,14 +85,14 @@ services:
       echo '2. 키스토어 설정 시작...';
       if [ ! -f /usr/share/elasticsearch/config/elasticsearch.keystore ]; then
           echo 'Elasticsearch 키스토어 생성 중...';
-          bin/elasticsearch-keystore create --force;
+          echo | bin/elasticsearch-keystore create;
       fi;
 
       echo '3. 보안 설정을 Elasticsearch 키스토어에 추가...';
-      echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.http.ssl.keystore.secure_password --stdin --force;
-      echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.http.ssl.truststore.secure_password --stdin --force;
-      echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password --stdin --force;
-      echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password --stdin --force;
+      echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.http.ssl.keystore.secure_password --stdin;
+      echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.http.ssl.truststore.secure_password --stdin;
+      echo -n \"${KEYSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password --stdin;
+      echo -n \"${TRUSTSTORE_PASSWORD}\" | bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password --stdin;
 
       echo '4. Elasticsearch 시작...';
       /usr/local/bin/docker-entrypoint.sh eswrapper &
@@ -131,6 +131,7 @@ services:
 
       echo '6. Elasticsearch 설정 완료.';
       wait"
+
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
       interval: 60s
