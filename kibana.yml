@@ -6,7 +6,7 @@ server.port: 5601
 # SSL configuration
 server.ssl.enabled: true
 server.ssl.keystore.path: "/usr/share/kibana/config/www.projectkkk.pkcs12"
-server.ssl.keystore.password: "${KIBANA_KEYSTORE_PASSWORD}"
+server.ssl.keystore.password: "Ccenter123456!"
 
 # Elasticsearch configuration
 elasticsearch.hosts: ["https://elasticsearch.www.projectkkk.com:9200"]
