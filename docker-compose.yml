@@ -26,7 +26,6 @@ services:
       - project_default
 
   elasticsearch:
-    user: 0:0
     image: docker.elastic.co/elasticsearch/elasticsearch:8.10.4
     container_name: elasticsearch
     restart: unless-stopped
