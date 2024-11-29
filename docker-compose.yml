@@ -96,30 +96,41 @@ services:
       
       echo "4. Elasticsearch 시작..."
       /usr/local/bin/docker-entrypoint.sh eswrapper &
-      local ES_PID=$!
+      ES_PID=$!
       
       echo "5. Elasticsearch 실행 상태 확인..."
-      for i in {1..20}; do
-          if curl -s -k https://localhost:9200 >/dev/null; then
+      MAX_TRIES=30
+      COUNTER=0
+      while [ $COUNTER -lt $MAX_TRIES ]; do
+          sleep 10
+          if curl -s -k https://localhost:9200/_cluster/health > /dev/null; then
               echo "Elasticsearch가 실행 중입니다."
+      
+              echo "6. 사용자 비밀번호 설정..."
+              sleep 10  # security 인덱스가 준비될 때까지 추가 대기
+      
+              curl -k -X POST -u "elastic:${ELASTIC_PASSWORD}" \
+                  -H "Content-Type: application/json" \
+                  -d "{\"password\":\"${ELASTIC_PASSWORD}\"}" \
+                  "https://localhost:9200/_security/user/elastic/_password"
+      
+              curl -k -X POST -u "elastic:${ELASTIC_PASSWORD}" \
+                  -H "Content-Type: application/json" \
+                  -d "{\"password\":\"${KIBANA_PASSWORD}\"}" \
+                  "https://localhost:9200/_security/user/kibana_system/_password"
+      
               break
           fi
           echo "Elasticsearch가 아직 준비되지 않았습니다. 재시도 중..."
-          sleep 5
+          let COUNTER=COUNTER+1
       done
       
-      echo "6. 사용자 비밀번호 설정..."
-      curl -k -X POST -u "elastic:${ELASTIC_PASSWORD}" \
-          -H "Content-Type: application/json" \
-          -d "{\"password\":\"${ELASTIC_PASSWORD}\"}" \
-          "https://localhost:9200/_security/user/elastic/_password"
+      if [ $COUNTER -eq $MAX_TRIES ]; then
+          echo "Elasticsearch 시작 타임아웃"
+          exit 1
+      fi
       
-      curl -k -X POST -u "elastic:${ELASTIC_PASSWORD}" \
-          -H "Content-Type: application/json" \
-          -d "{\"password\":\"${KIBANA_PASSWORD}\"}" \
-          "https://localhost:9200/_security/user/kibana_system/_password"
-      
-      wait "${ES_PID}"
+      wait "$ES_PID"
       '
     healthcheck:
       test: ["CMD", "curl", "-f", "-k", "-u", "elastic:${ELASTIC_PASSWORD}", "https://localhost:9200/_cluster/health"]
