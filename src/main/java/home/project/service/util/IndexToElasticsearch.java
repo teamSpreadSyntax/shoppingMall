@@ -21,11 +21,24 @@ public class IndexToElasticsearch {
                 // 기존 인덱스가 있다면 삭제
                 indexOperations.delete();
 
-                // 기본 인덱스 설정 생성
+                // 설정 생성
                 Map<String, Object> settings = Map.of(
                         "index", Map.of(
-                                "number_of_shards", 1,
-                                "number_of_replicas", 1
+                                "analysis", Map.of(
+                                        "tokenizer", Map.of(
+                                                "nori_tokenizer", Map.of(
+                                                        "type", "nori_tokenizer",
+                                                        "decompound_mode", "mixed"
+                                                )
+                                        ),
+                                        "analyzer", Map.of(
+                                                "korean", Map.of(
+                                                        "type", "custom",
+                                                        "tokenizer", "nori_tokenizer",
+                                                        "filter", List.of("lowercase", "trim")
+                                                )
+                                        )
+                                )
                         )
                 );
 
@@ -43,7 +56,6 @@ public class IndexToElasticsearch {
             throw e;
         }
     }
-
     public <T> void deleteDocumentFromElasticsearch(Long documentId, Class<T> documentClass) {
         try {
             // Long 타입의 ID를 String으로 변환하여 Elasticsearch에서 문서 삭제

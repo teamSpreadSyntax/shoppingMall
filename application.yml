@@ -7,9 +7,6 @@ spring:
   config:
     activate:
       on-profile: local
-  web:
-    resources:
-      add-mappings: true # 정적 리소스 매핑 활성화
   kafka:
     bootstrap-servers: localhost:9092
   elasticsearch:
@@ -38,9 +35,6 @@ spring:
   config:
     activate:
       on-profile: docker
-  web:
-    resources:
-      add-mappings: true # 정적 리소스 매핑 활성화
   kafka:
     bootstrap-servers: kafka:9092
   elasticsearch:
@@ -88,7 +82,7 @@ server:
     key-store: /app/springboot.p12
     key-store-password: ${KEYSTORE_PASSWORD}
     key-store-type: PKCS12
-    key-alias: projectkkk2
+    key-alias: springboot
   security:
     require-ssl: false
   hsts:

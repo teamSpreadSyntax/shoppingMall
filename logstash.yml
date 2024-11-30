@@ -1,5 +1,7 @@
 xpack.monitoring.elasticsearch.hosts: https://elasticsearch:9200
 xpack.monitoring.elasticsearch.password: Ccenter123456!
-xpack.monitoring.elasticsearch.ssl.verification_mode: certificate
+xpack.monitoring.elasticsearch.ssl.truststore.password: Ccenter123456!
+xpack.monitoring.elasticsearch.ssl.truststore.path: /usr/share/logstash/config/elastic-stack-ca.p12
+xpack.monitoring.elasticsearch.ssl.verification_mode: none
 xpack.monitoring.elasticsearch.username: elastic
 xpack.monitoring.enabled: true

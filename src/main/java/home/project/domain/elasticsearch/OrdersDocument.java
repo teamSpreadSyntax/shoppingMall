@@ -50,7 +50,12 @@ public class OrdersDocument {
         @Field(type = FieldType.Keyword)
         private String email;
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String name;
 
         @Field(type = FieldType.Keyword)
@@ -60,10 +65,10 @@ public class OrdersDocument {
         private String defaultAddress;
 
         @Field(type = FieldType.Keyword)
-        private String role; // RoleType enum: user, admin, center
+        private String role;  // RoleType enum: user, admin, center
 
         @Field(type = FieldType.Keyword)
-        private String grade; // MemberGradeType enum: BRONZE, SILVER, GOLD, PLATINUM
+        private String grade;  // MemberGradeType enum: BRONZE, SILVER, GOLD, PLATINUM
     }
 
     // 배송 정보를 담는 중첩 클래스
@@ -74,12 +79,17 @@ public class OrdersDocument {
         private Long id;
 
         @Field(type = FieldType.Keyword)
-        private String deliveryType; // DeliveryType enum: STRAIGHT_DELIVERY, ORDINARY_DELIVERY, REMOTE_DELIVERY
+        private String deliveryType;  // DeliveryType enum: STRAIGHT_DELIVERY, ORDINARY_DELIVERY, REMOTE_DELIVERY
 
         @Field(type = FieldType.Keyword)
         private String deliveryNum;
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String deliveryAddress;
 
         @Field(type = FieldType.Keyword)
@@ -95,9 +105,14 @@ public class OrdersDocument {
         private Long deliveryCost;
 
         @Field(type = FieldType.Keyword)
-        private String deliveryStatus; // DeliveryStatusType enum의 description
+        private String deliveryStatus;  // DeliveryStatusType enum의 description
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String shippingMessage;
     }
 
@@ -115,18 +130,28 @@ public class OrdersDocument {
         private Long price;
 
         @Field(type = FieldType.Keyword)
-        private String deliveryStatus; // DeliveryStatusType enum의 description
+        private String deliveryStatus;  // DeliveryStatusType enum의 description
 
         @Field(type = FieldType.Long)
         private Long productId;
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String productName;
 
         @Field(type = FieldType.Keyword)
         private String productNum;
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String brand;
 
         @Field(type = FieldType.Nested)
@@ -143,7 +168,12 @@ public class OrdersDocument {
         @Field(type = FieldType.Keyword)
         private String code;
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String name;
 
         @Field(type = FieldType.Integer)
@@ -152,7 +182,12 @@ public class OrdersDocument {
         @Field(type = FieldType.Long)
         private Long parentId;
 
-        @Field(type = FieldType.Text)
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
+                otherFields = {
+                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
+                }
+        )
         private String parentName;
 
         @Field(type = FieldType.Keyword)

@@ -24,7 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "관리자 배송", description = "관리자를 위한 배송관련 API입니다")
+@Tag(name = "배송", description = "배송관련 API입니다")
 @RequestMapping("/api/admin/shipping")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "Internal server error",
