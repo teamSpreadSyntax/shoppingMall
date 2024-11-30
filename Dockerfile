@@ -37,15 +37,69 @@ COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 # wait-for-it.sh 스크립트를 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
-# 권한 설정
-RUN chmod +x /app/wait-for-it.sh
+RUN mkdir -p /usr/share/elasticsearch/config \
+    /usr/share/kibana/config \
+    /usr/share/logstash/config \
+    /usr/share/logstash/pipeline \
+    /usr/share/kafka/config \
+    /usr/share/springboot/config
+
+RUN chown -R 1000:1000 /usr/share/elasticsearch/config \
+    /usr/share/kibana/config \
+    /usr/share/logstash/config \
+    /usr/share/logstash/pipeline \
+    /usr/share/kafka/config \
+    /usr/share/springboot/config
 
 # SSL 인증서 복사
-COPY elastic-stack-ca.p12 /app/elastic-stack-ca.p12
-COPY springboot.p12 /app/springboot.p12
+COPY www.projectkkk.pkcs12 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+COPY www.projectkkk.com.pem /usr/share/elasticsearch/config/www.projectkkk.com.pem
+COPY www.projectkkk.com.pem /usr/share/kibana/config/www.projectkkk.com.pem
+COPY www.projectkkk.pkcs12 /usr/share/logstash/config/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /usr/share/kibana/config/www.projectkkk.pkcs12
+COPY kibana.yml /usr/share/kibana/config/kibana.yml
+#COPY r10.crt /usr/share/kibana/config/r10.crt
+COPY www.projectkkk.pkcs12 /usr/share/kafka/config/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /usr/share/springboot/config/www.projectkkk.pkcs12
+COPY www.projectkkk.pkcs12 /app/www.projectkkk.pkcs12
+COPY logstash.conf /usr/share/logstash/pipeline/logstash.conf
+COPY logstash.yml /usr/share/logstash/config/logstash.yml
+
+RUN chown -R 1000:1000 \
+    /usr/share/elasticsearch/config/* \
+    /usr/share/kibana/config/* \
+    /usr/share/logstash/config/* \
+    /usr/share/logstash/pipeline/* \
+    /usr/share/kafka/config/* \
+    /usr/share/springboot/config/*
+
+RUN chmod 755 /usr/share/elasticsearch/config \
+    /usr/share/kibana/config \
+    /usr/share/logstash/config \
+    /usr/share/logstash/pipeline \
+    /usr/share/kafka/config \
+    /usr/share/springboot/config
+
+RUN chmod +x /app/wait-for-it.sh
+RUN chmod 644 /app/www.projectkkk.pkcs12
+
+# 권한 설정
+#RUN chmod 600 /usr/share/elasticsearch/config/elastic-truststore.p12
+RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.com.pem
+RUN chmod 600 /usr/share/kibana/config/www.projectkkk.com.pem
+RUN chmod 600 /usr/share/logstash/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/kibana/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/kibana/config/kibana.yml
+#RUN chmod 600 /usr/share/kibana/config/r10.crt
+RUN chmod 600 /usr/share/kafka/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/logstash/pipeline/logstash.conf
+RUN chmod 600 /usr/share/logstash/config/logstash.yml
+
 
 # Expose port 443 for the application
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/springboot.p12", "-Dserver.ssl.key-store-password=changeit", "-Dserver.ssl.key-store-type=PKCS12", "-jar", "app.jar"]
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12", "-Djavax.net.ssl.trustStorePassword=Ccenter123456!", "-Djavax.net.ssl.trustStoreType=PKCS12", "-jar", "app.jar"]

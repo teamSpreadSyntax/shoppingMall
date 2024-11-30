@@ -18,12 +18,12 @@ spring:
       socket-timeout: 30s
       ssl:
         enabled: true
-        verification-mode: none
+        verification-mode: full
         trust-store-type: PKCS12
-        trust-store: ./src/main/resources/elastic-stack-ca.p12
+        trust-store: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
         trust-store-password: ${CA_PASSWORD}
-        key-store: ./src/main/resources/springboot.p12
-        key-store-password: ${KEYSTORE_PASSWORD}
+        key-store: classpath:www.projectkkk.com.pkcs12
+        key-store-password: ${SPRINGBOOT_PASSWORD}
         key-store-type: PKCS12
   data:
     elasticsearch:
@@ -46,11 +46,12 @@ spring:
       socket-timeout: 30s
       ssl:
         enabled: true
+        verification-mode: full
         trust-store-type: PKCS12
-        trust-store: /app/elastic-stack-ca.p12
+        trust-store: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
         trust-store-password: ${CA_PASSWORD}
-        key-store: /app/springboot.p12
-        key-store-password: ${KEYSTORE_PASSWORD}
+        key-store: classpath:www.projectkkk.com.pkcs12
+        key-store-password: ${SPRINGBOOT_PASSWORD}
         key-store-type: PKCS12
   data:
     elasticsearch:
@@ -79,11 +80,15 @@ server:
   port: 443
   ssl:
     enabled: true
-    key-store: /app/springboot.p12
-    key-store-password: ${KEYSTORE_PASSWORD}
+    verification-mode: full
+    trust-store-type: PKCS12
+    trust-store: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+    trust-store-password: ${CA_PASSWORD}
+    key-store: /app/www.projectkkk.pkcs12
+    key-store-password: ${SPRINGBOOT_PASSWORD}
     key-store-type: PKCS12
-    key-alias: springboot
+    key-alias: www.projectkkk.com
   security:
-    require-ssl: false
+    require-ssl: full
   hsts:
     enabled: false
