@@ -25,4 +25,4 @@ server.cors.allowCredentials: true
 server.cors.allowOrigin: ["https://www.projectkkk.com"]
 
 server.customResponseHeaders:
-  content-security-policy: "frame-ancestors 'self' https://www.projectkkk.com"
+  content-security-policy: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self' https://www.projectkkk.com"
