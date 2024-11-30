@@ -111,6 +111,20 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .headers(headers -> headers
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives("default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; " +
+                                        "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='; " +
+                                        "style-src 'self' 'unsafe-inline'; " +
+                                        "img-src 'self' data: blob: https:; " +
+                                        "connect-src 'self' https: http: ws: wss:; " +
+                                        "font-src 'self' data:; " +
+                                        "frame-src 'self'; " +
+                                        "frame-ancestors 'self' https://www.projectkkk.com; " +
+                                        "worker-src 'self' blob:;")
+                        )
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )

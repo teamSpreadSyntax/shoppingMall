@@ -25,4 +25,12 @@ server.cors.allowCredentials: true
 server.cors.allowOrigin: ["https://www.projectkkk.com"]
 
 server.customResponseHeaders:
-  content-security-policy: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'self' https://www.projectkkk.com"
+  content-security-policy: "default-src 'self' 'unsafe-inline' 'unsafe-eval' blob: data:; 
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE='; 
+    style-src 'self' 'unsafe-inline'; 
+    img-src 'self' data: blob: https:; 
+    connect-src 'self' https: http: ws: wss:; 
+    font-src 'self' data:; 
+    frame-src 'self'; 
+    frame-ancestors 'self' https://www.projectkkk.com; 
+    worker-src 'self' blob:;"
