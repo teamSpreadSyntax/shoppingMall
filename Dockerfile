@@ -18,7 +18,7 @@ COPY src/main/resources/superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb2
 
 # gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
 RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:///app/gradle/gradle-8.5-bin.zip|' gradle/wrapper/gradle-wrapper.properties
-
+g
 # Gradle Wrapper를 사용하여 빌드 (항상 테스트를 제외)
 RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 
