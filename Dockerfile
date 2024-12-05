@@ -9,6 +9,7 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
+
 # Gradle 파일 복사
 COPY gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
 
@@ -17,8 +18,8 @@ COPY src/main/resources/superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb2
 
 # gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
 RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:///app/gradle/gradle-8.5-bin.zip|' gradle/wrapper/gradle-wrapper.properties
-
-# Gradle Wrapper를 사용하여 빌드
+g
+# Gradle Wrapper를 사용하여 빌드 (항상 테스트를 제외)
 RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 
 # Step 2: Use an official OpenJDK runtime image to run the app

@@ -16,8 +16,6 @@ public interface QnAService {
 
     Page<QnAResponse> findAll(Pageable pageable);
 
-    Page<QnADetailResponse> findAllForManager(Pageable pageable);
-
     Page<QnAResponse> findAllMyQnA(Pageable pageable);
 
     void deleteById(Long qnAid);

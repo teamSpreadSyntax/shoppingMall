@@ -88,12 +88,6 @@ public class QnAServiceImpl implements QnAService{
     }
 
     @Override
-    public Page<QnADetailResponse> findAllForManager(Pageable pageable){
-        Page<QnA> pagedQnA = qnARepository.findAll(pageable);
-        return converter.convertFromPagedQnAToPagedQnADetailResponse(pagedQnA);
-    }
-
-    @Override
     public Page<QnAResponse> findAllMyQnA(Pageable pageable){
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

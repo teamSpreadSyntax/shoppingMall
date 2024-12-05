@@ -27,10 +27,10 @@ server.cors.allowOrigin: ["https://www.projectkkk.com"]
 server.customResponseHeaders:
   content-security-policy: >-
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com;
-    style-src 'self' 'unsafe-inline' https://*.projectkkk.com;
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app;
+    style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;
     img-src 'self' data: blob:;
-    connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com;
-    frame-ancestors 'self';
+    connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
+    frame-ancestors 'self' https://www.projectkkk.com https://projectkkk.vercel.app;
     worker-src 'self' blob:;
-    object-src 'none'
+    object-src 'none';
