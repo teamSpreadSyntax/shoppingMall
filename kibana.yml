@@ -27,9 +27,9 @@ server.cors.allowOrigin: ["https://www.projectkkk.com"]
 server.customResponseHeaders:
   content-security-policy: >-
     default-src 'self';
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app;
-    style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;
-    img-src 'self' data: blob:;
+    script-src 'self' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app;
+    style-src 'self' 'sha256-YOUR_STYLE_SHA_HASH=' https://*.projectkkk.com https://projectkkk.vercel.app;
+    img-src 'self' data: blob: https://*.projectkkk.com;
     connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
     frame-ancestors 'self' https://www.projectkkk.com https://projectkkk.vercel.app;
     worker-src 'self' blob:;

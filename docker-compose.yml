@@ -217,7 +217,7 @@ services:
       LOGGING_LEVEL: debug
       SERVER_CORS_ENABLED: "true"
       SERVER_CORS_ALLOW_CREDENTIALS: "true"
-      SERVER_CORS_ALLOW_ORIGIN: "https://www.projectkkk.com"
+      server.cors.allowOrigin: [ "https://www.projectkkk.com", "https://projectkkk.vercel.app" ]
       NODE_OPTIONS: "--openssl-legacy-provider"
     ports:
       - "5601:5601"

@@ -114,21 +114,20 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp
                                 .policyDirectives(
-                                        "default-src 'self';" +
-                                                "script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
-                                                "'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' " +
-                                                "https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "style-src 'self' 'unsafe-inline' https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "img-src 'self' data: blob:;" +
-                                                "connect-src 'self' https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "font-src 'self' data:;" +
-                                                "frame-src 'self' https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "frame-ancestors 'self' https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "worker-src 'self' blob:;" +
-                                                "base-uri 'self';" +
+                                        "default-src 'self'; " +
+                                                "script-src 'self' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' blob: https://projectkkk.com https://www.projectkkk.com; " +
+                                                "style-src 'self' 'sha256-YOUR_STYLE_SHA_HASH' https://projectkkk.com https://www.projectkkk.com; " +
+                                                "img-src 'self' data: blob: https://projectkkk.com https://www.projectkkk.com; " +
+                                                "connect-src 'self' https: wss: blob:; " +
+                                                "font-src 'self' data: blob:; " +
+                                                "frame-src 'self' https://projectkkk.com https://www.projectkkk.com; " +
+                                                "frame-ancestors 'self' https://projectkkk.com https://www.projectkkk.com; " +
+                                                "worker-src 'self' blob:; " +
+                                                "base-uri 'self'; " +
                                                 "object-src 'none';"
                                 )
                         )
+                        .frameOptions(frame -> frame.sameOrigin())
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
