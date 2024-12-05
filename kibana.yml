@@ -22,7 +22,7 @@ xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
 # CORS settings
 server.cors.enabled: true
 server.cors.allowCredentials: true
-server.cors.allowOrigin: ["https://www.projectkkk.com"]
+server.cors.allowOrigin: "https://www.projectkkk.com"
 
 server.customResponseHeaders:
   content-security-policy: >-
