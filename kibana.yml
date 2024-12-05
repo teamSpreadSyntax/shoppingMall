@@ -38,3 +38,6 @@ server.customResponseHeaders:
     base-uri 'self';
     worker-src 'self' blob:;
     object-src 'none';
+
+server.csp.rules:
+    - "script-src 'self' 'unsafe-inline' 'unsafe-eval' ..."
