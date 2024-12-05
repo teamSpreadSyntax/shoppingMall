@@ -25,7 +25,7 @@ server.cors.allowCredentials: true
 server.cors.allowOrigin: ["https://www.projectkkk.com", "https://projectkkk.vercel.app", "https://www.projectkkk.com:5601"]
 
 
-server.csp.rules:
+csp.rules:
   - "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app"
   - "style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app"
   - "img-src 'self' data: blob:"
