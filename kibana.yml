@@ -32,7 +32,9 @@ server.customResponseHeaders:
     style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;
     img-src 'self' data: blob:;
     connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
-    frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
     frame-ancestors 'self' https://www.projectkkk.com https://projectkkk.vercel.app;
+    frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
+    font-src 'self' data:;
+    base-uri 'self';
     worker-src 'self' blob:;
     object-src 'none';
