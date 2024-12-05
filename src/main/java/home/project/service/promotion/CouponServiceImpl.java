@@ -77,9 +77,6 @@ public class CouponServiceImpl implements CouponService{
         kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
 */
 
-        messagingTemplate.convertAndSend("/topic/coupons", "New Coupon Created: " + coupon.getName());
-
-
         return converter.convertFromCouponToCouponResponse(coupon);
     }
 
@@ -199,10 +196,22 @@ public class CouponServiceImpl implements CouponService{
             }
 
 
-            webSocketNotificationService.sendNotification("/topic/coupons", "쿠폰이 발행되었습니다.");
 /*
             kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_member", coupon.getId(), member.getId()));
 */
+
+            String notificationMessage = String.format(
+                    "새로운 쿠폰이 발급되었습니다: %s (%d%% 할인)",
+                    coupon.getName(),
+                    coupon.getDiscountRate()
+            );
+
+            // 개별 회원에게 알림 전송
+            webSocketNotificationService.sendNotificationToUser(
+                    member.getEmail(),  // 수신자 ID로 이메일 사용
+                    notificationMessage
+            );
+
             return new MemberCouponResponse(
                     savedMemberCoupon.getId(),
                     member.getEmail(),
