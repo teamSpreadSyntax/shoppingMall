@@ -32,7 +32,9 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 path.startsWith("/swagger-ui/index.html") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/ws") ||
-                path.startsWith("/api/password-request");
+                path.startsWith("/api/password-request") ||
+                path.startsWith("/api/auth/login") ||    // 추가
+                path.startsWith("/api/admin/auth/login"); // 추가;
     }
 
     @Override
