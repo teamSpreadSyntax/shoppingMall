@@ -22,7 +22,8 @@ xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"
 # CORS settings
 server.cors.enabled: true
 server.cors.allowCredentials: true
-server.cors.allowOrigin: ["https://www.projectkkk.com"]
+server.cors.allowOrigin: ["https://www.projectkkk.com", "https://projectkkk.vercel.app"]
+
 
 server.customResponseHeaders:
   content-security-policy: >-
@@ -31,6 +32,7 @@ server.customResponseHeaders:
     style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;
     img-src 'self' data: blob:;
     connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
+    frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
     frame-ancestors 'self' https://www.projectkkk.com https://projectkkk.vercel.app;
     worker-src 'self' blob:;
     object-src 'none';
