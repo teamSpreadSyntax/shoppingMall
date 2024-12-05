@@ -34,7 +34,7 @@ server.customResponseHeaders:
     connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
     frame-ancestors 'self' https://www.projectkkk.com https://projectkkk.vercel.app;
     frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
-    font-src 'self' data:;
+    font-src 'self' https://fonts.gstatic.com data:;
     base-uri 'self';
     worker-src 'self' blob:;
     object-src 'none';
