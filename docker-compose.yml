@@ -219,6 +219,18 @@ services:
       SERVER_CORS_ALLOW_CREDENTIALS: "true"
       SERVER_CORS_ALLOW_ORIGIN: "https://www.projectkkk.com"
       NODE_OPTIONS: "--openssl-legacy-provider"
+      SERVER_CUSTOMRESPONSEHEADERS_CONTENT__SECURITY__POLICY: >-
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app;
+        style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;
+        img-src 'self' data: blob:;
+        connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
+        frame-ancestors 'self' https://www.projectkkk.com https://projectkkk.vercel.app;
+        frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
+        font-src 'self' data:;
+        base-uri 'self';
+        worker-src 'self' blob:;
+        object-src 'none'
     ports:
       - "5601:5601"
     depends_on:
