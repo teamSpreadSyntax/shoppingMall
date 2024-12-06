@@ -115,15 +115,13 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp
                                 .policyDirectives(
                                         "default-src 'self';" +
-                                                "script-src 'self' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app;" +
-                                                "'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' " +
-                                                "https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "style-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;;" +
+                                                "script-src 'self' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app https://www.projectkkk.com;" +
+                                                "style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;" +
                                                 "img-src 'self' data: blob:;" +
-                                                "connect-src 'self' https://projectkkk.vercel.app https://www.projectkkk.com;" +
+                                                "connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;" +
                                                 "font-src 'self' data:;" +
-                                                "frame-src 'self' https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "frame-ancestors 'self' https://projectkkk.vercel.app https://www.projectkkk.com;" +
+                                                "frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;" +
+                                                "frame-ancestors 'self' https://*.projectkkk.com https://projectkkk.vercel.app;" +
                                                 "worker-src 'self' blob:;" +
                                                 "base-uri 'self';" +
                                                 "object-src 'none';"

@@ -224,8 +224,8 @@ services:
       server.publicBaseUrl: "https://www.projectkkk.com:5601" # 올바른 변수 이름으로 추가
       CSP_RULES: >
         default-src 'self';
-        script-src 'self' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app;
-        style-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
+        script-src 'self' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app https://www.projectkkk.com;;
+        style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;
         img-src 'self' data: blob:;
         connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
         frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
