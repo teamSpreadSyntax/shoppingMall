@@ -221,6 +221,7 @@ services:
       NODE_OPTIONS: "--openssl-legacy-provider"
       xpack.security.sameSiteCookies: None
       xpack.security.secureCookies: true
+      server.publicBaseUrl: "https://www.projectkkk.com:5601" # 올바른 변수 이름으로 추가
     ports:
       - "5601:5601"
     depends_on:
