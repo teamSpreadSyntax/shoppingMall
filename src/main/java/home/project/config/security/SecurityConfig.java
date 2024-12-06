@@ -116,7 +116,7 @@ public class SecurityConfig {
                                 .policyDirectives(
                                         "default-src 'self';" +
                                                 "script-src 'self' 'sha256-SbBSU7MfZFnVMq4PuE/jbBz7pPIfXUTYDrdHl7Ckchc=' https://*.projectkkk.com https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;" +
+                                                "style-src 'self' 'sha256-7Qf8U/WgiKRW4EKHHq52AbsaG2K/o6jKbzN5oiiJSXM=' https://*.projectkkk.com https://projectkkk.vercel.app;" +
                                                 "img-src 'self' data: blob:;" +
                                                 "connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;" +
                                                 "font-src 'self' data:;" +
