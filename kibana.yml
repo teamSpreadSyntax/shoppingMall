@@ -25,17 +25,18 @@ server.cors.allowCredentials: true
 server.cors.allowOrigin: ["https://www.projectkkk.com", "https://projectkkk.vercel.app", "https://www.projectkkk.com:5601"]
 
 # CSP settings
-csp.rules: >
-  default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://www.projectkkk.com https://projectkkk.vercel.app;
-  style-src 'self' 'unsafe-inline' https://www.projectkkk.com https://projectkkk.vercel.app;
-  img-src 'self' data: blob:;
-  connect-src 'self' https://www.projectkkk.com wss://www.projectkkk.com https://projectkkk.vercel.app;
-  frame-ancestors 'self' https://www.projectkkk.com https://projectkkk.vercel.app;
-  font-src 'self' data:;
-  base-uri 'self';
-  worker-src 'self' blob:;
-  object-src 'none';
+server.customResponseHeaders:
+  content-security-policy: >
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app;
+    style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;
+    img-src 'self' data: blob:;
+    connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
+    frame-ancestors 'self' https://www.projectkkk.com https://projectkkk.vercel.app;
+    font-src 'self' data:;
+    base-uri 'self';
+    worker-src 'self' blob:;
+    object-src 'none';
 
 # Public Base URL
 server.publicBaseUrl: "https://www.projectkkk.com:5601"
