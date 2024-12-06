@@ -24,11 +24,14 @@ server.cors.enabled: true
 server.cors.allowCredentials: true
 server.cors.allowOrigin: ["https://www.projectkkk.com", "https://projectkkk.vercel.app", "https://www.projectkkk.com:5601"]
 
+csp.strict: false
+
 # CSP settings
 server.customResponseHeaders:
   content-security-policy: >
     default-src 'self';
     script-src 'self' 'sha256-3DcFRDTYdkfxL9Myjdgr7z27YkwOIv0xcpaC0gcMLmY=' https://*.projectkkk.com https://projectkkk.vercel.app;
+    style-src 'self' 'unsafe-inline' https://*.projectkkk.com https://projectkkk.vercel.app;
     style-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
     img-src 'self' data: blob:;
     connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
