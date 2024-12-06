@@ -30,7 +30,7 @@ csp.strict: false
 server.customResponseHeaders:
   content-security-policy: >
     default-src 'self';
-    script-src 'self' 'sha256-3DcFRDTYdkfxL9Myjdgr7z27YkwOIv0xcpaC0gcMLmY=' https://*.projectkkk.com https://projectkkk.vercel.app;
+    script-src 'self' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' https://*.projectkkk.com https://projectkkk.vercel.app;
     style-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
     img-src 'self' data: blob:;
     connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
