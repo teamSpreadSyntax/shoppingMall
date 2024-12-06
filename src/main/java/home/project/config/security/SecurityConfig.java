@@ -115,10 +115,10 @@ public class SecurityConfig {
                         .contentSecurityPolicy(csp -> csp
                                 .policyDirectives(
                                         "default-src 'self';" +
-                                                "script-src 'self' 'unsafe-inline' 'unsafe-eval' " +
-                                                "'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' " +
+                                                "script-src 'self' 'sha256-3DcFRDTYdkfxL9Myjdgr7z27YkwOIv0xcpaC0gcMLmY=' https://*.projectkkk.com https://projectkkk.vercel.app;" +
+                                                "'sha256-3DcFRDTYdkfxL9Myjdgr7z27YkwOIv0xcpaC0gcMLmY=' " +
                                                 "https://projectkkk.vercel.app https://www.projectkkk.com;" +
-                                                "style-src 'self' 'unsafe-inline' https://projectkkk.vercel.app https://www.projectkkk.com;" +
+                                                "style-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;;" +
                                                 "img-src 'self' data: blob:;" +
                                                 "connect-src 'self' https://projectkkk.vercel.app https://www.projectkkk.com;" +
                                                 "font-src 'self' data:;" +

@@ -222,6 +222,18 @@ services:
       xpack.security.sameSiteCookies: None
       xpack.security.secureCookies: true
       server.publicBaseUrl: "https://www.projectkkk.com:5601" # 올바른 변수 이름으로 추가
+      CSP_RULES: >
+        default-src 'self';
+        script-src 'self' 'sha256-3DcFRDTYdkfxL9Myjdgr7z27YkwOIv0xcpaC0gcMLmY=' https://*.projectkkk.com https://projectkkk.vercel.app;
+        style-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
+        img-src 'self' data: blob:;
+        connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;
+        frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
+        frame-ancestors 'self' https://*.projectkkk.com https://projectkkk.vercel.app;
+        font-src 'self' data:;
+        base-uri 'self';
+        worker-src 'self' blob:;
+        object-src 'none';
     ports:
       - "5601:5601"
     depends_on:
