@@ -752,8 +752,9 @@ public class Converter {
         return new NotificationResponse(
                 notification.getId(),
                 notification.getMember().getId(),
-                notification.getSubject(),
+                notification.getNotificationType(),
                 notification.getDescription(),
+                notification.isRead(),
                 notification.getCreatedAt()
         );
     }
@@ -762,14 +763,15 @@ public class Converter {
         return pagedNotification.map(notification -> new NotificationResponse(
                 notification.getId(),
                 notification.getMember().getId(),
-                notification.getSubject(),
+                notification.getNotificationType(),
                 notification.getDescription(),
+                notification.isRead(),
                 notification.getCreatedAt()
         ));
     }
     public NotificationDetailResponse convertFromNotificationToNotificationDetailResponse(Notification notification){
         return new NotificationDetailResponse(
-                notification.getSubject(),
+                notification.getNotificationType(),
                 notification.getDescription(),
                 notification.getCreatedAt()
         );

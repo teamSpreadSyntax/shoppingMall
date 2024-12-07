@@ -25,13 +25,16 @@ public class Notification {
     private Member member;
 
     @Column(nullable = false)
-    private String subject;
+    private NotificationType notificationType;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "read", nullable = false)
+    private boolean read;
 
     @PrePersist
     protected void onCreate() {

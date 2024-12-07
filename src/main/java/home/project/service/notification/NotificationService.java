@@ -10,6 +10,10 @@ import org.springframework.data.domain.Pageable;
 public interface NotificationService {
      NotificationResponse createNotification(CreateNotificationRequestDTO createNotificationRequestDTO);
 
+    NotificationResponse createCouponNotification(String description);
+
+     String readNotification(Long notificationId);
+
      Notification findById(Long notificationId);
 
     Page<NotificationResponse> findAllNotifications(Pageable pageable);
