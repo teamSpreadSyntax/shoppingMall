@@ -71,7 +71,7 @@ public class NotificationServiceImpl implements NotificationService {
         Member member = memberService.findByEmail(email);
         Long memberId = member.getId();
 
-        Notification notification = notificationRepository.findByMemberIdAndNotificationId(memberId, notificationId);
+        Notification notification = notificationRepository.findByIdAndMemberId(memberId, notificationId);
         notification.setRead(true);
         notificationRepository.save(notification);
         return email;
