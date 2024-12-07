@@ -42,8 +42,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final MemberService memberService;
     private final NotificationRepository notificationRepository;
     private final Converter converter;
-    private final PageUtil pageUtil;
-    private final NotificationService notificationService;
 
     @Override
     @Transactional

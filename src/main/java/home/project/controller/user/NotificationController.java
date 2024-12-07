@@ -67,7 +67,7 @@ public class NotificationController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/my_note")
+    @GetMapping("/my_notification")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findAllMyNotification(
             @PageableDefault(page = 1, size = 5)
