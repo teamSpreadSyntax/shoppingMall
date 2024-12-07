@@ -40,7 +40,7 @@ public class NotificationController {
     private final PageUtil pageUtil;
 
 
-    @Operation(summary = "id로 Notification 상세정보 조회 메서드", description = "id로 Notification 조회 메서드입니다.")
+    @Operation(summary = "id로 알림 상세정보 조회 메서드", description = "id로 알림 상세 정보 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
@@ -53,7 +53,7 @@ public class NotificationController {
 
         NotificationDetailResponse notificationDetailResponse = notificationService.findByIdReturnNotificationDetailResponse(notificationId);
 
-        String successMessage = notificationId + "에 해당하는 공지사항 입니다.";
+        String successMessage = notificationId + "에 해당하는 알림 입니다.";
 
         return new CustomResponseEntity<>(notificationDetailResponse, successMessage, HttpStatus.OK);
     }
@@ -86,7 +86,7 @@ public class NotificationController {
         return new CustomResponseEntity<>(pagedNotification.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "Notification 읽음 표시 메서드", description = "Notification 읽음 표시 메서드입니다.")
+    @Operation(summary = "알림 읽음 표시 메서드", description = "알림 읽음 표시 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
