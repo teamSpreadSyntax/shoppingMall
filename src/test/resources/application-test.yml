@@ -1,0 +1,56 @@
+spring:
+  # DataSource Configuration
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        show_sql: true
+    defer-datasource-initialization: true
+
+  # Elasticsearch Configuration
+  elasticsearch:
+    enabled: false
+
+  # Kafka Configuration
+  kafka:
+    enabled: false
+
+  # CORS Configuration
+  mvc:
+    cors:
+      allowed-origins: "*"
+      allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+      allowed-headers: "*"
+      exposed-headers: "*"
+      allow-credentials: false
+      max-age: 3600
+
+  # Additional Configurations
+  main:
+    allow-bean-definition-overriding: true
+
+# JWT Configuration
+jwt:
+  token-validity-in-seconds: 86400
+  secret: test-secret-key-for-development-only
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.project: DEBUG
+    org.hibernate.SQL: DEBUG
+
+# Server Configuration
+server:
+  port: 8080
