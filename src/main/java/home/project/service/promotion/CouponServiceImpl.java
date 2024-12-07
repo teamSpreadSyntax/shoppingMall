@@ -2,12 +2,14 @@ package home.project.service.promotion;
 
 import home.project.domain.elasticsearch.CouponDocument;
 import home.project.domain.member.Member;
+import home.project.domain.notification.Notification;
 import home.project.domain.product.*;
 import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
 import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
 import home.project.dto.requestDTO.CreateCouponRequestDTO;
 import home.project.dto.responseDTO.CouponResponse;
 import home.project.dto.responseDTO.MemberCouponResponse;
+import home.project.dto.responseDTO.NotificationResponse;
 import home.project.dto.responseDTO.ProductCouponResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.member.MemberRepository;
@@ -16,6 +18,7 @@ import home.project.repository.promotion.CouponRepository;
 import home.project.repository.promotion.MemberCouponRepository;
 import home.project.repository.promotion.ProductCouponRepository;
 import home.project.service.member.MemberService;
+import home.project.service.notification.NotificationService;
 import home.project.service.notification.WebSocketNotificationService;
 import home.project.service.util.Converter;
 import home.project.service.util.IndexToElasticsearch;
@@ -50,6 +53,7 @@ public class CouponServiceImpl implements CouponService{
     private final IndexToElasticsearch indexToElasticsearch;
     private final ElasticsearchOperations elasticsearchOperations;
     private final WebSocketNotificationService webSocketNotificationService;
+    private final NotificationService notificationService;
 
 
 
@@ -206,11 +210,9 @@ public class CouponServiceImpl implements CouponService{
                     coupon.getDiscountRate()
             );
 
-            // 개별 회원에게 알림 전송
-            webSocketNotificationService.sendNotificationToUser(
-                    member.getEmail(),  // 수신자 ID로 이메일 사용
-                    notificationMessage
-            );
+            NotificationResponse notificationResponse = notificationService.createCouponNotification(notificationMessage);
+
+            webSocketNotificationService.sendNotificationToUser(member.getEmail(),notificationResponse);
 
             return new MemberCouponResponse(
                     savedMemberCoupon.getId(),

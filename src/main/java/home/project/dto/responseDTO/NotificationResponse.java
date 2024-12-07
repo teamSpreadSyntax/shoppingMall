@@ -1,5 +1,6 @@
 package home.project.dto.responseDTO;
 
+import home.project.domain.notification.NotificationType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,17 +14,21 @@ public class NotificationResponse {
 
     private Long memberId;
 
-    private String subject;
+    private NotificationType notificationType;
 
     private String description;
 
+    private Boolean isRead;
+
     private LocalDateTime createdAt;
 
-    public NotificationResponse(Long id, Long memberId, String subject, String description, LocalDateTime createdAt) {
+
+    public NotificationResponse(Long id, Long memberId, NotificationType notificationType, String description, Boolean isRead, LocalDateTime createdAt) {
         this.id = id;
         this.memberId = memberId;
-        this.subject = subject;
+        this.notificationType = notificationType;
         this.description = description;
+        this.isRead = isRead;
         this.createdAt = createdAt;
     }
 }

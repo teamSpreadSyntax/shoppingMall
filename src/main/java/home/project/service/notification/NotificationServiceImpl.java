@@ -1,5 +1,6 @@
 package home.project.service.notification;
 
+import home.project.domain.notification.NotificationType;
 import home.project.domain.member.Member;
 import home.project.domain.notification.Notification;
 import home.project.dto.requestDTO.CreateNotificationRequestDTO;
@@ -36,11 +37,47 @@ public class NotificationServiceImpl implements NotificationService {
 
         Notification notification = new Notification();
         notification.setMember(member);
-        notification.setSubject(createNotificationRequestDTO.getSubject());
+        notification.setNotificationType(createNotificationRequestDTO.getNotificationType());
         notification.setDescription(createNotificationRequestDTO.getDescription());
+        notification.setRead(false);
         notificationRepository.save(notification);
         return converter.convertFromNotificationToNotificationResponse(notification);
     }
+
+    @Override
+    @Transactional
+    public NotificationResponse createCouponNotification(String description) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        Notification notification = new Notification();
+        notification.setMember(member);
+        notification.setNotificationType(NotificationType.Coupon);
+        notification.setDescription(description);
+        notification.setRead(false);
+        notificationRepository.save(notification);
+
+        return converter.convertFromNotificationToNotificationResponse(notification);
+    }
+
+    @Override
+    @Transactional
+    public String readNotification(Long notificationId) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+        Long memberId = member.getId();
+
+        Notification notification = notificationRepository.findByMemberIdAndNotificationId(memberId, notificationId);
+        notification.setRead(true);
+        notificationRepository.save(notification);
+        return email;
+    }
+
+
 
     @Override
     public Notification findById(Long notificationId) {

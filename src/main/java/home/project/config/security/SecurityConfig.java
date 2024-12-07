@@ -64,7 +64,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://localhost:5173", "https://projectkkk.vercel.app", "https://localhost:63342", "http://localhost:63342", "https://www.projectkkk.com"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "https://localhost:5173","http://localhost:5174", "https://localhost:5174", "https://projectkkk.vercel.app", "https://localhost:63342", "http://localhost:63342", "https://www.projectkkk.com"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -114,20 +114,19 @@ public class SecurityConfig {
                 .headers(headers -> headers
                         .contentSecurityPolicy(csp -> csp
                                 .policyDirectives(
-                                        "default-src 'self'; " +
-                                                "script-src 'self' 'sha256-P5polb1UreUSOe5V/Pv7tc+yeZuJXiOi/3fqhGsU7BE=' blob: https://projectkkk.com https://www.projectkkk.com; " +
-                                                "style-src 'self' 'sha256-YOUR_STYLE_SHA_HASH' https://projectkkk.com https://www.projectkkk.com; " +
-                                                "img-src 'self' data: blob: https://projectkkk.com https://www.projectkkk.com; " +
-                                                "connect-src 'self' https: wss: blob:; " +
-                                                "font-src 'self' data: blob:; " +
-                                                "frame-src 'self' https://projectkkk.com https://www.projectkkk.com; " +
-                                                "frame-ancestors 'self' https://projectkkk.com https://www.projectkkk.com; " +
-                                                "worker-src 'self' blob:; " +
-                                                "base-uri 'self'; " +
+                                        "default-src 'self';" +
+                                                "script-src 'self' 'sha256-SbBSU7MfZFnVMq4PuE/jbBz7pPIfXUTYDrdHl7Ckchc=' https://*.projectkkk.com https://projectkkk.vercel.app https://www.projectkkk.com;" +
+                                                "style-src 'self' 'sha256-7Qf8U/WgiKRW4EKHHq52AbsaG2K/o6jKbzN5oiiJSXM=' https://*.projectkkk.com https://projectkkk.vercel.app;" +
+                                                "img-src 'self' data: blob:;" +
+                                                "connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;" +
+                                                "font-src 'self' data:;" +
+                                                "frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;" +
+                                                "frame-ancestors 'self' https://*.projectkkk.com https://projectkkk.vercel.app;" +
+                                                "worker-src 'self' blob:;" +
+                                                "base-uri 'self';" +
                                                 "object-src 'none';"
                                 )
                         )
-                        .frameOptions(frame -> frame.sameOrigin())
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
