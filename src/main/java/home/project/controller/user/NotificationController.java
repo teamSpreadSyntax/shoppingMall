@@ -21,10 +21,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Tag(name = "Notification", description = "Notification 관련 API입니다")
 @RequestMapping("/api/notification")
@@ -39,34 +39,6 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final PageUtil pageUtil;
 
-
-    @Operation(summary = "전체 Notification 조회 메서드", description = "전체 Notification 조회 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-    })
-    @GetMapping("/all")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findAll(
-            @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "notificationId", direction = Sort.Direction.ASC)})
-            @ParameterObject Pageable pageable) {
-        pageable = pageUtil.pageable(pageable);
-        Page<NotificationResponse> pagedNotification = notificationService.findAllNotifications(pageable);
-
-        long totalCount = pagedNotification.getTotalElements();
-
-        int page = pagedNotification.getNumber();
-
-        String successMessage = "모든 공지사항 입니다.";
-
-        return new CustomResponseEntity<>(pagedNotification.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-    }
 
     @Operation(summary = "id로 Notification 상세정보 조회 메서드", description = "id로 Notification 조회 메서드입니다.")
     @ApiResponses(value = {
@@ -84,5 +56,56 @@ public class NotificationController {
         String successMessage = notificationId + "에 해당하는 공지사항 입니다.";
 
         return new CustomResponseEntity<>(notificationDetailResponse, successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "내 전체 알림 조회 메서드", description = "내 전체 알림 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("/my_note")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findAllMyNotification(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "notificationId", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<NotificationResponse> pagedNotification = notificationService.findAllByMemberId(pageable);
+
+        long totalCount = pagedNotification.getTotalElements();
+
+        int page = pagedNotification.getNumber();
+
+        String successMessage = "내 모든 알림 입니다.";
+
+        return new CustomResponseEntity<>(pagedNotification.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
+    @Operation(summary = "Notification 읽음 표시 메서드", description = "Notification 읽음 표시 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
+    })
+    @PostMapping("/read")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> readNotification(@RequestParam("notificationId") Long notificationId) {
+
+        String email = notificationService.readNotification(notificationId);
+
+        Map<String, String> responseMap = new HashMap<>();
+        responseMap.put("successMessage", email+"님의 "+notificationId + "번 알림이 읽음으로 변경되었습니다.");
+        return new CustomResponseEntity<>(responseMap, "알림 읽음 상태 변경 성공", HttpStatus.OK);
     }
 }
