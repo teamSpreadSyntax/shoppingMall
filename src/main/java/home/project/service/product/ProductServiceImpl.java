@@ -280,16 +280,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable) {
-        String categoryCode = null;
 
-        if (category != null && !category.isEmpty()) {//?
-            categoryCode = getCode(category);
-        }
-        if (content != null && !content.isEmpty()) {//?
-            categoryCode = getCode(content);
-        }
 
-        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
+        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
 
         Page<Product> pagedProduct = pagedDocuments.map(doc -> findById(doc.getId()));
 

@@ -30,7 +30,6 @@ public class ProductElasticsearchRepositoryCustomImpl implements ProductElastics
         boolean hasSearchCriteria = brand != null || category != null || productName != null || content != null;
 
         if (!hasSearchCriteria) {
-            // 모든 문서 검색
             NativeQuery searchQuery = new NativeQueryBuilder()
                     .withQuery(q -> q.matchAll(m -> m))
                     .withPageable(pageable)
@@ -45,21 +44,62 @@ public class ProductElasticsearchRepositoryCustomImpl implements ProductElastics
             return new PageImpl<>(products, pageable, searchHits.getTotalHits());
         }
 
-        // 기존 검색 조건 로직
+        // 개별 조건
         if (brand != null && !brand.isEmpty()) {
             queryBuilder.must(QueryBuilders.match(m -> m.field("brand").query(brand)));
         }
         if (category != null && !category.isEmpty()) {
-            queryBuilder.must(QueryBuilders.match(m -> m.field("categoryCode").query(category)));
+            BoolQuery.Builder categoryQuery = new BoolQuery.Builder();
+
+            // category.code로 정확히 검색
+            categoryQuery.should(QueryBuilders.nested(n -> n
+                    .path("category")
+                    .query(q -> q
+                            .term(t -> t
+                                    .field("category.code")
+                                    .value(category)
+                            )
+                    )
+            ));
+
+            // category.name.keyword로 정확히 검색 (수정됨)
+            categoryQuery.should(QueryBuilders.nested(n -> n
+                    .path("category")
+                    .query(q -> q
+                            .term(t -> t
+                                    .field("category.name.keyword")
+                                    .value(category) // 'content'에서 'category'로 수정
+                            )
+                    )
+            ));
+
+            queryBuilder.must(categoryQuery.build()._toQuery());
         }
         if (productName != null && !productName.isEmpty()) {
             queryBuilder.must(QueryBuilders.match(m -> m.field("name").query(productName)));
         }
+
+        // content 조건: 이름, 브랜드, 카테고리에서 검색
         if (content != null && !content.isEmpty()) {
-            queryBuilder.must(QueryBuilders.multiMatch(m -> m
-                    .query(content)
-                    .fields("brand", "name", "categoryCode")
-            ));
+            BoolQuery.Builder contentQuery = new BoolQuery.Builder()
+                    .should(QueryBuilders.match(m -> m
+                            .field("name")
+                            .query(content)
+                    ))
+                    .should(QueryBuilders.match(m -> m
+                            .field("brand")
+                            .query(content)
+                    ))
+                    .should(QueryBuilders.nested(n -> n
+                            .path("category")
+                            .query(q -> q
+                                    .term(t -> t
+                                            .field("category.name.keyword")
+                                            .value(content)
+                                    )
+                            )
+                    ));
+            queryBuilder.should(contentQuery.build()._toQuery()); // must -> should 유지
         }
 
         NativeQuery searchQuery = new NativeQueryBuilder()
