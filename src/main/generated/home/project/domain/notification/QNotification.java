@@ -30,7 +30,9 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public final home.project.domain.member.QMember member;
 
-    public final StringPath subject = createString("subject");
+    public final EnumPath<NotificationType> notificationType = createEnum("notificationType", NotificationType.class);
+
+    public final BooleanPath read = createBoolean("read");
 
     public QNotification(String variable) {
         this(Notification.class, forVariable(variable), INITS);

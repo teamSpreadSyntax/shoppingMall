@@ -21,6 +21,7 @@ import java.util.List;
 @Table(name = "member", uniqueConstraints = {@UniqueConstraint(columnNames = {"phone", "email" })})
 @Getter
 @Setter
+
 public class Member {
 
     @Id
