@@ -8,15 +8,31 @@ import home.project.dto.responseDTO.NotificationDetailResponse;
 import home.project.dto.responseDTO.NotificationResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.notification.NotificationRepository;
+import home.project.response.CustomResponseEntity;
 import home.project.service.member.MemberService;
 import home.project.service.util.Converter;
+import home.project.service.util.PageUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 
 @RequiredArgsConstructor
 @Service
@@ -71,7 +87,8 @@ public class NotificationServiceImpl implements NotificationService {
         Member member = memberService.findByEmail(email);
         Long memberId = member.getId();
 
-        Notification notification = notificationRepository.findByMemberIdAndNotificationId(memberId, notificationId);
+        Notification notification = notificationRepository.findByIdAndMemberId(notificationId,memberId).orElseThrow(() -> new EntityNotFoundException("알림을 찾을 수 없습니다."));;
+
         notification.setRead(true);
         notificationRepository.save(notification);
         return email;
@@ -88,6 +105,19 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public Page<NotificationResponse> findAllNotifications(Pageable pageable) {
         Page<Notification> pagedNotifications = notificationRepository.findAll(pageable);
+        return converter.convertFromPagedNotificationsToPagedNotificationsResponse(pagedNotifications);
+    }
+
+    @Override
+    public Page<NotificationResponse> findAllByMemberId(Pageable pageable) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+        Long memberId = member.getId();
+
+        Page<Notification> pagedNotifications = notificationRepository.findAllByMemberId(pageable, memberId);
+
         return converter.convertFromPagedNotificationsToPagedNotificationsResponse(pagedNotifications);
     }
 

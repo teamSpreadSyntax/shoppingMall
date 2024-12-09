@@ -205,9 +205,8 @@ public class CouponServiceImpl implements CouponService{
 */
 
             String notificationMessage = String.format(
-                    "새로운 쿠폰이 발급되었습니다: %s (%d%% 할인)",
-                    coupon.getName(),
-                    coupon.getDiscountRate()
+                    "새로운 쿠폰이 발급되었습니다: %s",
+                    coupon.getName()
             );
 
             NotificationResponse notificationResponse = notificationService.createCouponNotification(notificationMessage);

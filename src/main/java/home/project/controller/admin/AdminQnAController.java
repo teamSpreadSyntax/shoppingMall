@@ -112,6 +112,34 @@ public class AdminQnAController {
 //        return new CustomResponseEntity<>(pagedQnA.getContent(), "답변 대기중인 QnA 목록입니다.", HttpStatus.OK, totalCount, page);
 //    }
 
+//    @Operation(summary = "전체 QnA 조회 메서드", description = "전체 QnA 조회 메서드입니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful operation",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+//            @ApiResponse(responseCode = "404", description = "Resource not found",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+//            @ApiResponse(responseCode = "400", description = "Bad Request",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+//    })
+//    @GetMapping("/qnas")
+//    @SecurityRequirement(name = "bearerAuth")
+//    public ResponseEntity<?> findAllDetail(
+//            @PageableDefault(page = 1, size = 5)
+//            @SortDefault.SortDefaults(
+//                    {@SortDefault(sort = "qnaId", direction = Sort.Direction.ASC)})
+//            @ParameterObject Pageable pageable) {
+//        pageable = pageUtil.pageable(pageable);
+//        Page<QnADetailResponse> pagedQnA = qnAService.findAllForManager(pageable);
+//
+//        long totalCount = pagedQnA.getTotalElements();
+//
+//        int page = pagedQnA.getNumber();
+//
+//        String successMessage = "모든 QnA 입니다.";
+//
+//        return new CustomResponseEntity<>(pagedQnA.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+//    }
+
     @Operation(summary = "전체 QnA 조회 메서드", description = "전체 QnA 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -126,10 +154,10 @@ public class AdminQnAController {
     public ResponseEntity<?> findAll(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "qnaId", direction = Sort.Direction.ASC)})
+                    {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<QnADetailResponse> pagedQnA = qnAService.findAllForManager(pageable);
+        Page<QnAResponse> pagedQnA = qnAService.findAll(pageable);
 
         long totalCount = pagedQnA.getTotalElements();
 

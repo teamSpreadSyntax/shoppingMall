@@ -18,6 +18,8 @@ public interface NotificationService {
 
     Page<NotificationResponse> findAllNotifications(Pageable pageable);
 
+    Page<NotificationResponse> findAllByMemberId(Pageable pageable);
+
     NotificationDetailResponse findByIdReturnNotificationDetailResponse(Long notificationId);
 
     void deleteById(Long id);
