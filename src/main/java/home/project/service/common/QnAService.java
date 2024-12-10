@@ -16,6 +16,8 @@ public interface QnAService {
 
     Page<QnAResponse> findAll(Pageable pageable);
 
+    Page<QnAResponse> findProductQnA(Long productId, Pageable pageable);
+
     Page<QnADetailResponse> findAllForManager(Pageable pageable);
 
     Page<QnAResponse> findAllMyQnA(Pageable pageable);

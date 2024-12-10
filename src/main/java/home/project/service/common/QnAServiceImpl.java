@@ -2,12 +2,14 @@ package home.project.service.common;
 
 import home.project.domain.common.AnswerStatus;
 import home.project.domain.common.QnA;
+import home.project.domain.common.Review;
 import home.project.domain.member.Member;
 import home.project.domain.order.Orders;
 import home.project.domain.product.Product;
 import home.project.dto.requestDTO.CreateQnARequestDTO;
 import home.project.dto.responseDTO.QnADetailResponse;
 import home.project.dto.responseDTO.QnAResponse;
+import home.project.dto.responseDTO.ReviewDetailResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.common.QnARepository;
 import home.project.repository.order.OrderRepository;
@@ -85,6 +87,15 @@ public class QnAServiceImpl implements QnAService{
     public Page<QnAResponse> findAll(Pageable pageable){
         Page<QnA> pagedQnA = qnARepository.findAll(pageable);
         return converter.convertFromPagedQnAToPagedQnAResponse(pagedQnA);
+    }
+
+    @Override
+    public Page<QnAResponse> findProductQnA(Long productId, Pageable pageable) {
+        return converter.convertFromPagedQnAToPagedQnAResponse(findAllByProductId(productId, pageable));
+    }
+
+    private Page<QnA> findAllByProductId(Long productId, Pageable pageable) {
+        return qnARepository.findAllByProductId(productId, pageable);
     }
 
     @Override
