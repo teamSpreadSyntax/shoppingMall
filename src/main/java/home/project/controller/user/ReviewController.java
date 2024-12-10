@@ -136,7 +136,7 @@ public class ReviewController {
                     {@SortDefault(sort = "reviewId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ReviewResponse> pagedReview = reviewService.findProductReview(productId, pageable);
+        Page<ReviewDetailResponse> pagedReview = reviewService.findProductReview(productId, pageable);
 
         long totalCount = pagedReview.getTotalElements();
 

@@ -783,6 +783,21 @@ public class Converter {
         ));
     }
 
+    public Page<ReviewDetailResponse> convertFromPagedReviewToPagedReviewDetailResponse(Page<Review> pagedReview) {
+        return pagedReview.map(review -> new ReviewDetailResponse(
+                review.getId(),
+                review.getMember().getEmail(),
+                review.getProduct().getName(),
+                review.getCreateAt(),
+                review.getRatingType(),
+                review.getDescription(),
+                review.getImageUrl1(),
+                review.getImageUrl2(),
+                review.getImageUrl3(),
+                review.getHelpful()
+        ));
+    }
+
     public Page<ProductResponse> convertFromPagedWishListToProductResponseResponse(Page<WishList> pagedWishList) {
         return pagedWishList.map(wishList -> new ProductResponse(
                 wishList.getProduct().getId(),

@@ -15,7 +15,7 @@ public interface ReviewService {
 
     Page<ReviewResponse> findAllMyReview(Pageable pageable);
 
-    Page<ReviewResponse> findProductReview(Long productId, Pageable pageable);
+    Page<ReviewDetailResponse> findProductReview(Long productId, Pageable pageable);
 
     ReviewDetailResponse increaseHelpfulCount(Long reviewId);
 

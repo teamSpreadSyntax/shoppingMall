@@ -64,8 +64,8 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
-    public Page<ReviewResponse> findProductReview(Long productId,Pageable pageable) {
-        return converter.convertFromPagedReviewToPagedResponse(findAllByProductId(productId, pageable));
+    public Page<ReviewDetailResponse> findProductReview(Long productId,Pageable pageable) {
+        return converter.convertFromPagedReviewToPagedReviewDetailResponse(findAllByProductId(productId, pageable));
     }
 
     private Page<Review> findAllByProductId(Long productId, Pageable pageable) {
