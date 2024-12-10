@@ -40,7 +40,7 @@ public class QReview extends EntityPathBase<Review> {
 
     public final home.project.domain.product.QProduct product;
 
-    public final EnumPath<RatingType> rating = createEnum("rating", RatingType.class);
+    public final EnumPath<RatingType> ratingType = createEnum("ratingType", RatingType.class);
 
     public QReview(String variable) {
         this(Review.class, forVariable(variable), INITS);

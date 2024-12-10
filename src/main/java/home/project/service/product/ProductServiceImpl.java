@@ -379,7 +379,21 @@ public class ProductServiceImpl implements ProductService {
         String newProductNum = reCreateProductNum(existingProduct.getProductNum(), updateProductRequestDTO);
 
         Product beforeUpdate = new Product();
-        BeanUtils.copyProperties(existingProduct, beforeUpdate);
+        beforeUpdate.setId(existingProduct.getId());
+        beforeUpdate.setName(existingProduct.getName());
+        beforeUpdate.setBrand(existingProduct.getBrand());
+        beforeUpdate.setCategory(existingProduct.getCategory());
+        beforeUpdate.setStock(existingProduct.getStock());
+        beforeUpdate.setProductNum(existingProduct.getProductNum());
+        beforeUpdate.setSoldQuantity(existingProduct.getSoldQuantity());
+        beforeUpdate.setPrice(existingProduct.getPrice());
+        beforeUpdate.setDiscountRate(existingProduct.getDiscountRate());
+        beforeUpdate.setDefectiveStock(existingProduct.getDefectiveStock());
+        beforeUpdate.setDescription(existingProduct.getDescription());
+        beforeUpdate.setCreateAt(existingProduct.getCreateAt());
+        beforeUpdate.setImageUrl(existingProduct.getImageUrl());
+        beforeUpdate.setSize(existingProduct.getSize());
+        beforeUpdate.setColor(existingProduct.getColor());
 
         if (updateProductRequestDTO.getStock() != null) {
             if (updateProductRequestDTO.getStock() < 0) {

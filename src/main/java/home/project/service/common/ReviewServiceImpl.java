@@ -131,4 +131,12 @@ public class ReviewServiceImpl implements ReviewService{
     public void deleteById(Long ReviewId) {
         reviewRepository.deleteById(ReviewId);
     }
+
+    @Override
+    public ReviewDetailResponse findReviewById(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException(reviewId + "(으)로 등록된 리뷰가 없습니다."));
+
+        return converter.convertFromReviewToReviewDetailResponse(review);
+    }
 }
