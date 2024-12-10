@@ -102,7 +102,7 @@ public class ReviewController {
     })
     @GetMapping("/my_reiveiw")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findMyQnA(
+    public ResponseEntity<?> findMyReview(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults(
                     {@SortDefault(sort = "reviewId", direction = Sort.Direction.ASC)})
@@ -118,6 +118,35 @@ public class ReviewController {
 
         return new CustomResponseEntity<>(pagedReview.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
+
+    @Operation(summary = "상품에 해당하는 Review 조회 메서드", description = "상품에 해당하는 Review 조회 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("/product_review")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findProductReview(@RequestParam(value = "productId", required = false) Long productId,
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "reviewId", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<ReviewResponse> pagedReview = reviewService.findProductReview(productId, pageable);
+
+        long totalCount = pagedReview.getTotalElements();
+
+        int page = pagedReview.getNumber();
+
+        String successMessage = "상품에 해당하는 모든 Review 입니다.";
+
+        return new CustomResponseEntity<>(pagedReview.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
     @Operation(summary = "리뷰 좋아요 증가", description = "리뷰의 좋아요 수를 증가시킵니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
@@ -152,6 +181,7 @@ public class ReviewController {
         responseMap.put("successMessage", reviewId + "번 리뷰가 삭제되었습니다.");
         return new CustomResponseEntity<>(responseMap, "리뷰 삭제 성공", HttpStatus.OK);
     }
+
 
 
 }

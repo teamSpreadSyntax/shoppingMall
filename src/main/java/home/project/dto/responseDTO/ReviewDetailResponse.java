@@ -1,6 +1,6 @@
 package home.project.dto.responseDTO;
 
-import home.project.domain.common.Rating;
+import home.project.domain.common.RatingType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +17,7 @@ public class ReviewDetailResponse {
 
     private LocalDateTime createAt;
 
-    private Rating rating;
+    private RatingType ratingType;
 
     private String description;
 
@@ -29,12 +29,12 @@ public class ReviewDetailResponse {
 
     private Long helpful;
 
-    public ReviewDetailResponse(Long reviewId, String memberEmail, String productName, LocalDateTime createAt, Rating rating, String description, String imageUrl1, String imageUrl2, String imageUrl3, Long helpful) {
+    public ReviewDetailResponse(Long reviewId, String memberEmail, String productName, LocalDateTime createAt, RatingType ratingType, String description, String imageUrl1, String imageUrl2, String imageUrl3, Long helpful) {
         this.reviewId = reviewId;
         this.memberEmail = memberEmail;
         this.productName = productName;
         this.createAt = createAt;
-        this.rating = rating;
+        this.ratingType = ratingType;
         this.description = description;
         this.imageUrl1 = imageUrl1;
         this.imageUrl2 = imageUrl2;

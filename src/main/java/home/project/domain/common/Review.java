@@ -33,7 +33,7 @@ public class Review {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rating", nullable = false, length = 30)
-    private Rating rating;
+    private RatingType ratingType;
 
     @Column(name = "description", nullable = false)
     private String description;

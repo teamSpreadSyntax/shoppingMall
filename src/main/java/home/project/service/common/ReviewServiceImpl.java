@@ -64,6 +64,15 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
+    public Page<ReviewResponse> findProductReview(Long productId,Pageable pageable) {
+        return converter.convertFromPagedReviewToPagedResponse(findAllByProductId(productId, pageable));
+    }
+
+    private Page<Review> findAllByProductId(Long productId, Pageable pageable) {
+        return reviewRepository.findAllByProductId(productId, pageable);
+    }
+
+    @Override
     @Transactional
     public ReviewDetailResponse join(Long productOrderId, CreateReviewRequestDTO createReviewRequestDTO) {
 
@@ -78,7 +87,7 @@ public class ReviewServiceImpl implements ReviewService{
         review.setMember(member);
         review.setProduct(product);
         review.setCreateAt(LocalDateTime.now());
-        review.setRating(createReviewRequestDTO.getRating());
+        review.setRatingType(createReviewRequestDTO.getRatingType());
         review.setDescription(createReviewRequestDTO.getDescription());
         review.setHelpful(helpful);
 

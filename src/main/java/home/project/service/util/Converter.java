@@ -493,7 +493,7 @@ public class Converter {
                         review.getMember().getEmail(),
                         review.getProduct().getName(),
                         review.getCreateAt(),
-                        review.getRating(),
+                        review.getRatingType(),
                         review.getDescription(),
                         review.getImageUrl1(),
                         review.getImageUrl2(),
@@ -539,7 +539,7 @@ public class Converter {
                         review.getMember().getEmail(),
                         review.getProduct().getName(),
                         review.getCreateAt(),
-                        review.getRating(),
+                        review.getRatingType(),
                         review.getDescription(),
                         review.getImageUrl1(),
                         review.getImageUrl2(),
@@ -754,7 +754,7 @@ public class Converter {
                 review.getMember().getEmail(),
                 review.getProduct().getName(),
                 review.getCreateAt(),
-                review.getRating(),
+                review.getRatingType(),
                 review.getDescription(),
                 review.getImageUrl1(),
                 review.getImageUrl2(),
@@ -763,7 +763,18 @@ public class Converter {
         );
     }
 
+
+
     public Page<ReviewResponse> convertFromPagedReviewToPagedQnAResponse(Page<Review> pagedReview) {
+        return pagedReview.map(review -> new ReviewResponse(
+                review.getId(),
+                review.getProduct().getName(),
+                review.getMember().getEmail(),
+                review.getCreateAt()
+        ));
+    }
+
+    public Page<ReviewResponse> convertFromPagedReviewToPagedResponse(Page<Review> pagedReview) {
         return pagedReview.map(review -> new ReviewResponse(
                 review.getId(),
                 review.getProduct().getName(),
