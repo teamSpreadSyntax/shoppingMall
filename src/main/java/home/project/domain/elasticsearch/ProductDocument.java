@@ -52,7 +52,6 @@ public class ProductDocument {
     )
     private String description;
 
-
     @Field(type = FieldType.Keyword)
     private String imageUrl;
 
@@ -83,12 +82,7 @@ public class ProductDocument {
         @Field(type = FieldType.Long)
         private Long id;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Keyword)
         private String code;
 
         @MultiField(
@@ -113,12 +107,7 @@ public class ProductDocument {
         )
         private String parentName;
 
-        @MultiField(
-                mainField = @Field(type = FieldType.Text, analyzer = "nori"),
-                otherFields = {
-                        @InnerField(suffix = "keyword", type = FieldType.Keyword)
-                }
-        )
+        @Field(type = FieldType.Keyword)
         private String parentCode;
     }
 
