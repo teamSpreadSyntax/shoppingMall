@@ -3,10 +3,7 @@ package home.project.service.product;
 import home.project.domain.product.Product;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
-import home.project.dto.responseDTO.ProductResponse;
-import home.project.dto.responseDTO.ProductResponseForManager;
-import home.project.dto.responseDTO.ProductWithQnAAndReviewResponse;
-import home.project.dto.responseDTO.ProductWithQnAAndReviewResponseForManager;
+import home.project.dto.responseDTO.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -21,22 +18,22 @@ public interface ProductService {
 
     ProductWithQnAAndReviewResponseForManager findByIdReturnProductResponseForManager(Long productId);
 
-    Page<ProductResponseForManager> findAllByIdReturnProductResponseForManager(Pageable pageable);
+    Page<ProductSimpleResponseForManager> findAllByIdReturnProductResponseForManager(Pageable pageable);
 
     Product findByProductNum(String productNum);
 
-    Page<ProductResponse> findAll(Pageable pageable);
+    Page<ProductSimpleResponse> findAll(Pageable pageable);
 
 
     Page<ProductResponseForManager> findAllForManaging(Pageable pageable);
 
-    Page<ProductResponse> adminFindNewProduct(Pageable pageable);
+    Page<ProductSimpleResponseForManager> adminFindNewProduct(Pageable pageable);
 
-    Page<ProductResponse> findNewProduct(Pageable pageable);
+    Page<ProductSimpleResponse> findNewProduct(Pageable pageable);
 
     Page<ProductResponse> findProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable);
 
-    Page<ProductResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable);
+    Page<ProductSimpleResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable);
 
     Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, String color, String size, Pageable pageable);
     Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable);

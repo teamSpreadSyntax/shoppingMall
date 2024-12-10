@@ -102,7 +102,7 @@ public class ElasticSyncBatchConfig {
                 .name("productReader")
                 .entityManagerFactory(entityManagerFactory)
                 .pageSize(100)
-                .queryString("SELECT p FROM Product p")  // 컬렉션을 즉시 페치하지 않음
+                .queryString("SELECT DISTINCT p FROM Product p LEFT JOIN FETCH p.category")  // 컬렉션을 즉시 페치하지 않음
                 .build();
     }
 

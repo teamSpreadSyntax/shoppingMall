@@ -315,24 +315,18 @@ public class Converter {
         return pagedProduct.map(Product::getBrand);
     }
 
-    public Page<ProductResponseForManager> convertFromPagedMemberProductToPagedProductResponseForManaging(Page<MemberProduct> pagedMemberProduct){
-        return pagedMemberProduct.map(productResponseForManaging -> new ProductResponseForManager(
-                productResponseForManaging.getId(),
-                productResponseForManaging.getProduct().getName(),
-                productResponseForManaging.getProduct().getBrand(),
-                productResponseForManaging.getProduct().getCategory().getCode(),
-                productResponseForManaging.getProduct().getProductNum(),
-                productResponseForManaging.getProduct().getStock(),
-                productResponseForManaging.getProduct().getSoldQuantity(),
-                productResponseForManaging.getProduct().getPrice(),
-                productResponseForManaging.getProduct().getDiscountRate(),
-                productResponseForManaging.getProduct().getDefectiveStock(),
-                productResponseForManaging.getProduct().getDescription(),
-                productResponseForManaging.getProduct().getCreateAt(),
-                productResponseForManaging.getProduct().getImageUrl(),
-                productResponseForManaging.getProduct().getSize(),
-                productResponseForManaging.getProduct().getColor(),
-                convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProduct().getProductCoupons())
+    public Page<ProductSimpleResponseForManager> convertFromPagedMemberProductToPagedProductSimpleResponseForManager(Page<MemberProduct> pagedMemberProduct){
+        return pagedMemberProduct.map(productSimpleResponseForManager -> new ProductSimpleResponseForManager(
+                productSimpleResponseForManager.getId(),
+                productSimpleResponseForManager.getProduct().getName(),
+                productSimpleResponseForManager.getProduct().getBrand(),
+                productSimpleResponseForManager.getProduct().getStock(),
+                productSimpleResponseForManager.getProduct().getSoldQuantity(),
+                productSimpleResponseForManager.getProduct().getPrice(),
+                productSimpleResponseForManager.getProduct().getDiscountRate(),
+                productSimpleResponseForManager.getProduct().getCreateAt(),
+                productSimpleResponseForManager.getProduct().getSize(),
+                productSimpleResponseForManager.getProduct().getColor()
         ));
     }
 
@@ -354,6 +348,34 @@ public class Converter {
         ));
     }
 
+    public Page<ProductSimpleResponseForManager> convertFromPagedProductToPagedProductSimpleResponseForManager(Page<Product> pagedProduct){
+        return pagedProduct.map(productResponse -> new ProductSimpleResponseForManager(
+                productResponse.getId(),
+                productResponse.getName(),
+                productResponse.getBrand(),
+                productResponse.getStock(),
+                productResponse.getSoldQuantity(),
+                productResponse.getPrice(),
+                productResponse.getDiscountRate(),
+                productResponse.getCreateAt(),
+                productResponse.getSize(),
+                productResponse.getColor()
+        ));
+    }
+
+    public Page<ProductSimpleResponse> convertFromPagedProductToPagedProductSimpleResponse(Page<Product> pagedProduct){
+        return pagedProduct.map(productSimpleResponse -> new ProductSimpleResponse(
+                productSimpleResponse.getId(),
+                productSimpleResponse.getName(),
+                productSimpleResponse.getBrand(),
+                productSimpleResponse.getPrice(),
+                productSimpleResponse.getDiscountRate(),
+                productSimpleResponse.getImageUrl(),
+                false,
+                productSimpleResponse.getColor()
+        ));
+    }
+
     public Page<ProductResponse> convertFromPagedProductToPagedProductResponse2(Page<Product> pagedProduct,List<Long> isLiked){
 
         return pagedProduct.map(productResponse -> new ProductResponse(
@@ -370,6 +392,20 @@ public class Converter {
                 productResponse.getSize(),
                 productResponse.getColor(),
                 convertFromListedProductCouponProductCouponResponse(productResponse.getProductCoupons())
+        ));
+    }
+
+    public Page<ProductSimpleResponse> convertFromPagedProductToPagedProductSimpleResponse(Page<Product> pagedProduct,List<Long> isLiked){
+
+        return pagedProduct.map(productSimpleResponse -> new ProductSimpleResponse(
+                productSimpleResponse.getId(),
+                productSimpleResponse.getName(),
+                productSimpleResponse.getBrand(),
+                productSimpleResponse.getPrice(),
+                productSimpleResponse.getDiscountRate(),
+                productSimpleResponse.getImageUrl(),
+                isLiked.contains(productSimpleResponse.getId()),
+                productSimpleResponse.getColor()
         ));
     }
 
@@ -702,6 +738,12 @@ public class Converter {
     public Page<CartResponse> convertFromPagedCartToPagedCartResponse(Page<Cart> pagedCart) {
         return pagedCart.map(cart -> new CartResponse(
                 cart.getMember().getEmail(),
+                convertListedProductCartToListedProductDTOFOrOrder(cart.getProductCart())
+        ));
+    }
+
+    public Page<MyCartResponse> convertFromPagedCartToPagedMyCartResponse(Page<Cart> pagedCart) {
+        return pagedCart.map(cart -> new MyCartResponse(
                 convertListedProductCartToListedProductDTOFOrOrder(cart.getProductCart())
         ));
     }

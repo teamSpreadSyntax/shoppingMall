@@ -3,9 +3,7 @@ package home.project.controller.admin;
 
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
-import home.project.dto.responseDTO.ProductResponse;
-import home.project.dto.responseDTO.ProductResponseForManager;
-import home.project.dto.responseDTO.ProductWithQnAAndReviewResponseForManager;
+import home.project.dto.responseDTO.*;
 import home.project.response.CustomResponseEntity;
 import home.project.service.product.CategoryService;
 import home.project.service.product.ProductService;
@@ -109,7 +107,7 @@ public class AdminProductController {
                     {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductResponseForManager> productPage = productService.findAllByIdReturnProductResponseForManager(pageable);
+        Page<ProductSimpleResponseForManager> productPage = productService.findAllByIdReturnProductResponseForManager(pageable);
 
         long totalCount = productPage.getTotalElements();
 
@@ -137,7 +135,7 @@ public class AdminProductController {
                     {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductResponse> productPage = productService.adminFindNewProduct(pageable);
+        Page<ProductSimpleResponseForManager> productPage = productService.adminFindNewProduct(pageable);
 
         long totalCount = productPage.getTotalElements();
 

@@ -9,10 +9,7 @@ import home.project.domain.product.Product;
 import home.project.domain.product.ProductOrder;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
-import home.project.dto.responseDTO.ProductResponse;
-import home.project.dto.responseDTO.ProductResponseForManager;
-import home.project.dto.responseDTO.ProductWithQnAAndReviewResponse;
-import home.project.dto.responseDTO.ProductWithQnAAndReviewResponseForManager;
+import home.project.dto.responseDTO.*;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
 import home.project.repository.common.QnARepository;
@@ -185,7 +182,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> findAll(Pageable pageable) {
+    public Page<ProductSimpleResponse> findAll(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -193,14 +190,14 @@ public class ProductServiceImpl implements ProductService {
         String email = authentication.getName();
         if (email.equals("anonymousUser")){
 
-            return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+            return converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct);
         }
 
         Member member = memberService.findByEmail(email);
 
         List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
 
-        return converter.convertFromPagedProductToPagedProductResponse2(pagedProduct,likedProductIds);
+        return converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct,likedProductIds);
     }
 
     /*public Product getProductWithLikeStatus(Long memberId, Long productId) {
@@ -234,13 +231,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> adminFindNewProduct(Pageable pageable) {
+    public Page<ProductSimpleResponseForManager> adminFindNewProduct(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
-        return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+        return converter.convertFromPagedProductToPagedProductSimpleResponseForManager(pagedProduct);
     }
 
     @Override
-    public Page<ProductResponse> findNewProduct(Pageable pageable) {
+    public Page<ProductSimpleResponse> findNewProduct(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -248,14 +245,14 @@ public class ProductServiceImpl implements ProductService {
         String email = authentication.getName();
         if (email.equals("anonymousUser")){
 
-            return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+            return converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct);
         }
 
         Member member = memberService.findByEmail(email);
 
         List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
 
-        return converter.convertFromPagedProductToPagedProductResponse2(pagedProduct,likedProductIds);
+        return converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct,likedProductIds);
     }
 
     @Override
@@ -279,7 +276,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable) {
+    public Page<ProductSimpleResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable) {
 
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
@@ -291,14 +288,14 @@ public class ProductServiceImpl implements ProductService {
         String email = authentication.getName();
         if (email.equals("anonymousUser")){
 
-            return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
+            return converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct);
         }
 
         Member member = memberService.findByEmail(email);
 
         List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
 
-        return converter.convertFromPagedProductToPagedProductResponse2(pagedProduct,likedProductIds);
+        return converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct,likedProductIds);
 
     }
 
@@ -556,11 +553,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Page<ProductResponseForManager> findAllByIdReturnProductResponseForManager(Pageable pageable) {
+    public Page<ProductSimpleResponseForManager> findAllByIdReturnProductResponseForManager(Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Page<MemberProduct> memberProducts = memberProductRepository.findAllByMemberId(memberService.findByEmail(email).getId(), pageable);
-        return converter.convertFromPagedMemberProductToPagedProductResponseForManaging(memberProducts);
+        return converter.convertFromPagedMemberProductToPagedProductSimpleResponseForManager(memberProducts);
     }
 
 

@@ -2,6 +2,7 @@ package home.project.controller.user;
 
 
 import home.project.dto.responseDTO.ProductResponse;
+import home.project.dto.responseDTO.ProductSimpleResponse;
 import home.project.dto.responseDTO.ProductWithQnAAndReviewResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.product.CategoryService;
@@ -78,7 +79,7 @@ public class ProductController {
                     {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductResponse> productPage = productService.findAll(pageable);
+        Page<ProductSimpleResponse> productPage = productService.findAll(pageable);
 
         long totalCount = productPage.getTotalElements();
 
@@ -106,7 +107,7 @@ public class ProductController {
                     {@SortDefault(sort = "brand", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductResponse> productPage = productService.findNewProduct(pageable);
+        Page<ProductSimpleResponse> productPage = productService.findNewProduct(pageable);
 
         long totalCount = productPage.getTotalElements();
 
@@ -139,7 +140,7 @@ public class ProductController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<ProductResponse> productPage = productService.findProductsOnElastic(brand, category, productName, content, pageable);
+        Page<ProductSimpleResponse> productPage = productService.findProductsOnElastic(brand, category, productName, content, pageable);
 
         String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
 

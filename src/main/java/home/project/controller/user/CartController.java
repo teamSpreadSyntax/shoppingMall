@@ -1,6 +1,7 @@
 package home.project.controller.user;
 
 import home.project.dto.responseDTO.CartResponse;
+import home.project.dto.responseDTO.MyCartResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.order.CartService;
 import home.project.service.order.ShippingService;
@@ -75,7 +76,7 @@ public class CartController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/admin/products_in_cart")
+    @GetMapping("/products_in_cart")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findByEmail(
             @PageableDefault(page = 1, size = 5)
@@ -83,7 +84,7 @@ public class CartController {
                     {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<CartResponse> pagedCart = cartService.findAllByMemberId(pageable);
+        Page<MyCartResponse> pagedCart = cartService.findAllByMemberId(pageable);
 
         long totalCount = pagedCart.getTotalElements();
 
