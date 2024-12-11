@@ -1,99 +1,69 @@
 package home.project.dto.responseDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Check;
-import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
+@Schema(description = "관리자용 상품 QnA 및 리뷰 응답")
 public class ProductWithQnAAndReviewResponseForManager {
 
-    /**
-     * 상품의 고유 식별자입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 타입: BIGINT
-     * - 제약조건: AUTO_INCREMENT, PRIMARY KEY
-     */
+    @Schema(description = "상품 ID", example = "1")
     private Long id;
 
-    /**
-     * 상품의 이름입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: product_name
-     * - 타입: VARCHAR(255) (기본값)
-     */
+    @Schema(description = "상품 이름", example = "블루 데님 자켓")
     private String name;
 
-    /**
-     * 상품의 브랜드입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: brand
-     * - 타입: VARCHAR(255) (기본값)
-     */
+    @Schema(description = "브랜드 이름", example = "리바이스")
     private String brand;
 
-    /**
-     * 상품의 카테고리입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: category
-     * - 타입: VARCHAR(255) (기본값)
-     */
+    @Schema(description = "카테고리", example = "아우터/자켓")
     private String category;
 
-    /**
-     * 상품의 고유 번호입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: product_num
-     * - 타입: VARCHAR(255) (기본값)
-     * - 제약조건: UNIQUE
-     */
+    @Schema(description = "상품 고유 번호", example = "PROD-2024-001")
     private String productNum;
 
-    /**
-     * 상품의 재고 수량입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: stock
-     * - 타입: BIGINT
-     * - 제약조건: CHECK (stock >= 0)
-     */
-    @Check(constraints = "stock >= 0")
+    @Schema(description = "재고 수량", example = "100")
     private Long stock;
 
-    /**
-     * 상품의 판매 수량입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: sold_Quantity
-     * - 타입: BIGINT
-     * - 제약조건: CHECK (sold_Quantity >= 0)
-     * - 기본값: 0
-     */
-    @Check(constraints = "sold_Quantity >= 0")
+    @Schema(description = "판매 수량", example = "50")
     private Long soldQuantity;
 
+    @Schema(description = "가격", example = "89000")
     private Long price;
 
+    @Schema(description = "할인율", example = "20")
     private Integer discountRate;
 
+    @Schema(description = "불량 재고 수량", example = "2")
     private Long defectiveStock;
 
+    @Schema(description = "상품 설명")
     private String description;
 
+    @Schema(description = "상품 등록일시")
     private LocalDateTime createProductDate;
 
+    @Schema(description = "상품 이미지 URL")
     private String imageUrl;
 
+    @Schema(description = "사이즈", example = "M")
     private String size;
 
+    @Schema(description = "색상", example = "블루")
     private String color;
 
+    @Schema(description = "QnA 상세 목록")
     private List<QnADetailResponse> qnADetailResponses;
 
+    @Schema(description = "리뷰 상세 목록")
     private List<ReviewDetailResponse> reviewDetailResponses;
 
+    @Schema(description = "상품 쿠폰 목록")
     private List<ProductCouponResponse> productCouponResponse;
 
     public ProductWithQnAAndReviewResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses, List<ProductCouponResponse> productCouponResponse) {

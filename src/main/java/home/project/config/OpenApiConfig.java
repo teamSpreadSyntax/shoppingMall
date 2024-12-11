@@ -54,7 +54,7 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
-
+                 0
         // 에러 응답 스키마들
         Map<String, Schema> errorSchemas = Map.of(
                 "BadRequest", createErrorSchema(400),
