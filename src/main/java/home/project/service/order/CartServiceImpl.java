@@ -5,6 +5,7 @@ import home.project.domain.member.Member;
 import home.project.domain.order.Cart;
 import home.project.domain.product.Product;
 import home.project.domain.product.ProductCart;
+import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.CartResponse;
 import home.project.dto.responseDTO.MyCartResponse;
 import home.project.exceptions.exception.IdNotFoundException;
@@ -80,13 +81,14 @@ public class CartServiceImpl implements CartService{
     }
 
     @Override
-    public Page<MyCartResponse> findAllByMemberId(Pageable pageable){
+    public Page<ProductDTOForOrder> findAllByMemberId(Pageable pageable){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = memberService.findByEmail(email).getId();
         Page<Cart> pagedCart = cartRepository.findAllByMemberId(memberId, pageable);
-        return converter.convertFromPagedCartToPagedMyCartResponse(pagedCart);
+        return converter.convertFromListedProductCartToPagedProductDTOForOrder(pagedCart);
     }
+
     @Override
     @Transactional
     public String deleteById(Long productId) {

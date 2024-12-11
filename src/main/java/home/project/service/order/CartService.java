@@ -1,6 +1,7 @@
 package home.project.service.order;
 
 import home.project.domain.order.Cart;
+import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.CartResponse;
 import home.project.dto.responseDTO.MyCartResponse;
 import org.springframework.data.domain.Page;
@@ -11,7 +12,7 @@ public interface CartService {
 
     Cart findById(Long cartId);
 
-    Page<MyCartResponse> findAllByMemberId(Pageable pageable);
+    Page<ProductDTOForOrder> findAllByMemberId(Pageable pageable);
 
     String deleteById(Long id);
 

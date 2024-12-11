@@ -1,5 +1,6 @@
 package home.project.controller.user;
 
+import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.CartResponse;
 import home.project.dto.responseDTO.MyCartResponse;
 import home.project.response.CustomResponseEntity;
@@ -84,7 +85,7 @@ public class CartController {
                     {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<MyCartResponse> pagedCart = cartService.findAllByMemberId(pageable);
+        Page<ProductDTOForOrder> pagedCart = cartService.findAllByMemberId(pageable);
 
         long totalCount = pagedCart.getTotalElements();
 
