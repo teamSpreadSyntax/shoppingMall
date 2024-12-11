@@ -100,7 +100,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/my_reiveiw")
+    @GetMapping("/my_review")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findMyReview(
             @PageableDefault(page = 1, size = 5)
