@@ -80,9 +80,9 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PostMapping("/{productOrderId}/join")
+    @PostMapping("/join")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createReview(@PathVariable Long productOrderId, @RequestBody CreateReviewRequestDTO createReviewRequestDTO) {
+    public ResponseEntity<?> createReview(@RequestParam("productOrderId") Long productOrderId, @RequestBody CreateReviewRequestDTO createReviewRequestDTO) {
 
         ReviewDetailResponse reviewDetailResponse = reviewService.join(productOrderId, createReviewRequestDTO);
 
