@@ -1,70 +1,47 @@
 package home.project.dto.responseDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
+@Schema(description = "관리자용 상품 간단 응답")
 public class ProductSimpleResponseForManager {
 
-    /**
-     * 상품의 고유 식별자입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 타입: BIGINT
-     * - 제약조건: AUTO_INCREMENT, PRIMARY KEY
-     */
+    @Schema(description = "상품 ID", example = "1")
     private Long id;
 
-    /**
-     * 상품의 이름입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: product_name
-     * - 타입: VARCHAR(255) (기본값)
-     */
+    @Schema(description = "상품 이름", example = "블루 데님 자켓")
     private String name;
 
-    /**
-     * 상품의 브랜드입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: brand
-     * - 타입: VARCHAR(255) (기본값)
-     */
+    @Schema(description = "브랜드 이름", example = "리바이스")
     private String brand;
 
-
-    /**
-     * 상품의 재고 수량입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: stock
-     * - 타입: BIGINT
-     * - 제약조건: CHECK (stock >= 0)
-     */
+    @Schema(description = "재고 수량", example = "100")
     @Check(constraints = "stock >= 0")
     private Long stock;
 
-    /**
-     * 상품의 판매 수량입니다.
-     * 데이터베이스 컬럼 정보:
-     * - 이름: sold_Quantity
-     * - 타입: BIGINT
-     * - 제약조건: CHECK (sold_Quantity >= 0)
-     * - 기본값: 0
-     */
+    @Schema(description = "판매 수량", example = "50")
     @Check(constraints = "sold_Quantity >= 0")
     private Long soldQuantity;
 
+    @Schema(description = "가격", example = "89000")
     private Long price;
 
+    @Schema(description = "할인율", example = "20")
     private Integer discountRate;
 
+    @Schema(description = "생성일")
     private LocalDateTime createProductDate;
 
+    @Schema(description = "사이즈", example = "M")
     private String size;
 
+    @Schema(description = "색상", example = "블루")
     private String color;
 
     public ProductSimpleResponseForManager(Long id, String name, String brand, Long stock, Long soldQuantity, Long price, Integer discountRate, LocalDateTime createProductDate, String size, String color) {
