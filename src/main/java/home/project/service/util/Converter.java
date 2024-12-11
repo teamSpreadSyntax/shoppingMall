@@ -25,6 +25,7 @@ import home.project.repository.member.MemberRepository;
 import home.project.repository.product.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -733,6 +734,19 @@ public class Converter {
                             productCart.getQuantity()
                     ))
                     .collect(Collectors.toList());
+    }
+
+    public Page<ProductDTOForOrder> convertFromListedProductCartToPagedProductDTOForOrder(Page<Cart> pagedCart){
+        return new PageImpl<>(pagedCart.getContent().stream()
+                .flatMap(cart -> cart.getProductCart().stream()
+                        .map(productCart -> new ProductDTOForOrder(
+                                productCart.getProduct().getId(),
+                                productCart.getProduct().getPrice(),
+                                productCart.getQuantity()
+                        )))
+                .toList(),
+                pagedCart.getPageable(),
+                pagedCart.getTotalElements());
     }
 
     public Page<CartResponse> convertFromPagedCartToPagedCartResponse(Page<Cart> pagedCart) {
