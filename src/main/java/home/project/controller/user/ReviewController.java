@@ -182,6 +182,24 @@ public class ReviewController {
         return new CustomResponseEntity<>(responseMap, "리뷰 삭제 성공", HttpStatus.OK);
     }
 
+    @Operation(summary = "리뷰 ID로 리뷰 조회", description = "리뷰 ID를 통해 특정 리뷰를 조회하는 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ReviewDetailResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("/findById")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findReviewById(@RequestParam("reviewId") Long reviewId) {
+        ReviewDetailResponse reviewDetailResponse = reviewService.findReviewById(reviewId);
+
+        String successMessage = reviewId + "번 리뷰 조회 성공";
+
+        return new CustomResponseEntity<>(reviewDetailResponse, successMessage, HttpStatus.OK);
+    }
 
 
 }

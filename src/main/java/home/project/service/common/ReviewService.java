@@ -20,4 +20,6 @@ public interface ReviewService {
     ReviewDetailResponse increaseHelpfulCount(Long reviewId);
 
     void deleteById(Long ReviewId);
+
+    ReviewDetailResponse findReviewById(Long reviewId);
 }

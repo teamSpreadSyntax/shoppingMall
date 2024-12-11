@@ -26,6 +26,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -51,6 +53,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+
 class MemberServiceImplTest {
 
     @Mock
@@ -168,10 +172,12 @@ class MemberServiceImplTest {
             when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
             when(converter.convertFromCreateMemberRequestDTOToMember(any())).thenReturn(testMember);
             when(memberRepository.save(any(Member.class))).thenReturn(testMember);
+            when(memberRepository.findById(testMember.getId())).thenReturn(Optional.of(testMember));
             when(authenticationManager.authenticate(any())).thenReturn(
                     new UsernamePasswordAuthenticationToken(testMember.getEmail(), testMember.getPassword())
             );
             when(jwtTokenProvider.generateToken(any())).thenReturn(tokenResponse);
+            doNothing().when(indexToElasticsearch).indexDocumentToElasticsearch(any(), any());
 
             // when
             TokenResponse result = memberService.join(joinRequest);
@@ -181,6 +187,8 @@ class MemberServiceImplTest {
             assertThat(result.getAccessToken()).isEqualTo(tokenResponse.getAccessToken());
             verify(memberRepository).save(any(Member.class));
             verify(converter).convertFromMemberToMemberDocument(any(Member.class));
+            verify(memberRepository).findById(testMember.getId());
+            verify(indexToElasticsearch).indexDocumentToElasticsearch(any(), any());
         }
 
         @Test
