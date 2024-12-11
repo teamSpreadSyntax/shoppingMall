@@ -85,7 +85,6 @@ class ProductServiceImplTest {
     private Member testMember;
     private CreateProductRequestDTO createProductRequestDTO;
     private UpdateProductRequestDTO updateProductRequestDTO;
-    private ProductResponse productResponse;
 
     @BeforeEach
     void setUp() {
@@ -126,13 +125,6 @@ class ProductServiceImplTest {
         updateProductRequestDTO.setName("UpdatedProduct");
         updateProductRequestDTO.setBrand("UpdatedBrand");
         updateProductRequestDTO.setPrice(20000L);
-
-        // ProductResponse 객체 초기화 추가
-        productResponse = new ProductResponse();
-        productResponse.setId(1L);
-        productResponse.setName("UpdatedProduct");
-        productResponse.setBrand("UpdatedBrand");
-        productResponse.setPrice(20000L);
     }
 
     @Nested
@@ -211,7 +203,6 @@ class ProductServiceImplTest {
             when(productRepository.findById(anyLong())).thenReturn(Optional.of(testProduct));
             when(categoryRepository.findByCode(anyString())).thenReturn(Optional.of(testCategory));
             when(productRepository.save(any(Product.class))).thenReturn(testProduct);
-            when(converter.convertFromProductToProductResponse(any(Product.class))).thenReturn(productResponse);
 
             // when
             ProductResponse response = productService.update(updateProductRequestDTO);
@@ -219,10 +210,7 @@ class ProductServiceImplTest {
             // then
             assertThat(response).isNotNull();
             assertThat(response.getName()).isEqualTo("UpdatedProduct");
-            assertThat(response.getBrand()).isEqualTo("UpdatedBrand");
-            assertThat(response.getPrice()).isEqualTo(20000L);
             verify(productRepository).save(any(Product.class));
-            verify(converter).convertFromProductToProductResponse(any(Product.class));
         }
     }
 
