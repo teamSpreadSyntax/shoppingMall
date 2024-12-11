@@ -191,7 +191,7 @@ public class ReviewController {
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
-    @GetMapping("/findById")
+    @GetMapping("/review")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findReviewById(@RequestParam("reviewId") Long reviewId) {
         ReviewDetailResponse reviewDetailResponse = reviewService.findReviewById(reviewId);
