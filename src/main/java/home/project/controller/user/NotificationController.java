@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-@Tag(name = "Notification", description = "Notification 관련 API입니다")
+@Tag(name = "알림", description = "알림(Notification) 관련 API입니다.")
 @RequestMapping("/api/notification")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "500", description = "Internal server error",
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
@@ -39,33 +39,29 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final PageUtil pageUtil;
 
-
-    @Operation(summary = "id로 알림 상세정보 조회 메서드", description = "id로 알림 상세 정보 조회 메서드입니다.")
+    @Operation(summary = "ID로 알림 상세 조회", description = "알림 ID를 통해 특정 알림의 상세 정보를 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "200", description = "요청 성공",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotificationDetailResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/notification_detail")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findNotificationByIdReturnQnADetailResponse(@RequestParam("notificationId") Long notificationId) {
-
         NotificationDetailResponse notificationDetailResponse = notificationService.findByIdReturnNotificationDetailResponse(notificationId);
-
-        String successMessage = notificationId + "에 해당하는 알림 입니다.";
-
+        String successMessage = notificationId + "번 알림 상세 조회 성공.";
         return new CustomResponseEntity<>(notificationDetailResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "내 전체 알림 조회 메서드", description = "내 전체 알림 조회 메서드입니다.")
+    @Operation(summary = "내 전체 알림 조회", description = "로그인한 사용자의 모든 알림을 페이징 형태로 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+            @ApiResponse(responseCode = "200", description = "요청 성공",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotificationResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/my_notification")
     @SecurityRequirement(name = "bearerAuth")
@@ -78,34 +74,29 @@ public class NotificationController {
         Page<NotificationResponse> pagedNotification = notificationService.findAllByMemberId(pageable);
 
         long totalCount = pagedNotification.getTotalElements();
-
         int page = pagedNotification.getNumber();
-
-        String successMessage = "내 모든 알림 입니다.";
+        String successMessage = "모든 알림 조회 성공.";
 
         return new CustomResponseEntity<>(pagedNotification.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "알림 읽음 표시 메서드", description = "알림 읽음 표시 메서드입니다.")
+    @Operation(summary = "알림 읽음 처리", description = "특정 알림을 읽음 상태로 변경합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
+            @ApiResponse(responseCode = "200", description = "요청 성공",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
+            @ApiResponse(responseCode = "401", description = "권한 없음",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @PostMapping("/read")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> readNotification(@RequestParam("notificationId") Long notificationId) {
-
         String email = notificationService.readNotification(notificationId);
-
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", email+"님의 "+notificationId + "번 알림이 읽음으로 변경되었습니다.");
-        return new CustomResponseEntity<>(responseMap, "알림 읽음 상태 변경 성공", HttpStatus.OK);
+        responseMap.put("successMessage", email + "님의 " + notificationId + "번 알림이 읽음으로 처리되었습니다.");
+        return new CustomResponseEntity<>(responseMap, "알림 읽음 처리 성공", HttpStatus.OK);
     }
 }

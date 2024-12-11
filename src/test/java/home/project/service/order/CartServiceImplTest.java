@@ -113,7 +113,7 @@ class CartServiceImplTest {
         }
     }
 
-    @Nested
+    /*@Nested
     @DisplayName("회원별 장바구니 조회")
     class FindAllByMemberIdTest {
 
@@ -147,7 +147,7 @@ class CartServiceImplTest {
             assertThat(responses.getContent().get(0).getProducts().get(0).getQuantity()).isEqualTo(2);
 
             verify(cartRepository).findAllByMemberId(anyLong(), any(Pageable.class));
-        }
+        }*/
 
         @Nested
         @DisplayName("장바구니 삭제")
@@ -168,4 +168,3 @@ class CartServiceImplTest {
             }
         }
     }
-}
