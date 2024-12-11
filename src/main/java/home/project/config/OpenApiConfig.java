@@ -12,310 +12,91 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
+import java.util.Map;
+
 @Configuration
 @EnableWebSecurity
 public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-
-        // 로그인 성공 응답 스키마
-        Schema<?> loginSuccessResponseSchema = new ObjectSchema()
+        Schema<?> tokenResponseSchema = new ObjectSchema()
                 .addProperty("result", new ObjectSchema()
-                        .addProperty("grantType", new Schema<>().type("string"))
-                        .addProperty("accessToken", new Schema<>().type("string"))
-                        .addProperty("refreshToken", new Schema<>().type("string"))
-                        .addProperty("role", new Schema<>().type("string")))
+                    .addProperty("accessToken", new Schema<>().type("string"))
+                    .addProperty("refreshToken", new Schema<>().type("string"))
+                    .addProperty("role", new Schema<>().type("string")))
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
-        // 로그인 유효성 검사 실패 응답 스키마
-        Schema<?> loginValidationFailedResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("password", new Schema<>().type("string"))
-                        .addProperty("email", new Schema<>().type("string"))
-                )
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(400));
 
-        // 사용자 권한 스키마
-        Schema<?> userRoleSchema = new ObjectSchema()
-                .addProperty("id", new Schema<>().type("integer").format("int64"))
-                .addProperty("role", new Schema<>().type("string"))
-                .addProperty("name", new Schema<>().type("string"));
-
-        // 사용자별 권한 목록 응답 스키마
-        Schema<?> pagedUserRoleListResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("totalCount", new Schema<>().type("integer").format("int64"))
-                        .addProperty("page", new Schema<>().type("integer"))
-                        .addProperty("content", new ArraySchema().items(userRoleSchema)
-                                .addProperty("id", new Schema<>().type("integer").format("int64"))
-                                .addProperty("role", new Schema<>().type("string"))
-                                .addProperty("name", new Schema<>().type("string"))))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        // 권한 변경 성공 응답 스키마
-        Schema<?> authorityChangeSuccessResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("id", new Schema<>().type("integer").format("int64"))
-                        .addProperty("role", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        // 기본 응답 스키마 정의.
+        // 단일 응답을 위한 기본 스키마
         Schema<?> baseResponseSchema = new ObjectSchema()
                 .addProperty("result", new Schema<>().type("object"))
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
-        // 일반 성공 응답 스키마
-        Schema<?> generalSuccessResponseSchema = new ObjectSchema()
+        // 리스트 응답을 위한 기본 스키마
+        Schema<?> baseListResponseSchema = new ObjectSchema()
                 .addProperty("result", new ObjectSchema()
-                        .addProperty("successMessage", new Schema<>().type("string")))
+                        .addProperty("totalCount", new Schema<>().type("integer").format("int64"))
+                        .addProperty("page", new Schema<>().type("integer"))
+                        .addProperty("content", new ArraySchema().items(new Schema<>().type("array"))))
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
-        // 상품 스키마
-        Schema<?> productSchema = new ObjectSchema()
-                .addProperty("id", new Schema<>().type("integer").format("int64"))
-                .addProperty("name", new Schema<>().type("string"))
-                .addProperty("brand", new Schema<>().type("string"))
-                .addProperty("category", new Schema<>().type("string"))
-                .addProperty("soldQuantity", new Schema<>().type("integer").format("int64"))
-                .addProperty("stock", new Schema<>().type("integer").format("int64"))
-                .addProperty("image", new Schema<>().type("string"));
-
-        // 상품 응답 스키마
+        // 상품 응답 스키마 예시
         Schema<?> productResponseSchema = new ObjectSchema()
                 .addProperty("result", new ObjectSchema()
-                        .addProperty("id", new Schema<>().type("integer").format("int64"))
-                        .addProperty("name", new Schema<>().type("string"))
-                        .addProperty("brand", new Schema<>().type("string"))
-                        .addProperty("category", new Schema<>().type("string"))
-                        .addProperty("soldQuantity", new Schema<>().type("integer").format("int64"))
-                        .addProperty("stock", new Schema<>().type("integer").format("int64"))
-                        .addProperty("image", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        //브랜드 목록 스키마
-        Schema<?> brandListResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("totalCount", new Schema<>().type("integer"))
-                        .addProperty("page", new Schema<>().type("integer"))
-                        .addProperty("content", new ArraySchema().items(new Schema<>().type("string")))
+                                .addProperty("id", new Schema<>().type("integer").format("int64"))
+                                .addProperty("name", new Schema<>().type("string"))
+                                .addProperty("brand", new Schema<>().type("string"))
                 )
                 .addProperty("responseMessage", new Schema<>().type("string"))
                 .addProperty("status", new Schema<>().type("integer").example(200));
 
-        // 페이지네이션된 상품 목록 스키마
-        Schema<?> pagedProductListResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("totalCount", new Schema<>().type("integer").format("int64"))
-                        .addProperty("page", new Schema<>().type("integer"))
-                        .addProperty("content", new ArraySchema().items(productSchema)))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
 
-        // 카테고리 생성 성공 응답 스키마
-        Schema<?> categoryCreateSuccessResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("successMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
+        // 에러 응답 스키마들
+        Map<String, Schema> errorSchemas = Map.of(
+                "BadRequest", createErrorSchema(400),
+                "Unauthorized", createErrorSchema(401),
+                "Forbidden", createErrorSchema(403),
+                "NotFound", createErrorSchema(404),
+                "Conflict", createErrorSchema(409),
+                "InternalServer", createErrorSchema(500)
+        );
 
-// 카테고리 스키마
-        Schema<?> categorySchema = new ObjectSchema()
-                .addProperty("id", new Schema<>().type("integer").format("int64"))
-                .addProperty("code", new Schema<>().type("string"))
-                .addProperty("name", new Schema<>().type("string"))
-                .addProperty("level", new Schema<>().type("integer"))
-                .addProperty("parent", new Schema<>().type("object"))
-                .addProperty("children", new ArraySchema().items(new Schema<>().type("object")));
-
-// 페이지네이션된 카테고리 목록 스키마
-        Schema<?> pagedCategoryListResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("totalCount", new Schema<>().type("integer").format("int64"))
-                        .addProperty("page", new Schema<>().type("integer"))
-                        .addProperty("content", new ArraySchema().items(categorySchema)))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        //변경 정보 없음 스키마
-        Schema<?> noChangeResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("errorMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(204));
-
-        // 상품 유효성 검사 실패 응답 스키마
-        Schema<?> productValidationFailedResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("name", new Schema<>().type("string"))
-                        .addProperty("brand", new Schema<>().type("string"))
-                        .addProperty("category", new Schema<>().type("string"))
-                        .addProperty("image", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(400));
-
-        // 회원 스키마
-        Schema<?> memberWithoutPwSchema = new ObjectSchema()
-                .addProperty("id", new Schema<>().type("integer").format("int64"))
-                .addProperty("email", new Schema<>().type("string"))
-                .addProperty("name", new Schema<>().type("string"))
-                .addProperty("phone", new Schema<>().type("string"))
-                .addProperty("role", new Schema<>().type("string"));
-
-        // 회원 응답 스키마
-        Schema<?> memberResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("id", new Schema<>().type("integer").format("int64"))
-                        .addProperty("email", new Schema<>().type("string"))
-                        .addProperty("name", new Schema<>().type("string"))
-                        .addProperty("password", new Schema<>().type("string"))
-                        .addProperty("phone", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        // 회원 응답 스키마
-        Schema<?> memberWithoutPasswordResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("id", new Schema<>().type("integer").format("int64"))
-                        .addProperty("email", new Schema<>().type("string"))
-                        .addProperty("name", new Schema<>().type("string"))
-                        .addProperty("phone", new Schema<>().type("string"))
-                        .addProperty("role", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        // 본인확인 스키마
-        Schema<?> verifyResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("verificationToken", new Schema<>().type("string"))
-                        .addProperty("successMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        // 페이지네이션된 회원 목록 스키마
-        Schema<?> pagedMemberListResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("totalCount", new Schema<>().type("integer").format("int64"))
-                        .addProperty("page", new Schema<>().type("integer"))
-                        .addProperty("content", new ArraySchema().items(memberWithoutPwSchema)))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        // 회원가입 성공 응답 스키마
-        Schema<?> memberJoinSuccessResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("accessToken", new Schema<>().type("string"))
-                        .addProperty("refreshToken", new Schema<>().type("string"))
-                        .addProperty("successMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(200));
-
-        // 회원 유효성 검사 실패 응답 스키마
-        Schema<?> memberValidationFailedResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("email", new Schema<>().type("string"))
-                        .addProperty("password", new Schema<>().type("string"))
-                        .addProperty("passwordConfirm", new Schema<>().type("string"))
-                        .addProperty("phone", new Schema<>().type("string"))
-                        .addProperty("name", new Schema<>().type("string"))
-                )
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(400));
-
-        // BadRequest 응답 스키마
-        Schema<?> badRequestResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("errorMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(400));
-
-        // Unauthorized 응답 스키마
-        Schema<?> unauthorizedResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("errorMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(401));
-
-        // Forbidden 응답 스키마
-        Schema<?> forbiddenResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("errorMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(403));
-
-        // Not Found 응답 스키마
-        Schema<?> notFoundResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("errorMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(404));
-
-        // Conflict 응답 스키마
-        Schema<?> conflictResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("errorMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(409));
-
-        // Internal Server Error 응답 스키마
-        Schema<?> internalServerErrorResponseSchema = new ObjectSchema()
-                .addProperty("result", new ObjectSchema()
-                        .addProperty("errorMessage", new Schema<>().type("string")))
-                .addProperty("responseMessage", new Schema<>().type("string"))
-                .addProperty("status", new Schema<>().type("integer").example(500));
-
-        SecurityScheme apiKey = new SecurityScheme()
+        // SecurityScheme 설정
+        SecurityScheme bearerAuth = new SecurityScheme()
                 .type(SecurityScheme.Type.HTTP)
-                .in(SecurityScheme.In.HEADER)
-                .name("Authorization")
                 .scheme("bearer")
                 .bearerFormat("JWT");
 
-        SecurityRequirement securityRequirement = new SecurityRequirement()
-                .addList("Bearer Token");
+        // Components에 스키마 추가
+        Components components = new Components()
+                .addSecuritySchemes("bearerAuth", bearerAuth)
+                .addSchemas("BaseResponse", baseResponseSchema)
+                .addSchemas("BaseListResponse", baseListResponseSchema)
+                .addSchemas("ProductResponse", productResponseSchema)
+                .addSchemas("PagedProductList", pagedProductListResponseSchema)
+                .addSchemas("TokenResponse", tokenResponseSchema);
+
+        // 에러 스키마들 추가
+        errorSchemas.forEach(components::addSchemas);
 
         return new OpenAPI()
                 .info(new Info()
-                        .title("예제 게시판 Swagger")
+                        .title("API 문서")
                         .version("1.0.0")
                         .description("API 문서입니다."))
-                .components(new Components()
-                        .addSchemas("BaseResponseSchema", baseResponseSchema)
-                        .addSchemas("GeneralSuccessResponseSchema", generalSuccessResponseSchema)
-                        .addSchemas("ProductSchema", productSchema)
-                        .addSchemas("ProductResponseSchema", productResponseSchema)
-                        .addSchemas("PagedProductListResponseSchema", pagedProductListResponseSchema)
-                        .addSchemas("NoChangeResponseSchema", noChangeResponseSchema)
-                        .addSchemas("BrandListResponseSchema", brandListResponseSchema)
-                        .addSchemas("ProductValidationFailedResponseSchema", productValidationFailedResponseSchema)
-                        .addSchemas("LoginSuccessResponseSchema", loginSuccessResponseSchema)
-                        .addSchemas("PagedUserRoleListResponseSchema", pagedUserRoleListResponseSchema)
-                        .addSchemas("AuthorityChangeSuccessResponseSchema", authorityChangeSuccessResponseSchema)
-                        .addSchemas("LoginValidationFailedResponseSchema", loginValidationFailedResponseSchema)
-                        .addSchemas("MemberWithoutPwSchema", memberWithoutPwSchema)
-                        .addSchemas("MemberResponseSchema", memberResponseSchema)
-                        .addSchemas("MemberWithoutPasswordResponseSchema", memberWithoutPasswordResponseSchema)
-                        .addSchemas("VerifyResponseSchema", verifyResponseSchema)
-                        .addSchemas("PagedMemberListResponseSchema", pagedMemberListResponseSchema)
-                        .addSchemas("MemberJoinSuccessResponseSchema", memberJoinSuccessResponseSchema)
-                        .addSchemas("MemberValidationFailedResponseSchema", memberValidationFailedResponseSchema)
-                        .addSchemas("BadRequestResponseSchema", badRequestResponseSchema)
-                        .addSchemas("UnauthorizedResponseSchema", unauthorizedResponseSchema)
-                        .addSchemas("ForbiddenResponseSchema", forbiddenResponseSchema)
-                        .addSchemas("NotFoundResponseSchema", notFoundResponseSchema)
-                        .addSchemas("ConflictResponseSchema", conflictResponseSchema)
-                        .addSchemas("InternalServerErrorResponseSchema", internalServerErrorResponseSchema)
-                        .addSchemas("CategoryCreateSuccessResponseSchema", categoryCreateSuccessResponseSchema)
-                        .addSchemas("CategorySchema", categorySchema)
-                        .addSchemas("PagedCategoryListResponseSchema", pagedCategoryListResponseSchema)
-                        .addSecuritySchemes("bearerAuth", apiKey))
-                .addSecurityItem(securityRequirement);
+                .components(components)
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+    }
+
+    private Schema<?> createErrorSchema(int statusCode) {
+        return new ObjectSchema()
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("errorMessage", new Schema<>().type("string")))
+                .addProperty("responseMessage", new Schema<>().type("string"))
+                .addProperty("status", new Schema<>().type("integer").example(statusCode));
     }
 }

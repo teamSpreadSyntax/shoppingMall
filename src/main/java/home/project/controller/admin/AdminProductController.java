@@ -11,6 +11,8 @@ import home.project.service.util.PageUtil;
 import home.project.service.util.StringBuilderUtil;
 import home.project.service.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -146,13 +148,25 @@ public class AdminProductController {
         return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
+    @Operation(summary = "상품 통합 조회", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다.")
+    @Parameters({
+            @Parameter(name = "brand", description = "브랜드명으로 필터링", example = "리바이스", required = false),
+            @Parameter(name = "category", description = "카테고리명으로 필터링", example = "아우터/자켓", required = false),
+            @Parameter(name = "productName", description = "상품명으로 검색", example = "블루 데님 자켓", required = false),
+            @Parameter(name = "content", description = "통합 검색어", example = "청자켓", required = false),
+            @Parameter(name = "page", description = "페이지 번호 (1부터 시작)", example = "1"),
+            @Parameter(name = "size", description = "페이지 크기", example = "5"),
+            @Parameter(name = "sort", description = "정렬 기준 (brand,asc 형식)", example = "brand,asc")
+    })
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "조회 성공",
+                    content = @Content(schema = @Schema(implementation = ProductResponseForManager.class))
+            ),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "404", description = "결과 없음",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/search")
