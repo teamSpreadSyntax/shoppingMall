@@ -82,9 +82,9 @@ public class ReviewController {
     })
     @PostMapping("/join")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createReview(@RequestParam("productOrderId") Long productOrderId, @RequestBody CreateReviewRequestDTO createReviewRequestDTO) {
+    public ResponseEntity<?> createReview(@RequestParam("productId") Long productId, @RequestBody CreateReviewRequestDTO createReviewRequestDTO) {
 
-        ReviewDetailResponse reviewDetailResponse = reviewService.join(productOrderId, createReviewRequestDTO);
+        ReviewDetailResponse reviewDetailResponse = reviewService.join(productId, createReviewRequestDTO);
 
         String successMessage = "리뷰가 작성되었습니다.";
 
