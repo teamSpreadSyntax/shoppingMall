@@ -584,9 +584,9 @@ logback-access 모듈을 이용해 api 통신 관련 통신 로그 또한 파일
 <table>
   <tbody>
     <tr>
-      <td align="center"><a href="https://github.com/JeyunSong"><img src="https://user-images.githubusercontent.com/87157566/207309118-7b605a47-bd31-44ff-806c-dc6aef3d85f9.jpg" width="200px;" /><br /><sub><b>송제윤</b></sub></a><br /></td>
-      <td align="center"><a href="https://github.com/kyebalza"><img src="https://user-images.githubusercontent.com/87157566/207311363-ce5707ee-5679-44e3-a955-7642771be89d.jpg" width="200px;" /><br /><sub><b>계현준</b></sub></a><br /></td>
-      <td align="center"><a href="https://github.com/Suyoung225"><img src="https://user-images.githubusercontent.com/87157566/207468174-6be4110a-40f2-471b-97ca-b64dda0c8b24.jpg" width="200px; "/><br /><sub><b>윤수영</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/JeyunSong"><img src="" width="200px;" /><br /><sub><b>강민서</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/kyebalza"><img src="" width="200px;" /><br /><sub><b>김규현</b></sub></a><br /></td>
+      <td align="center"><a href="https://github.com/Suyoung225"><img src="" width="200px; "/><br /><sub><b>최영원</b></sub></a><br /></td>
      <tr/>
   </tbody>
 </table>
