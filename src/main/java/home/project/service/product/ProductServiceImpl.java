@@ -583,7 +583,7 @@ public class ProductServiceImpl implements ProductService {
             return findById(productId);
         }
 
-        throw new IllegalStateException("해당 상품을 구매한 이력이 없습니다.");
+        throw new IllegalStateException("리뷰는 구매했던 상품에 한해 작성이 가능합니다.");
     }
 
     @Override
