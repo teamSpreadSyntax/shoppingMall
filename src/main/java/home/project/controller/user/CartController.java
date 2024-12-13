@@ -3,6 +3,7 @@ package home.project.controller.user;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.CartResponse;
 import home.project.dto.responseDTO.MyCartResponse;
+import home.project.dto.responseDTO.ProductSimpleResponseForCart;
 import home.project.response.CustomResponseEntity;
 import home.project.service.order.CartService;
 import home.project.service.order.ShippingService;
@@ -85,7 +86,7 @@ public class CartController {
                     {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
-        Page<ProductDTOForOrder> pagedCart = cartService.findAllByMemberId(pageable);
+        Page<ProductSimpleResponseForCart> pagedCart = cartService.findAllByMemberId(pageable);
 
         long totalCount = pagedCart.getTotalElements();
 
