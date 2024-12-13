@@ -8,6 +8,8 @@ import home.project.domain.product.ProductCart;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.CartResponse;
 import home.project.dto.responseDTO.MyCartResponse;
+import home.project.dto.responseDTO.ProductSimpleResponseForCart;
+import home.project.dto.responseDTO.ProductSimpleResponsesForCart;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.member.MemberRepository;
 import home.project.repository.order.CartRepository;
@@ -81,12 +83,12 @@ public class CartServiceImpl implements CartService{
     }
 
     @Override
-    public Page<ProductDTOForOrder> findAllByMemberId(Pageable pageable){
+    public Page<ProductSimpleResponseForCart> findAllByMemberId(Pageable pageable){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = memberService.findByEmail(email).getId();
         Page<Cart> pagedCart = cartRepository.findAllByMemberId(memberId, pageable);
-        return converter.convertFromListedProductCartToPagedProductDTOForOrder(pagedCart);
+        return converter.convertFromListedProductCartToPagedProductSimpleResponseForCart(pagedCart);
     }
 
     @Override
