@@ -108,10 +108,10 @@ public class CartController {
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> deleteFromCart(@RequestParam("cartId") Long cartId) {
-        String name = cartService.deleteById(cartId);
+    public ResponseEntity<?> deleteFromCart(@RequestParam("productId") Long productId) {
+        String name = cartService.deleteByProductId(productId);
         Map<String, String> responseMap = new HashMap<>();
-        responseMap.put("successMessage", name + "(id:" + cartId + ")(이)가 장바구니에서 삭제되었습니다.");
+        responseMap.put("successMessage", name + "(id:" + productId + ")(이)가 장바구니에서 삭제되었습니다.");
         return new CustomResponseEntity<>(responseMap, "상품 삭제 성공", HttpStatus.OK);
     }
 
