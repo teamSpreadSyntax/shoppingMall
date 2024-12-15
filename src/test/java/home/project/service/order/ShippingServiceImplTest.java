@@ -101,7 +101,7 @@ class ShippingServiceImplTest {
             );
         });
 
-        // when
+        //when
         ShippingResponse result = shippingService.update(1L, DeliveryStatusType.DELIVERY_STARTED);
 
         // then
