@@ -80,7 +80,6 @@ class ShippingServiceImplTest {
     @Test
     @DisplayName("배송 상태를 업데이트 성공")
     void updateDeliveryStatusSuccess() {
-        // given
         when(shippingRepository.findById(anyLong())).thenReturn(Optional.of(testShipping));
         when(converter.convertFromShippingToShippingResponse(any())).thenAnswer(invocation -> {
             Shipping shipping = invocation.getArgument(0);
