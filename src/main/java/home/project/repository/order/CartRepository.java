@@ -7,4 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CartRepository extends JpaRepository<Cart, Long>, CartRepositoryCustom  {
     Page<Cart> findAllByMemberId(Long memberId, Pageable pageable);
+    Cart findByMemberId(Long memberId);
+
+
 }

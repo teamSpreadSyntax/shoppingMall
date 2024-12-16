@@ -16,6 +16,6 @@ public interface CartService {
 
     Page<ProductSimpleResponseForCart> findAllByMemberId(Pageable pageable);
 
-    String deleteById(Long id);
+    String deleteByProductId(Long productid);
 
 }

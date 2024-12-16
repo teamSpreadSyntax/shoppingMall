@@ -749,22 +749,19 @@ public class Converter {
                 pagedCart.getTotalElements());
     }
 
-    public Page<ProductSimpleResponseForCart> convertFromListedProductCartToPagedProductSimpleResponseForCart(Page<Cart> pagedCart){
-        return new PageImpl<>(pagedCart.getContent().stream()
-                .flatMap(cart -> cart.getProductCart().stream()
-                        .map(productCart -> new ProductSimpleResponseForCart(
-                                productCart.getProduct().getId(),
-                                productCart.getProduct().getName(),
-                                productCart.getProduct().getBrand(),
-                                productCart.getProduct().getPrice(),
-                                productCart.getProduct().getDiscountRate(),
-                                productCart.getProduct().getImageUrl(),
-                                productCart.getQuantity(),
-                                productCart.getProduct().getColor()
-                        )))
-                .toList(),
-                pagedCart.getPageable(),
-                pagedCart.getTotalElements());
+    public Page<ProductSimpleResponseForCart> convertFromListedProductCartToPagedProductSimpleResponseForCart(Page<ProductCart> pagedProductCart) {
+        return pagedProductCart.map(productCart ->
+                new ProductSimpleResponseForCart(
+                        productCart.getProduct().getId(),
+                        productCart.getProduct().getName(),
+                        productCart.getProduct().getBrand(),
+                        productCart.getProduct().getPrice(),
+                        productCart.getProduct().getDiscountRate(),
+                        productCart.getProduct().getImageUrl(),
+                        productCart.getQuantity(),
+                        productCart.getProduct().getColor()
+                )
+        );
     }
 
     public Page<CartResponse> convertFromPagedCartToPagedCartResponse(Page<Cart> pagedCart) {

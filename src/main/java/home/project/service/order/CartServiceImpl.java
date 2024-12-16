@@ -14,6 +14,7 @@ import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.member.MemberRepository;
 import home.project.repository.order.CartRepository;
 import home.project.repository.order.OrderRepository;
+import home.project.repository.order.ProductCartRepository;
 import home.project.repository.promotion.MemberCouponRepository;
 import home.project.repository.shipping.ShippingRepository;
 import home.project.service.member.MemberService;
@@ -40,6 +41,7 @@ public class CartServiceImpl implements CartService{
     private final MemberService memberService;
     private final ProductService productService;
     private final Converter converter;
+    private final ProductCartRepository productCartRepository;
 
 
     @Override
@@ -83,19 +85,25 @@ public class CartServiceImpl implements CartService{
     }
 
     @Override
-    public Page<ProductSimpleResponseForCart> findAllByMemberId(Pageable pageable){
+    public Page<ProductSimpleResponseForCart> findAllByMemberId(Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Long memberId = memberService.findByEmail(email).getId();
-        Page<Cart> pagedCart = cartRepository.findAllByMemberId(memberId, pageable);
-        return converter.convertFromListedProductCartToPagedProductSimpleResponseForCart(pagedCart);
+
+        Page<ProductCart> productCarts = productCartRepository.findByCart_Member_Id(memberId, pageable);
+        return converter.convertFromListedProductCartToPagedProductSimpleResponseForCart(productCarts);
     }
 
     @Override
     @Transactional
-    public String deleteById(Long productId) {
+    public String deleteByProductId(Long productId) {
+        // 현재 로그인한 사용자 정보 가져오기
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Long memberId = memberService.findByEmail(email).getId();
+
         String name = productService.findById(productId).getName();
-        cartRepository.deleteById(productId);
+        productCartRepository.deleteByProductIdAndCart_MemberId(productId, memberId);
         return name;
     }
 
