@@ -1,4 +1,4 @@
-# 여성 의류 쇼핑몰
+# 온라인 패션 셀렉샵 KKK - KKK 관리 프로그램
 
 ![1688810366](https://github.com/user-attachments/assets/c2d896b0-4f05-460e-b9f6-7d81b27b3781)
 
@@ -7,12 +7,12 @@
 
 # 프로젝트 소개
 
-- **1000만건의 상품 데이터가 있는 상황에서 사용자 편의성을 극대화 해보고자 했습니다.**
+- **운영자와 사용자 모두의 관점에서 편하게 이용할 수 있도록 만들어보았습니다.**
 
 
 
 
-✔ [쇼핑몰 링크](https://projectkkk.vercel.app/) <br>
+✔ [셀렉샵 링크](https://projectkkk.vercel.app/) <br>
 ✔ [SpreadSyntax 팀 노션 Click!](https://www.notion.so/115791ab9eb88017b3f4e771db6da68f?pvs=4)
 <br/><br/>
 # ⚙ InfraStructure 
@@ -22,17 +22,35 @@
 
 # ⛓ ERD
 <details>
+  
 <summary><strong> OPEN </strong></summary>
-<div markdown="1">       
+<div markdown="1"> 
+1. 시스템의 데이터 구조를 시각적으로 표현</br>
+2. 엔터티 간의 관계를 명확히 하여 데이터베이스 구현의 정확성을 높임</br>
+3. ER 다이어그램은 팀 간의 소통을 원활</br>
+4. 데이터 흐름과 비즈니스 로직을 명확히 정의하는 데 중요한 역할 </br> 
 </br>
 
-![image](https://user-images.githubusercontent.com/112923814/207008488-d2395e48-ea03-4744-aa31-492b1d4fecf6.png)
+![KakaoTalk_20241212_230448293](https://github.com/user-attachments/assets/664aed92-f049-40fd-804d-cb78269179d8)
 
 </div>
 </details>
 </br>
 
 # 🧬API
+<details>
+  
+<summary><strong> OPEN </strong></summary>
+<div markdown="1"> 
+1. RESTful API 호출 및 클라이언트와 서버 간의 데이터 처리 방법을 명확히 정의</br>
+2. 각 API 엔드포인트의 기능, 요청 및 응답 형식, 파라미터 등을 상세히 기술하여 프론트엔드와 백엔드 개발자 간의 효율적인 협업을 촉진</br>
+3. 이후 개발 과정에서 SpringDoc를 더 적극적으로 활용</br>
+</br>
+
+![KakaoTalk_20241212_230448293](https://github.com/user-attachments/assets/664aed92-f049-40fd-804d-cb78269179d8)
+
+</div>
+</details>
 ✔ [SoppingMall API Click!](https://www.projectkkk.com/swagger-ui/index.html#/)
 </br></br></br>
 
@@ -297,7 +315,7 @@ logback-access 모듈을 이용해 api 통신 관련 통신 로그 또한 파일
 <div markdown="1">      
 </br> 
  
-| **회원가입/로그인** | **메인페이지 랭킹보드** |
+| **ELK를 활용한 대시보드 구성** | **메인페이지 랭킹보드** |
 | :---: | :---: |
 | <img src="https://user-images.githubusercontent.com/112923814/208289007-d9dcc5ad-4b5d-4507-b77a-1285910eb93d.gif" width="70%" height="70%"/> | <img src="https://user-images.githubusercontent.com/112923814/208288878-e6405325-aa81-46f9-a43c-acbd68135c3b.gif" width="70%" height="70%"/> |
 | **필터링 검색** | **키워드 검색** |
@@ -309,68 +327,6 @@ logback-access 모듈을 이용해 api 통신 관련 통신 로그 또한 파일
 </details>
 <br>
 
-
-### ✔ 검색
-
-- <details><summary><strong> 📢 Latency 목표값 설정 기준 Click!</strong></summary><div markdown="1"></br><pre><strong>KISSmetrics는 고객의 47%가 2초 이내의 시간에 로딩이 되는 웹 페이지를 원하고 있으며, 40%는 로딩에 3초 이상 걸리는 페이지를 바로 떠난다고 설명했습니다.</strong></pre></br></div></details>
-- 메인 페이지의 로딩 속도는 플랫폼 첫 인상에 큰 영향을 주기에 100ms 이내를 목표했습니다.
-- 필터링/키워드 조회 속도 2초, 상세 조회는 400ms 이내를 목표했습니다.
-</br> 
-<details> 
-<summary><strong> 1⃣ Redis Sorted Set - 랭킹보드 구현을 통한 메인 페이지 로딩 최적화 </strong></summary>
-<div markdown="1">      
-</br> 
- 
-  - **Redis Sorted Set을 통해 평균 100ms의 속도로 랭킹보드를 제공하고 있습니다.**
-  - 메인 페이지에 접근할 때마다 Order By가 동작하는 기존의 코드보다 **27900% 조회 성능이 향상**되었습니다. ( 28s -> 100ms )
-  - 파이프라인 + 스케줄러를 통해 주기적으로 랭킹보드를 세팅하고 있습니다.</br></br>
-  
-</div>
-</details>
-
-<details>
-<summary><strong> 2⃣ Redis Cache Aside - 상품 상세페이지 캐싱</strong></summary>
-<div markdown="1"> 
-<br>
-
-  - **카테고리별 상위 5,000개의 상품 페이지를 캐싱하여 사용하고 있습니다.**
-  - Redis 캐시 데이터를 통해 **DB의 부하를 최소화**했습니다.
-  - 파이프라인을 통해 Cache Warmup을 동작시키고 있습니다.</br></br>
-  
-</div>
-</details>
-
-<details>
-<summary><strong> 3⃣ 결합 인덱스 추가, 커버링 인덱스 적용</strong></summary>
-<div markdown="1">       
-<br>
-
-  - **조회수+pk로 결합 인덱스를 추가하여 조회순, 날짜순 정렬 시 성능 저하의 가장 큰 원인이었던 sort 부하를 해결했습니다.**
-  - QueryDSL은 서브쿼리를 지원하지 않기 때문에 커버링 인덱스를 활용해 **페이징 조회 성능을 1900% 개선**했습니다. </br></br>
-  
-</div>
-</details>
-
-<details>
-<summary><strong> 4⃣ Full Text Search로 키워드 검색</strong></summary>
-<div markdown="1">    
-<br>
-
-  - 키워드 조회 시 Full-Text-Search 방식을 사용하여 like문을 사용한 쿼리보다 **약 634% 조회 성능을 개선**했습니다.</br></br>
-  
-</div>
-</details>
-
-<details>
-<summary><strong> 5⃣ 데이터 반정규화</strong></summary>
-<div markdown="1">       
-<br>
-
-  - 쿼리문에서 join문을 제거를 위해 데이터 반정규화를 하여 조회수, 재고수 테이블을 상품 테이블과 병합했고</br> **조회 성능을 66.6% 개선**했습니다.</br>
-  
-</div>
-</details>
-<br/>
 
 ### ✔ 주문
   - <details><summary><strong> 📢 동시성 제어 목표값 설정 기준 Click!</strong></summary><div markdown="1"></br><pre><strong>온라인 패션 스토어 무신사가 선보인 패션 특화 라이브 방송 ‘무신사 라이브’ 메종 키츠네 편이 방송 시작 5분 만에 매출 1억 원을 돌파했습니다.</br>동시 상품의 주문으로 가정했을 때 300초 동안 2000건의 주문이 발생한 상황입니다.</strong> (상품 가격 50,000원 기준)</pre></div></details>
@@ -403,176 +359,104 @@ logback-access 모듈을 이용해 api 통신 관련 통신 로그 또한 파일
 </details>
 <br/>
 
-
-## 💉 프로젝트 관리
-#### ✔ 애플리케이션 배포
-- Github Actions + Elastic Beanstalk 사용으로 **CI/CD 환경을 구축**했습니다. ( 추가 배치를 통한 롤링 )
-- ALB를 활용한 **Trigger 기반 오토 스케일링**으로 유동적인 트래픽에 효율적으로 대응하고 있습니다.
-- Github Actions CI 동작 시 **Gradle 세팅 캐싱**을 통해 더욱 생산성을 높였습니다. ( 2m -> 1m 9s )
-- 인터넷 보안 환경을 위해 **HTTPS**를 적용했습니다.
-#### ✔ 모니터링
-- Cloud Watch를 사용하여 **로그 + 성능 지표를 모니터링** 하고 있습니다.
-- CPU가 70%를 초과하면 알림이 울리는 **경보 프로세스**를 구축했습니다.
-  ( 경보 시 오토 스케일링 동작 )
-#### ✔ 테스트 커버리지 91%
-- 발생할 수 있는 주요 시나리오에 대해 대처하고자 했습니다.
-- 쓰지 않는 Lombok 코드와 같이 사용하지 않거나 중복된 프로덕션 코드를 제거하고 코드에 대한 이해도를 올리고자 했습니다.
-- <details><summary><strong>📢 클린코드 中</strong></summary><div markdown="1">       <br/><pre>얼마만큼의 코드를 자동화한 단위 테스트로 계산해야 할까? 대답할 필요조차 없다.<br/> 모조리 다 해야 한다. 모.조.리! 100% 테스트 커버리지를 권장하냐고? 권장이 아니라 강력히 요구한다. <br/>작성한 코드는 한 줄도 빠짐없이 전부 테스트해야 한다. 군말은 필요 없다. ― 클린코드 (로버트 마틴 저)</pre></div></details>
-#### ✔ React를 통한 클라이언트 코드 작성
-- **Single Page Application** 구현으로 UX를 최대화 시키고자 했습니다.
-- 백엔드 프로젝트지만 React 코드를 직접 작성하여 프론트엔드와 함께 진행하는 **실제 협업 프로세스**처럼 진행하고자 했습니다.   
-
-<br/>
-
 ## 🎯 트러블 슈팅
 
 <details>
-<summary><strong>📌 5,000 건의 상품 데이터 Cache Warmup 동작 시 Redis Latency의 지연이 발생했습니다.</strong> </summary>
+<summary><strong>📌 Docker Compose 환경에서의 SSL/TLS 인증 문제</strong></summary>
 <div markdown="1">       
+❗ 문제상황
 
-#### ❗ 문제상황
-  - 상품 데이터의 빠른 조회와 DB 부하 분산을 위해 캐싱은 필수였습니다.
-  - 하지만 TCP 기반으로 동작하는 Redis에 5,000 건의 데이터를 개별로 Input 하면서 Latency의 지연이 발생했습니다.
-  - ( 카테고리별 상위 5,000건의 상품 데이터를 캐싱하여 사용하고 있습니다. )
-  - <strong>Request +5000 ( Redis 요청 5000건 발생)</strong>
-  - ![1313](https://user-images.githubusercontent.com/112923814/207049796-b844c15d-4fba-4342-a256-65c6d6d1733b.png)
-  - ![nonepipe 5000-](https://user-images.githubusercontent.com/112923814/207048644-36273836-353b-48b5-b3be-dc19f1b232ad.png)
+Docker Compose로 구성된 MSA 환경(Zookeeper, Kafka, ELK Stack, Spring Boot)에서 지속적인 SSL 인증 문제 발생
+Let's Encrypt 인증서로 서비스 간 통신 암호화 시도 중 보안 검증 및 SAN 필드 설정 오류 발생
 
+🔍 원인 분석
 
-  
-#### 💡 Solution : Redis Pipeline 구축
-  - 작업의 단위를 직접 구축해서 요청이 가능해졌습니다. ( 다중 Insert 가능 )
-  
-#### ✔ 결과
-  - 5,000건의 TCP 통신이 1건(+5000)으로 축소되었습니다.
-  - <strong>Request +1 ( Redis 요청 1건 발생)</strong>
-  - ![131313](https://user-images.githubusercontent.com/112923814/207049817-dc7d5da6-a4ee-4f4e-99a3-5f7e88b98c56.png)
-  - ![pipe 5000_](https://user-images.githubusercontent.com/112923814/207049047-4a8b1c9f-3f94-4a1d-88a2-711e1b9b428b.png)
+Let's Encrypt 인증서 설정 문제
+
+SAN(Subject Alternative Name) 필드에 서브도메인(DNS) 미지정
+다중 서비스 환경에서 TLS 인증서 검증 실패
 
 
+Docker 컨테이너 구성 이슈
 
-</div>
-</details>
-
-<details>
-<summary><strong>📌 높은 트래픽 상황에도 상품이 클릭될 때마다 조회수 Update 쿼리가 동작했습니다.</strong></summary>
-<div markdown="1">       
-  
-#### ❗ 문제상황
-  - 높은 트래픽이 발생할 때 조회와 함께 발생하는 Update 쿼리는 서버에 큰 무리가 있었습니다.
-  - <strong>10초간 상품 상세 조회가 1만회 동작할 때 에러율이 62.31% 발생했습니다.</strong> 
-  - ![10,000 view update1](https://user-images.githubusercontent.com/112923814/207050945-515b7aec-1999-4547-bbba-53dc37670325.png)
-  - ![10,000 view update graph](https://user-images.githubusercontent.com/112923814/207050910-be5d0354-3d3a-4312-9077-b8db909638d2.png)
+서비스별(Elasticsearch, Kafka, Kibana) SSL 설정 불일치
+인증서 경로, 비밀번호, PKCS12 형식 설정 불일치로 보안 검증 실패
 
 
-  
-#### 💡 Solution : Cache Write Back
-  - 조회수를 캐시에 모아 일정 주기 DB에 배치하는 프로세스를 구현했습니다.
-  - 싱글쓰레드인 Redis의 특성상 Atomic하게 Increment를 처리할 수 있었습니다..
-  - 조회 기능의 많은 I/O와 함께 발생하는 Update 쿼리를 컨트롤할 수 있었습니다..  
-  
-#### ✔ 결과
-  - 클릭 시마다 발생했던 Update 쿼리를 1시간 주기로 일어나는 배치 작업으로 최적화가 이루어졌습니다.
-  - <strong>동일 상황에 에러율 0%를 달성했습니다.</strong>
-  - ![10,000 view redis1](https://user-images.githubusercontent.com/112923814/207050998-1e314ddd-4fee-49f4-9b76-157514757c0c.png)
-  - ![10,000 view redis graph](https://user-images.githubusercontent.com/112923814/207051036-38937920-808d-4bf0-9414-2a4f4504a93c.png)
+서버 간 호환성 문제
 
-</div>
-</details>
+Spring Boot와 Elasticsearch 간 HTTPS 통신 시 SSL 검증 오류
 
-<details>
-<summary><strong>📌 필터링 조회 동작 시 Index가 적용되지 않는 이슈가 발생했습니다. </strong></summary>
-<div markdown="1">       
 
-#### ❗ 문제상황
-  - Full-Text-Search 키워드 필터가 포함된 필터링 조회 동작 시 타임아웃이 발생했습니다.
-  - 필터링 조회에서 정렬(조회순, 날짜순)은 필수적으로 이루어져야 하는데 Full-Text-Search 키워드 필터가 동작하면서 Full-Text-Index가 쿼리에 적용되었고, 이로인해 정렬 컬럼의 인덱스가 누락되어 sort에 부하가 발생했습니다.
-  
-#### 💡 Solution :
-  - 필터링 조회 시 정렬 컬럼으로 인덱스를 사용하기 위해 키워드 검색은 contains문을 사용하였습니다.
-  - 키워드만으로 검색이 이루어질 때는 Full-Text-Search가 동작 되도록 설정했습니다.
- 
-#### ✔ 결과
-  - 키워드에 따른 속도 편차는 발생하지만 평균 500ms로 성능의 안정화를 이루었습니다. 
-  - ( 약 11,900%의 성능향상 효과를 얻었습니다. ) </br>
-  
-</div>
-</details>
 
-<details>
-<summary><strong>📌 조회 쿼리 동작 시 cross join이 발생하여 성능 이슈가 발생했습니다. </strong></summary>
-<div markdown="1">       
+💡 해결 과정
 
-#### ❗ 문제상황
-  - 조회 쿼리 동작 시 DB 로그에 cross join이 발생한 것을 확인했습니다.</br>
-  ( cross join 은 카다시안 곱을 수행하여 join하기 때문에 너무 많은 데이터를 가져와 성능이 저하됩니다. )
-  
-#### 💡 Solution :
-  - inner join 명시적으로 사용했습니다.
-  - join을 명시적으로 사용하지 않은 쿼리문에서 자동으로 cross join이 발생되고 있었기 때문에 join이 필요한 테이블에 inner join을 작성하였습니다.
- 
-#### ✔ 결과
-  - cross join으로 나가던 쿼리문이 inner join 바뀌었습니다.
-  - 200만건 기준 필터링 조회 시 평균 8초, 성능 200%까지 개선되었습니다. </br>
-</div>
-</details>
+SAN 필드 포함 인증서 재발급
+Copy# 도메인 구성
+elasticsearch.www.projectkkk.com
+kafka.www.projectkkk.com
+kibana.www.projectkkk.com
+logstash.www.projectkkk.com
+www.projectkkk.com
 
-<br/>
+SSL 설정 표준화
+yamlCopy# Docker 볼륨 설정
+volumes:
+  - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12
+  - ./www.projectkkk.pkcs12:/usr/share/logstash/config/www.projectkkk.pkcs12
+  - ./www.projectkkk.pkcs12:/usr/share/kibana/config/www.projectkkk.pkcs12
 
-## 🪨 기술적 챌린지
-### AWS 프리티어 인스턴스의 동작 최적화 
-**✔ 아키텍처 및 애플리케이션 튜닝을 통한 여러 전략**
-</br></br>
-<details>
-<summary><strong> 📣 Step1. DB 읽기 전용 복제본을 생성해 Read 요청을 분산 </strong></summary>
-<div markdown="1">     
+서비스별 SSL 설정 최적화
+propertiesCopy# Spring Boot SSL 설정
+SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
+SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /usr/share/springboot/config/www.projectkkk.pkcs12
+SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
 
-#### ❔원인
-  - 하나의 DB에 많은 조회와 주문이 몰리면서 CPU에 병목이 발생
-  
-#### ✔ 결과
-  - Main DB에서는 Write 요청만 동작
-  - 동일 상황에서 CPU의 안정화 
-  
-  ![image](https://user-images.githubusercontent.com/112923814/207860046-ace2a74e-4710-4cac-99f3-dc7d650d9811.png)
+# Elasticsearch SSL 설정
+xpack.security.http.ssl.enabled: true
+xpack.security.transport.ssl.enabled: true
 
-  
+연결 검증 프로세스 구축
 
-</div>
-</details>
+환경 변수(ELASTIC_PASSWORD, KEYSTORE_PASSWORD 등) 유효성 검증
+서비스별 연결 상태 점검:
 
-<details>
-<summary><strong> 📣 Step2. Hikari Connection Pool 최적의 개수 적용 </strong></summary>
-<div markdown="1">     
+Elasticsearch: https://elasticsearch.www.projectkkk.com:9200
+Kibana: https://www.projectkkk.com:5601
+Logstash → Elasticsearch SSL 인증
+Spring Boot ↔ Elasticsearch HTTPS 통신
 
-#### ❔원인
-  -  Cache Write Back 전략으로 조회수를 관리하고 있었기에 다중 DB Update를 위한
-       Hikari CP 확장이 필요했으나 </br>RDS micro.t3 인스턴스의 성능을 고려한 확장 필요
-  
-#### ✔ 결과
-  -  Jmeter 부하테스트를 통해 에러율이 가장 낮아지는 Connection Pool Size가 20임을 발견
-  
-![image](https://user-images.githubusercontent.com/112923814/207860175-26edd3dc-3838-4b57-9354-07913d9474b5.png)
+
+
+
+
+✔ 결과
+
+보안 강화
+
+서비스 간 TLS 보안 적용 완료
+SSL 검증 모드 'full' 설정으로 보안 강화
+SAN 필드를 통한 다중 서브도메인 지원
+
+
+시스템 안정성
+
+Docker Compose 환경에서 서비스 간 안정적인 HTTPS 통신 구현
+통일된 인증서 관리로 운영 효율성 향상
+서비스 간 유기적 연동 구조 확립
+
+
+기술적 성장
+
+Docker 기반 MSA 환경의 보안 설정에 대한 이해도 향상
+SSL/TLS 인증서 관리 및 서비스 간 보안 통신 구현 경험 획득
+컨테이너 기반 서비스의 보안 아키텍처 설계 역량 강화
+
 
 
 </div>
 </details>
-
-<details>
-<summary><strong> 📣 Step3. Time_Wait 소켓의 최적화 </strong></summary>
-<div markdown="1">     
-
-#### ❔원인
-  -  낮은 성능의 DB로 대규모 상품 데이터를 핸들링하는 상황에서, 남아있는 모든 소켓에 요청마다</br> TCP handshake가 발생하면서 불필요한 성능 낭비 발생
-  
-#### ✔ 결과
-  -  <strong>KeepAlive 적용</strong>을 통해 매 요청마다 새로운 세션을 만들지 않고,</br> 1024개의 세션을 연결한 뒤 그 연결을 통해 요청을 처리하도록 설정
-      </br></br>
- ![image](https://user-images.githubusercontent.com/112923814/207860282-2bfab5e0-411d-43b4-ac3a-6a86e2b174fb.png)
-
-</div>
-</details>
-
 
 
 
@@ -584,9 +468,10 @@ logback-access 모듈을 이용해 api 통신 관련 통신 로그 또한 파일
 <table>
   <tbody>
     <tr>
-      <td align="center"><a href="https://github.com/JeyunSong"><img src="" width="200px;" /><br /><sub><b>강민서</b></sub></a><br /></td>
-      <td align="center"><a href="https://github.com/kyebalza"><img src="" width="200px;" /><br /><sub><b>김규현</b></sub></a><br /></td>
-      <td align="center"><a href="https://github.com/Suyoung225"><img src="" width="200px; "/><br /><sub><b>최영원</b></sub></a><br /></td>
+      <td align="center"><a href=""><img src="" width="200px;" /><br /><sub><b>강민서</b></sub></a><br /></td>
+      <td align="center"><a href=""><img src="" width="200px;" /><br /><sub><b>김규현</b></sub></a><br /></td>
+      <td align="center"><a href=""><img src="https://github.com/user-attachments/assets/3ec996b5-2762-4378-b38a-8c611dd5567d" width="200px; "/><br /><sub><b>최영원</b></sub></a><br /></td>
      <tr/>
+
   </tbody>
 </table>
