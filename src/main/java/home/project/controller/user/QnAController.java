@@ -94,7 +94,7 @@ public class QnAController {
     public ResponseEntity<?> findAll(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
+                    {@SortDefault(sort = "qnAId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
         Page<QnAResponse> pagedQnA = qnAService.findAll(pageable);
