@@ -149,15 +149,6 @@ public class AdminProductController {
     }
 
     @Operation(summary = "상품 통합 조회", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다.")
-    @Parameters({
-            @Parameter(name = "brand", description = "브랜드명으로 필터링", example = "리바이스", required = false),
-            @Parameter(name = "category", description = "카테고리명으로 필터링", example = "아우터/자켓", required = false),
-            @Parameter(name = "productName", description = "상품명으로 검색", example = "블루 데님 자켓", required = false),
-            @Parameter(name = "content", description = "통합 검색어", example = "청자켓", required = false),
-            @Parameter(name = "page", description = "페이지 번호 (1부터 시작)", example = "1"),
-            @Parameter(name = "size", description = "페이지 크기", example = "5"),
-            @Parameter(name = "sort", description = "정렬 기준 (brand,asc 형식)", example = "brand,asc")
-    })
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",

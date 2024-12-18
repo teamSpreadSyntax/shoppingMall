@@ -611,7 +611,22 @@ public class ProductServiceImpl implements ProductService {
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
-        // 회원이 소유한 상품만 필터링하고 Page로 변환
+        // CENTER 권한인 경우 모든 제품 검색 가능
+        if (authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER"))) {
+            List<Product> allProducts = pagedDocuments
+                    .map(productDocument -> findById(productDocument.getId()))
+                    .getContent();
+            return converter.convertFromPagedProductToPagedProductResponseForManaging(
+                    new PageImpl<>(
+                            allProducts,
+                            pageable,
+                            pagedDocuments.getTotalElements()
+                    )
+            );
+        }
+
+        // ADMIN(판매자)인 경우 자신이 등록한 제품만 검색
         List<Product> filteredProducts = pagedDocuments
                 .map(productDocument -> findById(productDocument.getId()))
                 .getContent()
