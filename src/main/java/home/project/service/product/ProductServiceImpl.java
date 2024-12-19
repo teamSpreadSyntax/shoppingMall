@@ -601,15 +601,7 @@ public class ProductServiceImpl implements ProductService {
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
 
-        String categoryCode = null;
-        if (category != null && !category.isEmpty()) {
-            categoryCode = getCode(category);
-        }
-        if (content != null && !content.isEmpty()) {
-            categoryCode = getCode(content);
-        }
-
-        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
+        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
 
         // CENTER 권한인 경우 모든 제품 검색 가능
         if (authentication.getAuthorities().stream()
