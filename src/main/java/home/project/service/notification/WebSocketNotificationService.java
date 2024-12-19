@@ -20,13 +20,12 @@ public class WebSocketNotificationService {
     }
 
     public void sendNotificationToUser(String username, NotificationResponse notificationResponse) {
-        CustomResponseEntity<NotificationResponse> customResponseEntity = new CustomResponseEntity<>(notificationResponse, username+"님에게 "+notificationResponse.getDescription(), HttpStatus.OK);
+        CustomResponseEntity<NotificationResponse> customResponseEntity
+                = new CustomResponseEntity<>(notificationResponse, username+"님에게 "+notificationResponse.getDescription(), HttpStatus.OK);
         messagingTemplate.convertAndSendToUser(
-                username,             // 수신자 ID
-                "/queue/notifications", // 개인별 큐
-                customResponseEntity              // 메시지 내용
+                username,
+                "/queue/notifications",
+                customResponseEntity
         );
     }
-    //구독시 stompClient.subscribe('/user/queue/notifications', ...); 이런 방식으로 구독하면 실제 내부적으로는 /user/{email}/queue/notifications 같은 형태로 destination이 변환됨
-
 }

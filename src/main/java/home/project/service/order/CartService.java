@@ -4,6 +4,8 @@ import home.project.domain.order.Cart;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.CartResponse;
 import home.project.dto.responseDTO.MyCartResponse;
+import home.project.dto.responseDTO.ProductSimpleResponseForCart;
+import home.project.dto.responseDTO.ProductSimpleResponsesForCart;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,8 +14,8 @@ public interface CartService {
 
     Cart findById(Long cartId);
 
-    Page<ProductDTOForOrder> findAllByMemberId(Pageable pageable);
+    Page<ProductSimpleResponseForCart> findAllByMemberId(Pageable pageable);
 
-    String deleteById(Long id);
+    String deleteByProductId(Long productid);
 
 }

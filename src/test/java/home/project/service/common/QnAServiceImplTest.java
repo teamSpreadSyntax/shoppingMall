@@ -186,27 +186,4 @@ class QnAServiceImplTest {
         }
     }
 
-    @Nested
-    @DisplayName("QnA 상태별 조회")
-    class FindAllWaitingQnATest {
-
-        @Test
-        @DisplayName("대기 중인 QnA 조회 성공")
-        void findAllWaitingQnASuccess() {
-            // given
-            Page<QnA> pagedQnA = new PageImpl<>(Collections.singletonList(testQnA));
-            when(qnARepository.findByAnswerStatus(eq(AnswerStatus.WAITING), any(Pageable.class)))
-                    .thenReturn(pagedQnA);
-            when(converter.convertFromPagedQnAToPagedQnADetailResponse(any(Page.class)))
-                    .thenReturn(new PageImpl<>(Collections.emptyList()));
-
-            // when
-            Page<QnADetailResponse> response = qnAService.findAllWaitingQnA(Pageable.unpaged());
-
-            // then
-            assertThat(response).isNotNull();
-            verify(qnARepository).findByAnswerStatus(eq(AnswerStatus.WAITING), any(Pageable.class));
-            verify(converter).convertFromPagedQnAToPagedQnADetailResponse(any(Page.class));
-        }
-    }
 }

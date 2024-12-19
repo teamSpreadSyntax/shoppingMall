@@ -21,6 +21,7 @@ import home.project.repository.product.ProductRepository;
 import home.project.repository.product.WishListRepository;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.service.member.MemberService;
+import home.project.service.order.OrderService;
 import home.project.service.util.Converter;
 import home.project.service.util.IndexToElasticsearch;
 import home.project.service.util.PageUtil;
@@ -61,6 +62,7 @@ public class ProductServiceImpl implements ProductService {
     private final WishListRepository wishListRepository;
     private final QnARepository qnARepository;
     private final ReviewRepository reviewRepository;
+    private final ProductOrderRepository orderRepository;
 
     @Override
     @Transactional
@@ -560,10 +562,28 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product findByProductOrderNum(Long productOrderId) {
-        ProductOrder productOrder = productOrderRepository.findById(productOrderId)
-                .orElseThrow(() -> new IdNotFoundException(productOrderId + "(으)로 등록된 주문서가 없습니다."));
-        return productOrder.getProduct();
+    public Product findByProductIdAndConfirmHasPurchase(Long productId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+        Long memberId = member.getId();
+
+        List<ProductOrder> listedProductOrder = productOrderRepository.findAllByProductId(productId);
+        if(listedProductOrder.isEmpty()) {
+            throw new IdNotFoundException("리뷰는 구매했던 상품에 한해 작성이 가능합니다.");
+        }
+
+        // 리스트를 순회하면서 현재 회원이 주문한 적이 있는지 확인
+        boolean hasPurchased = listedProductOrder.stream()
+                .anyMatch(productOrder ->
+                        productOrder.getOrders().getMember().getId().equals(memberId)
+                );
+
+        if(hasPurchased) {
+            return findById(productId);
+        }
+
+        throw new IllegalStateException("리뷰는 구매했던 상품에 한해 작성이 가능합니다.");
     }
 
     @Override
@@ -591,7 +611,22 @@ public class ProductServiceImpl implements ProductService {
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
-        // 회원이 소유한 상품만 필터링하고 Page로 변환
+        // CENTER 권한인 경우 모든 제품 검색 가능
+        if (authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER"))) {
+            List<Product> allProducts = pagedDocuments
+                    .map(productDocument -> findById(productDocument.getId()))
+                    .getContent();
+            return converter.convertFromPagedProductToPagedProductResponseForManaging(
+                    new PageImpl<>(
+                            allProducts,
+                            pageable,
+                            pagedDocuments.getTotalElements()
+                    )
+            );
+        }
+
+        // ADMIN(판매자)인 경우 자신이 등록한 제품만 검색
         List<Product> filteredProducts = pagedDocuments
                 .map(productDocument -> findById(productDocument.getId()))
                 .getContent()
