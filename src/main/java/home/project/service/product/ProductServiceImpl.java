@@ -1,5 +1,7 @@
 package home.project.service.product;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.common.QnA;
 import home.project.domain.common.Review;
 import home.project.domain.elasticsearch.ProductDocument;
@@ -23,6 +25,7 @@ import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.service.member.MemberService;
 import home.project.service.order.OrderService;
 import home.project.service.util.Converter;
+import home.project.service.util.FileService;
 import home.project.service.util.IndexToElasticsearch;
 import home.project.service.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -33,14 +36,23 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static home.project.service.util.CategoryMapper.getCode;
@@ -63,10 +75,11 @@ public class ProductServiceImpl implements ProductService {
     private final QnARepository qnARepository;
     private final ReviewRepository reviewRepository;
     private final ProductOrderRepository orderRepository;
+    private final FileService fileService;
 
     @Override
     @Transactional
-    public void join(CreateProductRequestDTO createProductRequestDTO) {
+    public void join(CreateProductRequestDTO createProductRequestDTO, List<MultipartFile> descriptionImages) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
@@ -77,6 +90,13 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
         } else if (currentSoldQuantity < 0) {
             throw new IllegalStateException("판매량이 음수일 수 없습니다.");
+        }
+
+        // 이미지 파일들 저장
+        List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile image : descriptionImages) {
+            String fileName = fileService.saveFile(image);
+            imageUrls.add(fileName);
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -96,7 +116,15 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(createProductRequestDTO.getPrice());
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
         product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
-        product.setDescription(createProductRequestDTO.getDescription());
+
+        // 이미지 URL들을 JSON으로 변환하여 description에 저장
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            product.setDescription(objectMapper.writeValueAsString(imageUrls));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("이미지 URL 저장 중 오류가 발생했습니다.", e);
+        }
+
         product.setCreateAt(LocalDateTime.now());
         product.setImageUrl(createProductRequestDTO.getImageUrl());
         product.setSize(createProductRequestDTO.getSize());
@@ -114,7 +142,6 @@ public class ProductServiceImpl implements ProductService {
         memberProductRepository.save(memberProduct);
 
         ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
-
         try {
             indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
         } catch (Exception e) {
@@ -123,17 +150,39 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    /*
-        private Member authentification(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Member member = memberService.findByEmail(email);
-        if(authentification == null){
-            List<Long> likedProductIds =
-        }else {
+    // 이미지 파일 유효성 검사
+    private boolean isValidImageFile(MultipartFile file) {
+        String contentType = file.getContentType();
+        return contentType != null && (
+                contentType.equals(MediaType.IMAGE_JPEG_VALUE) ||
+                        contentType.equals(MediaType.IMAGE_PNG_VALUE) ||
+                        contentType.equals(MediaType.IMAGE_GIF_VALUE)
+        );
+    }
 
+    // 이미지 파일 저장 및 URL 생성
+    private String saveImageFile(MultipartFile file) {
+        try {
+            // 파일 이름 생성 (UUID 사용)
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+
+            // 저장 경로 설정
+            String uploadDir = "uploads/product-images/";
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // 파일 저장
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // 접근 가능한 URL 반환
+            return "/images/products/" + fileName;
+        } catch (IOException e) {
+            throw new RuntimeException("이미지 파일 저장 중 오류가 발생했습니다.", e);
         }
-    }*/
+    }
     @Override
     public ProductWithQnAAndReviewResponse findByIdReturnProductResponse(Long productId) {
 

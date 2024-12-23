@@ -29,13 +29,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Tag(name = "관리자 상품", description = "관리자 상품 관련 API입니다")
 @RequestMapping(path = "/api/admin/product")
@@ -53,7 +53,7 @@ public class AdminProductController {
     private final CategoryService categoryService;
 
 
-    @Operation(summary = "상품 등록 메서드", description = "상품 등록 메서드입니다.")
+    @Operation(summary = "상품 등록 메서드", description = "상품과 상세 이미지를 등록하는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
@@ -61,20 +61,25 @@ public class AdminProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "403", description = "Forbidden",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
-
+            @ApiResponse(responseCode = "415", description = "Unsupported Media Type")
     })
-    @PostMapping("/create")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createProduct(@RequestBody @Valid CreateProductRequestDTO createProductRequestDTO, BindingResult bindingResult) {
-        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
+    public ResponseEntity<?> createProduct(
+            @RequestPart(value = "productData") @Valid CreateProductRequestDTO createProductRequestDTO,
+            @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages,
+            BindingResult bindingResult) {
 
+        CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
-        productService.join(createProductRequestDTO);
+        List<MultipartFile> imageList = descriptionImages != null ?
+                Arrays.asList(descriptionImages) : new ArrayList<>();
+
+        productService.join(createProductRequestDTO, imageList);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", createProductRequestDTO.getName() + "(이)가 등록되었습니다.");
         return new CustomResponseEntity<>(responseMap, "상품 등록 성공", HttpStatus.OK);
-
     }
 
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")
