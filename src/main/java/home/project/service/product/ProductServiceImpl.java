@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.google.common.io.Files.getFileExtension;
 import static home.project.service.util.CategoryMapper.getCode;
 
 @RequiredArgsConstructor
@@ -95,7 +96,7 @@ public class ProductServiceImpl implements ProductService {
         // 이미지 파일들 저장
         List<String> imageUrls = new ArrayList<>();
         for (MultipartFile image : descriptionImages) {
-            String fileName = fileService.saveFile(image);
+            String fileName = saveFile(image);
             imageUrls.add(fileName);
         }
 
@@ -161,26 +162,39 @@ public class ProductServiceImpl implements ProductService {
     }
 
     // 이미지 파일 저장 및 URL 생성
-    private String saveImageFile(MultipartFile file) {
+    public String saveFile(MultipartFile file) {
         try {
-            // 파일 이름 생성 (UUID 사용)
-            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            // 루트 디렉토리에 uploads 폴더 생성 (OS 독립적 방식)
+            Path uploadPath = Paths.get("/uploads/product-images").toAbsolutePath().normalize();
 
-            // 저장 경로 설정
-            String uploadDir = "uploads/product-images/";
-            Path uploadPath = Paths.get(uploadDir);
+            System.out.println("Absolute Upload Path: " + uploadPath);
+
+            // 디렉토리 존재 여부 확인 및 생성
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
+                System.out.println("Directory created: " + uploadPath);
             }
+
+            // 파일명 생성
+            String extension = getFileExtension(file.getOriginalFilename());
+            String fileName = UUID.randomUUID().toString() + "." + extension;
 
             // 파일 저장
             Path filePath = uploadPath.resolve(fileName);
+
+            System.out.println("Full File Path: " + filePath);
+
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // 접근 가능한 URL 반환
+            System.out.println("File saved successfully: " + fileName);
+
+            // URL 형식으로 반환
             return "/images/products/" + fileName;
+
         } catch (IOException e) {
-            throw new RuntimeException("이미지 파일 저장 중 오류가 발생했습니다.", e);
+            System.err.println("파일 저장 중 오류 발생");
+            e.printStackTrace();
+            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
         }
     }
     @Override
