@@ -117,15 +117,7 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(createProductRequestDTO.getPrice());
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
         product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
-
-        // 이미지 URL들을 JSON으로 변환하여 description에 저장
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            product.setDescription(objectMapper.writeValueAsString(imageUrls));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("이미지 URL 저장 중 오류가 발생했습니다.", e);
-        }
-
+        product.setDescription(imageUrls);
         product.setCreateAt(LocalDateTime.now());
         product.setImageUrl(createProductRequestDTO.getImageUrl());
         product.setSize(createProductRequestDTO.getSize());
@@ -149,16 +141,6 @@ public class ProductServiceImpl implements ProductService {
             System.out.println("에러 발생: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    // 이미지 파일 유효성 검사
-    private boolean isValidImageFile(MultipartFile file) {
-        String contentType = file.getContentType();
-        return contentType != null && (
-                contentType.equals(MediaType.IMAGE_JPEG_VALUE) ||
-                        contentType.equals(MediaType.IMAGE_PNG_VALUE) ||
-                        contentType.equals(MediaType.IMAGE_GIF_VALUE)
-        );
     }
 
     // 이미지 파일 저장 및 URL 생성

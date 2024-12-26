@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Check;
 
+import java.util.List;
+
 /**
  * 상품 정보 업데이트를 위한 요청 데이터 전송 객체(DTO)입니다.
  * 이 클래스는 클라이언트로부터 상품 정보 수정에 필요한 데이터를 받아 서버로 전달합니다.
@@ -65,8 +67,7 @@ public class UpdateProductRequestDTO {
     @NotNull(message = "상품의 불량수량을 입력해주세요.")
     private Long defectiveStock = 0L;
 
-    @NotBlank(message = "상품의 상세정보를 입력해주세요.")
-    private String description;
+    private List<String> description;
 
     @NotBlank(message = "상품의 이미지를 입력해주세요.")
     private String imageUrl;
