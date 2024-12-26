@@ -46,7 +46,7 @@ public class ProductResponseForManager {
     private Long defectiveStock;
 
     @Schema(description = "상품 설명")
-    private String description;
+    private List<String> description;
 
     @Schema(description = "상품 등록일시")
     private LocalDateTime createProductDate;
@@ -65,7 +65,7 @@ public class ProductResponseForManager {
 
 
 
-    public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<ProductCouponResponse> productCouponResponse) {
+    public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, List<String> description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;

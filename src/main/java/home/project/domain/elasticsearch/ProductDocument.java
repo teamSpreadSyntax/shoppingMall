@@ -50,7 +50,7 @@ public class ProductDocument {
                     @InnerField(suffix = "keyword", type = FieldType.Keyword)
             }
     )
-    private String description;
+    private List<String> description;
 
     @Field(type = FieldType.Keyword)
     private String imageUrl;

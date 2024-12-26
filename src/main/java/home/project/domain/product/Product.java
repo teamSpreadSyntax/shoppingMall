@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import home.project.domain.common.Review;
+import home.project.service.util.StringListConverter;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -110,8 +110,9 @@ public class Product {
     @Column(name = "defective_stock")
     private Long defectiveStock = 0L;
 
-    @Column(nullable = false)
-    private String description;
+    @Column
+    @Convert(converter = StringListConverter.class)
+    private List<String> description;
 
     @Column(name = "createAt_product", columnDefinition = "TIMESTAMP")
     private LocalDateTime createAt;

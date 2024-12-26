@@ -33,7 +33,7 @@ public class ProductWithQnAAndReviewResponse {
     private Integer discountRate;
 
     @Schema(description = "상품 설명")
-    private String description;
+    private List<String> description;
 
     @Schema(description = "이미지 URL")
     private String imageUrl;
@@ -56,7 +56,7 @@ public class ProductWithQnAAndReviewResponse {
     @Schema(description = "리뷰 상세 목록")
     private List<ReviewDetailResponse> reviewDetailResponses;
 
-    public ProductWithQnAAndReviewResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponses, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses) {
+    public ProductWithQnAAndReviewResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, List<String> description, String imageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponses, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses) {
         this.id = id;
         this.name = name;
         this.brand = brand;

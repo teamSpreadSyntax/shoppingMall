@@ -19,7 +19,7 @@ public class ProductResponse {
     private String productNum;
     private Long price;
     private Integer discountRate;
-    private String description;
+    private List<String> description;
     private String imageUrl;
     private boolean isLiked;
 
@@ -30,7 +30,7 @@ public class ProductResponse {
 
 
 
-    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, String description, String imageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponse) {
+    public ProductResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, List<String> description, String imageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;
