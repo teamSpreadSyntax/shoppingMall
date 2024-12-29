@@ -1,7 +1,7 @@
 package home.project.service.product;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.springframework.web.multipart.MultipartFile;
 import home.project.domain.common.QnA;
 import home.project.domain.common.Review;
 import home.project.domain.elasticsearch.ProductDocument;
@@ -23,39 +23,27 @@ import home.project.repository.product.ProductRepository;
 import home.project.repository.product.WishListRepository;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.service.member.MemberService;
-import home.project.service.order.OrderService;
 import home.project.service.util.Converter;
 import home.project.service.util.FileService;
 import home.project.service.util.IndexToElasticsearch;
 import home.project.service.util.PageUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.google.common.io.Files.getFileExtension;
 import static home.project.service.util.CategoryMapper.getCode;
 
 @RequiredArgsConstructor
@@ -75,7 +63,6 @@ public class ProductServiceImpl implements ProductService {
     private final WishListRepository wishListRepository;
     private final QnARepository qnARepository;
     private final ReviewRepository reviewRepository;
-    private final ProductOrderRepository orderRepository;
     private final FileService fileService;
 
     @Override
@@ -94,11 +81,9 @@ public class ProductServiceImpl implements ProductService {
         }
 
         // 이미지 파일들 저장
-        List<String> imageUrls = new ArrayList<>();
-        for (MultipartFile image : descriptionImages) {
-            String fileName = saveFile(image);
-            imageUrls.add(fileName);
-        }
+        List<String> imageUrls = descriptionImages.stream()
+                .map(fileService::saveFile) // 파일 서비스 사용
+                .collect(Collectors.toList());
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -117,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(createProductRequestDTO.getPrice());
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
         product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
-        product.setDescription(imageUrls);
+        product.setDescription(imageUrls); // 이미지 URL 설정
         product.setCreateAt(LocalDateTime.now());
         product.setImageUrl(createProductRequestDTO.getImageUrl());
         product.setSize(createProductRequestDTO.getSize());
@@ -140,43 +125,6 @@ public class ProductServiceImpl implements ProductService {
         } catch (Exception e) {
             System.out.println("에러 발생: " + e.getMessage());
             e.printStackTrace();
-        }
-    }
-
-    // 이미지 파일 저장 및 URL 생성
-    public String saveFile(MultipartFile file) {
-        try {
-            // 루트 디렉토리에 uploads 폴더 생성 (OS 독립적 방식)
-            Path uploadPath = Paths.get("/uploads/product-images").toAbsolutePath().normalize();
-
-            System.out.println("Absolute Upload Path: " + uploadPath);
-
-            // 디렉토리 존재 여부 확인 및 생성
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-                System.out.println("Directory created: " + uploadPath);
-            }
-
-            // 파일명 생성
-            String extension = getFileExtension(file.getOriginalFilename());
-            String fileName = UUID.randomUUID().toString() + "." + extension;
-
-            // 파일 저장
-            Path filePath = uploadPath.resolve(fileName);
-
-            System.out.println("Full File Path: " + filePath);
-
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-
-            System.out.println("File saved successfully: " + fileName);
-
-            // URL 형식으로 반환
-            return "/images/products/" + fileName;
-
-        } catch (IOException e) {
-            System.err.println("파일 저장 중 오류 발생");
-            e.printStackTrace();
-            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
         }
     }
     @Override

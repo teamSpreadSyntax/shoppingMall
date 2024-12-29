@@ -1,5 +1,7 @@
 package home.project.service.util;
 
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,30 +9,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j // 로깅 추가
+@Slf4j
 public class FileService {
 
-    @Value("${file.upload-dir}")
-    private String uploadDir;
+    private final Storage storage; // GCS Storage 객체 주입
+
+    @Value("${google.cloud.storage.bucket-name}")
+    private String bucketName;
 
     @Value("${file.allowed-extensions}")
     private List<String> allowedExtensions;
 
     public String saveFile(MultipartFile file) {
         try {
-            // 현재 작업 디렉토리 로깅
-            log.info("Current Working Directory: {}", System.getProperty("user.dir"));
-            log.info("Upload Directory: {}", uploadDir);
-
             // 파일 확장자 검사
             String extension = getFileExtension(file.getOriginalFilename());
             log.info("File Extension: {}", extension);
@@ -40,32 +36,21 @@ public class FileService {
                 throw new IllegalArgumentException("지원하지 않는 파일 형식입니다.");
             }
 
-            // 파일명 생성
+            // 고유한 파일명 생성
             String fileName = UUID.randomUUID().toString() + "." + extension;
             log.info("Generated File Name: {}", fileName);
 
-            // 저장 경로 생성
-            Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
-            log.info("Absolute Upload Path: {}", uploadPath);
+            // GCS 버킷에 파일 업로드
+            BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fileName).build();
+            storage.create(blobInfo, file.getBytes());
+            log.info("File uploaded to GCS: {}", fileName);
 
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-                log.info("Directory created: {}", uploadPath);
-            }
-
-            // 파일 저장
-            Path filePath = uploadPath.resolve(fileName);
-            log.info("Full File Path: {}", filePath);
-
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-            log.info("File saved successfully");
-
-            // URL 형식으로 반환
-            return "/images/products/" + fileName;
+            // GCS URL 반환
+            return String.format("https://storage.googleapis.com/%s/%s", bucketName, fileName);
 
         } catch (IOException e) {
-            log.error("파일 저장 중 오류 발생", e);
-            throw new RuntimeException("파일 저장 중 오류가 발생했습니다.", e);
+            log.error("파일 업로드 중 오류 발생", e);
+            throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.", e);
         }
     }
 

@@ -32,7 +32,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Long> defectiveStock = createNumber("defectiveStock", Long.class);
 
-    public final StringPath description = createString("description");
+    public final ListPath<String, StringPath> description = this.<String, StringPath>createList("description", String.class, StringPath.class, PathInits.DIRECT2);
 
     public final NumberPath<Integer> discountRate = createNumber("discountRate", Integer.class);
 
