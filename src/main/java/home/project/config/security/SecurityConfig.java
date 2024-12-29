@@ -118,7 +118,7 @@ public class SecurityConfig {
                                                 "script-src 'self' 'sha256-SbBSU7MfZFnVMq4PuE/jbBz7pPIfXUTYDrdHl7Ckchc=' https://*.projectkkk.com https://projectkkk.vercel.app https://www.projectkkk.com;" +
                                                 "style-src 'self' 'sha256-7Qf8U/WgiKRW4EKHHq52AbsaG2K/o6jKbzN5oiiJSXM=' https://*.projectkkk.com https://projectkkk.vercel.app;" +
                                                 "img-src 'self' data: blob:;" +
-                                                "connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app;" +
+                                                "connect-src 'self' https://*.projectkkk.com wss://*.projectkkk.com https://projectkkk.vercel.app https://*.googleapis.com;" + // 여기에 googleapis.com 추가
                                                 "font-src 'self' data:;" +
                                                 "frame-src 'self' https://*.projectkkk.com https://projectkkk.vercel.app;" +
                                                 "frame-ancestors 'self' https://*.projectkkk.com https://projectkkk.vercel.app;" +
