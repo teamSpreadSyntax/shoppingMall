@@ -57,7 +57,8 @@ RUN chmod 600 /app/www.projectkkk.pkcs12
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java",
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-jar", "app.jar"]
+CMD [
     "-Dserver.port=443",
     "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12",
     "-Dserver.ssl.key-store-password=Ccenter123456!",
@@ -65,5 +66,5 @@ ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wa
     "-Djavax.net.ssl.trustStore=/usr/lib/jvm/java-17-openjdk-amd64/lib/security/cacerts",
     "-Djavax.net.ssl.trustStorePassword=changeit",
     "-Djavax.net.ssl.trustStoreType=PKCS12",
-    "-DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json",
-    "-jar", "app.jar"]
+    "-DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
+]
