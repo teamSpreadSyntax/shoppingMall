@@ -43,9 +43,6 @@ RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
     -storepass changeit -noprompt \
     && rm /tmp/google.crt
 
-# GCS 접근용 환경 변수 설정
-ENV GOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
-
 # wait-for-it.sh 스크립트 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
