@@ -293,12 +293,20 @@ services:
       SERVER_SSL_KEY_STORE: "/app/www.projectkkk.pkcs12"
       SERVER_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
       SERVER_SSL_KEY_STORE_TYPE: "PKCS12"
-      # HSTS 비활성화 설정 추가
       SERVER_HSTS_ENABLED: "false"
       SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
       SERVER_HSTS_PRELOAD: "false"
       KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
+      JAVA_OPTS: >
+        -Dserver.port=443
+        -Dserver.ssl.key-store=/app/www.projectkkk.pkcs12
+        -Dserver.ssl.key-store-password=${SPRINGBOOT_PASSWORD}
+        -Dserver.ssl.key-store-type=PKCS12
+        -Djavax.net.ssl.trustStore=/usr/lib/jvm/java-17-openjdk-amd64/lib/security/cacerts
+        -Djavax.net.ssl.trustStorePassword=changeit
+        -Djavax.net.ssl.trustStoreType=PKCS12
+        -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -311,13 +319,11 @@ services:
       - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/app/www.projectkkk.pkcs12
-      - ./src/main/resources/superb-analog-439512-g8-e7979f6854cd.json:/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json  # Mount the key file
-
+      - ./src/main/resources/superb-analog-439512-g8-e7979f6854cd.json:/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     networks:
       project_default:
         aliases:
           - www.projectkkk.com
-
 volumes:
   elasticsearch-data:
   kibana-data:
