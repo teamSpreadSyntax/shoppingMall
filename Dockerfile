@@ -17,6 +17,7 @@ COPY gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
 COPY src/main/resources/superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb251.json /app/serviceAccountKey.json
 COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
+
 # gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
 RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:///app/gradle/gradle-8.5-bin.zip|' gradle/wrapper/gradle-wrapper.properties
 
@@ -34,7 +35,12 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Copy Firebase config from builder stage
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
-
+# Google 인증서 추가
+COPY google.crt /tmp/google.crt
+RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
+    -keystore $JAVA_HOME/lib/security/cacerts \
+    -storepass changeit -noprompt \
+    && rm /tmp/google.crt
 # wait-for-it.sh 스크립트를 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
