@@ -1,0 +1,13 @@
+{
+  "properties": [
+    {
+      "name": "google.cloud.credentials.file",
+      "type": "java.lang.String",
+      "description": "Description for google.cloud.credentials.file."
+    },
+    {
+      "name": "google.cloud.project-id",
+      "type": "java.lang.String",
+      "description": "Description for google.cloud.project-id."
+    }
+  ] }
