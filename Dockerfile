@@ -21,8 +21,6 @@ RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:
 # 애플리케이션 빌드
 RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 
----
-
 # Stage 2: Run the application
 FROM openjdk:17-jdk-slim
 
