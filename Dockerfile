@@ -23,7 +23,6 @@ RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:
 # Gradle Wrapper를 사용하여 빌드 (항상 테스트를 제외)
 RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 
----
 
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
