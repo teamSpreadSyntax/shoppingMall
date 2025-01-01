@@ -36,6 +36,13 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 # Copy Firebase config from builder stage
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 # Google 인증서 추가
+# Google API 인증서 추가
+COPY googleapis-root.crt /etc/google/googleapis-root.crt
+
+# Java keystore에 인증서 추가
+RUN keytool -importcert -file /etc/google/googleapis-root.crt -alias googleapis-root \
+    -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt \
+
 COPY google.crt /tmp/google.crt
 RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
     -keystore $JAVA_HOME/lib/security/cacerts \
