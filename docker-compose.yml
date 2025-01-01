@@ -262,52 +262,51 @@ services:
         aliases:
           - kibana.www.projectkkk.com
 
-  services:
-    springboot:
-      build:
-        context: .
-        dockerfile: Dockerfile
-      container_name: springboot
-      dns:
-        - 8.8.8.8
-      ports:
-        - "443:443"
-      environment:
-        SPRING_PROFILES_ACTIVE: docker
-        SPRING_DATASOURCE_URL: jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB
-        SPRING_DATASOURCE_USERNAME: Kang
-        SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-        SPRING_ELASTICSEARCH_REST_URIS: "https://elasticsearch.www.projectkkk.com:9200"
-        SPRING_ELASTICSEARCH_REST_USERNAME: elastic
-        SPRING_ELASTICSEARCH_REST_PASSWORD: ${ELASTIC_PASSWORD}
-        SPRING_ELASTICSEARCH_REST_SSL_ENABLED: "true"
-        SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/springboot/config/www.projectkkk.pkcs12
-        SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
-        GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/config/superb-analog-439512-g8-e7979f6854cd.json"
-      depends_on:
-        elasticsearch:
-          condition: service_healthy
-        kafka:
-          condition: service_started
-        logstash:
-          condition: service_healthy
-      volumes:
-        - ./uploads:/uploads
-        - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
-        - ./src/main/resources/superb-analog-439512-g8-e7979f6854cd.json:/usr/share/springboot/config/superb-analog-439512-g8-e7979f6854cd.json
+  springboot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: springboot
+    dns:
+      - 8.8.8.8
+    ports:
+      - "443:443"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB
+      SPRING_DATASOURCE_USERNAME: Kang
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_ELASTICSEARCH_REST_URIS: "https://elasticsearch.www.projectkkk.com:9200"
+      SPRING_ELASTICSEARCH_REST_USERNAME: elastic
+      SPRING_ELASTICSEARCH_REST_PASSWORD: ${ELASTIC_PASSWORD}
+      SPRING_ELASTICSEARCH_REST_SSL_ENABLED: "true"
+      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/springboot/config/www.projectkkk.pkcs12
+      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
+      GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/config/superb-analog-439512-g8-e7979f6854cd.json"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+      logstash:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/uploads
+      - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
+      - ./src/main/resources/superb-analog-439512-g8-e7979f6854cd.json:/usr/share/springboot/config/superb-analog-439512-g8-e7979f6854cd.json
 
-      networks:
-        project_default:
-          aliases:
-            - www.projectkkk.com
+    networks:
+      project_default:
+        aliases:
+          - www.projectkkk.com
+volumes:
+  elasticsearch-data:
+  kibana-data:
+  token-volume:
+    driver: local  # 수정: 볼륨 드라이버 명시
+  es-data:
 
-  volumes:
-    elasticsearch-data:
-    kibana-data:
-    token-volume:
-      driver: local
-
-  networks:
-    project_default:
-      external: true
+networks:
+  project_default:
+    external: true
