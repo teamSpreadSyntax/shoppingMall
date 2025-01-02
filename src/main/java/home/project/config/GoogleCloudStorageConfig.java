@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
 @Configuration
@@ -16,7 +17,7 @@ public class GoogleCloudStorageConfig {
     public Storage storage() throws IOException {
         // 서비스 계정 키 파일에서 인증 정보 로드
         GoogleCredentials credentials = GoogleCredentials.fromStream(
-                new ClassPathResource("superb-analog-439512-g8-e7979f6854cd.json").getInputStream());
+                new FileInputStream(System.getenv("GOOGLE_APPLICATION_CREDENTIALS")));
 
         // Storage 객체 생성 및 반환
         return StorageOptions.newBuilder()
