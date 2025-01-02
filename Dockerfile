@@ -47,8 +47,8 @@ COPY google.crt /tmp/google.crt
 
 RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
     -keystore $JAVA_HOME/lib/security/cacerts \
-    -storepass changeit -noprompt \
-    && rm /tmp/google.crt
+    -storepass changeit -noprompt
+
 # wait-for-it.sh 스크립트를 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
