@@ -37,12 +37,15 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 # Google 인증서 추가
 # Google API 인증서 추가
-RUN apt-get update && apt-get install -y ca-certificates curl
-RUN curl -sSL https://pki.goog/roots.pem -o /usr/local/share/ca-certificates/roots.pem
-RUN update-ca-certificates
+COPY googleapis-root.crt /etc/google/googleapis-root.crt
 
 # Java keystore에 인증서 추가
-RUN keytool -importcert -file /usr/local/share/ca-certificates/roots.pem -alias google-root \
+RUN keytool -importcert -file /etc/google/googleapis-root.crt -alias googleapis-root \
+    -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
+
+COPY google.crt /tmp/google.crt
+
+RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
     -keystore $JAVA_HOME/lib/security/cacerts \
     -storepass changeit -noprompt
 
