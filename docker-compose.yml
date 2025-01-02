@@ -298,6 +298,7 @@ services:
       SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
       SERVER_HSTS_PRELOAD: "false"
       KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
+
     depends_on:
       elasticsearch:
         condition: service_healthy
