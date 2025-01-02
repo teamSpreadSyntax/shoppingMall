@@ -44,6 +44,8 @@ COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
 RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
+# wait-for-it.sh 스크립트를 복사
+COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
 # Google 인증서 추가
 # Google API 인증서 추가
@@ -59,8 +61,7 @@ RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
     -keystore $JAVA_HOME/lib/security/cacerts \
     -storepass changeit -noprompt
 
-# wait-for-it.sh 스크립트를 복사
-COPY scripts/wait-for-it.sh /app/wait-for-it.sh
+
 
 RUN mkdir -p /usr/share/elasticsearch/config \
     /usr/share/kibana/config \
