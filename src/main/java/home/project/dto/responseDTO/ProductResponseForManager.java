@@ -52,7 +52,7 @@ public class ProductResponseForManager {
     private LocalDateTime createProductDate;
 
     @Schema(description = "상품 이미지 URL")
-    private String imageUrl;
+    private String mainImageFile;
 
     @Schema(description = "사이즈", example = "M")
     private String size;
@@ -65,7 +65,7 @@ public class ProductResponseForManager {
 
 
 
-    public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, List<String> description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<ProductCouponResponse> productCouponResponse) {
+    public ProductResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, List<String> description, LocalDateTime createProductDate, String mainImageFile, String size, String color, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -78,7 +78,7 @@ public class ProductResponseForManager {
         this.defectiveStock = defectiveStock;
         this.description = description;
         this.createProductDate = createProductDate;
-        this.imageUrl = imageUrl;
+        this.mainImageFile = mainImageFile;
         this.size = size;
         this.color = color;
         this.productCouponResponse = productCouponResponse;

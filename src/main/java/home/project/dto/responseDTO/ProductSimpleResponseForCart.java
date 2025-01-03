@@ -25,7 +25,7 @@ public class ProductSimpleResponseForCart {
     private Integer discountRate;
 
     @Schema(description = "이미지 URL", example = "https://example.com/image.jpg")
-    private String imageUrl;
+    private String mainImageFile;
 
     @Schema(description = "수량", example = "1")
     private Integer quantity;
@@ -33,13 +33,13 @@ public class ProductSimpleResponseForCart {
     @Schema(description = "색상", example = "블루")
     private String color;
 
-    public ProductSimpleResponseForCart(Long id, String name, String brand, Long price, Integer discountRate, String imageUrl, Integer quantity, String color) {
+    public ProductSimpleResponseForCart(Long id, String name, String brand, Long price, Integer discountRate, String mainImageFile, Integer quantity, String color) {
         this.id = id;
         this.name = name;
         this.brand = brand;
         this.price = price;
         this.discountRate = discountRate;
-        this.imageUrl = imageUrl;
+        this.mainImageFile = mainImageFile;
         this.quantity = quantity;
         this.color = color;
     }
