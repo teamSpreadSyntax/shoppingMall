@@ -56,7 +56,7 @@ public class ReviewServiceImpl implements ReviewService{
                                 productOrder.getProduct().getName(),
                                 productOrder.getProduct().getBrand(),
                                 order.getOrderDate(),
-                                productOrder.getProduct().getImageUrl()
+                                productOrder.getProduct().getMainImageFile()
                         )))
                 .collect(Collectors.toList());
 
