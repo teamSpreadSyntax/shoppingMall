@@ -496,9 +496,7 @@ public class Converter {
                         review.getCreateAt(),
                         review.getRatingType(),
                         review.getDescription(),
-                        review.getImageUrl1(),
-                        review.getImageUrl2(),
-                        review.getImageUrl3(),
+                        review.getImageUrls(),
                         review.getHelpful()
                 ))
                 .toList(); // Stream을 List로 변환
@@ -542,9 +540,7 @@ public class Converter {
                         review.getCreateAt(),
                         review.getRatingType(),
                         review.getDescription(),
-                        review.getImageUrl1(),
-                        review.getImageUrl2(),
-                        review.getImageUrl3(),
+                        review.getImageUrls(),
                         review.getHelpful()
                 ))
                 .collect(Collectors.toList());
@@ -608,8 +604,7 @@ public class Converter {
                 event.getName(),
                 event.getDescription(),
                 event.getStartDate(),
-                event.getEndDate(),
-                event.getImage()
+                event.getEndDate()
         );
     }
 
@@ -619,12 +614,16 @@ public class Converter {
                 event.getName(),
                 event.getDescription(),
                 event.getStartDate(),
-                event.getEndDate(),
-                event.getImage()
+                event.getEndDate()
         ));
     }
 
-
+    public Page<EventSimpleResponse> convertFromPagedEventToPagedEventSimpleResponse(Page<Event> pagedEvent) {
+        return pagedEvent.map(event -> new EventSimpleResponse(
+                event.getId(),
+                event.getImage()
+        ));
+    }
 
     public Shipping convertFromCreateOrderRequestDTOToShipping(CreateOrderRequestDTO createOrderRequestDTO){
 
@@ -785,9 +784,7 @@ public class Converter {
                 review.getCreateAt(),
                 review.getRatingType(),
                 review.getDescription(),
-                review.getImageUrl1(),
-                review.getImageUrl2(),
-                review.getImageUrl3(),
+                review.getImageUrls(),
                 review.getHelpful()
         );
     }
@@ -820,9 +817,7 @@ public class Converter {
                 review.getCreateAt(),
                 review.getRatingType(),
                 review.getDescription(),
-                review.getImageUrl1(),
-                review.getImageUrl2(),
-                review.getImageUrl3(),
+                review.getImageUrls(),
                 review.getHelpful()
         ));
     }

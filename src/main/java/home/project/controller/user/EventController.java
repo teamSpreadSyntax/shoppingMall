@@ -1,6 +1,8 @@
 package home.project.controller.user;
 
 import home.project.dto.responseDTO.EventResponse;
+import home.project.dto.responseDTO.EventSimpleResponse;
+import home.project.dto.responseDTO.ProductSimpleResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.promotion.EventService;
 import home.project.service.util.PageUtil;
@@ -81,6 +83,34 @@ public class EventController {
         String successMessage = "전체 이벤트입니다.";
 
         return new CustomResponseEntity<>(pagedEvent.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
+    @Operation(summary = "전체 이벤트 이미지 조회 메서드", description = "전체 이벤트 이미지 조회 메서드 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @GetMapping("/eventsImage")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findAllProduct(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "startDate", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<EventSimpleResponse> EventSimplePage = eventService.findAllImages(pageable);
+
+        long totalCount = EventSimplePage.getTotalElements();
+
+        int page = EventSimplePage.getNumber();
+
+        String successMessage = "전체 이벤트 이미지 입니다.";
+
+        return new CustomResponseEntity<>(EventSimplePage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
     @Operation(summary = "이벤트 통합 조회 메서드", description = "이벤트이름, 이벤트시작날짜, 이벤트종료날짜, 할인율 및 일반 검색어로 이벤트를 조회합니다. 모든 조건을 만족하는 이벤트를 조회합니다. 검색어가 없으면 전체 이벤트를 조회합니다.")
