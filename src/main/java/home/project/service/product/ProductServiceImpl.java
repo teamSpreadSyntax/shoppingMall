@@ -67,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void join(CreateProductRequestDTO createProductRequestDTO, List<MultipartFile> descriptionImages) {
+    public void join(CreateProductRequestDTO createProductRequestDTO, MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
@@ -78,6 +78,11 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
         } else if (currentSoldQuantity < 0) {
             throw new IllegalStateException("판매량이 음수일 수 없습니다.");
+        }
+
+        String mainImageUrl = createProductRequestDTO.getMainImageFile(); // 기본적으로 URL 사용
+        if (mainImageFile != null && !mainImageFile.isEmpty()) {
+            mainImageUrl = fileService.saveFile(mainImageFile, "product/main", String.valueOf(member.getId()));
         }
 
         // 이미지 파일들 저장
@@ -104,7 +109,7 @@ public class ProductServiceImpl implements ProductService {
         product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
         product.setDescription(imageUrls); // 이미지 URL 설정
         product.setCreateAt(LocalDateTime.now());
-        product.setImageUrl(createProductRequestDTO.getImageUrl());
+        product.setMainImageFile(mainImageUrl);
         product.setSize(createProductRequestDTO.getSize());
         product.setColor(createProductRequestDTO.getColor());
 
@@ -363,7 +368,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO) {
+    public ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
 
         boolean isCategoryModified = false;
         boolean isNameModified = false;
@@ -386,9 +391,24 @@ public class ProductServiceImpl implements ProductService {
         beforeUpdate.setDefectiveStock(existingProduct.getDefectiveStock());
         beforeUpdate.setDescription(existingProduct.getDescription());
         beforeUpdate.setCreateAt(existingProduct.getCreateAt());
-        beforeUpdate.setImageUrl(existingProduct.getImageUrl());
+        beforeUpdate.setMainImageFile(existingProduct.getMainImageFile());
         beforeUpdate.setSize(existingProduct.getSize());
         beforeUpdate.setColor(existingProduct.getColor());
+
+        String MainImageFile = updateProductRequestDTO.getMainImageFile(); // 기본적으로 URL 사용
+        if (mainImageFile != null && !mainImageFile.isEmpty()) {
+            MainImageFile = fileService.saveFile(mainImageFile, "product/main", String.valueOf(existingProduct.getId()));
+        }
+        existingProduct.setMainImageFile(MainImageFile);
+
+        // ✅ 상세 이미지 업데이트
+        if (descriptionImages != null && !descriptionImages.isEmpty()) {
+            List<String> imageUrls = descriptionImages.stream()
+                    .filter(file -> !file.isEmpty())
+                    .map(file -> fileService.saveFile(file, "product/desc", String.valueOf(existingProduct.getId())))
+                    .collect(Collectors.toList());
+            existingProduct.setDescription(imageUrls);
+        }
 
         if (updateProductRequestDTO.getStock() != null) {
             if (updateProductRequestDTO.getStock() < 0) {
@@ -424,14 +444,6 @@ public class ProductServiceImpl implements ProductService {
 
         if (updateProductRequestDTO.getDefectiveStock() != null) {
             existingProduct.setDefectiveStock(updateProductRequestDTO.getDefectiveStock());
-        }
-
-        if (updateProductRequestDTO.getDescription() != null) {
-            existingProduct.setDescription(updateProductRequestDTO.getDescription());
-        }
-
-        if (updateProductRequestDTO.getImageUrl() != null) {
-            existingProduct.setImageUrl(updateProductRequestDTO.getImageUrl());
         }
 
         if (updateProductRequestDTO.getCategory() != null) {
@@ -630,10 +642,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO) {
+    public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
 
         if (confirmProductOwnership(updateProductRequestDTO.getName(), updateProductRequestDTO.getBrand())) {
-            return update(updateProductRequestDTO);
+            return update(updateProductRequestDTO , mainImageFile, descriptionImages);
         }
 
         throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");

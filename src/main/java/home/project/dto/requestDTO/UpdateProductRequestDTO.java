@@ -70,7 +70,7 @@ public class UpdateProductRequestDTO {
     private List<String> description;
 
     @NotBlank(message = "상품의 이미지를 입력해주세요.")
-    private String imageUrl;
+    private String MainImageFile;
 
     /**
      * 상품의 사이즈 옵션 리스트입니다.

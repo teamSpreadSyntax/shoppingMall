@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface ProductService {
 
-    void join(CreateProductRequestDTO createProductRequestDTO, List<MultipartFile> descriptionImages);
+    void join(CreateProductRequestDTO createProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
 
     Product findById(Long id);
 
@@ -49,7 +49,7 @@ public interface ProductService {
 
     Page<String> brandList(Pageable pageable);
 
-    ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO);
+    ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
 
     String deleteById(Long productId);
 
@@ -63,7 +63,7 @@ public interface ProductService {
 
     Product findByProductIdAndConfirmHasPurchase(Long productOrderId);
 
-    ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO);
+    ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
 
     String deleteByIdForAdmin(Long productId);
 

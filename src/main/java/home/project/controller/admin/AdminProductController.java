@@ -67,6 +67,7 @@ public class AdminProductController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> createProduct(
             @RequestPart(value = "productData") @Valid CreateProductRequestDTO createProductRequestDTO,
+            @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
             @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages,
             BindingResult bindingResult) {
 
@@ -76,7 +77,7 @@ public class AdminProductController {
         List<MultipartFile> imageList = descriptionImages != null ?
                 Arrays.asList(descriptionImages) : new ArrayList<>();
 
-        productService.join(createProductRequestDTO, imageList);
+        productService.join(createProductRequestDTO, mainImageFile, imageList);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", createProductRequestDTO.getName() + "(이)가 등록되었습니다.");
         return new CustomResponseEntity<>(responseMap, "상품 등록 성공", HttpStatus.OK);
@@ -225,12 +226,20 @@ public class AdminProductController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
     })
-    @PutMapping("/update")
+    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequestDTO updateProductRequestDTO, BindingResult bindingResult) {
+    public ResponseEntity<?> updateProduct(
+            @RequestPart(value = "productData") @Valid UpdateProductRequestDTO updateProductRequestDTO,
+            @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
+            @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages,
+            BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
-        ProductResponse productResponse = productService.updateMyProduct(updateProductRequestDTO);
+
+        List<MultipartFile> imageList = descriptionImages != null ?
+                Arrays.asList(descriptionImages) : new ArrayList<>();
+
+        ProductResponse productResponse = productService.updateMyProduct(updateProductRequestDTO ,mainImageFile , imageList);
         String successMessage = "상품 정보가 수정되었습니다.";
         return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
     }
