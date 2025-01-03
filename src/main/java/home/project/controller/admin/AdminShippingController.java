@@ -140,8 +140,8 @@ public class AdminShippingController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> searchShipping(
             @RequestParam(value = "deliveryNum", required = false) String deliveryNum,
-            @RequestParam(value = "shippingDate", required = false) String shippingDate,
-            @RequestParam(value = "deliveryAddress", required = false) String productNumber,
+            @RequestParam(value = "orderDate", required = false) String orderDate,
+            @RequestParam(value = "productNum", required = false) String productNum,
             @RequestParam(value = "memberEmail", required = false) String email,
             @RequestParam(value = "content", required = false) String content,
             @PageableDefault(page = 1, size = 5)
@@ -150,9 +150,9 @@ public class AdminShippingController {
             }) @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
 
-        Page<ShippingResponse> pagedShippingResponse = shippingService.findShippings(deliveryNum, shippingDate, productNumber, email, content, pageable);
+        Page<ShippingResponse> pagedShippingResponse = shippingService.findShippings(deliveryNum, orderDate, productNum, email, content, pageable);
 
-        String successMessage = StringBuilderUtil.buildShippingSearchCriteria(deliveryNum, shippingDate, productNumber, email, content, pagedShippingResponse);
+        String successMessage = StringBuilderUtil.buildShippingSearchCriteria(deliveryNum, orderDate, productNum, email, content, pagedShippingResponse);
 
         long totalCount = pagedShippingResponse.getTotalElements();
         int page = pagedShippingResponse.getNumber();
