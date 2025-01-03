@@ -110,7 +110,7 @@ public class Product {
     @Column(name = "defective_stock")
     private Long defectiveStock = 0L;
 
-    @Column
+    @Column(name = "description", length = 1024)
     @Convert(converter = StringListConverter.class)
     private List<String> description;
 
