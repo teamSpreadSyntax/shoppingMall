@@ -82,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
 
         // 이미지 파일들 저장
         List<String> imageUrls = descriptionImages.stream()
-                .map(fileService::saveFile) // 파일 서비스 사용
+                .map(file -> fileService.saveFile(file, "product", String.valueOf(member.getId())))
                 .collect(Collectors.toList());
 
         LocalDateTime now = LocalDateTime.now();

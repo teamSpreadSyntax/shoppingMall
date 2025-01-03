@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public class FileService {
     @Value("${file.allowed-extensions}")
     private List<String> allowedExtensions;
 
-    public String saveFile(MultipartFile file) {
+    public String saveFile(MultipartFile file, String domain, String userId) {
         try {
             // 파일 확장자 검사
             String extension = getFileExtension(file.getOriginalFilename());
@@ -38,15 +39,20 @@ public class FileService {
 
             // 고유한 파일명 생성
             String fileName = UUID.randomUUID().toString() + "." + extension;
-            log.info("Generated File Name: {}", fileName);
+
+            // 도메인 + 사용자 ID 경로 설정
+            String folderPath = String.format("%s/%s/%s", domain, userId, LocalDate.now());
+            String fullPath = folderPath + "/" + fileName;
+
+            log.info("Generated File Path: {}", fullPath);
 
             // GCS 버킷에 파일 업로드
-            BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fileName).build();
+            BlobInfo blobInfo = BlobInfo.newBuilder(bucketName, fullPath).build();
             storage.create(blobInfo, file.getBytes());
-            log.info("File uploaded to GCS: {}", fileName);
+            log.info("File uploaded to GCS: {}", fullPath);
 
             // GCS URL 반환
-            return String.format("https://storage.googleapis.com/%s/%s", bucketName, fileName);
+            return String.format("https://storage.googleapis.com/%s/%s", bucketName, fullPath);
 
         } catch (IOException e) {
             log.error("파일 업로드 중 오류 발생", e);
@@ -54,6 +60,12 @@ public class FileService {
         }
     }
 
+    /**
+     * 파일 확장자 추출
+     *
+     * @param fileName 파일 이름
+     * @return 파일 확장자
+     */
     private String getFileExtension(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
             log.warn("Filename is null or empty");
