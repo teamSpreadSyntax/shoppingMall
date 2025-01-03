@@ -43,9 +43,8 @@ public class EventServiceImpl implements EventService{
         event.setName(createEventRequestDTO.getName());
         event.setStartDate(createEventRequestDTO.getStartDate());
         event.setEndDate(createEventRequestDTO.getEndDate());
-        event.setImage(createEventRequestDTO.getImage());
 
-        String mainImageUrl = createEventRequestDTO.getImage(); // DTO에 기본 URL이 있는 경우
+        String mainImageUrl = null;
         if (mainImageFile != null && !mainImageFile.isEmpty()) {
             mainImageUrl = fileService.saveFile(mainImageFile, "event/main", "center");
         }
@@ -83,11 +82,6 @@ public class EventServiceImpl implements EventService{
             isModified = true;
         }
 
-        if (updateEventRequestDTO.getDescription() != null && !updateEventRequestDTO.getDescription().equals(existingEvent.getDescription())) {
-            existingEvent.setDescription(updateEventRequestDTO.getDescription());
-            isModified = true;
-        }
-
         if (updateEventRequestDTO.getStartDate() != null && !updateEventRequestDTO.getStartDate().equals(existingEvent.getStartDate())) {
             existingEvent.setStartDate(updateEventRequestDTO.getStartDate());
             isModified = true;
@@ -98,10 +92,6 @@ public class EventServiceImpl implements EventService{
             isModified = true;
         }
 
-        if (updateEventRequestDTO.getImage() != null && !updateEventRequestDTO.getImage().equals(existingEvent.getImage())) {
-            existingEvent.setImage(updateEventRequestDTO.getImage());
-            isModified = true;
-        }
 
         if (mainImageFile != null && !mainImageFile.isEmpty()) {
             String mainImageUrl = fileService.saveFile(mainImageFile, "event/main", "center");
