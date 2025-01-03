@@ -3,11 +3,13 @@ package home.project.domain.common;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import home.project.domain.member.Member;
 import home.project.domain.product.Product;
+import home.project.service.util.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "review")
@@ -38,14 +40,9 @@ public class Review {
     @Column(name = "description", nullable = false)
     private String description;
 
-    @Column(name = "image_url_1", columnDefinition = "TEXT")
-    private String imageUrl1;
-
-    @Column(name = "image_url_2", columnDefinition = "TEXT")
-    private String imageUrl2;
-
-    @Column(name = "image_url_3", columnDefinition = "TEXT")
-    private String imageUrl3;
+    @Column(name = "image_urls",  length = 1024)
+    @Convert(converter = StringListConverter.class)
+    private List<String> imageUrls;
 
     @Column(name = "helpful_count")
     private Long helpful;

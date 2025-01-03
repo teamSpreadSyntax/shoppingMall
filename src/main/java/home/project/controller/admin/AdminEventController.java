@@ -22,11 +22,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Tag(name = "관리자 이벤트", description = "관리자를 위한 이벤트 관련 API입니다")
 @RequestMapping("/api/admin/event")
@@ -54,11 +55,16 @@ public class AdminEventController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 
     })
-    @PostMapping("/join")
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createEvent(@RequestBody CreateEventRequestDTO createEventRequestDTO) {
+    public ResponseEntity<?> createEvent(@RequestPart("eventData") @Valid CreateEventRequestDTO createEventRequestDTO,
+                                         @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
+                                         @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages) {
 
-        EventResponse eventResponse = eventService.join(createEventRequestDTO);
+        List<MultipartFile> imageList = descriptionImages != null ?
+                Arrays.asList(descriptionImages) : new ArrayList<>();
+
+        EventResponse eventResponse = eventService.join(createEventRequestDTO, mainImageFile, imageList);
 
         String successMessage = eventResponse.getName() + "(으)로 이벤트가 등록되었습니다.";
 
@@ -76,11 +82,17 @@ public class AdminEventController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PutMapping("/update")
+    @PutMapping(value = "/update" , consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> updateEvent(@RequestParam("eventId") Long eventId,
-                                         @RequestBody @Valid CreateEventRequestDTO updateEventRequestDTO) {
-        EventResponse updatedEvent = eventService.updateEvent(eventId, updateEventRequestDTO);
+                                         @RequestPart("eventData") @Valid CreateEventRequestDTO updateEventRequestDTO,
+                                         @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
+                                         @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages) {
+
+        List<MultipartFile> imageList = descriptionImages != null ?
+                Arrays.asList(descriptionImages) : new ArrayList<>();
+
+        EventResponse updatedEvent = eventService.updateEvent(eventId, updateEventRequestDTO, mainImageFile, imageList);
         String successMessage = "이벤트 정보가 수정되었습니다.";
         return new CustomResponseEntity<>(updatedEvent, successMessage, HttpStatus.OK);
     }

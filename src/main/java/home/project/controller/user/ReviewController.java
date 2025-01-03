@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -22,11 +23,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Tag(name = "Review", description = "Review관련 API입니다")
     @RequestMapping("/api/review")
@@ -80,11 +82,17 @@ public class ReviewController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PostMapping("/join")
+    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createReview(@RequestParam("productId") Long productId, @RequestBody CreateReviewRequestDTO createReviewRequestDTO) {
+    public ResponseEntity<?> createReview(
+            @RequestParam("productId") Long productId,
+            @RequestPart("reviewData") @Valid CreateReviewRequestDTO createReviewRequestDTO,
+            @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages) {
 
-        ReviewDetailResponse reviewDetailResponse = reviewService.join(productId, createReviewRequestDTO);
+        List<MultipartFile> imageList = descriptionImages != null ?
+                Arrays.asList(descriptionImages) : new ArrayList<>();
+
+        ReviewDetailResponse reviewDetailResponse = reviewService.join(productId, createReviewRequestDTO , imageList);
 
         String successMessage = "리뷰가 작성되었습니다.";
 

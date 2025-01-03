@@ -6,6 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class CreateReviewRequestDTO {
@@ -18,12 +20,6 @@ public class CreateReviewRequestDTO {
     @Schema(description = "별점")
     private RatingType ratingType;
 
-    @Schema(description = "이미지 URL 1")
-    private String imageUrl1;
-
-    @Schema(description = "이미지 URL 2")
-    private String imageUrl2;
-
-    @Schema(description = "이미지 URL 3")
-    private String imageUrl3;
+    @Schema(description = "이미지 URL 선택해주세요.")
+    private List<String> imageUrls;
 }
