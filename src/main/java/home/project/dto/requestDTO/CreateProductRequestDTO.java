@@ -36,8 +36,6 @@ public class CreateProductRequestDTO {
     @NotNull(message = "상품의 불량 수량을 입력해주세요.")
     private Long defectiveStock = 0L;
 
-    @NotBlank(message = "상품의 이미지를 입력해주세요.")
-    private String MainImageFile;
 
     @NotBlank(message = "상품의 사이즈를 입력해주세요.")
     private String size;
