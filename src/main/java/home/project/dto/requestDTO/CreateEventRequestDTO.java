@@ -18,9 +18,6 @@ public class CreateEventRequestDTO {
     @Schema(description = "이벤트 이름", required = true)
     private String name;
 
-    @Schema(description = "이벤트 내용", required = true)
-    private List<String> description;
-
     @NotNull(message = "이벤트 시작날짜를 입력해주세요.")
     @Schema(description = "이벤트 시작 날짜", required = true)
     private LocalDateTime startDate;
@@ -32,9 +29,5 @@ public class CreateEventRequestDTO {
     @NotNull(message = "쿠폰 id를 입력해주세요.")
     @Schema(description = "쿠폰 id", required = true)
     private Long couponId;
-
-    @NotNull(message = "이미지 url을 입력해주세요.")
-    @Schema(description = "이미지", required = true)
-    private String image;
 
 }

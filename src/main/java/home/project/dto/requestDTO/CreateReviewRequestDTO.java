@@ -19,7 +19,4 @@ public class CreateReviewRequestDTO {
     @NotBlank(message = "별점을 선택해주세요.")
     @Schema(description = "별점")
     private RatingType ratingType;
-
-    @Schema(description = "이미지 URL 선택해주세요.")
-    private List<String> imageUrls;
 }
