@@ -118,7 +118,7 @@ public class Product {
     private LocalDateTime createAt;
 
     @Column(columnDefinition = "TEXT")
-    private String imageUrl;
+    private String mainImageFile;
 
     @JsonManagedReference
     @OneToMany(mappedBy = "product")
