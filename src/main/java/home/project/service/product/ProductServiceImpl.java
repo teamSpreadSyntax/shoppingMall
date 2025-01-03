@@ -80,9 +80,11 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalStateException("판매량이 음수일 수 없습니다.");
         }
 
-        String mainImageUrl = createProductRequestDTO.getMainImageFile(); // 기본적으로 URL 사용
+        String mainImageUrl = null;
         if (mainImageFile != null && !mainImageFile.isEmpty()) {
             mainImageUrl = fileService.saveFile(mainImageFile, "product/main", String.valueOf(member.getId()));
+        } else {
+            throw new IllegalArgumentException("대표 이미지 파일은 반드시 포함되어야 합니다.");
         }
 
         // 이미지 파일들 저장
@@ -395,11 +397,11 @@ public class ProductServiceImpl implements ProductService {
         beforeUpdate.setSize(existingProduct.getSize());
         beforeUpdate.setColor(existingProduct.getColor());
 
-        String MainImageFile = updateProductRequestDTO.getMainImageFile(); // 기본적으로 URL 사용
+        String mainImageUrl = existingProduct.getMainImageFile();
         if (mainImageFile != null && !mainImageFile.isEmpty()) {
-            MainImageFile = fileService.saveFile(mainImageFile, "product/main", String.valueOf(existingProduct.getId()));
+            mainImageUrl = fileService.saveFile(mainImageFile, "product/main", String.valueOf(existingProduct.getId()));
         }
-        existingProduct.setMainImageFile(MainImageFile);
+        existingProduct.setMainImageFile(mainImageUrl);
 
         // ✅ 상세 이미지 업데이트
         if (descriptionImages != null && !descriptionImages.isEmpty()) {
