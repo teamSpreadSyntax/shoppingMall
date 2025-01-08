@@ -972,7 +972,7 @@ public class Converter {
         doc.setPrice(product.getPrice());
         doc.setDiscountRate(product.getDiscountRate());
         doc.setDescription(product.getDescription());
-        doc.setImageUrl(product.getMainImageFile());
+        doc.setMainImageFile(product.getMainImageFile());
         doc.setStock(product.getStock());
         doc.setSoldQuantity(product.getSoldQuantity());
         doc.setDefectiveStock(product.getDefectiveStock());
