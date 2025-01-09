@@ -46,14 +46,11 @@ public class OrderController {
 
     @Operation(summary = "주문 생성 메서드", description = "주문 생성 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+            @ApiResponse(responseCode = "200", description = "Order created successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/OrderResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid input",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+
 
     })
     @PostMapping("/join")
@@ -69,10 +66,11 @@ public class OrderController {
 
     @Operation(summary = "id로 주문 조회 메서드", description = "id로 주문 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "200", description = "Order fetched successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/OrderResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Order not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
     })
     @GetMapping("/order")
     @SecurityRequirement(name = "bearerAuth")
@@ -84,10 +82,10 @@ public class OrderController {
 
     @Operation(summary = "내 주문 조회 메서드", description = "내 주문 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "200", description = "Orders fetched successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedOrderResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Orders not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/my_order")
     @SecurityRequirement(name = "bearerAuth")
@@ -109,11 +107,9 @@ public class OrderController {
 
     @Operation(summary = "주문 취소 메서드", description = "주문 취소 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
+            @ApiResponse(responseCode = "200", description = "Order canceled successfully",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "403", description = "Forbidden",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "404", description = "Order not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @DeleteMapping("/cancel")
@@ -128,15 +124,10 @@ public class OrderController {
 
     @Operation(summary = "반품 신청 메서드", description = "반품 신청 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "200", description = "Refund request successful",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ShippingResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Order not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @PostMapping("/refund")
     @SecurityRequirement(name = "bearerAuth")
@@ -153,15 +144,10 @@ public class OrderController {
 
     @Operation(summary = "교환 신청 메서드", description = "교환 신청 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "200", description = "Exchange request successful",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ShippingResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Order not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @PostMapping("/change")
     @SecurityRequirement(name = "bearerAuth")
@@ -178,14 +164,11 @@ public class OrderController {
 
     @Operation(summary = "구매 확정 메서드", description = "구매 확정 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "200", description = "Purchase confirmed successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Order not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
     })
     @PostMapping("/confirm")
     @SecurityRequirement(name = "bearerAuth")

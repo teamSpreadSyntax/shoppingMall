@@ -43,10 +43,12 @@ public class SocialAuthController {
 
     @Operation(summary = "소셜 로그인 메서드", description = "소셜 로그인 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "Bad Request",
+            @ApiResponse(responseCode = "200", description = "Social login successful",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Invalid login credentials",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/LoginValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "User not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid SocialLoginRequestDTO socialLoginRequestDTO, BindingResult bindingResult) {
@@ -66,9 +68,11 @@ public class SocialAuthController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "409", description = "Conflict",
+            @ApiResponse(responseCode = "200", description = "Member registered successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Invalid input data",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Email already registered",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @PostMapping("/join")
