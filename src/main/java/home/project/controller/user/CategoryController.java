@@ -41,8 +41,12 @@ public class CategoryController {
     @Operation(summary = "id로 카테고리 조회 메서드", description = "id로 카테고리 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/categoryResponseSchema"))),
+            @ApiResponse(responseCode = "200", description = "Category retrieved successfully.",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid category ID.",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Not Found: Category not found for the given ID.",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/category")
@@ -56,10 +60,10 @@ public class CategoryController {
     @Operation(summary = "전체 카테고리 조회 메서드", description = "전체 카테고리 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCategoryListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/pagedCategoryListResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid pagination parameters.",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
+            @ApiResponse(responseCode = "404", description = "Not Found: No categories found.",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/categories")
