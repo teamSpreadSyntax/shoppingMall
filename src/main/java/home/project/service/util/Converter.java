@@ -791,7 +791,7 @@ public class Converter {
 
 
 
-    public Page<ReviewResponse> convertFromPagedReviewToPagedQnAResponse(Page<Review> pagedReview) {
+    public Page<ReviewResponse> convertFromPagedReviewToPagedReviewResponse(Page<Review> pagedReview) {
         return pagedReview.map(review -> new ReviewResponse(
                 review.getId(),
                 review.getProduct().getName(),

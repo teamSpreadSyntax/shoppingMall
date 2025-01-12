@@ -1,4 +1,3 @@
-/*
 package home.project.service.product;
 
 import home.project.config.TestConfig;
@@ -44,6 +43,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +54,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@ContextConfiguration(classes = {TestConfig.class}) // TestConfig를 명시적으로 로드
+@ContextConfiguration(classes = {TestConfig.class})
 @MockitoSettings(strictness = Strictness.LENIENT)
 class ProductServiceImplTest {
 
@@ -84,8 +84,8 @@ class ProductServiceImplTest {
     private ReviewRepository reviewRepository;
     @Mock
     private ElasticsearchOperations elasticsearchOperations;
-    @Autowired
-    private FileService fileService; // FileService Mock 추가
+    @Mock
+    private FileService fileService;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -99,7 +99,7 @@ class ProductServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // 테스트용 데이터 초기화
+        // 테스트 데이터 초기화
         testCategory = new Category();
         testCategory.setId(1L);
         testCategory.setCode("01");
@@ -158,8 +158,12 @@ class ProductServiceImplTest {
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(fileService.saveFile(any(), anyString(), anyString())).thenReturn("test-image-url");
 
+            // Mock MultipartFile
+            MultipartFile mockFile = mock(MultipartFile.class);
+            when(mockFile.isEmpty()).thenReturn(false);
+
             // when
-            productService.join(createProductRequestDTO, null, List.of());
+            productService.join(createProductRequestDTO, mockFile, List.of());
 
             // then
             verify(productRepository).save(any(Product.class));
@@ -171,11 +175,31 @@ class ProductServiceImplTest {
         void createProductFailNoCategory() {
             // given
             when(categoryRepository.findByCode(anyString())).thenReturn(Optional.empty());
+            when(memberService.findByEmail(anyString())).thenReturn(testMember); // Mock Member
+
+            // Mock MultipartFile
+            MultipartFile mockFile = mock(MultipartFile.class);
+            when(mockFile.isEmpty()).thenReturn(false);
 
             // when & then
-            assertThatThrownBy(() -> productService.join(createProductRequestDTO, null, List.of()))
+            assertThatThrownBy(() -> productService.join(createProductRequestDTO, mockFile, List.of()))
                     .isInstanceOf(IdNotFoundException.class)
                     .hasMessageContaining("카테고리가 없습니다");
+        }
+
+        @Test
+        @DisplayName("대표 이미지 파일이 없을 경우 실패한다")
+        void createProductFailNoImage() {
+            // given
+            when(categoryRepository.findByCode(anyString())).thenReturn(Optional.of(testCategory));
+
+            // Mock MultipartFile as null
+            MultipartFile mockFile = null;
+
+            // when & then
+            assertThatThrownBy(() -> productService.join(createProductRequestDTO, mockFile, List.of()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessageContaining("대표 이미지 파일은 반드시 포함되어야 합니다.");
         }
     }
 
@@ -236,6 +260,18 @@ class ProductServiceImplTest {
             verify(productRepository).save(any(Product.class));
             verify(converter).convertFromProductToProductResponse(any(Product.class));
         }
+
+        @Test
+        @DisplayName("존재하지 않는 상품 업데이트 시 실패한다")
+        void updateProductFailNoProduct() {
+            // given
+            when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> productService.update(updateProductRequestDTO, null, List.of()))
+                    .isInstanceOf(IdNotFoundException.class)
+                    .hasMessageContaining("등록된 상품이 없습니다");
+        }
     }
 
     @Nested
@@ -256,6 +292,17 @@ class ProductServiceImplTest {
             verify(productRepository).deleteById(anyLong());
             verify(elasticsearchOperations).delete(anyString(), eq(ProductDocument.class));
         }
+
+        @Test
+        @DisplayName("존재하지 않는 상품 삭제 시 실패한다")
+        void deleteProductFailNoProduct() {
+            // given
+            when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> productService.deleteById(1L))
+                    .isInstanceOf(IdNotFoundException.class)
+                    .hasMessageContaining("등록된 상품이 없습니다");
+        }
     }
 }
-*/

@@ -116,7 +116,7 @@ public class ReviewServiceImpl implements ReviewService{
 
         Page<Review> pagedReview = reviewRepository.findAllByMemberId(member.getId(), pageable);
 
-        return converter.convertFromPagedReviewToPagedQnAResponse(pagedReview);
+        return converter.convertFromPagedReviewToPagedReviewResponse(pagedReview);
     }
 
     @Override

@@ -23,14 +23,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,11 +66,8 @@ class QnAServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // 테스트용 인증 객체 생성
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken("test@test.com", null);
-
-        // SecurityContextHolder에 인증 객체 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         testMember = new Member();
@@ -97,12 +90,11 @@ class QnAServiceImplTest {
 
     @Nested
     @DisplayName("QnA 등록")
-    class JoinTest {
+    class CreateQnATest {
 
         @Test
         @DisplayName("QnA 등록 성공")
-        void joinSuccess() {
-            // given
+        void shouldCreateQnASuccessfully() {
             CreateQnARequestDTO requestDTO = new CreateQnARequestDTO();
             requestDTO.setProductNum("P12345");
             requestDTO.setOrderNum("O12345");
@@ -115,24 +107,13 @@ class QnAServiceImplTest {
             when(qnARepository.save(any(QnA.class))).thenReturn(testQnA);
             when(converter.convertFromQnAToQnADetailResponse(any(QnA.class)))
                     .thenReturn(new QnADetailResponse(
-                            1L,
-                            QnAType.ORDER,  // 적절한 QnAType 값
-                            "subject",
-                            "description",
-                            "productNum",
-                            "orderNum",
-                            "memberName",
-                            LocalDateTime.now(),
-                            "answer",
-                            LocalDateTime.now(),
-                            "answerer",
-                            AnswerStatus.WAITING
-                    ));
+                            1L, QnAType.ORDER, "subject", "description",
+                            "productNum", "orderNum", "memberName",
+                            LocalDateTime.now(), "answer", LocalDateTime.now(),
+                            "answerer", AnswerStatus.WAITING));
 
-            // when
             QnADetailResponse response = qnAService.join(requestDTO);
 
-            // then
             assertThat(response).isNotNull();
             verify(qnARepository).save(any(QnA.class));
             verify(converter).convertFromQnAToQnADetailResponse(any(QnA.class));
@@ -141,18 +122,15 @@ class QnAServiceImplTest {
 
     @Nested
     @DisplayName("QnA 조회")
-    class FindByIdTest {
+    class FindQnATest {
 
         @Test
         @DisplayName("QnA ID로 조회 성공")
-        void findByIdSuccess() {
-            // given
+        void shouldFindQnAByIdSuccessfully() {
             when(qnARepository.findById(anyLong())).thenReturn(Optional.of(testQnA));
 
-            // when
             QnA result = qnAService.findById(1L);
 
-            // then
             assertThat(result).isNotNull();
             assertThat(result.getId()).isEqualTo(1L);
             verify(qnARepository).findById(anyLong());
@@ -160,11 +138,9 @@ class QnAServiceImplTest {
 
         @Test
         @DisplayName("존재하지 않는 QnA ID로 조회 실패")
-        void findByIdFail() {
-            // given
+        void shouldFailToFindQnAByNonexistentId() {
             when(qnARepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            // when & then
             assertThatThrownBy(() -> qnAService.findById(1L))
                     .isInstanceOf(IdNotFoundException.class)
                     .hasMessageContaining("QnA가 없습니다.");
@@ -177,13 +153,20 @@ class QnAServiceImplTest {
 
         @Test
         @DisplayName("QnA ID로 삭제 성공")
-        void deleteByIdSuccess() {
-            // when
+        void shouldDeleteQnAByIdSuccessfully() {
             qnAService.deleteById(1L);
 
-            // then
             verify(qnARepository).deleteById(anyLong());
         }
-    }
 
+        @Test
+        @DisplayName("QnA ID로 삭제 실패: 존재하지 않는 ID")
+        void shouldFailToDeleteQnAByNonexistentId() {
+            doThrow(new IdNotFoundException("QnA가 없습니다.")).when(qnARepository).deleteById(anyLong());
+
+            assertThatThrownBy(() -> qnAService.deleteById(1L))
+                    .isInstanceOf(IdNotFoundException.class)
+                    .hasMessageContaining("QnA가 없습니다.");
+        }
+    }
 }

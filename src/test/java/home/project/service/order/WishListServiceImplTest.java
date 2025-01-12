@@ -1,4 +1,3 @@
-/*
 package home.project.service.order;
 
 import home.project.domain.common.WishList;
@@ -164,21 +163,13 @@ class WishListServiceImplTest {
         void findAllMyWishListSuccess() {
             // given
             Page<WishList> pagedWishList = new PageImpl<>(List.of(testWishList));
-            Page<ProductResponse> pagedProductResponse = new PageImpl<>(List.of(new ProductResponse(
-                    1L,                        // id
-                    "Test Product",            // name
-                    "Test Brand",              // brand
-                    "Category",                // category
-                    "P12345",                  // productNum
-                    10000L,                    // price
-                    10,                        // discountRate
-                    "Description",             // description
-                    "image_url",               // imageUrl
-                    true,                      // isLiked
-                    "M",                       // size
-                    "Red",                     // color
-                    List.of()                  // productCouponResponse
-            )));
+            Page<ProductResponse> pagedProductResponse = new PageImpl<>(List.of(
+                    new ProductResponse(
+                            1L, "Test Product", "Test Brand", "Category",
+                            "P12345", 10000L, 10, List.of("Description"),
+                            "image_url", true, "M", "Red", List.of()
+                    )
+            ));
             Pageable pageable = PageRequest.of(0, 10);
 
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
@@ -204,4 +195,4 @@ class WishListServiceImplTest {
         SecurityContextHolder.setContext(securityContext);
     }
 }
-*/
+
