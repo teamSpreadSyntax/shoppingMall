@@ -295,7 +295,7 @@ services:
         aliases:
           - kibana.www.projectkkk.com
 
-    springboot:
+  springboot:
       build:
         context: .
         dockerfile: Dockerfile
