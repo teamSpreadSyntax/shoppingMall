@@ -67,34 +67,10 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        ObjectMapper mapper = JsonMapper.builder().build();
+        // ObjectMapper 설정
+        ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-        mapper.registerModule(new PageModule());  // PageModule 추가
-
-        PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
-                .allowIfBaseType(Object.class)
-                .build();
-
-        mapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL);
-
-        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(mapper);
-
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(jsonSerializer);
-        template.setHashKeySerializer(new StringRedisSerializer());
-        template.setHashValueSerializer(jsonSerializer);
-
-        template.setEnableTransactionSupport(true);
-        template.afterPropertiesSet();
-
-        return template;
-    }
-
-    @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
-        ObjectMapper mapper = JsonMapper.builder().build();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.registerModule(new PageModule());  // PageModule 추가
+        mapper.registerModule(new PageImplDeserializerModule());  // PageImpl 지원 추가
 
         PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                 .allowIfBaseType(Object.class)
@@ -105,44 +81,17 @@ public class RedisConfig {
 
         mapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL);
 
+        // Redis 직렬화 설정
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(mapper);
 
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofHours(1))
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
-                .disableCachingNullValues();
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(serializer);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setHashValueSerializer(serializer);
 
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(config)
-                .build();
-    }
+        template.setEnableTransactionSupport(true);
+        template.afterPropertiesSet();
 
-    // PageImpl을 위한 커스텀 디시리얼라이저
-    public static class PageModule extends SimpleModule {
-        public PageModule() {
-            addDeserializer(PageImpl.class, new PageImplDeserializer());
-        }
-    }
-
-    public static class PageImplDeserializer extends JsonDeserializer<PageImpl<?>> {
-        @Override
-        public PageImpl<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-            JsonNode node = p.getCodec().readTree(p);
-
-            // content 배열 파싱
-            List<?> content = ctxt.readTreeAsValue(node.get("content"), List.class);
-
-            // pageable 정보 파싱
-            JsonNode pageableNode = node.get("pageable");
-            int number = pageableNode.get("pageNumber").asInt();
-            int size = pageableNode.get("pageSize").asInt();
-
-            // total elements 파싱
-            long total = node.get("totalElements").asLong();
-
-            // PageImpl 객체 생성 및 반환
-            return new PageImpl<>(content, PageRequest.of(number, size), total);
-        }
+        return template;
     }
 }
