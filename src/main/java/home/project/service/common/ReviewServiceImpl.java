@@ -15,7 +15,7 @@ import home.project.service.member.MemberService;
 import home.project.service.order.OrderService;
 import home.project.service.product.ProductService;
 import home.project.service.util.Converter;
-import home.project.service.util.FileService;
+import home.project.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -116,7 +116,7 @@ public class ReviewServiceImpl implements ReviewService{
 
         Page<Review> pagedReview = reviewRepository.findAllByMemberId(member.getId(), pageable);
 
-        return converter.convertFromPagedReviewToPagedQnAResponse(pagedReview);
+        return converter.convertFromPagedReviewToPagedReviewResponse(pagedReview);
     }
 
     @Override

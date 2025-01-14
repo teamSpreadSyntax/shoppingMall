@@ -7,6 +7,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import home.project.config.JwtAuthenticationEntryPoint;
 import home.project.exceptions.CustomAccessDeniedHandler;
 import home.project.exceptions.CustomLogoutSuccessHandler;
+import home.project.service.integration.FirebaseAuthenticationFilter;
+import home.project.service.integration.FirebaseAuthenticationProvider;
+import home.project.service.security.JwtAuthenticationFilter;
+import home.project.service.security.JwtTokenProvider;
 import home.project.service.util.*;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
@@ -32,6 +36,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Configuration
@@ -53,7 +58,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager firebaseAuthenticationManager() {
-        return new ProviderManager(Arrays.asList(firebaseAuthenticationProvider));
+        return new ProviderManager(Collections.singletonList(firebaseAuthenticationProvider));
     }
 
     @Bean

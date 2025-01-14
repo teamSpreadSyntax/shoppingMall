@@ -45,8 +45,10 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 작성 가능 제품 목록 조회 메서드", description = "리뷰 작성 가능 제품 목록 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
+            @ApiResponse(responseCode = "200", description = "Successfully fetched reviewable products",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
 
     })
     @GetMapping("/reviewableProducts")
@@ -70,8 +72,12 @@ public class ReviewController {
 
     @Operation(summary = "Review 작성 메서드", description = "구매 확정된 제품에 대한 Review를 작성하는 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "200", description = "Successfully created the review",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ReviewDetailResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
 
     })
     @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -93,8 +99,10 @@ public class ReviewController {
 
     @Operation(summary = "내 Review 조회 메서드", description = "내 Review 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "200", description = "Successfully fetched user reviews",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedReviewResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized access",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
 
     })
     @GetMapping("/my_review")
@@ -118,8 +126,10 @@ public class ReviewController {
 
     @Operation(summary = "상품에 해당하는 Review 조회 메서드", description = "상품에 해당하는 Review 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "200", description = "Successfully fetched product reviews",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedReviewDetailResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
 
     })
     @GetMapping("/product_review")
@@ -143,8 +153,8 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 좋아요 증가", description = "리뷰의 좋아요 수를 증가시킵니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "200", description = "Successfully increased helpful count",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ReviewDetailResponseSchema")))
 
     })
     @PatchMapping("/increase_helpful")
@@ -159,8 +169,10 @@ public class ReviewController {
     }
     @Operation(summary = "리뷰 삭제 메서드", description = "리뷰 삭제 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
+            @ApiResponse(responseCode = "200", description = "Successfully deleted review",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Review not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 
     })
     @DeleteMapping("delete")
@@ -174,8 +186,10 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 ID로 리뷰 조회", description = "리뷰 ID를 통해 특정 리뷰를 조회하는 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
+            @ApiResponse(responseCode = "200", description = "Successfully fetched review details",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ReviewDetailResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Review not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 
     })
     @GetMapping("/review")

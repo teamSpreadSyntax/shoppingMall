@@ -1,6 +1,5 @@
 package home.project.service.promotion;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.product.Coupon;
 import home.project.domain.promotion.Event;
 import home.project.domain.promotion.EventCoupon;
@@ -9,15 +8,12 @@ import home.project.dto.responseDTO.EventResponse;
 import home.project.dto.responseDTO.EventSimpleResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
-import home.project.repository.member.MemberRepository;
-import home.project.repository.product.ProductRepository;
 import home.project.repository.promotion.*;
 import home.project.service.util.Converter;
-import home.project.service.util.FileService;
+import home.project.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;

@@ -1,4 +1,3 @@
-/*
 package home.project.service.order;
 
 import home.project.domain.common.WishList;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,7 +57,10 @@ class WishListServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // 기본 테스트 데이터
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken("test@example.com", null);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         testMember = new Member();
         testMember.setId(1L);
         testMember.setEmail("test@example.com");
@@ -71,37 +75,51 @@ class WishListServiceImplTest {
         testWishList.setProduct(testProduct);
         testWishList.setLiked(true);
         testWishList.setCreateAt(LocalDateTime.now());
-
-        // SecurityContext Mock 설정
-        mockSecurityContext(testMember.getEmail());
     }
 
     @Nested
     @DisplayName("위시리스트 추가 테스트")
     class AddToWishListTest {
-
         @Test
-        @DisplayName("위시리스트에 상품 추가 성공")
+        @DisplayName("신규 상품 위시리스트 추가 성공")
         void addToWishListSuccess() {
             // given
+            WishList savedWishList = new WishList();
+            savedWishList.setId(1L);
+            savedWishList.setMember(testMember);
+            savedWishList.setProduct(testProduct);
+            savedWishList.setLiked(true);
+            savedWishList.setCreateAt(LocalDateTime.now());
+
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(productService.findById(anyLong())).thenReturn(testProduct);
             when(wishListRepository.findByMemberIdAndProductId(anyLong(), anyLong())).thenReturn(null);
-            when(wishListRepository.save(any(WishList.class))).thenReturn(testWishList);
 
-            // when
+            when(wishListRepository.save(any(WishList.class))).thenAnswer(invocation -> {
+                WishList wishList = invocation.getArgument(0);
+                wishList.setId(1L);
+                return wishList;
+            });
+
             WishListResponse response = wishListService.addToWishList(1L);
 
-            // then
             assertThat(response).isNotNull();
+            assertThat(response.getId()).isEqualTo(1L);
+            assertThat(response.getProductId()).isEqualTo(testProduct.getId());
+            assertThat(response.isLiked()).isTrue();
             assertThat(response.getMessage()).isEqualTo("위시리스트에 추가되었습니다.");
+
+            verify(memberService).findByEmail(anyString());
+            verify(productService).findById(1L);
+            verify(wishListRepository).findByMemberIdAndProductId(anyLong(), anyLong());
             verify(wishListRepository).save(any(WishList.class));
         }
 
         @Test
-        @DisplayName("위시리스트에 이미 존재하는 상품 추가 시도")
+        @DisplayName("이미 존재하는 상품 위시리스트 추가 시도")
         void addToWishListAlreadyExists() {
             // given
+            testWishList.setLiked(true);
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(productService.findById(anyLong())).thenReturn(testProduct);
             when(wishListRepository.findByMemberIdAndProductId(anyLong(), anyLong())).thenReturn(testWishList);
@@ -112,6 +130,25 @@ class WishListServiceImplTest {
             // then
             assertThat(response).isNotNull();
             assertThat(response.getMessage()).isEqualTo("이미 위시리스트에 존재합니다.");
+            assertThat(response.getId()).isEqualTo(testWishList.getId());
+            assertThat(response.isLiked()).isTrue();
+
+            verify(wishListRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("상품이 존재하지 않는 경우 추가 실패")
+        void addToWishListProductNotFound() {
+            // given
+            when(memberService.findByEmail(anyString())).thenReturn(testMember);
+            when(productService.findById(anyLong()))
+                    .thenThrow(new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
+            // when & then
+            assertThatThrownBy(() -> wishListService.addToWishList(99L))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("상품을 찾을 수 없습니다.");
+
             verify(wishListRepository, never()).save(any());
         }
     }
@@ -119,7 +156,6 @@ class WishListServiceImplTest {
     @Nested
     @DisplayName("위시리스트 삭제 테스트")
     class RemoveFromWishListTest {
-
         @Test
         @DisplayName("위시리스트에서 상품 삭제 성공")
         void removeFromWishListSuccess() {
@@ -134,11 +170,14 @@ class WishListServiceImplTest {
             // then
             assertThat(response).isNotNull();
             assertThat(response.getMessage()).isEqualTo("위시리스트에서 삭제되었습니다.");
-            verify(wishListRepository).delete(any(WishList.class));
+            assertThat(response.getId()).isEqualTo(testWishList.getId());
+            assertThat(response.isLiked()).isFalse();
+
+            verify(wishListRepository).delete(testWishList);
         }
 
         @Test
-        @DisplayName("위시리스트에 존재하지 않는 상품 삭제 시도")
+        @DisplayName("위시리스트에 없는 상품 삭제 시도")
         void removeFromWishListNotFound() {
             // given
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
@@ -151,57 +190,63 @@ class WishListServiceImplTest {
             // then
             assertThat(response).isNotNull();
             assertThat(response.getMessage()).isEqualTo("위시리스트에 존재하지 않습니다.");
+            assertThat(response.getId()).isNull();
+            assertThat(response.isLiked()).isFalse();
+
             verify(wishListRepository, never()).delete(any());
         }
     }
 
     @Nested
     @DisplayName("위시리스트 조회 테스트")
-    class FindAllMyWishListTest {
-
+    class FindWishListTest {
         @Test
-        @DisplayName("위시리스트 조회 성공")
+        @DisplayName("내 위시리스트 조회 성공")
         void findAllMyWishListSuccess() {
             // given
             Page<WishList> pagedWishList = new PageImpl<>(List.of(testWishList));
-            Page<ProductResponse> pagedProductResponse = new PageImpl<>(List.of(new ProductResponse(
-                    1L,                        // id
-                    "Test Product",            // name
-                    "Test Brand",              // brand
-                    "Category",                // category
-                    "P12345",                  // productNum
-                    10000L,                    // price
-                    10,                        // discountRate
-                    "Description",             // description
-                    "image_url",               // imageUrl
-                    true,                      // isLiked
-                    "M",                       // size
-                    "Red",                     // color
-                    List.of()                  // productCouponResponse
-            )));
-            Pageable pageable = PageRequest.of(0, 10);
+            ProductResponse expectedResponse = new ProductResponse(
+                    1L, "Test Product", "Test Brand", "Category",
+                    "P12345", 10000L, 10, List.of("Description"),
+                    "image_url", true, "M", "Red", List.of()
+            );
+            Page<ProductResponse> expectedPage = new PageImpl<>(List.of(expectedResponse));
 
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(wishListRepository.findAllByMemberId(anyLong(), any(Pageable.class))).thenReturn(pagedWishList);
-            when(converter.convertFromPagedWishListToProductResponseResponse(any(Page.class))).thenReturn(pagedProductResponse);
+            when(converter.convertFromPagedWishListToProductResponseResponse(any())).thenReturn(expectedPage);
 
             // when
-            Page<ProductResponse> response = wishListService.findAllMyWishList(pageable);
+            Page<ProductResponse> response = wishListService.findAllMyWishList(PageRequest.of(0, 10));
 
             // then
             assertThat(response).isNotNull();
             assertThat(response.getContent()).hasSize(1);
-            verify(wishListRepository).findAllByMemberId(anyLong(), any(Pageable.class));
-            verify(converter).convertFromPagedWishListToProductResponseResponse(any(Page.class));
+            assertThat(response.getContent().get(0).getId()).isEqualTo(testProduct.getId());
+            assertThat(response.getContent().get(0).getName()).isEqualTo("Test Product");
+
+            verify(converter).convertFromPagedWishListToProductResponseResponse(pagedWishList);
+        }
+
+        @Test
+        @DisplayName("빈 위시리스트 조회")
+        void findEmptyWishListSuccess() {
+            // given
+            Page<WishList> emptyPage = new PageImpl<>(List.of());
+            Page<ProductResponse> emptyResponse = new PageImpl<>(List.of());
+
+            when(memberService.findByEmail(anyString())).thenReturn(testMember);
+            when(wishListRepository.findAllByMemberId(anyLong(), any(Pageable.class))).thenReturn(emptyPage);
+            when(converter.convertFromPagedWishListToProductResponseResponse(any())).thenReturn(emptyResponse);
+
+            // when
+            Page<ProductResponse> response = wishListService.findAllMyWishList(PageRequest.of(0, 10));
+
+            // then
+            assertThat(response).isNotNull();
+            assertThat(response.getContent()).isEmpty();
+            assertThat(response.getTotalElements()).isZero();
         }
     }
-
-    private void mockSecurityContext(String email) {
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn(email);
-        SecurityContextHolder.setContext(securityContext);
-    }
 }
-*/
+

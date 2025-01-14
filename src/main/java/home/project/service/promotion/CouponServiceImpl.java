@@ -2,7 +2,6 @@ package home.project.service.promotion;
 
 import home.project.domain.elasticsearch.CouponDocument;
 import home.project.domain.member.Member;
-import home.project.domain.notification.Notification;
 import home.project.domain.product.*;
 import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
 import home.project.dto.requestDTO.AssignCouponToProductRequestDTO;
@@ -21,7 +20,7 @@ import home.project.service.member.MemberService;
 import home.project.service.notification.NotificationService;
 import home.project.service.notification.WebSocketNotificationService;
 import home.project.service.util.Converter;
-import home.project.service.util.IndexToElasticsearch;
+import home.project.service.integration.IndexToElasticsearch;
 import home.project.service.util.StringBuilderUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -76,10 +75,6 @@ public class CouponServiceImpl implements CouponService{
             System.out.println("에러 발생: " + e.getMessage());
             e.printStackTrace();
         }
-
-/*
-        kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
-*/
 
         return converter.convertFromCouponToCouponResponse(coupon);
     }

@@ -24,8 +24,8 @@ import home.project.repository.product.WishListRepository;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.service.member.MemberService;
 import home.project.service.util.Converter;
-import home.project.service.util.FileService;
-import home.project.service.util.IndexToElasticsearch;
+import home.project.service.file.FileService;
+import home.project.service.integration.IndexToElasticsearch;
 import home.project.service.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -43,8 +43,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static home.project.service.util.CategoryMapper.getCode;
 
 @RequiredArgsConstructor
 @Service
@@ -96,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String formattedDate = now.format(formatter);
         String timeStamp = formattedDate.substring(2, 4) + formattedDate.substring(6, 8) +
-                formattedDate.substring(10, 11) + formattedDate.substring(12, 13);
+                formattedDate.charAt(10) + formattedDate.charAt(12);
 
         Product product = new Product();
         product.setName(createProductRequestDTO.getName());
@@ -104,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(categoryRepository.findByCode(createProductRequestDTO.getCategory())
                 .orElseThrow(() -> new IdNotFoundException(createProductRequestDTO.getCategory() + " 카테고리가 없습니다.")));
         product.setStock(createProductRequestDTO.getStock());
-        product.setProductNum(timeStamp + createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory().toString());
+        product.setProductNum(timeStamp + createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory());
         product.setSoldQuantity(createProductRequestDTO.getSoldQuantity());
         product.setPrice(createProductRequestDTO.getPrice());
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
@@ -265,12 +263,6 @@ public class ProductServiceImpl implements ProductService {
 
         String categoryCode = null;
 
-        if (category != null && !category.isEmpty()) {
-            categoryCode = getCode(category);
-        }
-        if (content != null && !content.isEmpty()) {
-            categoryCode = getCode(content);
-        }
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
@@ -305,13 +297,6 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content,String color, String size,  Pageable pageable) {
         String categoryCode = null;
 
-        if (category != null && !category.isEmpty()) {
-            categoryCode = getCode(category);
-        }
-        if (content != null && !content.isEmpty()) {
-            categoryCode = getCode(content);
-        }
-
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
@@ -320,13 +305,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable) {
         String categoryCode = null;
-
-        if (category != null && !category.isEmpty()) {//?
-            categoryCode = getCode(category);
-        }
-        if (content != null && !content.isEmpty()) {//?
-            categoryCode = getCode(content);
-        }
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
@@ -343,13 +321,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable) {
         String categoryCode = null;
-
-        if (category != null && !category.isEmpty()) {
-            categoryCode = getCode(category);
-        }
-        if (content != null && !content.isEmpty()) {
-            categoryCode = getCode(content);
-        }
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
