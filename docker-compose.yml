@@ -12,7 +12,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - TZ=Asia/Seoul
     sysctls:
-      net.core.somaxconn: 1024
+      net.core.somaxconn: 511
 
     ulimits:
       nproc: 65535
