@@ -1,7 +1,12 @@
 package home.project.config.redis;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.databind.jsontype.PolymorphicTypeValidator;
@@ -20,12 +25,13 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 
+import java.io.IOException;
 import java.time.Duration;
+import java.util.List;
 
 @Configuration
 @EnableCaching
@@ -61,9 +67,9 @@ public class RedisConfig {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
 
-        // 커스텀 Redis Serializer 설정
         ObjectMapper mapper = JsonMapper.builder().build();
         mapper.registerModule(new JavaTimeModule());
+        mapper.registerModule(new PageModule());  // PageModule 추가
 
         PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                 .allowIfBaseType(Object.class)
@@ -71,11 +77,8 @@ public class RedisConfig {
 
         mapper.activateDefaultTyping(ptv, ObjectMapper.DefaultTyping.NON_FINAL);
 
-        // GenericJackson2JsonRedisSerializer 사용 (Jackson2JsonRedisSerializer 대신)
-        GenericJackson2JsonRedisSerializer jsonSerializer =
-                new GenericJackson2JsonRedisSerializer(mapper);
+        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(mapper);
 
-        // Serializer 설정
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(jsonSerializer);
         template.setHashKeySerializer(new StringRedisSerializer());
@@ -86,10 +89,12 @@ public class RedisConfig {
 
         return template;
     }
+
     @Bean
     public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
         ObjectMapper mapper = JsonMapper.builder().build();
         mapper.registerModule(new JavaTimeModule());
+        mapper.registerModule(new PageModule());  // PageModule 추가
 
         PolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
                 .allowIfBaseType(Object.class)
@@ -111,5 +116,33 @@ public class RedisConfig {
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .build();
+    }
+
+    // PageImpl을 위한 커스텀 디시리얼라이저
+    public static class PageModule extends SimpleModule {
+        public PageModule() {
+            addDeserializer(PageImpl.class, new PageImplDeserializer());
+        }
+    }
+
+    public static class PageImplDeserializer extends JsonDeserializer<PageImpl<?>> {
+        @Override
+        public PageImpl<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            JsonNode node = p.getCodec().readTree(p);
+
+            // content 배열 파싱
+            List<?> content = ctxt.readTreeAsValue(node.get("content"), List.class);
+
+            // pageable 정보 파싱
+            JsonNode pageableNode = node.get("pageable");
+            int number = pageableNode.get("pageNumber").asInt();
+            int size = pageableNode.get("pageSize").asInt();
+
+            // total elements 파싱
+            long total = node.get("totalElements").asLong();
+
+            // PageImpl 객체 생성 및 반환
+            return new PageImpl<>(content, PageRequest.of(number, size), total);
+        }
     }
 }
