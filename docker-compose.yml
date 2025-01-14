@@ -12,7 +12,7 @@ services:
       - TZ=Asia/Seoul
     sysctls:
       net.core.somaxconn: 1024
-      vm.overcommit_memory: 1
+
     ulimits:
       nproc: 65535
       nofile:
