@@ -195,7 +195,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(key = "'products:page:' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:page:' + #pageable.pageNumber + ':size:' + #pageable.pageSize", unless = "#result == null")
     public Page<ProductSimpleResponse> findAll(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
 
@@ -239,21 +239,21 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    @Cacheable(key = "'products:managing:all:' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:managing:all:' + #pageable.pageNumber")
     public Page<ProductResponseForManager> findAllForManaging(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
 
     @Override
-    @Cacheable(key = "'products:admin:new:' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:admin:new:' + #pageable.pageNumber")
     public Page<ProductSimpleResponseForManager> adminFindNewProduct(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
         return converter.convertFromPagedProductToPagedProductSimpleResponseForManager(pagedProduct);
     }
 
     @Override
-    @Cacheable(key = "'products:new:' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:new:' + #pageable.pageNumber + ':size:' + #pageable.pageSize", unless = "#result == null")
     public Page<ProductSimpleResponse> findNewProduct(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
 
@@ -288,7 +288,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(key = "'products:elastic:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:elastic:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber + ':size:' + #pageable.pageSize", unless = "#result == null")
     public Page<ProductSimpleResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable) {
 
 
@@ -313,7 +313,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(key = "'products:managing:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:managing:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber")
     public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content,String color, String size,  Pageable pageable) {
         String categoryCode = null;
 
@@ -323,7 +323,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(key = "'products:elastic:managing:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:elastic:managing:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber")
     public Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable) {
         String categoryCode = null;
 
@@ -341,7 +341,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(key = "'products:sold:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:sold:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber")
     public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable) {
         String categoryCode = null;
 
@@ -351,14 +351,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(key = "'products:bestsellers:' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:bestsellers:' + #pageable.pageNumber")
     public Page<ProductResponse> findAllBySoldQuantity(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAllBySoldQuantity(pageable);
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
-    @Cacheable(key = "'brands:list:' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'brands:list:' + #pageable.pageNumber")
     public Page<String> brandList(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAllByOrderByBrandAsc(pageable);
         return converter.convertFromPagedProductToPagedBrand(pagedProduct);
@@ -597,7 +597,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(key = "'products:manager:' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:manager:' + #pageable.pageNumber")
     public Page<ProductSimpleResponseForManager> findAllByIdReturnProductResponseForManager(Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -607,7 +607,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
-    @Cacheable(key = "'products:elastic:admin:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
+    @Cacheable(key = "'products:elastic:admin:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber")
     public Page<ProductResponseForManager> findProductsOnElasticForAdmin(String brand, String category, String productName, String content, Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
