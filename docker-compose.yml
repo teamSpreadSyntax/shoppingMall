@@ -29,7 +29,10 @@ services:
         limits:
           memory: 1g
     networks:
-      - project_default
+      project_default:
+        aliases:
+          - redis.www.projectkkk.com
+
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: zookeeper
