@@ -6,7 +6,7 @@ import home.project.dto.responseDTO.CategoryResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.product.CategoryService;
 import home.project.service.util.PageUtil;
-import home.project.service.util.ValidationCheck;
+import home.project.service.validation.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

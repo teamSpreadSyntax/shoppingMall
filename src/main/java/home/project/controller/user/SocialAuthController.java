@@ -1,15 +1,13 @@
 package home.project.controller.user;
 
-import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.CreateSocialMemberRequestDTO;
-import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.dto.requestDTO.SocialLoginRequestDTO;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.member.AuthService;
 import home.project.service.member.MemberService;
 import home.project.service.util.PageUtil;
-import home.project.service.util.ValidationCheck;
+import home.project.service.validation.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

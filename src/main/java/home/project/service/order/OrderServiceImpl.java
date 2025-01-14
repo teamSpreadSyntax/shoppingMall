@@ -1,6 +1,5 @@
 package home.project.service.order;
 
-import com.google.api.gax.rpc.InvalidArgumentException;
 import home.project.domain.delivery.DeliveryStatusType;
 import home.project.domain.delivery.Shipping;
 import home.project.domain.elasticsearch.MemberDocument;
@@ -26,7 +25,7 @@ import home.project.service.member.MemberService;
 import home.project.service.product.ProductService;
 import home.project.service.promotion.CouponService;
 import home.project.service.util.Converter;
-import home.project.service.util.IndexToElasticsearch;
+import home.project.service.integration.IndexToElasticsearch;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

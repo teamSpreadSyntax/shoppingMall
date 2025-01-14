@@ -54,7 +54,7 @@ public class WishListController {
     @Operation(summary = "WishList 삭제 메서드", description = "WishList 삭제 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Product removed from wishlist",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/WishListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Product not found in wishlist",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 

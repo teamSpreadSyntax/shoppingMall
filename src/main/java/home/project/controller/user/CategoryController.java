@@ -60,7 +60,7 @@ public class CategoryController {
     @Operation(summary = "전체 카테고리 조회 메서드", description = "전체 카테고리 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/pagedCategoryListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCategoryListResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request: Invalid pagination parameters.",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Not Found: No categories found.",

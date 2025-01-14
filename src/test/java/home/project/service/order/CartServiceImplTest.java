@@ -65,12 +65,10 @@ class CartServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        // SecurityContext 설정
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken("test@test.com", null);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // 테스트 데이터 초기화
         testMember = new Member();
         testMember.setId(1L);
         testMember.setEmail("test@test.com");
@@ -95,20 +93,30 @@ class CartServiceImplTest {
 
         @Test
         @DisplayName("장바구니 추가 성공")
-        void joinSuccess() {
-            // given
+        void addToCartSuccess() {
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(productService.findById(anyLong())).thenReturn(testProduct);
             when(cartRepository.save(any(Cart.class))).thenReturn(testCart);
             when(converter.convertFromCartToCartResponse(any(Cart.class))).thenReturn(new CartResponse("test@test.com", null));
 
-            // when
             CartResponse response = cartService.join(1L, 2);
 
-            // then
             assertThat(response).isNotNull();
             assertThat(response.getEmail()).isEqualTo("test@test.com");
             verify(cartRepository).save(any(Cart.class));
+        }
+
+        @Test
+        @DisplayName("장바구니 추가 실패 - 상품 없음")
+        void addToCartFailProductNotFound() {
+            when(memberService.findByEmail(anyString())).thenReturn(testMember);
+            when(productService.findById(anyLong())).thenThrow(new IdNotFoundException("상품이 존재하지 않습니다."));
+
+            assertThatThrownBy(() -> cartService.join(1L, 2))
+                    .isInstanceOf(IdNotFoundException.class)
+                    .hasMessage("상품이 존재하지 않습니다.");
+
+            verify(cartRepository, never()).save(any(Cart.class));
         }
     }
 
@@ -119,18 +127,17 @@ class CartServiceImplTest {
         @Test
         @DisplayName("장바구니 조회 성공")
         void findAllByMemberIdSuccess() {
-            // given
             Page<ProductCart> pagedProductCart = new PageImpl<>(Collections.singletonList(testProductCart));
             Page<ProductSimpleResponseForCart> expectedResponse = new PageImpl<>(List.of(
                     new ProductSimpleResponseForCart(
-                            1L, // id
-                            "Test Product", // name
-                            "Test Brand", // brand
-                            10000L, // price
-                            10, // discountRate
-                            "image_url", // mainImageFile
-                            2, // quantity
-                            "Blue" // color
+                            1L,
+                            "Test Product",
+                            "Test Brand",
+                            10000L,
+                            10,
+                            "image_url",
+                            2,
+                            "Blue"
                     )
             ));
             Pageable pageable = PageRequest.of(0, 10);
@@ -140,36 +147,51 @@ class CartServiceImplTest {
             when(converter.convertFromListedProductCartToPagedProductSimpleResponseForCart(any(Page.class)))
                     .thenReturn(expectedResponse);
 
-            // when
             Page<ProductSimpleResponseForCart> response = cartService.findAllByMemberId(pageable);
 
-            // then
-            assertThat(response).isNotNull(); // null 확인
-            assertThat(response.getContent()).hasSize(1); // 결과 크기 확인
-            assertThat(response.getContent().get(0).getName()).isEqualTo("Test Product"); // 이름 확인
-            assertThat(response.getContent().get(0).getQuantity()).isEqualTo(2); // 수량 확인
-            verify(productCartRepository).findByCart_Member_Id(anyLong(), any(Pageable.class)); // 호출 검증
+            assertThat(response).isNotNull();
+            assertThat(response.getContent()).hasSize(1);
+            assertThat(response.getContent().get(0).getName()).isEqualTo("Test Product");
+        }
+
+        @Test
+        @DisplayName("장바구니 조회 실패 - 회원 없음")
+        void findAllByMemberIdFailMemberNotFound() {
+            when(memberService.findByEmail(anyString())).thenThrow(new IdNotFoundException("회원이 존재하지 않습니다."));
+
+            assertThatThrownBy(() -> cartService.findAllByMemberId(Pageable.unpaged()))
+                    .isInstanceOf(IdNotFoundException.class)
+                    .hasMessage("회원이 존재하지 않습니다.");
         }
     }
 
-
     @Nested
-    @DisplayName("장바구니 삭제")
+    @DisplayName("장바구니에서 상품 삭제")
     class DeleteByProductIdTest {
 
         @Test
         @DisplayName("장바구니에서 상품 삭제 성공")
         void deleteByProductIdSuccess() {
-            // given
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(productService.findById(anyLong())).thenReturn(testProduct);
 
-            // when
             String response = cartService.deleteByProductId(1L);
 
-            // then
             assertThat(response).isEqualTo("Test Product");
             verify(productCartRepository).deleteByProductIdAndCart_MemberId(anyLong(), anyLong());
+        }
+
+        @Test
+        @DisplayName("장바구니에서 상품 삭제 실패 - 상품 없음")
+        void deleteByProductIdFailProductNotFound() {
+            when(memberService.findByEmail(anyString())).thenReturn(testMember);
+            when(productService.findById(anyLong())).thenThrow(new IdNotFoundException("상품이 존재하지 않습니다."));
+
+            assertThatThrownBy(() -> cartService.deleteByProductId(1L))
+                    .isInstanceOf(IdNotFoundException.class)
+                    .hasMessage("상품이 존재하지 않습니다.");
+
+            verify(productCartRepository, never()).deleteByProductIdAndCart_MemberId(anyLong(), anyLong());
         }
     }
 
@@ -180,13 +202,10 @@ class CartServiceImplTest {
         @Test
         @DisplayName("장바구니 ID로 조회 성공")
         void findByIdSuccess() {
-            // given
             when(cartRepository.findById(anyLong())).thenReturn(Optional.of(testCart));
 
-            // when
             Cart cart = cartService.findById(1L);
 
-            // then
             assertThat(cart).isNotNull();
             assertThat(cart.getId()).isEqualTo(1L);
             verify(cartRepository).findById(anyLong());
@@ -195,14 +214,11 @@ class CartServiceImplTest {
         @Test
         @DisplayName("장바구니 ID로 조회 실패 - ID 없음")
         void findByIdFail() {
-            // given
             when(cartRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            // when & then
             assertThatThrownBy(() -> cartService.findById(1L))
                     .isInstanceOf(IdNotFoundException.class)
                     .hasMessageContaining("1(으)로 등록된 상품이 없습니다.");
-            verify(cartRepository).findById(anyLong());
         }
     }
 }

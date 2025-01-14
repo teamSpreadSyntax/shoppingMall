@@ -1,13 +1,10 @@
 package home.project.config;
 
-import home.project.service.util.FileService;
+import home.project.service.file.FileService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
 

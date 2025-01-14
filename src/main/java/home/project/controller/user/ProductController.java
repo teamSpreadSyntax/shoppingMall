@@ -1,7 +1,6 @@
 package home.project.controller.user;
 
 
-import home.project.dto.responseDTO.ProductResponse;
 import home.project.dto.responseDTO.ProductSimpleResponse;
 import home.project.dto.responseDTO.ProductWithQnAAndReviewResponse;
 import home.project.response.CustomResponseEntity;
@@ -9,7 +8,7 @@ import home.project.service.product.CategoryService;
 import home.project.service.product.ProductService;
 import home.project.service.util.PageUtil;
 import home.project.service.util.StringBuilderUtil;
-import home.project.service.util.ValidationCheck;
+import home.project.service.validation.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -68,7 +67,7 @@ public class ProductController {
     @Operation(summary = "전체 상품 조회 메서드", description = "전체 상품 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Products fetched successfully",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductUserListResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
 
@@ -95,7 +94,7 @@ public class ProductController {
     @Operation(summary = "신상품 조회 메서드", description = "신상품 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductUserListResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
@@ -123,7 +122,7 @@ public class ProductController {
     @Operation(summary = "상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductUserListResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",

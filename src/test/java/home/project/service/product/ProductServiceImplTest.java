@@ -8,7 +8,6 @@ import home.project.domain.product.Product;
 import home.project.dto.requestDTO.CreateProductRequestDTO;
 import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.ProductResponse;
-import home.project.dto.responseDTO.ProductResponseForManager;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.common.QnARepository;
 import home.project.repository.common.ReviewRepository;
@@ -20,8 +19,8 @@ import home.project.repository.product.WishListRepository;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.service.member.MemberService;
 import home.project.service.util.Converter;
-import home.project.service.util.FileService;
-import home.project.service.util.IndexToElasticsearch;
+import home.project.service.file.FileService;
+import home.project.service.integration.IndexToElasticsearch;
 import home.project.service.util.PageUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -33,11 +32,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -151,21 +145,17 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("정상적으로 상품을 생성한다")
         void createProductSuccess() {
-            // given
             when(categoryRepository.findByCode(anyString())).thenReturn(Optional.of(testCategory));
             when(productRepository.existsByProductNum(anyString())).thenReturn(false);
             when(productRepository.save(any(Product.class))).thenReturn(testProduct);
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(fileService.saveFile(any(), anyString(), anyString())).thenReturn("test-image-url");
 
-            // Mock MultipartFile
             MultipartFile mockFile = mock(MultipartFile.class);
             when(mockFile.isEmpty()).thenReturn(false);
 
-            // when
             productService.join(createProductRequestDTO, mockFile, List.of());
 
-            // then
             verify(productRepository).save(any(Product.class));
             verify(fileService, times(1)).saveFile(any(), anyString(), anyString());
         }
@@ -173,15 +163,12 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("카테고리가 존재하지 않을 경우 실패한다")
         void createProductFailNoCategory() {
-            // given
             when(categoryRepository.findByCode(anyString())).thenReturn(Optional.empty());
             when(memberService.findByEmail(anyString())).thenReturn(testMember); // Mock Member
 
-            // Mock MultipartFile
             MultipartFile mockFile = mock(MultipartFile.class);
             when(mockFile.isEmpty()).thenReturn(false);
 
-            // when & then
             assertThatThrownBy(() -> productService.join(createProductRequestDTO, mockFile, List.of()))
                     .isInstanceOf(IdNotFoundException.class)
                     .hasMessageContaining("카테고리가 없습니다");
@@ -190,13 +177,10 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("대표 이미지 파일이 없을 경우 실패한다")
         void createProductFailNoImage() {
-            // given
             when(categoryRepository.findByCode(anyString())).thenReturn(Optional.of(testCategory));
 
-            // Mock MultipartFile as null
             MultipartFile mockFile = null;
 
-            // when & then
             assertThatThrownBy(() -> productService.join(createProductRequestDTO, mockFile, List.of()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessageContaining("대표 이미지 파일은 반드시 포함되어야 합니다.");
@@ -210,13 +194,10 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("ID로 상품을 조회한다")
         void findByIdSuccess() {
-            // given
             when(productRepository.findById(anyLong())).thenReturn(Optional.of(testProduct));
 
-            // when
             Product product = productService.findById(1L);
 
-            // then
             assertThat(product).isNotNull();
             assertThat(product.getName()).isEqualTo("TestProduct");
             verify(productRepository).findById(anyLong());
@@ -225,10 +206,8 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("존재하지 않는 상품 ID로 조회할 경우 실패한다")
         void findByIdFailNotFound() {
-            // given
             when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            // when & then
             assertThatThrownBy(() -> productService.findById(1L))
                     .isInstanceOf(IdNotFoundException.class)
                     .hasMessageContaining("등록된 상품이 없습니다");
@@ -242,17 +221,14 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("상품 정보를 업데이트한다")
         void updateProductSuccess() {
-            // given
             when(productRepository.findById(anyLong())).thenReturn(Optional.of(testProduct));
             when(categoryRepository.findByCode(anyString())).thenReturn(Optional.of(testCategory));
             when(productRepository.save(any(Product.class))).thenReturn(testProduct);
             when(converter.convertFromProductToProductResponse(any(Product.class))).thenReturn(productResponse);
             when(fileService.saveFile(any(), anyString(), anyString())).thenReturn("updated-image-url");
 
-            // when
             ProductResponse response = productService.update(updateProductRequestDTO, null, List.of());
 
-            // then
             assertThat(response).isNotNull();
             assertThat(response.getName()).isEqualTo("UpdatedProduct");
             assertThat(response.getBrand()).isEqualTo("UpdatedBrand");
@@ -264,10 +240,8 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("존재하지 않는 상품 업데이트 시 실패한다")
         void updateProductFailNoProduct() {
-            // given
             when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            // when & then
             assertThatThrownBy(() -> productService.update(updateProductRequestDTO, null, List.of()))
                     .isInstanceOf(IdNotFoundException.class)
                     .hasMessageContaining("등록된 상품이 없습니다");
@@ -281,13 +255,10 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("상품을 삭제한다")
         void deleteProductSuccess() {
-            // given
             when(productRepository.findById(anyLong())).thenReturn(Optional.of(testProduct));
 
-            // when
             String deletedProductName = productService.deleteById(1L);
 
-            // then
             assertThat(deletedProductName).isEqualTo("TestProduct");
             verify(productRepository).deleteById(anyLong());
             verify(elasticsearchOperations).delete(anyString(), eq(ProductDocument.class));
@@ -296,10 +267,8 @@ class ProductServiceImplTest {
         @Test
         @DisplayName("존재하지 않는 상품 삭제 시 실패한다")
         void deleteProductFailNoProduct() {
-            // given
             when(productRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-            // when & then
             assertThatThrownBy(() -> productService.deleteById(1L))
                     .isInstanceOf(IdNotFoundException.class)
                     .hasMessageContaining("등록된 상품이 없습니다");
