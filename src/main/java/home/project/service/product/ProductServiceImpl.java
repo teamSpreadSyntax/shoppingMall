@@ -94,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String formattedDate = now.format(formatter);
         String timeStamp = formattedDate.substring(2, 4) + formattedDate.substring(6, 8) +
-                formattedDate.substring(10, 11) + formattedDate.substring(12, 13);
+                formattedDate.charAt(10) + formattedDate.charAt(12);
 
         Product product = new Product();
         product.setName(createProductRequestDTO.getName());
@@ -102,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
         product.setCategory(categoryRepository.findByCode(createProductRequestDTO.getCategory())
                 .orElseThrow(() -> new IdNotFoundException(createProductRequestDTO.getCategory() + " 카테고리가 없습니다.")));
         product.setStock(createProductRequestDTO.getStock());
-        product.setProductNum(timeStamp + createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory().toString());
+        product.setProductNum(timeStamp + createProductRequestDTO.getBrand().charAt(0) + createProductRequestDTO.getName().charAt(0) + createProductRequestDTO.getCategory());
         product.setSoldQuantity(createProductRequestDTO.getSoldQuantity());
         product.setPrice(createProductRequestDTO.getPrice());
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
