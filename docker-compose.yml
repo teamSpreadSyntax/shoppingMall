@@ -1,4 +1,37 @@
 services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: redis
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis-data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    ports:
+      - "6379:6379"
+    environment:
+      - TZ=Asia/Seoul
+    sysctls:
+      net.core.somaxconn: 1024
+      vm.overcommit_memory: 1
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    networks:
+      project_default:
+        aliases:
+          - redis.www.projectkkk.com
+
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: zookeeper
@@ -262,75 +295,86 @@ services:
         aliases:
           - kibana.www.projectkkk.com
 
-  springboot:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    dns:
-      - 8.8.8.8
-    container_name: springboot
-    ports:
-      - "443:443"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB
-      SPRING_DATASOURCE_USERNAME: Kang
-      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SPRING_ELASTICSEARCH_REST_URIS: "https://elasticsearch.www.projectkkk.com:9200"
-      SPRING_ELASTICSEARCH_REST_USERNAME: elastic
-      SPRING_ELASTICSEARCH_REST_PASSWORD: ${ELASTIC_PASSWORD}
-      SPRING_ELASTICSEARCH_REST_SSL_ENABLED: "true"
-      SPRING_ELASTICSEARCH_REST_SSL_VERIFICATION_MODE: full
-      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
-      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
-      SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: PKCS12
-      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /usr/share/springboot/config/www.projectkkk.pkcs12
-      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
-      SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
-      SERVER_PORT: "443"
-      SERVER_SSL_ENABLED: "true"
-      SERVER_SSL_KEY_STORE: "/app/www.projectkkk.pkcs12"
-      SERVER_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
-      SERVER_SSL_KEY_STORE_TYPE: "PKCS12"
-      SERVER_HSTS_ENABLED: "false"
-      SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
-      SERVER_HSTS_PRELOAD: "false"
-      KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
-      GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
-      JAVA_OPTS: >
-        -Dserver.port=443
-        -Dserver.ssl.key-store=/app/www.projectkkk.pkcs12
-        -Dserver.ssl.key-store-password=${SPRINGBOOT_PASSWORD}
-        -Dserver.ssl.key-store-type=PKCS12
-        -Djavax.net.ssl.trustStore=/usr/local/openjdk-17/lib/security/cacerts
-        -Djavax.net.ssl.trustStorePassword=changeit
-        -Djavax.net.ssl.trustStoreType=JKS
-        -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-      logstash:
-        condition: service_healthy
-    volumes:
-      - ./uploads:/uploads
-      - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12:ro
-      - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
-      - ./www.projectkkk.pkcs12:/app/www.projectkkk.pkcs12
-      - ./src/main/resources/superb-analog-439512-g8-e7979f6854cd.json:/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
-    networks:
-      project_default:
-        aliases:
-          - www.projectkkk.com
-volumes:
-  elasticsearch-data:
-  kibana-data:
-  token-volume:
-    driver: local  # 수정: 볼륨 드라이버 명시
-  es-data:
+    springboot:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      dns:
+        - 8.8.8.8
+      container_name: springboot
+      ports:
+        - "443:443"
+      environment:
+        SPRING_PROFILES_ACTIVE: docker
+        SPRING_DATASOURCE_URL: jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB
+        SPRING_DATASOURCE_USERNAME: Kang
+        SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+        SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+        SPRING_ELASTICSEARCH_REST_URIS: "https://elasticsearch.www.projectkkk.com:9200"
+        SPRING_ELASTICSEARCH_REST_USERNAME: elastic
+        SPRING_ELASTICSEARCH_REST_PASSWORD: ${ELASTIC_PASSWORD}
+        SPRING_ELASTICSEARCH_REST_SSL_ENABLED: "true"
+        SPRING_ELASTICSEARCH_REST_SSL_VERIFICATION_MODE: full
+        SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+        SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_PASSWORD: ${CA_PASSWORD}
+        SPRING_ELASTICSEARCH_REST_SSL_TRUST_STORE_TYPE: PKCS12
+        SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE: /usr/share/springboot/config/www.projectkkk.pkcs12
+        SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
+        SPRING_ELASTICSEARCH_REST_SSL_KEY_STORE_TYPE: PKCS12
+        # Redis 관련 환경변수 추가
+        SPRING_REDIS_HOST: redis.www.projectkkk.com
+        SPRING_REDIS_PORT: 6379
+        SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD}
+        SPRING_REDIS_SSL: "false"
+        # 기존 환경변수들
+        SERVER_PORT: "443"
+        SERVER_SSL_ENABLED: "true"
+        SERVER_SSL_KEY_STORE: "/app/www.projectkkk.pkcs12"
+        SERVER_SSL_KEY_STORE_PASSWORD: ${SPRINGBOOT_PASSWORD}
+        SERVER_SSL_KEY_STORE_TYPE: "PKCS12"
+        SERVER_HSTS_ENABLED: "false"
+        SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
+        SERVER_HSTS_PRELOAD: "false"
+        KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
+        GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
+        JAVA_OPTS: >
+          -Dserver.port=443
+          -Dserver.ssl.key-store=/app/www.projectkkk.pkcs12
+          -Dserver.ssl.key-store-password=${SPRINGBOOT_PASSWORD}
+          -Dserver.ssl.key-store-type=PKCS12
+          -Djavax.net.ssl.trustStore=/usr/local/openjdk-17/lib/security/cacerts
+          -Djavax.net.ssl.trustStorePassword=changeit
+          -Djavax.net.ssl.trustStoreType=JKS
+          -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+      depends_on:
+        elasticsearch:
+          condition: service_healthy
+        kafka:
+          condition: service_started
+        logstash:
+          condition: service_healthy
+        redis:
+          condition: service_healthy
+      volumes:
+        - ./uploads:/uploads
+        - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12:ro
+        - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
+        - ./www.projectkkk.pkcs12:/app/www.projectkkk.pkcs12
+        - ./src/main/resources/superb-analog-439512-g8-e7979f6854cd.json:/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+      networks:
+        project_default:
+          aliases:
+            - www.projectkkk.com
 
-networks:
-  project_default:
-    external: true
+  volumes:
+    elasticsearch-data:
+    kibana-data:
+    token-volume:
+      driver: local
+    es-data:
+    redis-data:
+      driver: local
+
+  networks:
+    project_default:
+      external: true
