@@ -13,6 +13,8 @@ import java.util.List;
 @Setter
 @Document(indexName = "products")
 public class ProductDocument {
+    public ProductDocument() {}
+
     @Id
     private Long id;
 
@@ -79,6 +81,8 @@ public class ProductDocument {
     @Getter
     @Setter
     public static class CategoryInfo {
+        public CategoryInfo() {} // 추가
+
         @Field(type = FieldType.Long)
         private Long id;
 
@@ -114,6 +118,8 @@ public class ProductDocument {
     @Getter
     @Setter
     public static class ProductCoupon {
+        public ProductCoupon() {} // 추가
+
         @Field(type = FieldType.Long)
         private Long id;
 
