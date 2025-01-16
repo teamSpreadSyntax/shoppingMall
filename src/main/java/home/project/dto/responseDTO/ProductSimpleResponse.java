@@ -9,6 +9,8 @@ import lombok.Setter;
 @Schema(description = "상품 간단 응답")
 public class ProductSimpleResponse {
 
+    public ProductSimpleResponse() {}
+
     @Schema(description = "상품 ID", example = "1")
     private Long id;
 
