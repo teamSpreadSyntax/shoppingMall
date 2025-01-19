@@ -305,11 +305,9 @@ services:
       logstash:
         condition: service_healthy
     volumes:
-      - ./uploads:/uploads
       - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/app/www.projectkkk.pkcs12
-      - ./src/main/resources/superb-analog-439512-g8-e7979f6854cd.json:/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     networks:
       project_default:
         aliases:
