@@ -303,6 +303,9 @@ services:
         -Dserver.ssl.key-store=/app/www.projectkkk.pkcs12
         -Dserver.ssl.key-store-password=${SPRINGBOOT_PASSWORD}
         -Dserver.ssl.key-store-type=PKCS12
+        -Djavax.net.ssl.trustStore=/usr/local/openjdk-17/lib/security/cacerts
+        -Djavax.net.ssl.trustStorePassword=Ccenter123456!
+        -Djavax.net.ssl.trustStoreType=JKS
         -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     depends_on:
       elasticsearch:
