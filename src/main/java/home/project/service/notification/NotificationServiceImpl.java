@@ -87,7 +87,7 @@ public class NotificationServiceImpl implements NotificationService {
         Member member = memberService.findByEmail(email);
         Long memberId = member.getId();
 
-        Notification notification = notificationRepository.findByIdAndMemberId(notificationId,memberId).orElseThrow(() -> new EntityNotFoundException("알림을 찾을 수 없습니다."));
+        Notification notification = notificationRepository.findByIdAndMemberId(notificationId,memberId).orElseThrow(() -> new EntityNotFoundException("알림을 찾을 수 없습니다."));;
 
         notification.setRead(true);
         notificationRepository.save(notification);
