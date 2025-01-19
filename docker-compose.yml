@@ -297,6 +297,13 @@ services:
       SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
       SERVER_HSTS_PRELOAD: "false"
       KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
+      GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
+      JAVA_OPTS: >
+        -Dserver.port=443
+        -Dserver.ssl.key-store=/app/www.projectkkk.pkcs12
+        -Dserver.ssl.key-store-password=${SPRINGBOOT_PASSWORD}
+        -Dserver.ssl.key-store-type=PKCS12
+        -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -305,9 +312,11 @@ services:
       logstash:
         condition: service_healthy
     volumes:
+      - ./uploads:/uploads
       - ./www.projectkkk.pkcs12:/usr/share/elasticsearch/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/usr/share/springboot/config/www.projectkkk.pkcs12:ro
       - ./www.projectkkk.pkcs12:/app/www.projectkkk.pkcs12
+      - ./src/main/resources/superb-analog-439512-g8-e7979f6854cd.json:/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     networks:
       project_default:
         aliases:
