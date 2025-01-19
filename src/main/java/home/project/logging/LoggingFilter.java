@@ -26,11 +26,12 @@ public class LoggingFilter implements Filter {
             throws IOException, ServletException {
 
         // HTTP 요청이 아닌 경우 처리하지 않음
-        if (!(request instanceof HttpServletRequest httpRequest) || !(response instanceof HttpServletResponse)) {
+        if (!(request instanceof HttpServletRequest) || !(response instanceof HttpServletResponse)) {
             chain.doFilter(request, response);
             return;
         }
 
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
         ContentCachingRequestWrapper requestWrapper = new ContentCachingRequestWrapper(httpRequest);
         ContentCachingResponseWrapper responseWrapper =
                 new ContentCachingResponseWrapper((HttpServletResponse) response);

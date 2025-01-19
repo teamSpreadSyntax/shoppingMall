@@ -1,38 +1,4 @@
 services:
-  redis:
-    image: redis:7.2-alpine
-    container_name: redis
-    command: redis-server /usr/local/etc/redis/redis.conf
-    volumes:
-      - redis-data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
-    ports:
-      - "6379:6379"
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - TZ=Asia/Seoul
-    sysctls:
-      net.core.somaxconn: 511
-
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 262144
-        hard: 262144
-    healthcheck:
-      test: ["CMD-SHELL", "redis-cli -a $REDIS_PASSWORD ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    deploy:
-      resources:
-        limits:
-          memory: 1g
-    networks:
-      project_default:
-        aliases:
-          - redis.www.projectkkk.com
-
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: zookeeper
@@ -307,9 +273,6 @@ services:
       - "443:443"
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      REDIS_PASSWORD : ${REDIS_PASSWORD}
       SPRING_DATASOURCE_URL: jdbc:mysql://zigzag-database.cnkq8ww86ffm.ap-northeast-2.rds.amazonaws.com:3306/zigzagDB
       SPRING_DATASOURCE_USERNAME: Kang
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
@@ -335,7 +298,6 @@ services:
       SERVER_HSTS_PRELOAD: "false"
       KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
-
       JAVA_OPTS: >
         -Dserver.port=443
         -Dserver.ssl.key-store=/app/www.projectkkk.pkcs12
@@ -366,10 +328,8 @@ volumes:
   elasticsearch-data:
   kibana-data:
   token-volume:
-    driver: local
+    driver: local  # 수정: 볼륨 드라이버 명시
   es-data:
-  redis-data:
-    driver: local
 
 networks:
   project_default:

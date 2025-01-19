@@ -34,7 +34,7 @@ class JwtTokenProviderTest {
 
     private Authentication authentication;
     private UserDetails userDetails;
-    private final String secretKey = "c2VjcmV0LWtleS1mb3ItdGVzdGluZy1wdXJwb3Nlcy1vbmx5LXNob3VsZC1iZS1sb25nLWVub3VnaA=="; // 테스트용 시크릿 키
+    private String secretKey = "c2VjcmV0LWtleS1mb3ItdGVzdGluZy1wdXJwb3Nlcy1vbmx5LXNob3VsZC1iZS1sb25nLWVub3VnaA=="; // 테스트용 시크릿 키
 
     @BeforeEach
     void setUp() {

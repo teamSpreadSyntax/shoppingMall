@@ -67,7 +67,7 @@ public class OrderRepositoryCustomImpl implements OrderRepositoryCustom {
         }
 
         // 검색 조건이 없을 경우 기본 조건 추가 (모든 주문 조회)
-        if (!builder.hasValue()) {
+        if (builder.hasValue() == false) {
             builder.and(orders.isNotNull());  // 기본적으로 모든 주문을 조회하는 조건
         }
 
