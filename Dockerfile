@@ -46,7 +46,7 @@ RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 # wait-for-it.sh 스크립트를 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
-
+RUN chmod +x /app/wait-for-it.sh
 
 RUN mkdir -p /usr/share/elasticsearch/config \
     /usr/share/kibana/config \
@@ -91,7 +91,6 @@ RUN chmod 755 /usr/share/elasticsearch/config \
     /usr/share/kafka/config \
     /usr/share/springboot/config
 
-RUN chmod +x /app/wait-for-it.sh
 RUN chmod 644 /app/www.projectkkk.pkcs12
 
 # 권한 설정
