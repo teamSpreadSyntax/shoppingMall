@@ -38,11 +38,13 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
 
+# wait-for-it.sh 스크립트 복사
+COPY scripts/wait-for-it.sh /app/wait-for-it.sh
+
 # PKCS12 키스토어 파일 복사
 COPY www.projectkkk.pkcs12 /usr/share/springboot/config/www.projectkkk.pkcs12
 
-# wait-for-it.sh 스크립트 복사
-COPY scripts/wait-for-it.sh /app/wait-for-it.sh
+
 
 # 권한 설정
 RUN chmod +x /app/wait-for-it.sh
