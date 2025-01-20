@@ -38,7 +38,7 @@ public class FileService {
             }
 
             // 고유한 파일명 생성
-            String fileName = UUID.randomUUID().toString() + "." + extension;
+            String fileName = UUID.randomUUID() + "." + extension;
 
             // 도메인 + 사용자 ID 경로 설정
             String folderPath = String.format("%s/%s/%s", domain, userId, LocalDate.now());

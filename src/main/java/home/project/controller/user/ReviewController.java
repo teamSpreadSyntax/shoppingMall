@@ -100,7 +100,7 @@ public class ReviewController {
     @Operation(summary = "내 Review 조회 메서드", description = "내 Review 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched user reviews",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedReviewListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedReviewResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized access",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
 
@@ -127,7 +127,7 @@ public class ReviewController {
     @Operation(summary = "상품에 해당하는 Review 조회 메서드", description = "상품에 해당하는 Review 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully fetched product reviews",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedReviewListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedReviewDetailResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
 

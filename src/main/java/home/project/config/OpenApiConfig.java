@@ -921,6 +921,17 @@ public class OpenApiConfig {
                 .addProperty("responseMessage", new Schema<>().type("string").description("응답 메시지").example("상품 세부 정보 조회 성공"))
                 .addProperty("status", new Schema<>().type("integer").description("HTTP 상태 코드").example(200));
 
+        Schema<?> pagedReviewDetailResponseSchema = new ObjectSchema()
+                .description("페이지네이션된 리뷰 상세 응답 스키마")
+                .addProperty("result", new ObjectSchema()
+                        .addProperty("totalCount", new Schema<>().type("integer").format("int64").description("전체 리뷰 수").example(50))
+                        .addProperty("page", new Schema<>().type("integer").description("현재 페이지 번호").example(1))
+                        .addProperty("content", new ArraySchema()
+                                .description("현재 페이지의 리뷰 상세 목록")
+                                .items(new Schema<>().$ref("#/components/schemas/ReviewDetailResponse"))))
+                .addProperty("responseMessage", new Schema<>().type("string").description("응답 메시지").example("페이지네이션된 리뷰 상세 목록입니다."))
+                .addProperty("status", new Schema<>().type("integer").description("HTTP 상태 코드").example(200));
+
         Schema<?> wishListResponseSchema = new ObjectSchema()
                 .description("위시리스트 응답 DTO")
                 .addProperty("result", new ObjectSchema()
@@ -1000,7 +1011,7 @@ public class OpenApiConfig {
                 .addProperty("productName", new Schema<>().type("string").description("상품 이름").example("블루 데님 자켓"))
                 .addProperty("brandName", new Schema<>().type("string").description("브랜드 이름").example("리바이스"))
                 .addProperty("orderDate", new Schema<>().type("string").format("date-time").description("주문 날짜").example("2025-01-01T10:00:00"))
-                .addProperty("imageUrl1", new Schema<>().type("string").description("상품 이미지 URL").example("https://example.com/image1.jpg")))
+                .addProperty("imageUrl1", new Schema<>().type("string").description("상품 이미지 URL").example("https://example.com/image1.jpg"));
 
         Schema<?> reviewDetailResponseSchema = new ObjectSchema()
                 .description("리뷰 상세 응답 DTO")
@@ -1017,6 +1028,19 @@ public class OpenApiConfig {
                         .addProperty("helpful", new Schema<>().type("integer").format("int64").description("도움이 됨 수").example(10)))
                 .addProperty("responseMessage", new Schema<>().type("string").description("응답 메시지").example("리뷰 조회 성공"))
                 .addProperty("status", new Schema<>().type("integer").description("HTTP 상태 코드").example(200));
+
+        Schema<?> reviewDetailResponse = new ObjectSchema()
+                .description("리뷰 상세 응답 DTO")
+                .addProperty("reviewId", new Schema<>().type("integer").format("int64").description("리뷰 ID").example(1))
+                .addProperty("memberEmail", new Schema<>().type("string").description("회원 이메일").example("user@example.com"))
+                .addProperty("productName", new Schema<>().type("string").description("상품 이름").example("블루 데님 자켓"))
+                .addProperty("createAt", new Schema<>().type("string").format("date-time").description("리뷰 생성일").example("2025-01-01T12:00:00"))
+                .addProperty("ratingType", new Schema<>().type("string").description("평점").example("FIVE"))
+                .addProperty("description", new Schema<>().type("string").description("리뷰 내용").example("상품 품질이 매우 우수합니다."))
+                .addProperty("imageUrls", new ArraySchema()
+                        .description("이미지 URL 목록")
+                        .items(new Schema<>().type("string").example("https://example.com/image1.jpg")))
+                .addProperty("helpful", new Schema<>().type("integer").format("int64").description("도움이 됨 수").example(10));
 
         Schema<?> reviewResponseSchema = new ObjectSchema()
                 .description("리뷰 응답 DTO")
@@ -1144,6 +1168,7 @@ public class OpenApiConfig {
                         .addSchemas("ReviewResponseSchema", reviewResponseSchema)
                         .addSchemas("ReviewResponse", reviewResponse)
                         .addSchemas("PagedReviewResponseSchema", pagedReviewResponseSchema)
+                        .addSchemas("PagedReviewDetailResponseSchema", pagedReviewDetailResponseSchema)
 
                         .addSecuritySchemes("bearerAuth", apiKey))
                 .addSecurityItem(securityRequirement);
