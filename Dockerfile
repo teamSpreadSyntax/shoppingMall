@@ -4,7 +4,7 @@ FROM gradle:8.5-jdk17 AS builder
 # Set the working directory
 WORKDIR /app
 
-# 빌드에 필요한 파일들 복사
+# 빌드에 필요한 파일 복사
 COPY gradlew .
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
@@ -16,8 +16,6 @@ COPY gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
 # Firebase 설정 파일 복사
 COPY src/main/resources/superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb251.json /app/serviceAccountKey.json
 COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
-
-# 파일 권한 설정
 RUN chown root:root /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
@@ -30,38 +28,39 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
 
-# wait-for-it.sh 스크립트를 복사
-COPY scripts/wait-for-it.sh /app/wait-for-it.sh
-
 # Set the working directory in the runtime container
 WORKDIR /app
 
-# Copy the JAR file from the builder stage
+# 빌드 결과 복사
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Copy Firebase and GCS configuration files
+# Firebase 설정 파일 복사
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
 
-# 파일 권한 설정
-RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+# wait-for-it.sh 스크립트 복사
+COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
-# Google 인증서 추가 (Google Cloud와의 SSL 통신)
-COPY googleapis-root.crt /etc/google/googleapis-root.crt
+# 권한 설정
+RUN chown root:root /app/wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
 
-RUN keytool -importcert -file /etc/google/googleapis-root.crt -alias googleapis-root \
-    -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
+# Google 인증서 추가
+COPY google.crt /tmp/google.crt
+RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
+    -keystore $JAVA_HOME/lib/security/cacerts \
+    -storepass changeit -noprompt \
+    && rm /tmp/google.crt
 
-# SSL 인증서 추가
-COPY www.projectkkk.pkcs12 /app/www.projectkkk.pkcs12
+# SSL 인증서 복사
+COPY www.projectkkk.pkcs12 /usr/share/springboot/config/www.projectkkk.pkcs12
+RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
 
-RUN chmod 600 /app/www.projectkkk.pkcs12
-
-# 환경 변수 설정 (Google Cloud Storage 인증)
+# 환경 변수 설정
 ENV GOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
-# Expose port 443 for the application
+# 노출 포트
 EXPOSE 443
 
-# Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/local/openjdk-17/lib/security/cacerts", "-Djavax.net.ssl.trustStorePassword=changeit", "-Djavax.net.ssl.trustStoreType=JKS", "-jar", "app.jar"]
+# 애플리케이션 실행
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/usr/share/springboot/config/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/local/openjdk-17/lib/security/cacerts", "-Djavax.net.ssl.trustStorePassword=changeit", "-Djavax.net.ssl.trustStoreType=JKS", "-jar", "app.jar"]
