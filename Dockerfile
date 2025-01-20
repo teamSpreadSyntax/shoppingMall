@@ -38,29 +38,33 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
 
+# PKCS12 키스토어 파일 복사
+COPY www.projectkkk.pkcs12 /usr/share/springboot/config/www.projectkkk.pkcs12
+
 # wait-for-it.sh 스크립트 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
 # 권한 설정
-RUN chown root:root /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
-
-# Google 인증서 추가
-COPY google.crt /tmp/google.crt
-RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
-    -keystore $JAVA_HOME/lib/security/cacerts \
-    -storepass changeit -noprompt \
-    && rm /tmp/google.crt
-
-# SSL 인증서 복사
-COPY www.projectkkk.pkcs12 /usr/share/springboot/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
 
-# 환경 변수 설정
-ENV GOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+# 필요한 인증서를 키스토어에 추가 (통합)
+COPY googleapis-root.crt /tmp/googleapis-root.crt
+COPY google.crt /tmp/google.crt
+
+RUN keytool -importcert -file /tmp/googleapis-root.crt -alias googleapis-root \
+    -keystore /usr/share/springboot/config/www.projectkkk.pkcs12 -storetype PKCS12 \
+    -storepass Ccenter123456! -noprompt && \
+    keytool -importcert -file /tmp/google.crt -alias google-cert \
+    -keystore /usr/share/springboot/config/www.projectkkk.pkcs12 -storetype PKCS12 \
+    -storepass Ccenter123456! -noprompt && \
+    rm /tmp/googleapis-root.crt /tmp/google.crt
 
 # 노출 포트
 EXPOSE 443
 
+# 환경 변수 설정
+ENV GOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+
 # 애플리케이션 실행
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/usr/share/springboot/config/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/local/openjdk-17/lib/security/cacerts", "-Djavax.net.ssl.trustStorePassword=changeit", "-Djavax.net.ssl.trustStoreType=JKS", "-jar", "app.jar"]
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/usr/share/springboot/config/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/share/springboot/config/www.projectkkk.pkcs12", "-Djavax.net.ssl.trustStorePassword=Ccenter123456!", "-Djavax.net.ssl.trustStoreType=PKCS12", "-jar", "app.jar"]
