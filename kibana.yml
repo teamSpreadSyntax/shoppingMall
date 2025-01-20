@@ -26,6 +26,9 @@ server.cors.allowOrigin: ["https://www.projectkkk.com", "https://projectkkk.verc
 
 csp.strict: false
 
+xpack.security.sameSiteCookies: None
+xpack.security.secureCookies: true
+
 # CSP settings
 server.customResponseHeaders:
   content-security-policy: >
