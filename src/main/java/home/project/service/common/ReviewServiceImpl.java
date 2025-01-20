@@ -80,7 +80,7 @@ public class ReviewServiceImpl implements ReviewService{
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
 
-        Product product = productService.findByProductIdAndConfirmHasPurchase(productOrderId);
+        Product product = productService.findByProductOrderNum(productOrderId);
 
         Long helpful = 0L;
         Review review = new Review();

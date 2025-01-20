@@ -199,6 +199,11 @@ public class CouponServiceImpl implements CouponService{
                 e.printStackTrace();
             }
 
+
+/*
+            kafkaEventProducerService.sendCouponEvent(new CouponEventDTO("coupon_assigned_to_member", coupon.getId(), member.getId()));
+*/
+
             String notificationMessage = String.format(
                     "새로운 쿠폰이 발급되었습니다: %s",
                     coupon.getName()

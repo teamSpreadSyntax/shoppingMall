@@ -43,10 +43,12 @@ public class SocialAuthController {
 
     @Operation(summary = "소셜 로그인 메서드", description = "소셜 로그인 메서드입니다.")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponse"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/LoginValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid SocialLoginRequestDTO socialLoginRequestDTO, BindingResult bindingResult) {
@@ -66,6 +68,8 @@ public class SocialAuthController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponse"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "409", description = "Conflict",

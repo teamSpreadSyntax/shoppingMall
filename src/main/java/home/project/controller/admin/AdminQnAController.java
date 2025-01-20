@@ -55,21 +55,6 @@ public class AdminQnAController {
         return new CustomResponseEntity<>(response, "답변이 등록되었습니다.", HttpStatus.OK);
     }
 
-    @Operation(summary = "관리자를 위한 id로 QnA 상세정보 조회 메서드", description = "관리자를 위한 id로 QnA 조회 메서드입니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-    })
-    @GetMapping("/qna_detail")
-    @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> findQnAByIdReturnQnADetailResponse(@RequestParam("qnAId") Long qnAId) {
-        QnADetailResponse qnADetailResponse = qnAService.findByIdReturnQnADetailResponse(qnAId);
-        String successMessage = qnAId + "에 해당하는 QnA 입니다.";
-        return new CustomResponseEntity<>(qnADetailResponse, successMessage, HttpStatus.OK);
-    }
-
     @Operation(summary = "관리자 QnA 답변 수정 메서드", description = "관리자가 QnA 답변을 수정하는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",

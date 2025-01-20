@@ -58,7 +58,7 @@ public interface ProductService {
 
     ProductResponseForManager decreaseSoldQuantity(Long productId, Long stock);
 
-    Product findByProductIdAndConfirmHasPurchase(Long productOrderId);
+    Product findByProductOrderNum(Long productOrderId);
 
     ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO);
 

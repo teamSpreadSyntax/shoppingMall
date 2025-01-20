@@ -749,21 +749,6 @@ public class Converter {
                 pagedCart.getTotalElements());
     }
 
-    public Page<ProductSimpleResponseForCart> convertFromListedProductCartToPagedProductSimpleResponseForCart(Page<ProductCart> pagedProductCart) {
-        return pagedProductCart.map(productCart ->
-                new ProductSimpleResponseForCart(
-                        productCart.getProduct().getId(),
-                        productCart.getProduct().getName(),
-                        productCart.getProduct().getBrand(),
-                        productCart.getProduct().getPrice(),
-                        productCart.getProduct().getDiscountRate(),
-                        productCart.getProduct().getImageUrl(),
-                        productCart.getQuantity(),
-                        productCart.getProduct().getColor()
-                )
-        );
-    }
-
     public Page<CartResponse> convertFromPagedCartToPagedCartResponse(Page<Cart> pagedCart) {
         return pagedCart.map(cart -> new CartResponse(
                 cart.getMember().getEmail(),

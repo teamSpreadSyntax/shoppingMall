@@ -78,8 +78,7 @@ public class MemberServiceImpl implements MemberService {
             e.printStackTrace();
         }
 
-        Authentication authentication =
-                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(createMemberRequestDTO.getEmail(), createMemberRequestDTO.getPassword()));
         TokenResponse TokenResponse = jwtTokenProvider.generateToken(authentication);
 
         RoleType savedRole = findById(member.getId()).getRole();

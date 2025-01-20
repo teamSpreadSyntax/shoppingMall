@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path = "/api/auth")
 @ApiResponses(value = {
         @ApiResponse(responseCode = "500", description = "서버 내부 오류",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServer")))
+                content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
 @RestController
@@ -36,11 +36,11 @@ public class AuthController {
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "로그인 성공",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponse"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequest"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "인증 실패",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/Unauthorized")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequestDTO loginRequestDTO, BindingResult bindingResult) {
@@ -56,9 +56,9 @@ public class AuthController {
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "토큰 갱신 성공",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponse"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "인증 실패",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/Unauthorized")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestParam(value = "refreshToken") String refreshToken) {
@@ -70,9 +70,9 @@ public class AuthController {
             security = @SecurityRequirement(name = "bearerAuth"))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "토큰 검증 성공",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponse"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "인증 실패",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/Unauthorized")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
     })
     @GetMapping("/verify")
     public ResponseEntity<?> verifyUser(

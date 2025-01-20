@@ -31,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -169,7 +170,7 @@ class ReviewServiceImplTest {
             );
 
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(productService.findByProductIdAndConfirmHasPurchase(anyLong())).thenReturn(testProduct);
+            when(productService.findByProductOrderNum(anyLong())).thenReturn(testProduct);
             when(reviewRepository.save(any(Review.class))).thenReturn(testReview);
             when(converter.convertFromReviewToReviewDetailResponse(any(Review.class)))
                     .thenReturn(expectedResponse);
