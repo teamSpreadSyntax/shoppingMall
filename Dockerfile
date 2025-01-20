@@ -14,7 +14,12 @@ COPY src ./src
 COPY gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
 
 # Firebase 설정 파일 복사
-COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+COPY src/main/resources/superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb251.json /app/serviceAccountKey.json
+
+
+COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
+RUN chown root:root /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 # gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
 RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:///app/gradle/gradle-8.5-bin.zip|' gradle/wrapper/gradle-wrapper.properties
@@ -25,6 +30,8 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
 
+
+
 # Set the working directory in the runtime container
 WORKDIR /app
 
@@ -34,8 +41,12 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 # Copy Firebase config from builder stage
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 
+COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
+RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+
 # wait-for-it.sh 스크립트를 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
+
 
 RUN mkdir -p /usr/share/elasticsearch/config \
     /usr/share/kibana/config \
@@ -96,12 +107,10 @@ RUN chmod 600 /usr/share/kafka/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/logstash/pipeline/logstash.conf
 RUN chmod 600 /usr/share/logstash/config/logstash.yml
-RUN chmod 644 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
-
 
 
 # Expose port 443 for the application
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12", "-Djavax.net.ssl.trustStorePassword=Ccenter123456!", "-Djavax.net.ssl.trustStoreType=PKCS12", "-jar", "app.jar"]
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=120", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/local/openjdk-17/lib/security/cacerts", "-Djavax.net.ssl.trustStorePassword=Ccenter123456!", "-Djavax.net.ssl.trustStoreType=PKCS12", "-jar", "app.jar"]
