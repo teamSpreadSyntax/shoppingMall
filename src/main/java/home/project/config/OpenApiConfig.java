@@ -1000,7 +1000,7 @@ public class OpenApiConfig {
                 .addProperty("productName", new Schema<>().type("string").description("상품 이름").example("블루 데님 자켓"))
                 .addProperty("brandName", new Schema<>().type("string").description("브랜드 이름").example("리바이스"))
                 .addProperty("orderDate", new Schema<>().type("string").format("date-time").description("주문 날짜").example("2025-01-01T10:00:00"))
-                .addProperty("imageUrl1", new Schema<>().type("string").description("상품 이미지 URL").example("https://example.com/image1.jpg"));
+                .addProperty("imageUrl1", new Schema<>().type("string").description("상품 이미지 URL").example("https://example.com/image1.jpg")))
 
         Schema<?> reviewDetailResponseSchema = new ObjectSchema()
                 .description("리뷰 상세 응답 DTO")
