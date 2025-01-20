@@ -6,6 +6,7 @@ WORKDIR /app
 
 # 빌드에 필요한 파일들 복사
 COPY gradlew .
+RUN chmod +x gradlew
 COPY gradle gradle
 COPY build.gradle settings.gradle ./
 COPY src ./src
