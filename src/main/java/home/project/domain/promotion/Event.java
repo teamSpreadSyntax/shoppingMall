@@ -1,10 +1,12 @@
 package home.project.domain.promotion;
 
+import home.project.service.util.StringListConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Entity
@@ -19,8 +21,9 @@ public class Event {
     @Column(name = "event_name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
-    private String description;
+    @Column(name = "description", length = 1024)
+    @Convert(converter = StringListConverter.class)
+    private List<String> description;
 
     @Column(nullable = false)
     private LocalDateTime startDate;
@@ -28,7 +31,7 @@ public class Event {
     @Column(nullable = false)
     private LocalDateTime endDate;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String image;
 
 }

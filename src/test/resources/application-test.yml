@@ -35,9 +35,6 @@ spring:
       allow-credentials: false
       max-age: 3600
 
-  # Additional Configurations
-  main:
-    allow-bean-definition-overriding: true
 
 # JWT Configuration
 jwt:
@@ -54,3 +51,4 @@ logging:
 # Server Configuration
 server:
   port: 8080
+

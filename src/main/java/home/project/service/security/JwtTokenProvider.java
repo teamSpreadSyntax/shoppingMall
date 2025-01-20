@@ -1,4 +1,4 @@
-package home.project.service.util;
+package home.project.service.security;
 
 import home.project.dto.responseDTO.TokenResponse;
 import io.jsonwebtoken.*;
@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 @Service
 public class JwtTokenProvider {
     private final Key key;
-    private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주-30분
-    private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000; //2주
+    private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
+    private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
     private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
-    private final Long RESET_TOKEN_VALIDATION_PERIOD = 60L * 60 * 1000; // 1시간 유효기간 설정
+    private final Long RESET_TOKEN_VALIDATION_PERIOD = 60L * 60 * 1000;
     // 2주 - 5분
     private final UserDetailsService userDetailsService;
 
@@ -141,7 +141,7 @@ public class JwtTokenProvider {
 
     }
 
-    private static long getNow() {
+    static long getNow() {
         return (new Date()).getTime();
     }
 
@@ -195,7 +195,6 @@ public class JwtTokenProvider {
         EXPIRED
     }
 
-    // 비밀번호 재설정 토큰 생성 메서드 추가
     public String generateResetToken(String email) {
         long now = getNow();
         Date expirationDate = new Date(now + RESET_TOKEN_VALIDATION_PERIOD);

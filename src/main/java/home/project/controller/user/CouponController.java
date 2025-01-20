@@ -26,10 +26,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "쿠폰", description = "쿠폰 관련 API입니다.")
+@Tag(name = "쿠폰", description = "쿠폰관련 API입니다")
 @RequestMapping("/api/coupon")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+        @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
@@ -39,51 +39,52 @@ public class CouponController {
     private final CouponService couponService;
     private final PageUtil pageUtil;
 
-    @Operation(summary = "쿠폰 ID로 조회", description = "ID를 기반으로 쿠폰을 조회하는 API입니다.")
+    @Operation(summary = "id로 쿠폰 조회 메서드", description = "id로 쿠폰 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "쿠폰 조회 성공",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CouponResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+            @ApiResponse(responseCode = "200", description = "Coupons retrieved successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCouponListResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
     @GetMapping("/coupon")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findCouponById(@RequestParam("couponId") Long couponId) {
         CouponResponse couponResponse = couponService.findByIdReturnCouponResponse(couponId);
-        String successMessage = couponId + "에 해당하는 쿠폰입니다.";
+        String successMessage = couponId + "에 해당하는 쿠폰 입니다.";
         return new CustomResponseEntity<>(couponResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "회원 쿠폰 조회", description = "회원 ID를 기반으로 쿠폰 목록을 조회하는 API입니다.")
+    @Operation(summary = "회원 id로 쿠폰 조회 메서드", description = "회원 id로 쿠폰 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "회원 쿠폰 조회 성공",
+            @ApiResponse(responseCode = "200", description = "Coupons retrieved successfully",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCouponListResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+
     })
     @GetMapping("/mycoupon")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findAllCouponByMemberId(
             @PageableDefault(page = 1, size = 5)
-            @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "startDate", direction = Sort.Direction.ASC)})
-            @ParameterObject Pageable pageable) {
+    @SortDefault.SortDefaults(
+            {@SortDefault(sort = "startDate", direction = Sort.Direction.ASC)})
+    @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
         Page<CouponResponse> pagedCouponResponse = couponService.findAllByMemberIdReturnCouponResponse(pageable);
         long totalCount = pagedCouponResponse.getTotalElements();
+
         int page = pagedCouponResponse.getNumber();
+
         String successMessage = "내 전체 쿠폰입니다.";
 
         return new CustomResponseEntity<>(pagedCouponResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "전체 쿠폰 조회", description = "모든 쿠폰을 조회하는 API입니다.")
+    @Operation(summary = "전체 쿠폰 조회 메서드", description = "전체 쿠폰 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "쿠폰 목록 조회 성공",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCouponListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
+            @ApiResponse(responseCode = "200", description = "Best coupon retrieved successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/CouponResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Coupon not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/coupons")
@@ -95,21 +96,23 @@ public class CouponController {
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
         Page<CouponResponse> pagedCoupon = couponService.findAll(pageable);
+
         long totalCount = pagedCoupon.getTotalElements();
+
         int page = pagedCoupon.getNumber();
+
         String successMessage = "전체 쿠폰입니다.";
 
         return new CustomResponseEntity<>(pagedCoupon.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "쿠폰 검색", description = "쿠폰 이름, 시작일, 종료일, 조건 등 다양한 필터를 사용하여 쿠폰을 검색하는 API입니다.")
+    @Operation(summary = "쿠폰 통합 조회 메서드", description = "쿠폰이름, 사용시작날짜, 사용종료날짜, 쿠폰부여조건 및 일반 검색어로 쿠폰을 조회합니다. 모든 조건을 만족하는 쿠폰을 조회합니다. 검색어가 없으면 전체 쿠폰을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "쿠폰 검색 성공",
+            @ApiResponse(responseCode = "200", description = "Coupons retrieved successfully",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCouponListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
@@ -133,14 +136,16 @@ public class CouponController {
         int page = pagedCouponResponse.getNumber();
 
         return new CustomResponseEntity<>(pagedCouponResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+
     }
 
-    @Operation(summary = "최적 쿠폰 조회", description = "회원과 상품에 가장 적합한 쿠폰을 조회하는 API입니다.")
+    @Operation(summary = "최적 쿠폰 조회 메서드", description = "특정 회원과 상품에 대해 가장 적절한 쿠폰을 조회합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "최적 쿠폰 조회 성공",
+            @ApiResponse(responseCode = "200", description = "Best coupon retrieved successfully",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/CouponResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "적합한 쿠폰 없음",
+            @ApiResponse(responseCode = "404", description = "Coupon not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
     })
     @GetMapping("/best-coupon")
     @SecurityRequirement(name = "bearerAuth")
@@ -149,6 +154,7 @@ public class CouponController {
 
         CouponResponse bestCouponResponse = couponService.selectBestCouponForMember(productId);
 
-        return new CustomResponseEntity<>(bestCouponResponse, "가장 적합한 쿠폰 조회 성공", HttpStatus.OK);
+        return new CustomResponseEntity<>(bestCouponResponse, "가장 적절한 쿠폰 조회 성공", HttpStatus.OK);
     }
+
 }

@@ -1,4 +1,4 @@
-package home.project.service.util;
+package home.project.service.integration;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;

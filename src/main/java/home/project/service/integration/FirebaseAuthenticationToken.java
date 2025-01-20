@@ -1,4 +1,4 @@
-package home.project.service.util;
+package home.project.service.integration;
 
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

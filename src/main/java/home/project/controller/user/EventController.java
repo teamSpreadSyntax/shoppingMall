@@ -1,6 +1,8 @@
 package home.project.controller.user;
 
 import home.project.dto.responseDTO.EventResponse;
+import home.project.dto.responseDTO.EventSimpleResponse;
+import home.project.dto.responseDTO.ProductSimpleResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.promotion.EventService;
 import home.project.service.util.PageUtil;
@@ -26,10 +28,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "이벤트", description = "이벤트 관련 API입니다.")
+@Tag(name = "이벤트", description = "이벤트 관련 API입니다")
 @RequestMapping("/api/event")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+        @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
@@ -39,28 +41,28 @@ public class EventController {
     private final EventService eventService;
     private final PageUtil pageUtil;
 
-    @Operation(summary = "ID로 이벤트 조회", description = "ID를 통해 특정 이벤트를 조회합니다.")
+
+    @Operation(summary = "id로 이벤트 조회 메서드", description = "id로 이벤트 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청 성공",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/EventResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
+            @ApiResponse(responseCode = "404", description = "Event not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
     })
     @GetMapping("/event")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findEventById(@RequestParam("eventId") Long eventId) {
         EventResponse eventResponse = eventService.findByIdReturnEventResponse(eventId);
-        String successMessage = eventId + "에 해당하는 이벤트입니다.";
+        String successMessage = eventId + "에 해당하는 이벤트 입니다.";
         return new CustomResponseEntity<>(eventResponse, successMessage, HttpStatus.OK);
     }
 
-    @Operation(summary = "전체 이벤트 조회", description = "전체 이벤트를 페이징하여 조회합니다.")
+    @Operation(summary = "전체 이벤트 조회 메서드", description = "전체 이벤트 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청 성공",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/EventResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
+            @ApiResponse(responseCode = "200", description = "Event retrieved successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedEventListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Event not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/events")
@@ -74,20 +76,46 @@ public class EventController {
         Page<EventResponse> pagedEvent = eventService.findAll(pageable);
 
         long totalCount = pagedEvent.getTotalElements();
+
         int page = pagedEvent.getNumber();
-        String successMessage = "전체 이벤트 조회 결과입니다.";
+
+        String successMessage = "전체 이벤트입니다.";
 
         return new CustomResponseEntity<>(pagedEvent.getContent(), successMessage, HttpStatus.OK, totalCount, page);
     }
 
-    @Operation(summary = "이벤트 검색", description = "이벤트 이름, 시작 날짜, 종료 날짜, 할인율 및 검색어를 사용하여 이벤트를 검색합니다.")
+    @Operation(summary = "전체 이벤트 이미지 조회 메서드", description = "전체 이벤트 이미지 조회 메서드 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "요청 성공",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/EventResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedEventImageListResponseSchema")))
+
+    })
+    @GetMapping("/eventsImage")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> findAllProduct(
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults(
+                    {@SortDefault(sort = "startDate", direction = Sort.Direction.ASC)})
+            @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+        Page<EventSimpleResponse> EventSimplePage = eventService.findAllImages(pageable);
+
+        long totalCount = EventSimplePage.getTotalElements();
+
+        int page = EventSimplePage.getNumber();
+
+        String successMessage = "전체 이벤트 이미지 입니다.";
+
+        return new CustomResponseEntity<>(EventSimplePage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+    }
+
+    @Operation(summary = "이벤트 통합 조회 메서드", description = "이벤트이름, 이벤트시작날짜, 이벤트종료날짜, 할인율 및 일반 검색어로 이벤트를 조회합니다. 모든 조건을 만족하는 이벤트를 조회합니다. 검색어가 없으면 전체 이벤트를 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Events retrieved successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedEventListResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Invalid search criteria",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
@@ -111,5 +139,8 @@ public class EventController {
         int page = pagedEventResponse.getNumber();
 
         return new CustomResponseEntity<>(pagedEventResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+
     }
+
+
 }

@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Getter
@@ -16,10 +17,6 @@ public class CreateEventRequestDTO {
     @NotBlank(message = "이벤트 이름을 입력해주세요.")
     @Schema(description = "이벤트 이름", required = true)
     private String name;
-
-    @NotNull(message = "이벤트 내용을 입력해주세요.")
-    @Schema(description = "이벤트 내용", required = true)
-    private String description;
 
     @NotNull(message = "이벤트 시작날짜를 입력해주세요.")
     @Schema(description = "이벤트 시작 날짜", required = true)
@@ -32,9 +29,5 @@ public class CreateEventRequestDTO {
     @NotNull(message = "쿠폰 id를 입력해주세요.")
     @Schema(description = "쿠폰 id", required = true)
     private Long couponId;
-
-    @NotNull(message = "이미지 url을 입력해주세요.")
-    @Schema(description = "이미지", required = true)
-    private String image;
 
 }

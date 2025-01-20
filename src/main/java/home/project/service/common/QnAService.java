@@ -29,6 +29,4 @@ public interface QnAService {
     QnADetailResponse updateAnswer(Long qnAId, String answer);
 
     void deleteAnswer(Long qnAId);
-
-    Page<QnADetailResponse> findAllWaitingQnA(Pageable pageable);
 }

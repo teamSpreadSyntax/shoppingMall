@@ -17,6 +17,7 @@ bin/
 !**/src/main/**/bin/
 !**/src/test/**/bin/
 
+src/main/resources/superb-analog-439512-g8-e7979f6854cd.json
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -41,5 +42,5 @@ DockerDesktopWSL/main/ext4.vhdx
 DockerDesktopWSL/disk/docker_data.vhdx
 
 gradle/gradle-8.5-bin.zip
-
+superb-analog-439512-g8-e7979f6854cd.json
 superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb251.json

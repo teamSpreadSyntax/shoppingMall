@@ -1,5 +1,6 @@
-package home.project.service.util;
+package home.project.service.websocket;
 
+import home.project.service.security.JwtTokenProvider;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;

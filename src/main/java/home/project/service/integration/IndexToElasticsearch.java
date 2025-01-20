@@ -1,4 +1,4 @@
-package home.project.service.util;
+package home.project.service.integration;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;

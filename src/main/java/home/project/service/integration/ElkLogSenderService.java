@@ -1,4 +1,4 @@
-package home.project.service.util;
+package home.project.service.integration;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

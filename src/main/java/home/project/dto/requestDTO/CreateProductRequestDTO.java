@@ -1,9 +1,13 @@
 package home.project.dto.requestDTO;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -32,11 +36,6 @@ public class CreateProductRequestDTO {
     @NotNull(message = "상품의 불량 수량을 입력해주세요.")
     private Long defectiveStock = 0L;
 
-    @NotBlank(message = "상품의 상세 정보를 입력해주세요.")
-    private String description;
-
-    @NotBlank(message = "상품의 이미지를 입력해주세요.")
-    private String imageUrl;
 
     @NotBlank(message = "상품의 사이즈를 입력해주세요.")
     private String size;

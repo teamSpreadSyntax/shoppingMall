@@ -1,23 +1,25 @@
 package home.project.service.promotion;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import home.project.domain.product.Coupon;
 import home.project.domain.promotion.Event;
 import home.project.domain.promotion.EventCoupon;
 import home.project.dto.requestDTO.CreateEventRequestDTO;
 import home.project.dto.responseDTO.EventResponse;
+import home.project.dto.responseDTO.EventSimpleResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.NoChangeException;
-import home.project.repository.member.MemberRepository;
-import home.project.repository.product.ProductRepository;
 import home.project.repository.promotion.*;
 import home.project.service.util.Converter;
+import home.project.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -26,25 +28,28 @@ public class EventServiceImpl implements EventService{
     private final EventRepository eventRepository;
     private final EventCouponRepository eventCouponRepository;
     private final CouponService couponService;
-    private final CouponRepository couponRepository;
-    private final MemberCouponRepository memberCouponRepository;
-    private final ProductCouponRepository productCouponRepository;
-    private final MemberRepository memberRepository;
-    private final ProductRepository productRepository;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
     private final Converter converter;
+    private final FileService fileService;
 
 
     @Override
     @Transactional
-    public EventResponse join(CreateEventRequestDTO createEventRequestDTO){
+    public EventResponse join(CreateEventRequestDTO createEventRequestDTO, MultipartFile mainImageFile, List<MultipartFile> descriptionImages){
         Event event = new Event();
         event.setName(createEventRequestDTO.getName());
-        event.setDescription(createEventRequestDTO.getDescription());
         event.setStartDate(createEventRequestDTO.getStartDate());
         event.setEndDate(createEventRequestDTO.getEndDate());
-        event.setImage(createEventRequestDTO.getImage());
+
+        String mainImageUrl = null;
+        if (mainImageFile != null && !mainImageFile.isEmpty()) {
+            mainImageUrl = fileService.saveFile(mainImageFile, "event/main", "center");
+        }
+        event.setImage(mainImageUrl);
+
+        List<String> descriptionImageUrls = descriptionImages.stream()
+                .map(file -> fileService.saveFile(file, "event/description", "center"))
+                .collect(Collectors.toList());
+        event.setDescription(descriptionImageUrls); // 기타 이미지 URL 설정
 
         eventRepository.save(event);
 
@@ -56,14 +61,13 @@ public class EventServiceImpl implements EventService{
 
         eventCouponRepository.save(eventCoupon);
 
-//        sendCouponEvent(new CouponEventDTO("coupon_created", coupon.getId()));
-
         return converter.convertFromEventToEventResponse(event);
     }
 
     @Override
     @Transactional
-    public EventResponse updateEvent(Long eventId, CreateEventRequestDTO updateEventRequestDTO) {
+    public EventResponse updateEvent(Long eventId, CreateEventRequestDTO updateEventRequestDTO,
+                                     MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
 
         Event existingEvent = findById(eventId);
 
@@ -71,11 +75,6 @@ public class EventServiceImpl implements EventService{
 
         if (updateEventRequestDTO.getName() != null && !updateEventRequestDTO.getName().equals(existingEvent.getName())) {
             existingEvent.setName(updateEventRequestDTO.getName());
-            isModified = true;
-        }
-
-        if (updateEventRequestDTO.getDescription() != null && !updateEventRequestDTO.getDescription().equals(existingEvent.getDescription())) {
-            existingEvent.setDescription(updateEventRequestDTO.getDescription());
             isModified = true;
         }
 
@@ -89,8 +88,18 @@ public class EventServiceImpl implements EventService{
             isModified = true;
         }
 
-        if (updateEventRequestDTO.getImage() != null && !updateEventRequestDTO.getImage().equals(existingEvent.getImage())) {
-            existingEvent.setImage(updateEventRequestDTO.getImage());
+
+        if (mainImageFile != null && !mainImageFile.isEmpty()) {
+            String mainImageUrl = fileService.saveFile(mainImageFile, "event/main", "center");
+            existingEvent.setImage(mainImageUrl);
+            isModified = true;
+        }
+
+        if (descriptionImages != null && !descriptionImages.isEmpty()) {
+            List<String> descriptionImageUrls = descriptionImages.stream()
+                    .map(file -> fileService.saveFile(file, "event/description", "center"))
+                    .collect(Collectors.toList());
+            existingEvent.setDescription(descriptionImageUrls);
             isModified = true;
         }
 
@@ -105,6 +114,12 @@ public class EventServiceImpl implements EventService{
     public Page<EventResponse> findAll(Pageable pageable) {
         Page<Event> pagedEvent= eventRepository.findAll(pageable);
         return converter.convertFromPagedEventToPagedEventResponse(pagedEvent);
+    }
+
+    @Override
+    public Page<EventSimpleResponse> findAllImages(Pageable pageable) {
+        Page<Event> pagedEvent= eventRepository.findAll(pageable);
+        return converter.convertFromPagedEventToPagedEventSimpleResponse(pagedEvent);
     }
 
     @Override

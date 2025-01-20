@@ -1,4 +1,4 @@
-package home.project.service.util;
+package home.project.service.common;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;

@@ -1,4 +1,4 @@
-package home.project.service.util;
+package home.project.service.security;
 
 
 import jakarta.servlet.FilterChain;
@@ -64,7 +64,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         chain.doFilter(request, response);
     }
 
-    private String resolveToken(HttpServletRequest request) {
+    String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
             return bearerToken.substring(7);

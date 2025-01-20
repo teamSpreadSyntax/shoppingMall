@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "배송", description = "배송 관련 API입니다.")
+@Tag(name = "배송", description = "배송관련 API입니다")
 @RequestMapping("/api/shipping")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "500", description = "서버 내부 오류",
+        @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
 @RequiredArgsConstructor
@@ -30,19 +30,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class ShippingController {
 
     private final ShippingService shippingService;
+    private final PageUtil pageUtil;
 
-    @Operation(summary = "ID로 배송 조회", description = "배송 ID를 통해 특정 배송 정보를 조회합니다.")
+    @Operation(summary = "id로 배송 조회 메서드", description = "id로 배송 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "조회 성공",
+            @ApiResponse(responseCode = "200", description = "Shipping fetched successfully",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ShippingResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "리소스를 찾을 수 없음",
+            @ApiResponse(responseCode = "404", description = "Shipping not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
     })
     @GetMapping("/shipping")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findShippingById(@RequestParam("shippingId") Long shippingId) {
         ShippingResponse shippingResponse = shippingService.findByIdReturnShippingResponse(shippingId);
-        String successMessage = shippingId + "번 배송 정보를 조회했습니다.";
+        String successMessage = shippingId + "에 해당하는 배송 입니다.";
         return new CustomResponseEntity<>(shippingResponse, successMessage, HttpStatus.OK);
     }
 }

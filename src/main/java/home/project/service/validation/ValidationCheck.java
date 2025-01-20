@@ -1,4 +1,4 @@
-package home.project.service.util;
+package home.project.service.validation;
 
 import home.project.response.CustomResponseBody;
 import home.project.response.CustomResponseEntity;
