@@ -243,7 +243,6 @@ services:
       SERVER_SSL_ENABLED: "true"
       SERVER_SSL_KEYSTORE_PATH: /usr/share/kibana/config/www.projectkkk.pkcs12
       SERVER_SSL_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
-      KIBANA_KEYSTORE_PASSWORD: ${KIBANA_KEYSTORE_PASSWORD}
       SERVER_PUBLICBASEURL: "https://www.projectkkk.com:5601"
       XPACK_SECURITY_ENCRYPTIONKEY: "something_at_least_32_characters"
       XPACK_REPORTING_ENCRYPTIONKEY: "something_at_least_32_characters"
@@ -253,7 +252,7 @@ services:
       LOGGING_LEVEL: debug
       SERVER_CORS_ENABLED: "true"
       SERVER_CORS_ALLOW_CREDENTIALS: "true"
-      SERVER_CORS_ALLOW_ORIGIN: "https://www.projectkkk.com,https://projectkkk.vercel.app,https://www.projectkkk.com:5601"
+      SERVER_CORS_ALLOW_ORIGIN: '["https://www.projectkkk.com", "https://projectkkk.vercel.app", "https://www.projectkkk.com:5601"]'
       NODE_OPTIONS: "--openssl-legacy-provider"
       CSP_RULES: >
         default-src 'self';
@@ -272,16 +271,8 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    restart: unless-stopped
-    command: >
-      /bin/bash -c "
-                    while [ ! -f /usr/share/kibana/config/token.env ]; do
-                      sleep 1
-                    done
-                    /usr/local/bin/kibana-docker --allow-root &
-                    wait"
     healthcheck:
-      test: [ "CMD-SHELL", "curl -s https://localhost:5601/api/status | grep -q 'Looking good'" ]
+      test: [ "CMD-SHELL", "curl -k -s https://localhost:5601/api/status | grep -q 'Looking good'" ]
       interval: 10s
       timeout: 10s
       retries: 120
@@ -289,7 +280,6 @@ services:
       - ./www.projectkkk.pkcs12:/usr/share/kibana/config/www.projectkkk.pkcs12
       - ./kibana.yml:/usr/share/kibana/config/kibana.yml
       - token-volume:/usr/share/kibana/config:rw
-      - ./www.projectkkk.com.pem:/usr/share/elasticsearch/config/www.projectkkk.com.pem
       - ./www.projectkkk.com.pem:/usr/share/kibana/config/www.projectkkk.com.pem
     networks:
       project_default:
