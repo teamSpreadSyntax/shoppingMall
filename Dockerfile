@@ -48,18 +48,6 @@ COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 RUN chmod +x /app/wait-for-it.sh
 RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
 
-# 필요한 인증서를 키스토어에 추가 (통합)
-COPY googleapis-root.crt /tmp/googleapis-root.crt
-COPY google.crt /tmp/google.crt
-
-RUN keytool -importcert -file /tmp/googleapis-root.crt -alias googleapis-root \
-    -keystore /usr/share/springboot/config/www.projectkkk.pkcs12 -storetype PKCS12 \
-    -storepass Ccenter123456! -noprompt && \
-    keytool -importcert -file /tmp/google.crt -alias google-cert \
-    -keystore /usr/share/springboot/config/www.projectkkk.pkcs12 -storetype PKCS12 \
-    -storepass Ccenter123456! -noprompt && \
-    rm /tmp/googleapis-root.crt /tmp/google.crt
-
 # 노출 포트
 EXPOSE 443
 
