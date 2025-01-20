@@ -14,7 +14,6 @@ COPY src ./src
 COPY gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
 
 # Firebase 설정 파일 복사
-COPY src/main/resources/superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb251.json /app/serviceAccountKey.json
 COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 # gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
