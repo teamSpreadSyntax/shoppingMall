@@ -29,9 +29,6 @@ WORKDIR /app
 # Copy the JAR file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Copy Firebase config from builder stage
-COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
-
 # wait-for-it.sh 스크립트를 복사
 COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
