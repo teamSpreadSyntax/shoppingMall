@@ -6,7 +6,7 @@ import home.project.dto.responseDTO.CategoryResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.product.CategoryService;
 import home.project.service.util.PageUtil;
-import home.project.service.validation.ValidationCheck;
+import home.project.service.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,8 +34,6 @@ import java.util.Optional;
 @Tag(name = "관리자 카테고리", description = "관리자 카테고리 관련 API입니다")
 @RequestMapping(path = "/api/admin/category")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "403", description = "Forbidden",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
@@ -52,8 +50,9 @@ public class AdminCategoryController {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryCreateSuccessResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema")))
     })
     @PostMapping("/createCategory")
     @SecurityRequirement(name = "bearerAuth")
@@ -69,12 +68,9 @@ public class AdminCategoryController {
     @Operation(summary = "id로 카테고리 조회 메서드", description = "id로 카테고리 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @GetMapping("/category")
     @SecurityRequirement(name = "bearerAuth")
@@ -90,7 +86,8 @@ public class AdminCategoryController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCategoryListResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/categories")
     @SecurityRequirement(name = "bearerAuth")
@@ -116,12 +113,15 @@ public class AdminCategoryController {
     @Operation(summary = "카테고리(수정) 메서드", description = "카테고리(수정) 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CategoryResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "204", description = "NO_CONTENT",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
@@ -137,11 +137,10 @@ public class AdminCategoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")

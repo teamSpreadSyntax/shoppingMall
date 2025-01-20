@@ -47,11 +47,14 @@ public class CartController {
     @Operation(summary = "장바구니에 추가 메서드", description = "장바구니에 추가 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CartResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid product ID or quantity.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found: Product not found.",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
     })
     @PostMapping("/join")
     @SecurityRequirement(name = "bearerAuth")
@@ -69,9 +72,11 @@ public class CartController {
     @Operation(summary = "내 장바구니 조회 메서드", description = "내 장바구니 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductSimpleResponseForCartSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized: User not authenticated.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
     @GetMapping("/products_in_cart")
     @SecurityRequirement(name = "bearerAuth")
@@ -96,11 +101,10 @@ public class CartController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid product ID.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found: Product not found in the cart.",
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")

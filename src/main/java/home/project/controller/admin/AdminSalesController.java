@@ -30,8 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "판매", description = "판매관련 API입니다")
 @RequestMapping("/api/admin/sales")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "403", description = "Forbidden",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
@@ -46,12 +44,11 @@ public class AdminSalesController {
     @Operation(summary = "판매 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명, 일반 검색어, 색상, 사이즈로 판매 내역을 조회합니다. 모든 조건을 만족하는 판매 내역을 조회합니다. 검색어가 없으면 전체 판매 내역을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedSoldProductListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @GetMapping("/sold_products")
     @SecurityRequirement(name = "bearerAuth")
@@ -87,7 +84,6 @@ public class AdminSalesController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @GetMapping("/sales_ranking")
     @SecurityRequirement(name = "bearerAuth")
@@ -108,6 +104,8 @@ public class AdminSalesController {
         return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
 
     }
+
+
 }
 
 

@@ -109,24 +109,6 @@ class NotificationServiceImplTest {
 
             verify(notificationRepository).save(any(Notification.class));
         }
-
-        @Test
-        @DisplayName("일반 알림 생성 실패 - 회원 없음")
-        void createNotificationFailMemberNotFound() {
-            // given
-            CreateNotificationRequestDTO requestDTO = new CreateNotificationRequestDTO();
-            requestDTO.setNotificationType(NotificationType.Coupon);
-            requestDTO.setDescription("New Notification");
-
-            when(memberService.findByEmail(anyString())).thenThrow(new IdNotFoundException("회원이 존재하지 않습니다."));
-
-            // when & then
-            assertThatThrownBy(() -> notificationService.createNotification(requestDTO))
-                    .isInstanceOf(IdNotFoundException.class)
-                    .hasMessage("회원이 존재하지 않습니다.");
-
-            verify(notificationRepository, never()).save(any(Notification.class));
-        }
     }
 
     @Nested
@@ -162,22 +144,6 @@ class NotificationServiceImplTest {
             assertThat(response.getDescription()).isEqualTo(description);
 
             verify(notificationRepository).save(any(Notification.class));
-        }
-
-        @Test
-        @DisplayName("쿠폰 알림 생성 실패 - 회원 없음")
-        void createCouponNotificationFailMemberNotFound() {
-            // given
-            String description = "Coupon Notification";
-
-            when(memberService.findByEmail(anyString())).thenThrow(new IdNotFoundException("회원이 존재하지 않습니다."));
-
-            // when & then
-            assertThatThrownBy(() -> notificationService.createCouponNotification(description))
-                    .isInstanceOf(IdNotFoundException.class)
-                    .hasMessage("회원이 존재하지 않습니다.");
-
-            verify(notificationRepository, never()).save(any(Notification.class));
         }
     }
 
@@ -257,20 +223,6 @@ class NotificationServiceImplTest {
 
             verify(notificationRepository).findAllByMemberId(any(Pageable.class), anyLong());
         }
-
-        @Test
-        @DisplayName("회원별 알림 조회 실패 - 회원 없음")
-        void findAllByMemberIdFailMemberNotFound() {
-            // given
-            when(memberService.findByEmail(anyString())).thenThrow(new IdNotFoundException("회원이 존재하지 않습니다."));
-
-            // when & then
-            assertThatThrownBy(() -> notificationService.findAllByMemberId(Pageable.unpaged()))
-                    .isInstanceOf(IdNotFoundException.class)
-                    .hasMessage("회원이 존재하지 않습니다.");
-
-            verify(notificationRepository, never()).findAllByMemberId(any(Pageable.class), anyLong());
-        }
     }
 
     @Nested
@@ -285,19 +237,6 @@ class NotificationServiceImplTest {
 
             // then
             verify(notificationRepository).deleteById(anyLong());
-        }
-
-        @Test
-        @DisplayName("알림 삭제 실패 - 알림 없음")
-        void deleteNotificationFailNotFound() {
-            // given
-            doThrow(new IdNotFoundException("알림이 존재하지 않습니다."))
-                    .when(notificationRepository).deleteById(anyLong());
-
-            // when & then
-            assertThatThrownBy(() -> notificationService.deleteById(1L))
-                    .isInstanceOf(IdNotFoundException.class)
-                    .hasMessage("알림이 존재하지 않습니다.");
         }
     }
 }

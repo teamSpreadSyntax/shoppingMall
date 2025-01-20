@@ -155,9 +155,9 @@ public class ShippingServiceImpl implements ShippingService{
     }
 
     @Override
-    public Page<ShippingResponse> findShippings(String deliveryNum, String orderDate, String productNum, String email, String content, Pageable pageable) {
+    public Page<ShippingResponse> findShippings(String deliveryNum, String orderDate, String orderNum, String email, String content, Pageable pageable) {
 
-        Page<Shipping> pagedShipping = shippingRepository.findShippings(deliveryNum, orderDate, productNum, email, content, pageable);
+        Page<Shipping> pagedShipping = shippingRepository.findShippings(deliveryNum, orderDate, orderNum, email, content, pageable);
 
         return converter.convertFromPagedShippingToPagedShippingResponse(pagedShipping);
     }

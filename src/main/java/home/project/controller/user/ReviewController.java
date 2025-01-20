@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -23,12 +22,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Tag(name = "Review", description = "Review관련 API입니다")
     @RequestMapping("/api/review")
@@ -45,11 +43,12 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 작성 가능 제품 목록 조회 메서드", description = "리뷰 작성 가능 제품 목록 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully fetched reviewable products",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad request",
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-
     })
     @GetMapping("/reviewableProducts")
     @SecurityRequirement(name = "bearerAuth")
@@ -72,25 +71,20 @@ public class ReviewController {
 
     @Operation(summary = "Review 작성 메서드", description = "구매 확정된 제품에 대한 Review를 작성하는 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully created the review",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ReviewDetailResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PostMapping(value = "/join", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/join")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createReview(
-            @RequestParam("productId") Long productId,
-            @RequestPart("reviewData") @Valid CreateReviewRequestDTO createReviewRequestDTO,
-            @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages) {
+    public ResponseEntity<?> createReview(@RequestParam("productId") Long productId, @RequestBody CreateReviewRequestDTO createReviewRequestDTO) {
 
-        List<MultipartFile> imageList = descriptionImages != null ?
-                Arrays.asList(descriptionImages) : new ArrayList<>();
-
-        ReviewDetailResponse reviewDetailResponse = reviewService.join(productId, createReviewRequestDTO , imageList);
+        ReviewDetailResponse reviewDetailResponse = reviewService.join(productId, createReviewRequestDTO);
 
         String successMessage = "리뷰가 작성되었습니다.";
 
@@ -99,11 +93,12 @@ public class ReviewController {
 
     @Operation(summary = "내 Review 조회 메서드", description = "내 Review 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully fetched user reviews",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedReviewListResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized access",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
     @GetMapping("/my_review")
     @SecurityRequirement(name = "bearerAuth")
@@ -126,11 +121,12 @@ public class ReviewController {
 
     @Operation(summary = "상품에 해당하는 Review 조회 메서드", description = "상품에 해당하는 Review 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully fetched product reviews",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedReviewListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad request",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-
     })
     @GetMapping("/product_review")
     @SecurityRequirement(name = "bearerAuth")
@@ -153,9 +149,10 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 좋아요 증가", description = "리뷰의 좋아요 수를 증가시킵니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully increased helpful count",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ReviewDetailResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @PatchMapping("/increase_helpful")
     @SecurityRequirement(name = "bearerAuth")
@@ -169,11 +166,12 @@ public class ReviewController {
     }
     @Operation(summary = "리뷰 삭제 메서드", description = "리뷰 삭제 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully deleted review",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Review not found",
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @DeleteMapping("delete")
     @SecurityRequirement(name = "bearerAuth")
@@ -186,11 +184,12 @@ public class ReviewController {
 
     @Operation(summary = "리뷰 ID로 리뷰 조회", description = "리뷰 ID를 통해 특정 리뷰를 조회하는 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully fetched review details",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ReviewDetailResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Review not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
     @GetMapping("/review")
     @SecurityRequirement(name = "bearerAuth")

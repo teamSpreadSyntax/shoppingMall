@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -31,20 +30,28 @@ public class ReviewDetailResponse {
     @Schema(description = "리뷰 내용")
     private String description;
 
-    @Schema(description = "이미지 URL", example = "https://example.com/image1.jpg")
-    private List<String> imageUrls;
+    @Schema(description = "이미지 URL 1", example = "https://example.com/image1.jpg")
+    private String imageUrl1;
+
+    @Schema(description = "이미지 URL 2", example = "https://example.com/image2.jpg")
+    private String imageUrl2;
+
+    @Schema(description = "이미지 URL 3", example = "https://example.com/image3.jpg")
+    private String imageUrl3;
 
     @Schema(description = "도움이 됨 수", example = "10")
     private Long helpful;
 
-    public ReviewDetailResponse(Long reviewId, String memberEmail, String productName, LocalDateTime createAt, RatingType ratingType, String description, List<String> imageUrls, Long helpful) {
+    public ReviewDetailResponse(Long reviewId, String memberEmail, String productName, LocalDateTime createAt, RatingType ratingType, String description, String imageUrl1, String imageUrl2, String imageUrl3, Long helpful) {
         this.reviewId = reviewId;
         this.memberEmail = memberEmail;
         this.productName = productName;
         this.createAt = createAt;
         this.ratingType = ratingType;
         this.description = description;
-        this.imageUrls = imageUrls;
+        this.imageUrl1 = imageUrl1;
+        this.imageUrl2 = imageUrl2;
+        this.imageUrl3 = imageUrl3;
         this.helpful = helpful;
     }
 }

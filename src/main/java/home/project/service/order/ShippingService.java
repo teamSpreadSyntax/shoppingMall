@@ -17,7 +17,7 @@ public interface ShippingService {
 
     Page<ShippingResponse> findAll(Pageable pageable);
 
-    Page<ShippingResponse> findShippings(String deliveryNum, String orderDate, String productNum, String email, String content, Pageable pageable);
+    Page<ShippingResponse> findShippings(String deliveryNum, String orderDate, String orderNum, String email, String content, Pageable pageable);
 
 
 //    String deleteById(Long shippingId);

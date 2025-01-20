@@ -34,11 +34,10 @@ public class ShippingController {
 
     @Operation(summary = "id로 배송 조회 메서드", description = "id로 배송 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Shipping fetched successfully",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ShippingResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Shipping not found",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @GetMapping("/shipping")
     @SecurityRequirement(name = "bearerAuth")
@@ -47,4 +46,31 @@ public class ShippingController {
         String successMessage = shippingId + "에 해당하는 배송 입니다.";
         return new CustomResponseEntity<>(shippingResponse, successMessage, HttpStatus.OK);
     }
+
+//    @Operation(summary = "내 배송 조회 메서드", description = "내 배송 조회 메서드입니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful operation",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+//            @ApiResponse(responseCode = "404", description = "Resource not found",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+//    })
+//    @GetMapping("/my_shipping")
+//    @SecurityRequirement(name = "bearerAuth")
+//    public ResponseEntity<?> findShippingById(@RequestParam("shippingId") Long shippingId, @PageableDefault(page = 1, size = 5)
+//    @SortDefault.SortDefaults({
+//            @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+//    }) @ParameterObject Pageable pageable) {
+//
+//        pageable = pageUtil.pageable(pageable);
+//        Page<ShippingResponse> pagedShippingResponse = shippingService.findByMemberIdReturnShippingResponse(shippingId, pageable);
+//        String successMessage = shippingId + "에 해당하는 배송 입니다.";
+//        long totalCount = pagedShippingResponse.getTotalElements();
+//        int page = pagedShippingResponse.getNumber();
+//        return new CustomResponseEntity<>(pagedShippingResponse.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+//    }
+
+
+
+
+
 }

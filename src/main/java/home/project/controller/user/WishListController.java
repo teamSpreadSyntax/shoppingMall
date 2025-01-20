@@ -38,11 +38,14 @@ public class WishListController {
 
     @Operation(summary = "WishList 등록 메서드", description = "WishList 등록 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product added to wishlist",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/WishListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Invalid product ID",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @PostMapping("/add")
     @SecurityRequirement(name = "bearerAuth")
@@ -53,11 +56,14 @@ public class WishListController {
 
     @Operation(summary = "WishList 삭제 메서드", description = "WishList 삭제 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Product removed from wishlist",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Product not found in wishlist",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @DeleteMapping("/remove")
     @SecurityRequirement(name = "bearerAuth")
@@ -68,11 +74,12 @@ public class WishListController {
 
     @Operation(summary = "내 wishList 조회 메서드", description = "내 wishList 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Wishlist retrieved successfully",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedWishListResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Wishlist not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
     @GetMapping("/my_wishList")
     @SecurityRequirement(name = "bearerAuth")

@@ -4,7 +4,6 @@ import home.project.domain.common.AnswerStatus;
 import home.project.domain.common.QnA;
 import home.project.domain.common.Review;
 import home.project.domain.member.Member;
-import home.project.domain.member.RoleType;
 import home.project.domain.order.Orders;
 import home.project.domain.product.Product;
 import home.project.dto.requestDTO.CreateQnARequestDTO;
@@ -20,7 +19,6 @@ import home.project.service.product.ProductService;
 import home.project.service.util.Converter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -86,20 +84,8 @@ public class QnAServiceImpl implements QnAService{
     }
 
     @Override
-    public Page<QnAResponse> findAll(Pageable pageable) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
-        Member member = memberService.findByEmail(email);
-
+    public Page<QnAResponse> findAll(Pageable pageable){
         Page<QnA> pagedQnA = qnARepository.findAll(pageable);
-
-        if (member.getRole() == RoleType.center) {
-        return converter.convertFromPagedQnAToPagedQnAResponse(pagedQnA);
-        }
-        else if (member.getRole() == RoleType.admin) {
-            pagedQnA = qnARepository.findBySellerIdUsingMemberProduct(member.getId(), pageable);
-        }
-
         return converter.convertFromPagedQnAToPagedQnAResponse(pagedQnA);
     }
 
@@ -201,6 +187,14 @@ public class QnAServiceImpl implements QnAService{
         qnA.setAnswerDate(null);
         qnA.setAnswerer(null);
         qnA.setAnswerStatus(AnswerStatus.DELETED);
+    }
+
+    @Override
+    public Page<QnADetailResponse> findAllWaitingQnA(Pageable pageable) {
+
+        Page<QnA> pagedQnA = qnARepository.findByAnswerStatus(AnswerStatus.WAITING, pageable);
+
+        return converter.convertFromPagedQnAToPagedQnADetailResponse(pagedQnA);
     }
 
 }

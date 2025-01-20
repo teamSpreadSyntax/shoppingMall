@@ -30,7 +30,11 @@ public class QReview extends EntityPathBase<Review> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final ListPath<String, StringPath> imageUrls = this.<String, StringPath>createList("imageUrls", String.class, StringPath.class, PathInits.DIRECT2);
+    public final StringPath imageUrl1 = createString("imageUrl1");
+
+    public final StringPath imageUrl2 = createString("imageUrl2");
+
+    public final StringPath imageUrl3 = createString("imageUrl3");
 
     public final home.project.domain.member.QMember member;
 

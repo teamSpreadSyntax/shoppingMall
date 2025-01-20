@@ -262,7 +262,7 @@ public class Converter {
                 product.getDefectiveStock(),
                 product.getDescription(),
                 product.getCreateAt(),
-                product.getMainImageFile(),
+                product.getImageUrl(),
                 product.getSize(),
                 product.getColor(),
                 convertFromListedProductCouponProductCouponResponse(product.getProductCoupons())
@@ -283,7 +283,7 @@ public class Converter {
                 product.getDefectiveStock(),
                 product.getDescription(),
                 product.getCreateAt(),
-                product.getMainImageFile(),
+                product.getImageUrl(),
                 product.getSize(),
                 product.getColor(),
                 convertFromPagedQnAToListQnADetailResponse(qnAs),
@@ -306,7 +306,7 @@ public class Converter {
                 productResponseForManaging.getDefectiveStock(),
                 productResponseForManaging.getDescription(),
                 productResponseForManaging.getCreateAt(),
-                productResponseForManaging.getMainImageFile(),
+                productResponseForManaging.getImageUrl(),
                 productResponseForManaging.getSize(),
                 productResponseForManaging.getColor(),
                 convertFromListedProductCouponProductCouponResponse(productResponseForManaging.getProductCoupons())
@@ -341,7 +341,7 @@ public class Converter {
                 productResponse.getPrice(),
                 productResponse.getDiscountRate(),
                 productResponse.getDescription(),
-                productResponse.getMainImageFile(),
+                productResponse.getImageUrl(),
                 false,
                 productResponse.getSize(),
                 productResponse.getColor(),
@@ -371,7 +371,7 @@ public class Converter {
                 productSimpleResponse.getBrand(),
                 productSimpleResponse.getPrice(),
                 productSimpleResponse.getDiscountRate(),
-                productSimpleResponse.getMainImageFile(),
+                productSimpleResponse.getImageUrl(),
                 false,
                 productSimpleResponse.getColor()
         ));
@@ -388,7 +388,7 @@ public class Converter {
                 productResponse.getPrice(),
                 productResponse.getDiscountRate(),
                 productResponse.getDescription(),
-                productResponse.getMainImageFile(),
+                productResponse.getImageUrl(),
                 isLiked.contains(productResponse.getId()),
                 productResponse.getSize(),
                 productResponse.getColor(),
@@ -404,7 +404,7 @@ public class Converter {
                 productSimpleResponse.getBrand(),
                 productSimpleResponse.getPrice(),
                 productSimpleResponse.getDiscountRate(),
-                productSimpleResponse.getMainImageFile(),
+                productSimpleResponse.getImageUrl(),
                 isLiked.contains(productSimpleResponse.getId()),
                 productSimpleResponse.getColor()
         ));
@@ -421,7 +421,7 @@ public class Converter {
                 product.getPrice(),
                 product.getDiscountRate(),
                 product.getDescription(),
-                product.getMainImageFile(),
+                product.getImageUrl(),
                 false,
                 product.getSize(),
                 product.getColor(),
@@ -439,7 +439,7 @@ public class Converter {
                 product.getPrice(),
                 product.getDiscountRate(),
                 product.getDescription(),
-                product.getMainImageFile(),
+                product.getImageUrl(),
                 false,
                 product.getSize(),
                 product.getColor(),
@@ -459,7 +459,7 @@ public class Converter {
                 product.getPrice(),
                 product.getDiscountRate(),
                 product.getDescription(),
-                product.getMainImageFile(),
+                product.getImageUrl(),
                 isLiked.contains(product.getId()),
                 product.getSize(),
                 product.getColor(),
@@ -477,7 +477,7 @@ public class Converter {
                 product.getPrice(),
                 product.getDiscountRate(),
                 product.getDescription(),
-                product.getMainImageFile(),
+                product.getImageUrl(),
                 isLiked.contains(product.getId()),
                 product.getSize(),
                 product.getColor(),
@@ -496,7 +496,9 @@ public class Converter {
                         review.getCreateAt(),
                         review.getRatingType(),
                         review.getDescription(),
-                        review.getImageUrls(),
+                        review.getImageUrl1(),
+                        review.getImageUrl2(),
+                        review.getImageUrl3(),
                         review.getHelpful()
                 ))
                 .toList(); // Stream을 List로 변환
@@ -540,7 +542,9 @@ public class Converter {
                         review.getCreateAt(),
                         review.getRatingType(),
                         review.getDescription(),
-                        review.getImageUrls(),
+                        review.getImageUrl1(),
+                        review.getImageUrl2(),
+                        review.getImageUrl3(),
                         review.getHelpful()
                 ))
                 .collect(Collectors.toList());
@@ -604,7 +608,8 @@ public class Converter {
                 event.getName(),
                 event.getDescription(),
                 event.getStartDate(),
-                event.getEndDate()
+                event.getEndDate(),
+                event.getImage()
         );
     }
 
@@ -614,16 +619,12 @@ public class Converter {
                 event.getName(),
                 event.getDescription(),
                 event.getStartDate(),
-                event.getEndDate()
-        ));
-    }
-
-    public Page<EventSimpleResponse> convertFromPagedEventToPagedEventSimpleResponse(Page<Event> pagedEvent) {
-        return pagedEvent.map(event -> new EventSimpleResponse(
-                event.getId(),
+                event.getEndDate(),
                 event.getImage()
         ));
     }
+
+
 
     public Shipping convertFromCreateOrderRequestDTOToShipping(CreateOrderRequestDTO createOrderRequestDTO){
 
@@ -756,7 +757,7 @@ public class Converter {
                         productCart.getProduct().getBrand(),
                         productCart.getProduct().getPrice(),
                         productCart.getProduct().getDiscountRate(),
-                        productCart.getProduct().getMainImageFile(),
+                        productCart.getProduct().getImageUrl(),
                         productCart.getQuantity(),
                         productCart.getProduct().getColor()
                 )
@@ -784,14 +785,16 @@ public class Converter {
                 review.getCreateAt(),
                 review.getRatingType(),
                 review.getDescription(),
-                review.getImageUrls(),
+                review.getImageUrl1(),
+                review.getImageUrl2(),
+                review.getImageUrl3(),
                 review.getHelpful()
         );
     }
 
 
 
-    public Page<ReviewResponse> convertFromPagedReviewToPagedReviewResponse(Page<Review> pagedReview) {
+    public Page<ReviewResponse> convertFromPagedReviewToPagedQnAResponse(Page<Review> pagedReview) {
         return pagedReview.map(review -> new ReviewResponse(
                 review.getId(),
                 review.getProduct().getName(),
@@ -817,7 +820,9 @@ public class Converter {
                 review.getCreateAt(),
                 review.getRatingType(),
                 review.getDescription(),
-                review.getImageUrls(),
+                review.getImageUrl1(),
+                review.getImageUrl2(),
+                review.getImageUrl3(),
                 review.getHelpful()
         ));
     }
@@ -832,7 +837,7 @@ public class Converter {
                 wishList.getProduct().getPrice(),
                 wishList.getProduct().getDiscountRate(),
                 wishList.getProduct().getDescription(),
-                wishList.getProduct().getMainImageFile(),
+                wishList.getProduct().getImageUrl(),
                 wishList.isLiked(),
                 wishList.getProduct().getSize(),
                 wishList.getProduct().getColor(),
@@ -972,7 +977,7 @@ public class Converter {
         doc.setPrice(product.getPrice());
         doc.setDiscountRate(product.getDiscountRate());
         doc.setDescription(product.getDescription());
-        doc.setMainImageFile(product.getMainImageFile());
+        doc.setImageUrl(product.getImageUrl());
         doc.setStock(product.getStock());
         doc.setSoldQuantity(product.getSoldQuantity());
         doc.setDefectiveStock(product.getDefectiveStock());

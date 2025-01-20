@@ -25,7 +25,7 @@ public class ProductSimpleResponse {
     private Integer discountRate;
 
     @Schema(description = "이미지 URL", example = "https://example.com/image.jpg")
-    private String mainImageFile;
+    private String imageUrl;
 
     @Schema(description = "좋아요 여부", example = "true")
     private boolean isLiked;
@@ -33,13 +33,13 @@ public class ProductSimpleResponse {
     @Schema(description = "색상", example = "블루")
     private String color;
 
-    public ProductSimpleResponse(Long id, String name, String brand, Long price, Integer discountRate, String mainImageFile, boolean isLiked, String color) {
+    public ProductSimpleResponse(Long id, String name, String brand, Long price, Integer discountRate, String imageUrl, boolean isLiked, String color) {
         this.id = id;
         this.name = name;
         this.brand = brand;
         this.price = price;
         this.discountRate = discountRate;
-        this.mainImageFile = mainImageFile;
+        this.imageUrl = imageUrl;
         this.isLiked = isLiked;
         this.color = color;
     }

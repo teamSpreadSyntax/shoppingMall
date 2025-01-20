@@ -1,7 +1,5 @@
 package home.project.service.product;
 
-
-import org.springframework.web.multipart.MultipartFile;
 import home.project.domain.common.QnA;
 import home.project.domain.common.Review;
 import home.project.domain.elasticsearch.ProductDocument;
@@ -23,11 +21,12 @@ import home.project.repository.product.ProductRepository;
 import home.project.repository.product.WishListRepository;
 import home.project.repositoryForElasticsearch.ProductElasticsearchRepository;
 import home.project.service.member.MemberService;
+import home.project.service.order.OrderService;
 import home.project.service.util.Converter;
-import home.project.service.file.FileService;
-import home.project.service.integration.IndexToElasticsearch;
+import home.project.service.util.IndexToElasticsearch;
 import home.project.service.util.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -43,6 +42,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static home.project.service.util.CategoryMapper.getCode;
 
 @RequiredArgsConstructor
 @Service
@@ -61,11 +62,11 @@ public class ProductServiceImpl implements ProductService {
     private final WishListRepository wishListRepository;
     private final QnARepository qnARepository;
     private final ReviewRepository reviewRepository;
-    private final FileService fileService;
+    private final ProductOrderRepository orderRepository;
 
     @Override
     @Transactional
-    public void join(CreateProductRequestDTO createProductRequestDTO, MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
+    public void join(CreateProductRequestDTO createProductRequestDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
@@ -77,18 +78,6 @@ public class ProductServiceImpl implements ProductService {
         } else if (currentSoldQuantity < 0) {
             throw new IllegalStateException("판매량이 음수일 수 없습니다.");
         }
-
-        String mainImageUrl = null;
-        if (mainImageFile != null && !mainImageFile.isEmpty()) {
-            mainImageUrl = fileService.saveFile(mainImageFile, "product/main", String.valueOf(member.getId()));
-        } else {
-            throw new IllegalArgumentException("대표 이미지 파일은 반드시 포함되어야 합니다.");
-        }
-
-        // 이미지 파일들 저장
-        List<String> imageUrls = descriptionImages.stream()
-                .map(file -> fileService.saveFile(file, "product", String.valueOf(member.getId())))
-                .collect(Collectors.toList());
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -107,9 +96,9 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(createProductRequestDTO.getPrice());
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
         product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
-        product.setDescription(imageUrls); // 이미지 URL 설정
+        product.setDescription(createProductRequestDTO.getDescription());
         product.setCreateAt(LocalDateTime.now());
-        product.setMainImageFile(mainImageUrl);
+        product.setImageUrl(createProductRequestDTO.getImageUrl());
         product.setSize(createProductRequestDTO.getSize());
         product.setColor(createProductRequestDTO.getColor());
 
@@ -125,6 +114,7 @@ public class ProductServiceImpl implements ProductService {
         memberProductRepository.save(memberProduct);
 
         ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+
         try {
             indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
         } catch (Exception e) {
@@ -132,6 +122,18 @@ public class ProductServiceImpl implements ProductService {
             e.printStackTrace();
         }
     }
+
+    /*
+        private Member authentification(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+        if(authentification == null){
+            List<Long> likedProductIds =
+        }else {
+
+        }
+    }*/
     @Override
     public ProductWithQnAAndReviewResponse findByIdReturnProductResponse(Long productId) {
 
@@ -263,6 +265,12 @@ public class ProductServiceImpl implements ProductService {
 
         String categoryCode = null;
 
+        if (category != null && !category.isEmpty()) {
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {
+            categoryCode = getCode(content);
+        }
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
@@ -297,6 +305,13 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content,String color, String size,  Pageable pageable) {
         String categoryCode = null;
 
+        if (category != null && !category.isEmpty()) {
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {
+            categoryCode = getCode(content);
+        }
+
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
@@ -305,6 +320,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable) {
         String categoryCode = null;
+
+        if (category != null && !category.isEmpty()) {//?
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {//?
+            categoryCode = getCode(content);
+        }
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
@@ -321,6 +343,13 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable) {
         String categoryCode = null;
+
+        if (category != null && !category.isEmpty()) {
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {
+            categoryCode = getCode(content);
+        }
 
         Page<Product> pagedProduct = productRepository.findProducts(brand, categoryCode, productName, content, color, size, pageable);
 
@@ -341,7 +370,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
+    public ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO) {
 
         boolean isCategoryModified = false;
         boolean isNameModified = false;
@@ -364,24 +393,9 @@ public class ProductServiceImpl implements ProductService {
         beforeUpdate.setDefectiveStock(existingProduct.getDefectiveStock());
         beforeUpdate.setDescription(existingProduct.getDescription());
         beforeUpdate.setCreateAt(existingProduct.getCreateAt());
-        beforeUpdate.setMainImageFile(existingProduct.getMainImageFile());
+        beforeUpdate.setImageUrl(existingProduct.getImageUrl());
         beforeUpdate.setSize(existingProduct.getSize());
         beforeUpdate.setColor(existingProduct.getColor());
-
-        String mainImageUrl = existingProduct.getMainImageFile();
-        if (mainImageFile != null && !mainImageFile.isEmpty()) {
-            mainImageUrl = fileService.saveFile(mainImageFile, "product/main", String.valueOf(existingProduct.getId()));
-        }
-        existingProduct.setMainImageFile(mainImageUrl);
-
-        // ✅ 상세 이미지 업데이트
-        if (descriptionImages != null && !descriptionImages.isEmpty()) {
-            List<String> imageUrls = descriptionImages.stream()
-                    .filter(file -> !file.isEmpty())
-                    .map(file -> fileService.saveFile(file, "product/desc", String.valueOf(existingProduct.getId())))
-                    .collect(Collectors.toList());
-            existingProduct.setDescription(imageUrls);
-        }
 
         if (updateProductRequestDTO.getStock() != null) {
             if (updateProductRequestDTO.getStock() < 0) {
@@ -417,6 +431,14 @@ public class ProductServiceImpl implements ProductService {
 
         if (updateProductRequestDTO.getDefectiveStock() != null) {
             existingProduct.setDefectiveStock(updateProductRequestDTO.getDefectiveStock());
+        }
+
+        if (updateProductRequestDTO.getDescription() != null) {
+            existingProduct.setDescription(updateProductRequestDTO.getDescription());
+        }
+
+        if (updateProductRequestDTO.getImageUrl() != null) {
+            existingProduct.setImageUrl(updateProductRequestDTO.getImageUrl());
         }
 
         if (updateProductRequestDTO.getCategory() != null) {
@@ -579,24 +601,17 @@ public class ProductServiceImpl implements ProductService {
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
 
-        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
-
-        // CENTER 권한인 경우 모든 제품 검색 가능
-        if (authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER"))) {
-            List<Product> allProducts = pagedDocuments
-                    .map(productDocument -> findById(productDocument.getId()))
-                    .getContent();
-            return converter.convertFromPagedProductToPagedProductResponseForManaging(
-                    new PageImpl<>(
-                            allProducts,
-                            pageable,
-                            pagedDocuments.getTotalElements()
-                    )
-            );
+        String categoryCode = null;
+        if (category != null && !category.isEmpty()) {
+            categoryCode = getCode(category);
+        }
+        if (content != null && !content.isEmpty()) {
+            categoryCode = getCode(content);
         }
 
-        // ADMIN(판매자)인 경우 자신이 등록한 제품만 검색
+        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
+
+        // 회원이 소유한 상품만 필터링하고 Page로 변환
         List<Product> filteredProducts = pagedDocuments
                 .map(productDocument -> findById(productDocument.getId()))
                 .getContent()
@@ -615,10 +630,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
+    public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO) {
 
         if (confirmProductOwnership(updateProductRequestDTO.getName(), updateProductRequestDTO.getBrand())) {
-            return update(updateProductRequestDTO , mainImageFile, descriptionImages);
+            return update(updateProductRequestDTO);
         }
 
         throw new IllegalArgumentException("귀사의 상품이 맞는지 확인해주세요.");

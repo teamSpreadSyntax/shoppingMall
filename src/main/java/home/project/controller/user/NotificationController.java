@@ -42,13 +42,10 @@ public class NotificationController {
 
     @Operation(summary = "id로 알림 상세정보 조회 메서드", description = "id로 알림 상세 정보 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Notification fetched successfully",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotificationDetailResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Notification not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid input",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/notification_detail")
     @SecurityRequirement(name = "bearerAuth")
@@ -63,11 +60,12 @@ public class NotificationController {
 
     @Operation(summary = "내 전체 알림 조회 메서드", description = "내 전체 알림 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Notifications fetched successfully",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedNotificationListResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized: User not authenticated",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
     @GetMapping("/my_notification")
     @SecurityRequirement(name = "bearerAuth")
@@ -90,13 +88,14 @@ public class NotificationController {
 
     @Operation(summary = "알림 읽음 표시 메서드", description = "알림 읽음 표시 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Notification marked as read successfully",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Notification not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid input",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 
     })
     @PostMapping("/read")

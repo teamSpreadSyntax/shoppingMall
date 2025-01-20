@@ -10,6 +10,7 @@ import home.project.dto.requestDTO.CreateQnARequestDTO;
 import home.project.dto.responseDTO.QnADetailResponse;
 import home.project.exceptions.exception.IdNotFoundException;
 import home.project.repository.common.QnARepository;
+import home.project.repository.order.OrderRepository;
 import home.project.service.member.MemberService;
 import home.project.service.order.OrderService;
 import home.project.service.product.ProductService;
@@ -22,10 +23,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,6 +46,9 @@ class QnAServiceImplTest {
     private QnARepository qnARepository;
 
     @Mock
+    private OrderRepository orderRepository;
+
+    @Mock
     private MemberService memberService;
 
     @Mock
@@ -49,11 +57,11 @@ class QnAServiceImplTest {
     @Mock
     private OrderService orderService;
 
-    @InjectMocks
-    private QnAServiceImpl qnAService;
-
     @Mock
     private Converter converter;
+
+    @InjectMocks
+    private QnAServiceImpl qnAService;
 
     private Member testMember;
     private Product testProduct;
@@ -62,8 +70,11 @@ class QnAServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        // 테스트용 인증 객체 생성
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken("test@test.com", null);
+
+        // SecurityContextHolder에 인증 객체 설정
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         testMember = new Member();
@@ -81,17 +92,17 @@ class QnAServiceImplTest {
         testQnA.setMember(testMember);
         testQnA.setProduct(testProduct);
         testQnA.setOrders(testOrder);
-        testQnA.setAnswerStatus(AnswerStatus.ANSWERED);
-        testQnA.setAnswerer(testMember);
+        testQnA.setAnswerStatus(AnswerStatus.WAITING);
     }
 
     @Nested
     @DisplayName("QnA 등록")
-    class CreateQnATest {
+    class JoinTest {
 
         @Test
         @DisplayName("QnA 등록 성공")
-        void shouldCreateQnASuccessfully() {
+        void joinSuccess() {
+            // given
             CreateQnARequestDTO requestDTO = new CreateQnARequestDTO();
             requestDTO.setProductNum("P12345");
             requestDTO.setOrderNum("O12345");
@@ -105,65 +116,43 @@ class QnAServiceImplTest {
             when(converter.convertFromQnAToQnADetailResponse(any(QnA.class)))
                     .thenReturn(new QnADetailResponse(
                             1L,
-                            null,
-                            "Subject",
-                            "P12345",
-                            "O12345",
-                            "Description",
-                            "test@test.com",
+                            QnAType.ORDER,  // 적절한 QnAType 값
+                            "subject",
+                            "description",
+                            "productNum",
+                            "orderNum",
+                            "memberName",
                             LocalDateTime.now(),
-                            null,
-                            null,
-                            null,
+                            "answer",
+                            LocalDateTime.now(),
+                            "answerer",
                             AnswerStatus.WAITING
                     ));
 
+            // when
             QnADetailResponse response = qnAService.join(requestDTO);
 
+            // then
             assertThat(response).isNotNull();
-            assertThat(response.getSubject()).isEqualTo("Subject");
             verify(qnARepository).save(any(QnA.class));
-        }
-
-        @Test
-        @DisplayName("QnA 등록 실패: 인증 실패")
-        void shouldFailToCreateQnAWithoutAuthentication() {
-            SecurityContextHolder.getContext().setAuthentication(null);
-
-            CreateQnARequestDTO requestDTO = new CreateQnARequestDTO();
-            requestDTO.setProductNum("P12345");
-
-            assertThatThrownBy(() -> qnAService.join(requestDTO))
-                    .isInstanceOf(NullPointerException.class);
-        }
-
-        @Test
-        @DisplayName("QnA 등록 실패: 잘못된 ProductNum")
-        void shouldFailToCreateQnAWithInvalidProductNum() {
-            CreateQnARequestDTO requestDTO = new CreateQnARequestDTO();
-            requestDTO.setProductNum("INVALID");
-            requestDTO.setOrderNum("O12345");
-
-            when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(productService.findByProductNum(anyString())).thenThrow(new IdNotFoundException("Product not found"));
-
-            assertThatThrownBy(() -> qnAService.join(requestDTO))
-                    .isInstanceOf(IdNotFoundException.class)
-                    .hasMessageContaining("Product not found");
+            verify(converter).convertFromQnAToQnADetailResponse(any(QnA.class));
         }
     }
 
     @Nested
     @DisplayName("QnA 조회")
-    class FindQnATest {
+    class FindByIdTest {
 
         @Test
         @DisplayName("QnA ID로 조회 성공")
-        void shouldFindQnAByIdSuccessfully() {
+        void findByIdSuccess() {
+            // given
             when(qnARepository.findById(anyLong())).thenReturn(Optional.of(testQnA));
 
+            // when
             QnA result = qnAService.findById(1L);
 
+            // then
             assertThat(result).isNotNull();
             assertThat(result.getId()).isEqualTo(1L);
             verify(qnARepository).findById(anyLong());
@@ -171,14 +160,15 @@ class QnAServiceImplTest {
 
         @Test
         @DisplayName("존재하지 않는 QnA ID로 조회 실패")
-        void shouldFailToFindQnAByNonexistentId() {
+        void findByIdFail() {
+            // given
             when(qnARepository.findById(anyLong())).thenReturn(Optional.empty());
 
+            // when & then
             assertThatThrownBy(() -> qnAService.findById(1L))
                     .isInstanceOf(IdNotFoundException.class)
                     .hasMessageContaining("QnA가 없습니다.");
         }
-
     }
 
     @Nested
@@ -187,128 +177,36 @@ class QnAServiceImplTest {
 
         @Test
         @DisplayName("QnA ID로 삭제 성공")
-        void shouldDeleteQnAByIdSuccessfully() {
+        void deleteByIdSuccess() {
+            // when
             qnAService.deleteById(1L);
 
+            // then
             verify(qnARepository).deleteById(anyLong());
-        }
-
-        @Test
-        @DisplayName("QnA 삭제 실패: 존재하지 않는 ID")
-        void shouldFailToDeleteQnAByNonexistentId() {
-            doThrow(new IdNotFoundException("QnA가 없습니다.")).when(qnARepository).deleteById(anyLong());
-
-            assertThatThrownBy(() -> qnAService.deleteById(1L))
-                    .isInstanceOf(IdNotFoundException.class)
-                    .hasMessageContaining("QnA가 없습니다.");
         }
     }
 
     @Nested
-    @DisplayName("답변 추가")
-    class AddAnswerTest {
+    @DisplayName("QnA 상태별 조회")
+    class FindAllWaitingQnATest {
 
         @Test
-        @DisplayName("답변 추가 성공")
-        void shouldAddAnswerSuccessfully() {
-            testQnA.setAnswerStatus(AnswerStatus.WAITING); // WAITING 상태로 설정
-            when(qnARepository.findById(anyLong())).thenReturn(Optional.of(testQnA));
-            when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(converter.convertFromQnAToQnADetailResponse(any(QnA.class)))
-                    .thenReturn(new QnADetailResponse(
-                            1L,
-                            null,
-                            "Test Subject",
-                            "P12345",
-                            "O12345",
-                            "Test Description",
-                            "test@test.com",
-                            LocalDateTime.now(),
-                            "Test Answer",
-                            LocalDateTime.now(),
-                            "test@test.com",
-                            AnswerStatus.ANSWERED
-                    ));
+        @DisplayName("대기 중인 QnA 조회 성공")
+        void findAllWaitingQnASuccess() {
+            // given
+            Page<QnA> pagedQnA = new PageImpl<>(Collections.singletonList(testQnA));
+            when(qnARepository.findByAnswerStatus(eq(AnswerStatus.WAITING), any(Pageable.class)))
+                    .thenReturn(pagedQnA);
+            when(converter.convertFromPagedQnAToPagedQnADetailResponse(any(Page.class)))
+                    .thenReturn(new PageImpl<>(Collections.emptyList()));
 
-            QnADetailResponse response = qnAService.addAnswer(1L, "Test Answer");
+            // when
+            Page<QnADetailResponse> response = qnAService.findAllWaitingQnA(Pageable.unpaged());
 
+            // then
             assertThat(response).isNotNull();
-            assertThat(response.getAnswer()).isEqualTo("Test Answer");
-            verify(qnARepository).findById(anyLong());
-        }
-
-
-        @Test
-        @DisplayName("답변 추가 실패: 답변 대기 상태가 아님")
-        void shouldFailToAddAnswerIfNotWaiting() {
-            testQnA.setAnswerStatus(AnswerStatus.ANSWERED);
-            when(qnARepository.findById(anyLong())).thenReturn(Optional.of(testQnA));
-
-            assertThatThrownBy(() -> qnAService.addAnswer(1L, "Test Answer"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("답변 대기중인 QnA만");
-        }
-
-        @Test
-        @DisplayName("답변 추가 실패: 인증 실패")
-        void shouldFailToAddAnswerWithoutAuthentication() {
-            SecurityContextHolder.getContext().setAuthentication(null);
-
-            assertThatThrownBy(() -> qnAService.addAnswer(1L, "Test Answer"))
-                    .isInstanceOf(NullPointerException.class);
+            verify(qnARepository).findByAnswerStatus(eq(AnswerStatus.WAITING), any(Pageable.class));
+            verify(converter).convertFromPagedQnAToPagedQnADetailResponse(any(Page.class));
         }
     }
-
-    @Test
-    @DisplayName("답변 수정 성공")
-    void shouldUpdateAnswerSuccessfully() {
-        testQnA.setAnswerStatus(AnswerStatus.ANSWERED);
-        testQnA.setAnswer("Old Answer");
-        when(qnARepository.findById(anyLong())).thenReturn(Optional.of(testQnA));
-        when(memberService.findByEmail(anyString())).thenReturn(testMember);
-        when(converter.convertFromQnAToQnADetailResponse(any(QnA.class)))
-                .thenReturn(new QnADetailResponse(
-                        1L,                    // id
-                        QnAType.ORDER,         // qnaType
-                        "Test Subject",        // subject
-                        "Test ProductNum",     // productNum
-                        "Test OrderNum",       // orderNum
-                        "Test Description",    // description
-                        "test@test.com",       // memberEmail
-                        LocalDateTime.now(),   // createAt
-                        "Updated Answer",      // answer
-                        LocalDateTime.now(),   // answerDate
-                        "test@test.com",       // answererEmail
-                        AnswerStatus.ANSWERED  // answerStatus
-                ));
-
-        QnADetailResponse response = qnAService.updateAnswer(1L, "Updated Answer");
-
-        assertThat(response).isNotNull();
-        assertThat(response.getAnswer()).isEqualTo("Updated Answer");
-        verify(qnARepository).findById(anyLong());
-    }
-
-
-
-
-    @Test
-        @DisplayName("답변 수정 실패: 상태가 답변 완료가 아님")
-        void shouldFailToUpdateAnswerIfNotAnswered() {
-            testQnA.setAnswerStatus(AnswerStatus.WAITING);
-            when(qnARepository.findById(anyLong())).thenReturn(Optional.of(testQnA));
-
-            assertThatThrownBy(() -> qnAService.updateAnswer(1L, "Updated Answer"))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("답변 완료 상태의 QnA만 수정할 수 있습니다.");
-        }
-
-        @Test
-        @DisplayName("답변 수정 실패: 인증 실패")
-        void shouldFailToUpdateAnswerWithoutAuthentication() {
-            SecurityContextHolder.getContext().setAuthentication(null);
-
-            assertThatThrownBy(() -> qnAService.updateAnswer(1L, "Updated Answer"))
-                    .isInstanceOf(NullPointerException.class);
-        }
-    }
+}

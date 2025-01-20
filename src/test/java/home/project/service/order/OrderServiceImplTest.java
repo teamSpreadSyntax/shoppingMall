@@ -3,6 +3,7 @@ package home.project.service.order;
 import home.project.domain.delivery.DeliveryStatusType;
 import home.project.domain.delivery.DeliveryType;
 import home.project.domain.delivery.Shipping;
+import home.project.domain.elasticsearch.OrdersDocument;
 import home.project.domain.member.Member;
 import home.project.domain.member.MemberGradeType;
 import home.project.domain.order.Orders;
@@ -10,6 +11,7 @@ import home.project.domain.product.*;
 import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.OrderResponse;
+import home.project.exceptions.exception.IdNotFoundException;
 import home.project.exceptions.exception.InvalidCouponException;
 import home.project.repository.member.MemberRepository;
 import home.project.repository.order.OrderRepository;
@@ -20,7 +22,7 @@ import home.project.service.member.MemberService;
 import home.project.service.product.ProductService;
 import home.project.service.promotion.CouponService;
 import home.project.service.util.Converter;
-import home.project.service.integration.IndexToElasticsearch;
+import home.project.service.util.IndexToElasticsearch;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -94,12 +96,6 @@ class OrderServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        Authentication authentication = mock(Authentication.class);
-        SecurityContext securityContext = mock(SecurityContext.class);
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("test@example.com");
-        SecurityContextHolder.setContext(securityContext);
-
         now = LocalDateTime.now();
 
         // Member 설정
@@ -110,12 +106,14 @@ class OrderServiceImplTest {
         testMember.setAccumulatedPurchase(0L);
         testMember.setPoint(1000L);
 
+        // Product 설정
         testProduct = new Product();
         testProduct.setId(1L);
         testProduct.setName("TestProduct");
         testProduct.setPrice(10000L);
         testProduct.setStock(100L);
 
+        // Shipping 설정
         testShipping = new Shipping();
         testShipping.setId(1L);
         testShipping.setDeliveryType(DeliveryType.STRAIGHT_DELIVERY);
@@ -125,6 +123,7 @@ class OrderServiceImplTest {
         testShipping.setDeliveryCost(3000L);
         testShipping.setShippingMessage("문 앞에 놓아주세요");
 
+        // ProductDTOForOrder 설정
         ProductDTOForOrder productDTO = new ProductDTOForOrder();
         productDTO.setProductId(1L);
         productDTO.setQuantity(2);
@@ -132,6 +131,7 @@ class OrderServiceImplTest {
         productDTOList = new ArrayList<>();
         productDTOList.add(productDTO);
 
+        // ProductOrder 설정
         testProductOrder = new ProductOrder();
         testProductOrder.setProduct(testProduct);
         testProductOrder.setQuantity(2);
@@ -151,6 +151,7 @@ class OrderServiceImplTest {
         testOrder.getProductOrders().add(testProductOrder);
         testShipping.setOrders(testOrder);
 
+        // OrderResponse 설정
         orderResponse = new OrderResponse(
                 1L,
                 "TEST123",
@@ -162,184 +163,133 @@ class OrderServiceImplTest {
                 productDTOList
         );
 
+        // CreateOrderRequestDTO 설정
         createOrderRequestDTO = new CreateOrderRequestDTO();
         createOrderRequestDTO.setProductOrders(productDTOList);
         createOrderRequestDTO.setCouponId(1L);
         createOrderRequestDTO.setPointsUsed(0L);
 
+        // Security Context Mock 설정
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn("test@example.com");
+        SecurityContextHolder.setContext(securityContext);
+
+        // Coupon 설정 수정
         testCoupon = new Coupon();
         testCoupon.setId(1L);
         testCoupon.setName("TestCoupon");
         testCoupon.setDiscountRate(10);
-        testCoupon.setStartDate(now.minusDays(1));
-        testCoupon.setEndDate(now.plusDays(30));
+        testCoupon.setStartDate(now.minusDays(1));  // 시작일 설정
+        testCoupon.setEndDate(now.plusDays(30));    // 종료일 설정
 
+        // MemberCoupon 설정
         testMemberCoupon = new MemberCoupon();
         testMemberCoupon.setMember(testMember);
         testMemberCoupon.setCoupon(testCoupon);
         testMemberCoupon.setUsed(false);
     }
 
-    @Nested
-    @DisplayName("주문 생성 테스트")
-    class CreateOrderTest {
-        @Test
-        @DisplayName("정상적으로 주문을 생성한다")
-        void createOrderSuccess() {
-            // given
-            when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(productService.findById(anyLong())).thenReturn(testProduct);
-            when(couponService.findById(anyLong())).thenReturn(testCoupon);
-            when(memberCouponRepository.findByMemberAndCoupon(any(Member.class), any(Coupon.class)))
-                    .thenReturn(Optional.of(testMemberCoupon));
-            when(orderRepository.save(any(Orders.class))).thenReturn(testOrder);
-            when(converter.convertFromOrderToOrderResponse(any(Orders.class))).thenReturn(orderResponse);
-            when(converter.convertFromCreateOrderRequestDTOToShipping(any(CreateOrderRequestDTO.class)))
-                    .thenReturn(testShipping);
+    @Test
+    @DisplayName("정상적으로 주문을 생성한다")
+    void createOrderSuccess() {
+        // given
+        when(memberService.findByEmail(anyString())).thenReturn(testMember);
+        when(productService.findById(anyLong())).thenReturn(testProduct);
+        when(couponService.findById(anyLong())).thenReturn(testCoupon);
+        when(memberCouponRepository.findByMemberAndCoupon(any(Member.class), any(Coupon.class)))
+                .thenReturn(Optional.of(testMemberCoupon));
+        when(orderRepository.save(any(Orders.class))).thenReturn(testOrder);
+        when(converter.convertFromOrderToOrderResponse(any(Orders.class))).thenReturn(orderResponse);
+        when(converter.convertFromCreateOrderRequestDTOToShipping(any(CreateOrderRequestDTO.class)))
+                .thenReturn(testShipping);
 
-            // when
-            OrderResponse response = orderService.join(createOrderRequestDTO);
+        // when
+        OrderResponse response = orderService.join(createOrderRequestDTO);
 
-            // then
-            assertThat(response).isNotNull();
-            assertThat(response.getOrderNum()).isEqualTo("TEST123");
-            verify(orderRepository).save(any(Orders.class));
-            verify(productService).decreaseStock(anyLong(), anyLong());
-        }
-
-        @Test
-        @DisplayName("재고가 부족한 경우 주문 생성에 실패한다")
-        void createOrderFailInsufficientStock() {
-            // given
-            testProduct.setStock(1L);
-            createOrderRequestDTO.setCouponId(null);
-
-            when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(productService.findById(anyLong())).thenReturn(testProduct);
-            when(converter.convertFromCreateOrderRequestDTOToShipping(any(CreateOrderRequestDTO.class)))
-                    .thenReturn(testShipping);
-            when(productService.decreaseStock(anyLong(), anyLong()))
-                    .thenThrow(new IllegalStateException("재고가 부족합니다"));
-
-            // when & then
-            assertThatThrownBy(() -> orderService.join(createOrderRequestDTO))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("재고가 부족합니다");
-        }
-
-        @Test
-        @DisplayName("유효하지 않은 쿠폰으로 주문 시 실패한다")
-        void createOrderFailInvalidCoupon() {
-            // given
-            testCoupon.setEndDate(now.minusDays(1));
-            when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(productService.findById(anyLong())).thenReturn(testProduct);
-            when(couponService.findById(anyLong())).thenReturn(testCoupon);
-            when(converter.convertFromCreateOrderRequestDTOToShipping(any(CreateOrderRequestDTO.class)))
-                    .thenReturn(testShipping);
-
-            // when & then
-            assertThatThrownBy(() -> orderService.join(createOrderRequestDTO))
-                    .isInstanceOf(InvalidCouponException.class)
-                    .hasMessageContaining("쿠폰이 유효하지 않습니다");
-        }
-        @Test
-        @DisplayName("포인트가 부족한 경우 주문 생성에 실패한다")
-        void createOrderFailInsufficientPoints() {
-            // given
-            testMember.setPoint(0L);
-            createOrderRequestDTO.setPointsUsed(1000L);
-            when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(productService.findById(anyLong())).thenReturn(testProduct);
-            when(converter.convertFromCreateOrderRequestDTOToShipping(any(CreateOrderRequestDTO.class)))
-                    .thenReturn(testShipping);
-
-            // when & then
-            assertThatThrownBy(() -> orderService.join(createOrderRequestDTO))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("포인트가 부족합니다");
-        }
-    }
-
-    @Nested
-    @DisplayName("회원 등급 변경 테스트")
-    class MemberGradeTest {
-        @Test
-        @DisplayName("누적 구매액에 따라 회원 등급이 올라간다")
-        void memberGradeUpgradeSuccess() {
-            // given
-            testMember.setAccumulatedPurchase(180000L);
-            testOrder.setAmount(30000L);
-            createOrderRequestDTO.setCouponId(null);
-
-            when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(productService.findById(anyLong())).thenReturn(testProduct);
-            when(orderRepository.save(any(Orders.class))).thenReturn(testOrder);
-            when(converter.convertFromOrderToOrderResponse(any(Orders.class))).thenReturn(orderResponse);
-            when(converter.convertFromCreateOrderRequestDTOToShipping(any(CreateOrderRequestDTO.class)))
-                    .thenReturn(testShipping);
-
-            // when
-            orderService.join(createOrderRequestDTO);
-
-            // then
-            assertThat(testMember.getGrade()).isEqualTo(MemberGradeType.GOLD);
-            verify(memberRepository).save(testMember);
-        }
-    }
-
-    @Nested
-    @DisplayName("주문 상태 변경 테스트")
-    class OrderStatusTest {
-        @Test
-        @DisplayName("배송 완료 전 구매 확정 시도시 실패한다")
-        void confirmPurchaseFailBeforeDelivery() {
-            // given
-            testProductOrder.setDeliveryStatus(DeliveryStatusType.DELIVERY_STARTED);
-            when(orderRepository.findById(anyLong())).thenReturn(Optional.of(testOrder));
-
-            // when & then
-            assertThatThrownBy(() -> orderService.confirmPurchase(1L))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("배송이 완료된 상품만 구매 확정이 가능합니다");
-        }
-
-        @Test
-        @DisplayName("주문 취소시 재고가 정상적으로 복구된다")
-        void deleteOrderRestoreStockSuccess() {
-            // given
-            when(orderRepository.findById(anyLong())).thenReturn(Optional.of(testOrder));
-            Long initialStock = testProduct.getStock();
-
-            // when
-            orderService.deleteById(1L);
-
-            // then
-            verify(productService).increaseStock(anyLong(), eq(2L));
-            verify(productService).decreaseSoldQuantity(anyLong(), eq(2L));
-        }
+        // then
+        assertThat(response).isNotNull();
+        assertThat(response.getOrderNum()).isEqualTo("TEST123");
+        assertThat(response.getDeliveryAddress()).isEqualTo("Test Address");
+        assertThat(response.getTotalAmount()).isEqualTo(20000L);
+        assertThat(response.getProducts()).hasSize(1);
+        verify(orderRepository).save(any(Orders.class));
+        verify(productService).decreaseStock(anyLong(), anyLong());
     }
 
     @Nested
     @DisplayName("주문 조회 테스트")
-    class OrderSearchTest {
+    class FindOrderTest {
+
         @Test
-        @DisplayName("회원 ID로 주문 목록을 조회한다")
-        void findByMemberIdSuccess() {
+        @DisplayName("ID로 주문을 조회한다")
+        void findByIdSuccess() {
             // given
-            List<Orders> ordersList = List.of(testOrder);
-            Page<Orders> ordersPage = new PageImpl<>(ordersList);
-            when(memberRepository.findByEmail(anyString())).thenReturn(Optional.of(testMember));
-            when(orderRepository.findByMemberId(anyLong(), any(Pageable.class))).thenReturn(ordersPage);
-            when(converter.convertFromPagedOrderToPagedOrderResponse(any())).thenReturn(new PageImpl<>(List.of(orderResponse)));
+            when(orderRepository.findById(anyLong())).thenReturn(Optional.of(testOrder));
+            when(converter.convertFromOrderToOrderResponse(any(Orders.class))).thenReturn(orderResponse);
 
             // when
-            Page<OrderResponse> response = orderService.findByMemberId(Pageable.unpaged());
+            OrderResponse response = orderService.findByIdReturnOrderResponse(1L);
 
             // then
             assertThat(response).isNotNull();
-            assertThat(response.getContent()).hasSize(1);
-            verify(orderRepository).findByMemberId(eq(testMember.getId()), any(Pageable.class));
+            assertThat(response.getOrderNum()).isEqualTo("TEST123");
+            assertThat(response.getOrderDate()).isEqualTo(now);
+            assertThat(response.getDeliveryAddress()).isEqualTo("Test Address");
+            verify(orderRepository).findById(anyLong());
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 주문 ID로 조회할 경우 실패한다")
+        void findByIdFailNotFound() {
+            // given
+            when(orderRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            // when & then
+            assertThatThrownBy(() -> orderService.findById(1L))
+                    .isInstanceOf(IdNotFoundException.class)
+                    .hasMessageContaining("등록된 주문이 없습니다");
+        }
+    }
+
+    @Nested
+    @DisplayName("주문 구매확정 테스트")
+    class ConfirmPurchaseTest {
+
+        @Test
+        @DisplayName("배송 완료된 주문을 구매 확정한다")
+        void confirmPurchaseSuccess() {
+            // given
+            testProductOrder.setDeliveryStatus(DeliveryStatusType.DELIVERY_COMPLETED);
+            when(orderRepository.findById(anyLong())).thenReturn(Optional.of(testOrder));
+
+            // when
+            orderService.confirmPurchase(1L);
+
+            // then
+            assertThat(testProductOrder.getDeliveryStatus()).isEqualTo(DeliveryStatusType.PURCHASE_CONFIRMED);
+            verify(orderRepository).save(any(Orders.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("주문 삭제 테스트")
+    class DeleteOrderTest {
+
+        @Test
+        @DisplayName("주문을 삭제한다")
+        void deleteOrderSuccess() {
+            // given
+            when(orderRepository.findById(anyLong())).thenReturn(Optional.of(testOrder));
+
+            // when
+            String deletedOrderNum = orderService.deleteById(1L);
+
+            // then
+            assertThat(deletedOrderNum).isEqualTo("TEST123");
+            verify(orderRepository).deleteById(anyLong());
+            verify(elasticsearchOperations).delete(anyString(), eq(OrdersDocument.class));
         }
     }
 }

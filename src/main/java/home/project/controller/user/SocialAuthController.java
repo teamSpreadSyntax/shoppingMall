@@ -1,13 +1,15 @@
 package home.project.controller.user;
 
+import home.project.dto.requestDTO.CreateMemberRequestDTO;
 import home.project.dto.requestDTO.CreateSocialMemberRequestDTO;
+import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.dto.requestDTO.SocialLoginRequestDTO;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.member.AuthService;
 import home.project.service.member.MemberService;
 import home.project.service.util.PageUtil;
-import home.project.service.validation.ValidationCheck;
+import home.project.service.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -41,12 +43,10 @@ public class SocialAuthController {
 
     @Operation(summary = "소셜 로그인 메서드", description = "소셜 로그인 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Social login successful",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/TokenResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Invalid login credentials",
+            @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/LoginValidationFailedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "User not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
     })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid SocialLoginRequestDTO socialLoginRequestDTO, BindingResult bindingResult) {
@@ -66,11 +66,9 @@ public class SocialAuthController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Member registered successfully",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Invalid input data",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "409", description = "Email already registered",
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @PostMapping("/join")

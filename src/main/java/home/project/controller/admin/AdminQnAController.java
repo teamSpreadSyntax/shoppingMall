@@ -29,8 +29,6 @@ import java.util.Map;
 @Tag(name = "관리자 QnA", description = "관리자용 QnA 관련 API입니다")
 @RequestMapping(path = "/api/admin/qna")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "403", description = "Forbidden",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
@@ -49,7 +47,6 @@ public class AdminQnAController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @PostMapping("/answer")
     @SecurityRequirement(name = "bearerAuth")
@@ -61,14 +58,9 @@ public class AdminQnAController {
     @Operation(summary = "관리자를 위한 id로 QnA 상세정보 조회 메서드", description = "관리자를 위한 id로 QnA 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/QnADetailResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
-            @ApiResponse(responseCode = "409", description = "Conflict - Answer already exists",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
-
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/qna_detail")
     @SecurityRequirement(name = "bearerAuth")
@@ -86,7 +78,6 @@ public class AdminQnAController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
@@ -99,7 +90,8 @@ public class AdminQnAController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")
@@ -110,22 +102,74 @@ public class AdminQnAController {
         return new CustomResponseEntity<>(responseMap, "답변 삭제 성공", HttpStatus.OK);
     }
 
+//    @Operation(summary = "관리자 전체 QnA 답변 대기 목록 조회 메서드", description = "답변 대기중인 전체 QnA 목록을 조회하는 메서드입니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful operation",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedQnAListResponseSchema"))),
+//            @ApiResponse(responseCode = "400", description = "Bad Request",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+//    })
+//    @GetMapping("/waiting")
+//    @SecurityRequirement(name = "bearerAuth")
+//    public CustomResponseEntity<?> findAllWaitingQnA(
+//            @PageableDefault(page = 1, size = 5)
+//            @SortDefault.SortDefaults({
+//                    @SortDefault(sort = "createAt", direction = Sort.Direction.DESC)
+//            }) @ParameterObject Pageable pageable) {
+//
+//        pageable = pageUtil.pageable(pageable);
+//
+//        Page<QnADetailResponse> pagedQnA = qnAService.findAllWaitingQnA(pageable);
+//
+//        long totalCount = pagedQnA.getTotalElements();
+//        int page = pagedQnA.getNumber();
+//
+//        return new CustomResponseEntity<>(pagedQnA.getContent(), "답변 대기중인 QnA 목록입니다.", HttpStatus.OK, totalCount, page);
+//    }
+
+//    @Operation(summary = "전체 QnA 조회 메서드", description = "전체 QnA 조회 메서드입니다.")
+//    @ApiResponses(value = {
+//            @ApiResponse(responseCode = "200", description = "Successful operation",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+//            @ApiResponse(responseCode = "404", description = "Resource not found",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+//            @ApiResponse(responseCode = "400", description = "Bad Request",
+//                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+//    })
+//    @GetMapping("/qnas")
+//    @SecurityRequirement(name = "bearerAuth")
+//    public ResponseEntity<?> findAllDetail(
+//            @PageableDefault(page = 1, size = 5)
+//            @SortDefault.SortDefaults(
+//                    {@SortDefault(sort = "qnaId", direction = Sort.Direction.ASC)})
+//            @ParameterObject Pageable pageable) {
+//        pageable = pageUtil.pageable(pageable);
+//        Page<QnADetailResponse> pagedQnA = qnAService.findAllForManager(pageable);
+//
+//        long totalCount = pagedQnA.getTotalElements();
+//
+//        int page = pagedQnA.getNumber();
+//
+//        String successMessage = "모든 QnA 입니다.";
+//
+//        return new CustomResponseEntity<>(pagedQnA.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+//    }
+
     @Operation(summary = "전체 QnA 조회 메서드", description = "전체 QnA 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedQnAListResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
             @ApiResponse(responseCode = "404", description = "Resource not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
     @GetMapping("/qnas")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> findAll(
             @PageableDefault(page = 1, size = 5)
             @SortDefault.SortDefaults(
-                    {@SortDefault(sort = "qnaId", direction = Sort.Direction.ASC)})
+                    {@SortDefault(sort = "cartId", direction = Sort.Direction.ASC)})
             @ParameterObject Pageable pageable) {
         pageable = pageUtil.pageable(pageable);
         Page<QnAResponse> pagedQnA = qnAService.findAll(pageable);

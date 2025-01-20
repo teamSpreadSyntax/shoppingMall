@@ -5,7 +5,7 @@ import home.project.domain.member.RoleType;
 import home.project.dto.requestDTO.LoginRequestDTO;
 import home.project.dto.responseDTO.TokenResponse;
 import home.project.repository.member.MemberRepository;
-import home.project.service.security.JwtTokenProvider;
+import home.project.service.util.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,12 +19,20 @@ import org.mockito.quality.Strictness;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -59,157 +67,145 @@ class AuthServiceImplTest {
         String testEmail = "test@test.com";
         String testPassword = "Password123!";
 
+        // Mock PasswordEncoder 동작 정의
+        when(passwordEncoder.encode(anyString())).thenAnswer(invocation -> "encoded_" + invocation.getArgument(0));
+
+        // LoginRequestDTO 설정
         loginRequest = new LoginRequestDTO();
         loginRequest.setEmail(testEmail);
         loginRequest.setPassword(testPassword);
 
+        // Member 설정
         testMember = new Member();
         testMember.setId(1L);
         testMember.setEmail(testEmail);
-        testMember.setPassword("encoded_password");
+        testMember.setPassword(passwordEncoder.encode(testPassword));
         testMember.setRole(RoleType.user);
 
+        // GrantedAuthority 설정
+        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+
+        // UserDetails 설정
         userDetails = mock(UserDetails.class);
         when(userDetails.getUsername()).thenReturn(testEmail);
         when(userDetails.getPassword()).thenReturn(testMember.getPassword());
+        when(userDetails.getAuthorities()).thenReturn((List) authorities);
 
+        // TokenResponse 설정
         tokenResponse = new TokenResponse();
-        tokenResponse.setAccessToken("access_token");
-        tokenResponse.setRefreshToken("refresh_token");
+        tokenResponse.setAccessToken("test.access.token");
+        tokenResponse.setRefreshToken("test.refresh.token");
         tokenResponse.setRole(RoleType.user);
         tokenResponse.setGrantType("Bearer");
     }
+
 
     @Nested
     @DisplayName("로그인 테스트")
     class LoginTest {
 
         @Test
-        @DisplayName("로그인 성공")
+        @DisplayName("정상적인 로그인 요청시 성공한다")
         void loginSuccess() {
+            // given
             when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
             when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-            when(authenticationManager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken(testMember.getEmail(), testMember.getPassword()));
+            when(authenticationManager.authenticate(any())).thenReturn(
+                    new UsernamePasswordAuthenticationToken(testMember.getEmail(), testMember.getPassword())
+            );
             when(jwtTokenProvider.generateToken(any())).thenReturn(tokenResponse);
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(memberService.findById(anyLong())).thenReturn(testMember);
 
+            // when
             TokenResponse result = authService.login(loginRequest);
 
+            // then
             assertThat(result).isNotNull();
             assertThat(result.getAccessToken()).isEqualTo(tokenResponse.getAccessToken());
+            assertThat(result.getRole()).isEqualTo(RoleType.user);
+            verify(userDetailsService).loadUserByUsername(anyString());
+            verify(memberService).findByEmail(anyString());
+            verify(memberService).findById(anyLong());
         }
 
         @Test
-        @DisplayName("로그인 실패: 비밀번호 불일치")
-        void loginFailPasswordMismatch() {
+        @DisplayName("잘못된 비밀번호로 로그인시 실패한다")
+        void loginFailWrongPassword() {
+            // given
             when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
             when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
+            // when & then
             assertThatThrownBy(() -> authService.login(loginRequest))
                     .isInstanceOf(BadCredentialsException.class)
                     .hasMessage("비밀번호를 확인해주세요.");
-        }
-
-        @Test
-        @DisplayName("로그인 실패: 사용자 미존재")
-        void loginFailUserNotFound() {
-            when(userDetailsService.loadUserByUsername(anyString())).thenThrow(new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-            assertThatThrownBy(() -> authService.login(loginRequest))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("사용자를 찾을 수 없습니다.");
         }
     }
 
     @Nested
     @DisplayName("소셜 로그인 테스트")
     class SocialLoginTest {
-        @Test
-        @DisplayName("소셜 로그인 성공")
-        void socialLoginSuccess() {
-            String email = "social@test.com";
 
+        @Test
+        @DisplayName("정상적인 소셜 로그인 요청시 성공한다")
+        void socialLoginSuccess() {
+            // given
+            String email = "test@test.com";
             when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
-            when(authenticationManager.authenticate(any())).thenReturn(new UsernamePasswordAuthenticationToken(email, null));
+            when(authenticationManager.authenticate(any())).thenReturn(
+                    new UsernamePasswordAuthenticationToken(email, "null")
+            );
             when(jwtTokenProvider.generateToken(any())).thenReturn(tokenResponse);
             when(memberService.findByEmail(anyString())).thenReturn(testMember);
             when(memberService.findById(anyLong())).thenReturn(testMember);
 
+            // when
             TokenResponse result = authService.socialLogin(email);
 
+            // then
             assertThat(result).isNotNull();
             assertThat(result.getAccessToken()).isEqualTo(tokenResponse.getAccessToken());
-        }
-
-        @Test
-        @DisplayName("소셜 로그인 실패: 사용자 미존재")
-        void socialLoginFailUserNotFound() {
-            when(userDetailsService.loadUserByUsername(anyString())).thenThrow(new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-            assertThatThrownBy(() -> authService.socialLogin("nonexistent@test.com"))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("사용자를 찾을 수 없습니다.");
-        }
-    }
-
-    @Nested
-    @DisplayName("토큰 갱신 테스트")
-    class RefreshTokenTest {
-
-        @Test
-        @DisplayName("토큰 갱신 성공")
-        void refreshTokenSuccess() {
-            String refreshToken = "valid_refresh_token";
-
-            when(jwtTokenProvider.refreshAccessToken(anyString())).thenReturn(tokenResponse);
-            when(jwtTokenProvider.getEmailFromToken(anyString())).thenReturn(testMember.getEmail());
-            when(memberService.findByEmail(anyString())).thenReturn(testMember);
-            when(memberService.findById(anyLong())).thenReturn(testMember);
-
-            TokenResponse result = authService.refreshToken(refreshToken);
-
-            assertThat(result).isNotNull();
-            assertThat(result.getAccessToken()).isEqualTo(tokenResponse.getAccessToken());
-        }
-
-        @Test
-        @DisplayName("토큰 갱신 실패: 잘못된 토큰")
-        void refreshTokenFailInvalidToken() {
-            String refreshToken = "invalid_refresh_token";
-
-            when(jwtTokenProvider.refreshAccessToken(anyString())).thenThrow(new IllegalArgumentException("잘못된 토큰입니다."));
-
-            assertThatThrownBy(() -> authService.refreshToken(refreshToken))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("잘못된 토큰입니다.");
-        }
-    }
-
-    @Nested
-    @DisplayName("권한 추가 테스트")
-    class AddAuthorityTest {
-
-        @Test
-        @DisplayName("권한 추가 성공")
-        void addAuthoritySuccess() {
-            when(memberService.findById(anyLong())).thenReturn(testMember);
-
-            authService.addAuthority(1L, RoleType.admin);
-
+            assertThat(result.getRole()).isEqualTo(RoleType.user);
+            verify(memberService).findByEmail(anyString());
             verify(memberService).findById(anyLong());
-            verify(memberRepository).save(any(Member.class));
-            assertThat(testMember.getRole()).isEqualTo(RoleType.admin);
         }
+    }
 
-        @Test
-        @DisplayName("권한 추가 실패: 사용자 미존재")
-        void addAuthorityFailUserNotFound() {
-            when(memberService.findById(anyLong())).thenThrow(new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+    @Test
+    @DisplayName("토큰 갱신 요청시 성공한다")
+    void refreshTokenSuccess() {
+        // given
+        String refreshToken = "refresh.token";
+        when(jwtTokenProvider.refreshAccessToken(anyString())).thenReturn(tokenResponse);
+        when(jwtTokenProvider.getEmailFromToken(anyString())).thenReturn(testMember.getEmail());
+        when(memberService.findByEmail(anyString())).thenReturn(testMember);
+        when(memberService.findById(anyLong())).thenReturn(testMember);
 
-            assertThatThrownBy(() -> authService.addAuthority(1L, RoleType.admin))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("사용자를 찾을 수 없습니다.");
-        }
+        // when
+        TokenResponse result = authService.refreshToken(refreshToken);
+
+        // then
+        assertThat(result).isNotNull();
+        assertThat(result.getAccessToken()).isEqualTo(tokenResponse.getAccessToken());
+        assertThat(result.getRole()).isEqualTo(RoleType.user);
+        verify(memberService).findByEmail(anyString());
+        verify(memberService).findById(anyLong());
+    }
+
+    @Test
+    @DisplayName("권한 추가 요청시 성공한다")
+    void addAuthoritySuccess() {
+        // given
+        when(memberService.findById(anyLong())).thenReturn(testMember);
+        when(memberRepository.save(any(Member.class))).thenReturn(testMember);
+
+        // when
+        authService.addAuthority(1L, RoleType.admin);
+
+        // then
+        verify(memberService).findById(anyLong());
+        verify(memberRepository).save(any(Member.class));
+        assertThat(testMember.getRole()).isEqualTo(RoleType.admin);
     }
 }

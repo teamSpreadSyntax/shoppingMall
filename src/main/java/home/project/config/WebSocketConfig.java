@@ -1,6 +1,6 @@
 package home.project.config;
 
-import home.project.service.websocket.WebSocketAuthInterceptor;
+import home.project.service.util.WebSocketAuthInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;

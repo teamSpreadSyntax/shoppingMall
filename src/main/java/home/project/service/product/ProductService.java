@@ -6,14 +6,11 @@ import home.project.dto.requestDTO.UpdateProductRequestDTO;
 import home.project.dto.responseDTO.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 
 public interface ProductService {
 
-    void join(CreateProductRequestDTO createProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
+    void join(CreateProductRequestDTO createProductRequestDTO);
 
     Product findById(Long id);
 
@@ -49,7 +46,7 @@ public interface ProductService {
 
     Page<String> brandList(Pageable pageable);
 
-    ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
+    ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO);
 
     String deleteById(Long productId);
 
@@ -63,7 +60,7 @@ public interface ProductService {
 
     Product findByProductIdAndConfirmHasPurchase(Long productOrderId);
 
-    ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
+    ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO);
 
     String deleteByIdForAdmin(Long productId);
 

@@ -15,7 +15,6 @@ import home.project.service.member.MemberService;
 import home.project.service.order.OrderService;
 import home.project.service.product.ProductService;
 import home.project.service.util.Converter;
-import home.project.service.file.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +38,6 @@ public class ReviewServiceImpl implements ReviewService{
     private final ReviewRepository reviewRepository;
     private final Converter converter;
     private final OrderRepository orderRepository;
-    private final FileService fileService;
 
 
     @Override
@@ -59,7 +56,7 @@ public class ReviewServiceImpl implements ReviewService{
                                 productOrder.getProduct().getName(),
                                 productOrder.getProduct().getBrand(),
                                 order.getOrderDate(),
-                                productOrder.getProduct().getMainImageFile()
+                                productOrder.getProduct().getImageUrl()
                         )))
                 .collect(Collectors.toList());
 
@@ -77,18 +74,13 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Override
     @Transactional
-    public ReviewDetailResponse join(Long productOrderId, CreateReviewRequestDTO createReviewRequestDTO , List<MultipartFile> imageUrls) {
+    public ReviewDetailResponse join(Long productOrderId, CreateReviewRequestDTO createReviewRequestDTO) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
 
         Product product = productService.findByProductIdAndConfirmHasPurchase(productOrderId);
-
-        List<String> descriptionImageUrls = imageUrls.stream()
-                .filter(file -> !file.isEmpty())
-                .map(file -> fileService.saveFile(file, "review/desc", String.valueOf(member.getId())))
-                .collect(Collectors.toList());
 
         Long helpful = 0L;
         Review review = new Review();
@@ -97,9 +89,11 @@ public class ReviewServiceImpl implements ReviewService{
         review.setCreateAt(LocalDateTime.now());
         review.setRatingType(createReviewRequestDTO.getRatingType());
         review.setDescription(createReviewRequestDTO.getDescription());
-        review.setImageUrls(descriptionImageUrls);
         review.setHelpful(helpful);
 
+        review.setImageUrl1(createReviewRequestDTO.getImageUrl1());
+        review.setImageUrl2(createReviewRequestDTO.getImageUrl2());
+        review.setImageUrl3(createReviewRequestDTO.getImageUrl3());
 
         reviewRepository.save(review);
 
@@ -116,7 +110,7 @@ public class ReviewServiceImpl implements ReviewService{
 
         Page<Review> pagedReview = reviewRepository.findAllByMemberId(member.getId(), pageable);
 
-        return converter.convertFromPagedReviewToPagedReviewResponse(pagedReview);
+        return converter.convertFromPagedReviewToPagedQnAResponse(pagedReview);
     }
 
     @Override

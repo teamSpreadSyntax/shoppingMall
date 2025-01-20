@@ -34,8 +34,6 @@ import java.util.Map;
 @Tag(name = "관리자 쿠폰", description = "관라자를 위한 쿠폰관련 API입니다.")
 @RequestMapping("/api/admin/coupon")
 @ApiResponses(value = {
-        @ApiResponse(responseCode = "403", description = "Forbidden",
-                content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
         @ApiResponse(responseCode = "500", description = "Internal server error",
                 content = @Content(schema = @Schema(ref = "#/components/schemas/InternalServerErrorResponseSchema")))
 })
@@ -50,12 +48,12 @@ public class AdminCouponController {
     @Operation(summary = "쿠폰 생성 메서드", description = "쿠폰 생성 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CouponResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 
     })
@@ -73,8 +71,8 @@ public class AdminCouponController {
     @Operation(summary = "id로 쿠폰 조회 메서드", description = "id로 쿠폰 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CouponResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/coupon")
@@ -88,12 +86,13 @@ public class AdminCouponController {
     @Operation(summary = "쿠폰 수정 메서드", description = "쿠폰 수정 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/CouponResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
@@ -110,10 +109,11 @@ public class AdminCouponController {
     @Operation(summary = "전체 쿠폰 조회 메서드", description = "전체 쿠폰 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCouponListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-
     })
     @GetMapping("coupons")
     @SecurityRequirement(name = "bearerAuth")
@@ -137,10 +137,11 @@ public class AdminCouponController {
     @Operation(summary = "쿠폰 통합 조회 메서드", description = "쿠폰이름, 사용시작날짜, 사용종료날짜, 쿠폰부여조건 및 일반 검색어로 쿠폰을 조회합니다. 모든 조건을 만족하는 쿠폰을 조회합니다. 검색어가 없으면 전체 쿠폰을 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedCouponListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
-
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
@@ -170,12 +171,13 @@ public class AdminCouponController {
     @Operation(summary = "회원에게 쿠폰 부여 메서드", description = "회원에게 쿠폰 부여 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedMemberCouponResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
 
     })
     @PostMapping("/assignCouponToMember")
@@ -199,12 +201,13 @@ public class AdminCouponController {
     @Operation(summary = "상품에 쿠폰 부여 메서드", description = "상품에 쿠폰 부여 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductCouponResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
 
     })
     @PostMapping("/assignCouponToProduct")
@@ -230,9 +233,10 @@ public class AdminCouponController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")

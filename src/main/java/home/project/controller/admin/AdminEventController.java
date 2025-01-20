@@ -22,12 +22,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Tag(name = "관리자 이벤트", description = "관리자를 위한 이벤트 관련 API입니다")
 @RequestMapping("/api/admin/event")
@@ -46,26 +45,20 @@ public class AdminEventController {
     @Operation(summary = "이벤트 생성 메서드", description = "이벤트 생성 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/EventResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found",
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
 
-
     })
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/join")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<?> createEvent(@RequestPart("eventData") @Valid CreateEventRequestDTO createEventRequestDTO,
-                                         @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
-                                         @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages) {
+    public ResponseEntity<?> createEvent(@RequestBody CreateEventRequestDTO createEventRequestDTO) {
 
-        List<MultipartFile> imageList = descriptionImages != null ?
-                Arrays.asList(descriptionImages) : new ArrayList<>();
-
-        EventResponse eventResponse = eventService.join(createEventRequestDTO, mainImageFile, imageList);
+        EventResponse eventResponse = eventService.join(createEventRequestDTO);
 
         String successMessage = eventResponse.getName() + "(으)로 이벤트가 등록되었습니다.";
 
@@ -76,23 +69,18 @@ public class AdminEventController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/EventResponseSchema"))),
+            @ApiResponse(responseCode = "204", description = "No Content",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "event not found",
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
-    @PutMapping(value = "/update" , consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> updateEvent(@RequestParam("eventId") Long eventId,
-                                         @RequestPart("eventData") @Valid CreateEventRequestDTO updateEventRequestDTO,
-                                         @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
-                                         @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages) {
-
-        List<MultipartFile> imageList = descriptionImages != null ?
-                Arrays.asList(descriptionImages) : new ArrayList<>();
-
-        EventResponse updatedEvent = eventService.updateEvent(eventId, updateEventRequestDTO, mainImageFile, imageList);
+                                         @RequestBody @Valid CreateEventRequestDTO updateEventRequestDTO) {
+        EventResponse updatedEvent = eventService.updateEvent(eventId, updateEventRequestDTO);
         String successMessage = "이벤트 정보가 수정되었습니다.";
         return new CustomResponseEntity<>(updatedEvent, successMessage, HttpStatus.OK);
     }
@@ -100,12 +88,9 @@ public class AdminEventController {
     @Operation(summary = "id로 이벤트 조회 메서드", description = "id로 이벤트 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/EventResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "event not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ProductResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @GetMapping("/event")
     @SecurityRequirement(name = "bearerAuth")
@@ -118,12 +103,11 @@ public class AdminEventController {
     @Operation(summary = "전체 이벤트 조회 메서드", description = "전체 이벤트 조회 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedEventListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "event not found",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
     })
     @GetMapping("/events")
     @SecurityRequirement(name = "bearerAuth")
@@ -147,12 +131,11 @@ public class AdminEventController {
     @Operation(summary = "이벤트 통합 조회 메서드", description = "이벤트이름, 이벤트시작날짜, 이벤트종료날짜, 할인율 및 일반 검색어로 이벤트를 조회합니다. 모든 조건을 만족하는 이벤트를 조회합니다. 검색어가 없으면 전체 이벤트를 조회합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedEventListResponseSchema"))),
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductListResponseSchema"))),
             @ApiResponse(responseCode = "400", description = "Bad Request",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "event not found",
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @GetMapping("/search")
     @SecurityRequirement(name = "bearerAuth")
@@ -183,11 +166,10 @@ public class AdminEventController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "event not found",
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @DeleteMapping("/delete")
     @SecurityRequirement(name = "bearerAuth")

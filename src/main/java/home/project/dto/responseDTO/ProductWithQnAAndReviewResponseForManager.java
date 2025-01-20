@@ -43,13 +43,13 @@ public class ProductWithQnAAndReviewResponseForManager {
     private Long defectiveStock;
 
     @Schema(description = "상품 설명")
-    private List<String> description;
+    private String description;
 
     @Schema(description = "상품 등록일시")
     private LocalDateTime createProductDate;
 
     @Schema(description = "상품 이미지 URL")
-    private String mainImageFile;
+    private String imageUrl;
 
     @Schema(description = "사이즈", example = "M")
     private String size;
@@ -66,7 +66,7 @@ public class ProductWithQnAAndReviewResponseForManager {
     @Schema(description = "상품 쿠폰 목록")
     private List<ProductCouponResponse> productCouponResponse;
 
-    public ProductWithQnAAndReviewResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, List<String> description, LocalDateTime createProductDate, String mainImageFile, String size, String color, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses, List<ProductCouponResponse> productCouponResponse) {
+    public ProductWithQnAAndReviewResponseForManager(Long id, String name, String brand, String category, String productNum, Long stock, Long soldQuantity, Long price, Integer discountRate, Long defectiveStock, String description, LocalDateTime createProductDate, String imageUrl, String size, String color, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses, List<ProductCouponResponse> productCouponResponse) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -79,7 +79,7 @@ public class ProductWithQnAAndReviewResponseForManager {
         this.defectiveStock = defectiveStock;
         this.description = description;
         this.createProductDate = createProductDate;
-        this.mainImageFile = mainImageFile;
+        this.imageUrl = imageUrl;
         this.size = size;
         this.color = color;
         this.qnADetailResponses = qnADetailResponses;

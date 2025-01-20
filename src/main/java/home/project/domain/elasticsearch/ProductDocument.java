@@ -50,10 +50,10 @@ public class ProductDocument {
                     @InnerField(suffix = "keyword", type = FieldType.Keyword)
             }
     )
-    private List<String> description;
+    private String description;
 
     @Field(type = FieldType.Keyword)
-    private String mainImageFile;
+    private String imageUrl;
 
     @Field(type = FieldType.Long)
     private Long stock;

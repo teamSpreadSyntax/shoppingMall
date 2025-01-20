@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -19,7 +18,7 @@ public class EventResponse {
     private String name;
 
     @Schema(description = "이벤트 설명", example = "봄 시즌 맞이 50% 할인")
-    private List<String> description;
+    private String description;
 
     @Schema(description = "이벤트 시작 날짜")
     private LocalDateTime startDate;
@@ -27,11 +26,15 @@ public class EventResponse {
     @Schema(description = "이벤트 종료 날짜")
     private LocalDateTime endDate;
 
-    public EventResponse(Long id, String name, List<String> description, LocalDateTime startDate, LocalDateTime endDate) {
+    @Schema(description = "이벤트 이미지 URL", example = "https://example.com/event.jpg")
+    private String image;
+
+    public EventResponse(Long id, String name, String description, LocalDateTime startDate, LocalDateTime endDate, String image) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.image = image;
     }
 }

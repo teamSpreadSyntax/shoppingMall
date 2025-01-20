@@ -8,7 +8,7 @@ import home.project.dto.responseDTO.TokenResponse;
 import home.project.response.CustomResponseEntity;
 import home.project.service.member.MemberService;
 import home.project.service.util.PageUtil;
-import home.project.service.validation.ValidationCheck;
+import home.project.service.util.ValidationCheck;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -46,13 +46,12 @@ public class MemberController {
 
     @Operation(summary = "회원가입 메서드", description = "회원가입 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Member successfully registered.",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/MemberJoinSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid input data.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "409", description = "Conflict: Email already exists.",
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
-
     })
     @PostMapping("/join")
     public ResponseEntity<?> createMember(@RequestBody @Valid CreateMemberRequestDTO createMemberRequestDTO, BindingResult bindingResult) {
@@ -71,11 +70,12 @@ public class MemberController {
 
     @Operation(summary = "id로 회원 조회 메서드", description = "id로 회원 조회 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Member information retrieved successfully.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found: Member does not exist.",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @GetMapping("/member")
     @SecurityRequirement(name = "bearerAuth")
@@ -88,10 +88,15 @@ public class MemberController {
 
     @Operation(summary = "본인확인 메서드", description = "본인확인 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Verification successful.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid credentials.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/VerifyResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+
     })
     @PostMapping("/verify")
     @SecurityRequirement(name = "bearerAuth")
@@ -114,13 +119,14 @@ public class MemberController {
 
     @Operation(summary = "회원 정보 업데이트(수정) 메서드", description = "회원 정보 업데이트(수정) 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Member information updated successfully.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberResponseForUserSchema"))),
-            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid input data.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found: Member does not exist.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberWithoutPasswordResponseSchema"))),
+            @ApiResponse(responseCode = "204", description = "NO_CONTENT",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NoChangeResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberValidationFailedResponseSchema"))),
+            @ApiResponse(responseCode = "409", description = "Conflict",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ConflictResponseSchema")))
     })
     @PutMapping("/update")
     @SecurityRequirement(name = "bearerAuth")
@@ -141,10 +147,12 @@ public class MemberController {
 
     @Operation(summary = "회원 탈퇴 메서드", description = "회원 탈퇴 메서드입니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Member account deleted successfully."),
-            @ApiResponse(responseCode = "404", description = "Not Found: Member does not exist.",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "403", description = "Forbidden",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/ForbiddenResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @DeleteMapping("/cancel")
     @SecurityRequirement(name = "bearerAuth")
@@ -158,11 +166,10 @@ public class MemberController {
 
     @Operation(summary = "이메일 찾기 메서드", description = "이름과 전화번호를 기반으로 사용자의 이메일을 찾습니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Email found successfully.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found: Member does not exist.",
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/MemberEmailResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-
     })
     @PostMapping("/find-email")
     public ResponseEntity<?> findEmail(@RequestBody @Valid FindEmailRequestDTO findEmailRequestDTO, BindingResult bindingResult) {
@@ -178,14 +185,7 @@ public class MemberController {
     }
 
     @Operation(summary = "비밀번호 재설정 요청", description = "비밀번호 재설정을 위해 이메일로 링크를 전송합니다.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Password reset email sent successfully.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "404", description = "Not Found: Member does not exist.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
-    })
     @PostMapping("/reset-password-request")
-
     public ResponseEntity<?> resetPasswordRequest(@RequestBody @Valid PasswordResetRequestDTO requestDTO, BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
@@ -199,10 +199,14 @@ public class MemberController {
 
     @Operation(summary = "비밀번호 재설정", description = "토큰을 검증하고 비밀번호를 재설정합니다.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Password reset successfully.",
+            @ApiResponse(responseCode = "200", description = "비밀번호 재설정 성공",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid token.",
-                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema")))
+            @ApiResponse(responseCode = "400", description = "잘못된 요청",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "401", description = "권한 없음",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/UnauthorizedResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "자원 없음",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @PostMapping("/reset_password")
     public ResponseEntity<?> resetPassword(@RequestParam("token") String token,
