@@ -30,8 +30,7 @@ RUN --mount=type=cache,target=/root/.gradle ./gradlew build -x test --no-daemon
 # Step 2: Use an official OpenJDK runtime image to run the app
 FROM openjdk:17-jdk-slim
 
-# wait-for-it.sh 스크립트를 복사
-COPY scripts/wait-for-it.sh /app/wait-for-it.sh
+
 
 # Set the working directory in the runtime container
 WORKDIR /app
@@ -60,7 +59,8 @@ RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
     -keystore $JAVA_HOME/lib/security/cacerts \
     -storepass changeit -noprompt
 
-
+# wait-for-it.sh 스크립트를 복사
+COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 
 RUN mkdir -p /usr/share/elasticsearch/config \
     /usr/share/kibana/config \
