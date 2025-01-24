@@ -193,7 +193,7 @@ services:
       LOGSTASH_KEYSTORE_PASSWORD: "${LOGSTASH_KEYSTORE_PASSWORD}"
       LOGSTASH_KEYSTORE_TYPE: "pkcs12"
       CA_PASSWORD: "${CA_PASSWORD}"
-      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12 -Djavax.net.ssl.trustStorePassword=Ccenter123456! -Djavax.net.ssl.trustStoreType=PKCS12"
+      LS_JAVA_OPTS: "-Djavax.net.ssl.trustStore=/usr/share/logstash/config/www.projectkkk.pkcs12 -Djavax.net.ssl.trustStorePassword=Ccenter123456! -Djavax.net.ssl.trustStoreType=PKCS12"
     depends_on:
       elasticsearch:
         condition: service_healthy
