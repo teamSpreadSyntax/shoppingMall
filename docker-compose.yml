@@ -117,7 +117,7 @@ services:
       fi
       
       echo "2. 키스토어 설정 시작..."
-      if [ ! -f /usr/share/elasticsearch/config/elasticsearch.keystore ]; then
+      if [ ! -f /usr/share/elasticsearch/config/www.projectkkk.pkcs12 ]; then
           echo "Elasticsearch 키스토어 생성 중..."
           bin/elasticsearch-keystore create
       fi
