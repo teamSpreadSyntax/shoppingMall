@@ -121,7 +121,7 @@ RUN chmod 600 /usr/share/kafka/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
 RUN chmod 600 /usr/share/logstash/pipeline/logstash.conf
 RUN chmod 600 /usr/share/logstash/config/logstash.yml
-
+#s
 
 # Expose port 443 for the application
 EXPOSE 443
