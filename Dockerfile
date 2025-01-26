@@ -50,11 +50,14 @@ RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 # Google 인증서 추가
 # Google API 인증서 추가
-COPY googleapis-root.crt /etc/google/googleapis-root.crt
-
-# Java keystore에 인증서 추가
-RUN keytool -importcert -file /etc/google/googleapis-root.crt -alias googleapis-root \
-    -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
+RUN apt-get update && apt-get install -y ca-certificates
+COPY googleapis-root.crt /etc/ssl/certs/
+RUN update-ca-certificates
+RUN keytool -importcert -file /etc/ssl/certs/googleapis-root.crt \
+    -alias googleapis \
+    -keystore $JAVA_HOME/lib/security/cacerts \
+    -storepass changeit \
+    -noprompt
 
 COPY google.crt /tmp/google.crt
 
