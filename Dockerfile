@@ -48,6 +48,8 @@ COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.j
 RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 
+RUN apt-get update && apt-get install -y ca-certificates
+
 # Google 인증서 추가
 # Google API 인증서 추가
 COPY googleapis-root.crt /etc/google/googleapis-root.crt
