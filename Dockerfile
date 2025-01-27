@@ -52,16 +52,12 @@ RUN apt-get update && apt-get install -y ca-certificates
 
 # Google 인증서 추가
 # Google API 인증서 추가
-COPY googleapis-root.crt /etc/google/googleapis-root.crt
-
-# Java keystore에 인증서 추가
-RUN keytool -importcert -file /etc/google/googleapis-root.crt -alias googleapis-root \
-    -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
-
-COPY google.crt /tmp/google.crt
-
-RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
-    -keystore $JAVA_HOME/lib/security/cacerts \
+RUN apt-get install -y curl && \
+    curl -o /usr/local/share/ca-certificates/google.crt \
+    https://pki.goog/roots.pem && \
+    update-ca-certificates && \
+    keytool -importcert -file /usr/local/share/ca-certificates/google.crt \
+    -alias google-root -keystore $JAVA_HOME/lib/security/cacerts \
     -storepass changeit -noprompt
 
 
