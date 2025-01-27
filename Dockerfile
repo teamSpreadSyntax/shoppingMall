@@ -47,21 +47,17 @@ COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
 RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
-# wait-for-it.sh 스크립트를 복사
-COPY scripts/wait-for-it.sh /app/wait-for-it.sh
+
+RUN apt-get update && apt-get install -y ca-certificates
 
 # Google 인증서 추가
 # Google API 인증서 추가
-COPY googleapis-root.crt /etc/google/googleapis-root.crt
-
-# Java keystore에 인증서 추가
-RUN keytool -importcert -file /etc/google/googleapis-root.crt -alias googleapis-root \
-    -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit -noprompt
-
-COPY google.crt /tmp/google.crt
-
-RUN keytool -importcert -file /tmp/google.crt -alias google-cert \
-    -keystore $JAVA_HOME/lib/security/cacerts \
+RUN apt-get install -y curl && \
+    curl -o /usr/local/share/ca-certificates/google.crt \
+    https://pki.goog/roots.pem && \
+    update-ca-certificates && \
+    keytool -importcert -file /usr/local/share/ca-certificates/google.crt \
+    -alias google-root -keystore $JAVA_HOME/lib/security/cacerts \
     -storepass changeit -noprompt
 
 
@@ -132,4 +128,3 @@ EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
 ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=200", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12", "-Djavax.net.ssl.trustStorePassword=Ccenter123456!", "-Djavax.net.ssl.trustStoreType=PKCS12", "-jar", "app.jar"]
-
