@@ -129,7 +129,7 @@ RUN chmod 600 /usr/share/logstash/config/logstash.yml
 # Expose port 443 for the application
 EXPOSE 443
 
-# Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
+# Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready.
 ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=200", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java",
     "-Dserver.port=443",
     "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12",
