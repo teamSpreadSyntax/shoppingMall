@@ -127,7 +127,19 @@ RUN chmod 600 /usr/share/logstash/config/logstash.yml
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready
-ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=200", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java", "-Dserver.port=443", "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12", "-Dserver.ssl.key-store-password=Ccenter123456!", "-Dserver.ssl.key-store-type=PKCS12", "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12", "-Djavax.net.ssl.trustStorePassword=Ccenter123456!", "-Djavax.net.ssl.trustStoreType=PKCS12", "-jar", "app.jar", "-Dgoogle.auth.http.trustStorePath=/usr/local/share/ca-certificates/google.crt",
+ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=200", "--", "/app/wait-for-it.sh", "elasticsearch:9200", "--timeout=240", "--", "java",
+    "-Dserver.port=443",
+    "-Dserver.ssl.key-store=/app/www.projectkkk.pkcs12",
+    "-Dserver.ssl.key-store-password=Ccenter123456!",
+    "-Dserver.ssl.key-store-type=PKCS12",
+    "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12",
+    "-Djavax.net.ssl.trustStorePassword=Ccenter123456!",
+    "-Djavax.net.ssl.trustStoreType=PKCS12",
+    "-Dgoogle.auth.http.trustStorePath=/usr/local/share/ca-certificates/google.crt",
+    "-Dgoogle.auth.http.trustStorePassword=changeit",
+    "-Dgoogle.auth.http.trustStoreType=PEM",
+    "-DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json",
+    "-jar", "app.jar"]
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "-Dgoogle.auth.http.trustStorePassword=changeit",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "-Dgoogle.auth.http.trustStoreType=PEM",
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                "-DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json",
