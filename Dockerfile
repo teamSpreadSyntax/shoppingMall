@@ -55,7 +55,10 @@ RUN apt-get update && apt-get install -y ca-certificates
 RUN apt-get install -y curl && \
     curl -o /usr/local/share/ca-certificates/google.crt \
     https://pki.goog/roots.pem && \
-    update-ca-certificates && \
+    keytool -importcert -file /usr/local/share/ca-certificates/google.crt \
+    -alias google-root \
+    -keystore /usr/share/elasticsearch/config/www.projectkkk.pkcs12 \
+    -storepass Ccenter123456! -noprompt && \
     keytool -importcert -file /usr/local/share/ca-certificates/google.crt \
     -alias google-root -keystore $JAVA_HOME/lib/security/cacerts \
     -storepass changeit -noprompt
@@ -135,12 +138,4 @@ ENTRYPOINT ["/app/wait-for-it.sh", "kafka:9092", "--timeout=200", "--", "/app/wa
     "-Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12",
     "-Djavax.net.ssl.trustStorePassword=Ccenter123456!",
     "-Djavax.net.ssl.trustStoreType=PKCS12",
-    "-Dgoogle.auth.http.trustStorePath=/usr/local/share/ca-certificates/google.crt",
-    "-Dgoogle.auth.http.trustStorePassword=changeit",
-    "-Dgoogle.auth.http.trustStoreType=PEM",
-    "-DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json",
     "-jar", "app.jar"]
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "-Dgoogle.auth.http.trustStorePassword=changeit",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "-Dgoogle.auth.http.trustStoreType=PEM",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "-DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json",
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               "-jar", "app.jar"]
