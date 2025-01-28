@@ -45,7 +45,12 @@ COPY --from=builder /app/build/libs/*.jar app.jar
 COPY --from=builder /app/serviceAccountKey.json /app/serviceAccountKey.json
 
 COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
+
+# SSL 인증서를 미리 복사
+COPY www.projectkkk.pkcs12 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
+
 RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 
 
 RUN apt-get update && apt-get install -y ca-certificates
