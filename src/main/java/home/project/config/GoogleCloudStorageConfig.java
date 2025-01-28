@@ -9,19 +9,23 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Configuration
 public class GoogleCloudStorageConfig {
 
     @Bean
     public Storage storage() throws IOException {
-        // 서비스 계정 키 파일에서 인증 정보 로드
         GoogleCredentials credentials = GoogleCredentials.fromStream(
-                new FileInputStream(System.getenv("GOOGLE_APPLICATION_CREDENTIALS")));
+                        new FileInputStream(System.getenv("GOOGLE_APPLICATION_CREDENTIALS")))
+                .createScoped(Arrays.asList(
+                        "https://www.googleapis.com/auth/cloud-platform",
+                        "https://www.googleapis.com/auth/devstorage.read_write"
+                ));
 
-        // Storage 객체 생성 및 반환
         return StorageOptions.newBuilder()
                 .setCredentials(credentials)
+                .setProjectId("superb-analog-439512-g8")
                 .build()
                 .getService();
     }
