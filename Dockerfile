@@ -57,16 +57,14 @@ RUN apt-get update && apt-get install -y ca-certificates
 
 # Google 인증서 추가
 # Google API 인증서 추가
+# Google 인증서는 $JAVA_HOME/lib/security/cacerts에만 추가
 RUN apt-get install -y curl && \
-    curl -o /usr/local/share/ca-certificates/google.crt \
-    https://pki.goog/roots.pem && \
+    curl -o /usr/local/share/ca-certificates/google.crt https://pki.goog/roots.pem && \
     keytool -importcert -file /usr/local/share/ca-certificates/google.crt \
-    -alias google-root \
-    -keystore /usr/share/elasticsearch/config/www.projectkkk.pkcs12 \
-    -storepass Ccenter123456! -noprompt && \
-    keytool -importcert -file /usr/local/share/ca-certificates/google.crt \
-    -alias google-root -keystore $JAVA_HOME/lib/security/cacerts \
-    -storepass changeit -noprompt
+        -alias google-root \
+        -keystore $JAVA_HOME/lib/security/cacerts \
+        -storepass changeit -noprompt
+
 
 
 
