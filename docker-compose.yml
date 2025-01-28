@@ -334,9 +334,9 @@ services:
       SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
       SERVER_HSTS_PRELOAD: "false"
       KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
-      GOOGLE_AUTH_HTTP_TRUST_STORE_PATH: /usr/share/elasticsearch/config/www.projectkkk.pkcs12
-      GOOGLE_AUTH_HTTP_TRUST_STORE_PASSWORD: Ccenter123456!
-      GOOGLE_AUTH_HTTP_TRUST_STORE_TYPE: PKCS12
+      GOOGLE_AUTH_HTTP_TRUST_STORE_PATH: /usr/local/share/ca-certificates/google.crt
+      GOOGLE_AUTH_HTTP_TRUST_STORE_PASSWORD: changeit
+      GOOGLE_AUTH_HTTP_TRUST_STORE_TYPE: PEM
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
       JAVA_OPTS: >
         -Dserver.port=443
@@ -346,9 +346,9 @@ services:
         -Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12
         -Djavax.net.ssl.trustStorePassword=Ccenter123456!
         -Djavax.net.ssl.trustStoreType=PKCS12
-        -Dgoogle.auth.http.trustStorePath=/usr/share/elasticsearch/config/www.projectkkk.pkcs12
-        -Dgoogle.auth.http.trustStorePassword=Ccenter123456!
-        -Dgoogle.auth.http.trustStoreType=PKCS12
+        -Dgoogle.auth.http.trustStorePath=/usr/local/share/ca-certificates/google.crt
+        -Dgoogle.auth.http.trustStorePassword=changeit
+        -Dgoogle.auth.http.trustStoreType=PEM
         -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     depends_on:
       elasticsearch:

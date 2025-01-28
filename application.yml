@@ -76,6 +76,16 @@ spring:
       org.springframework.data.elasticsearch: DEBUG
       org.elasticsearch: DEBUG
 
+google:
+  cloud:
+    storage:
+      credentials:
+        ssl:
+          enabled: true
+          trust-store: /usr/local/share/ca-certificates/google.crt
+          trust-store-password: changeit
+          trust-store-type: PEM
+
 server:
   port: 443
   ssl:
