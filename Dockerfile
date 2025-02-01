@@ -16,14 +16,9 @@ COPY gradle/gradle-8.5-bin.zip /app/gradle/gradle-8.5-bin.zip
 # Firebase 설정 파일 복사
 COPY src/main/resources/superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb251.json /app/serviceAccountKey.json
 
-
 COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
 
 COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /app/src/main/resources/
-
-
-RUN chown root:root /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
-RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 # gradle-wrapper.properties의 distributionUrl을 로컬 파일 경로로 변경
 RUN sed -i 's|https://services.gradle.org/distributions/gradle-8.5-bin.zip|file:///app/gradle/gradle-8.5-bin.zip|' gradle/wrapper/gradle-wrapper.properties
@@ -40,8 +35,6 @@ COPY scripts/wait-for-it.sh /app/wait-for-it.sh
 # Set the working directory in the runtime container
 WORKDIR /app
 
-
-
 # Copy the JAR file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
@@ -53,11 +46,7 @@ COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.j
 # SSL 인증서를 미리 복사
 COPY www.projectkkk.pkcs12 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 
-RUN chown root:root /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json && \
-    chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
-
 RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
-
 
 RUN apt-get update && apt-get install -y ca-certificates
 
@@ -70,9 +59,6 @@ RUN apt-get install -y curl && \
         -alias google-root \
         -keystore $JAVA_HOME/lib/security/cacerts \
         -storepass changeit -noprompt
-
-
-
 
 RUN mkdir -p /usr/share/elasticsearch/config \
     /usr/share/kibana/config \
@@ -122,18 +108,18 @@ RUN chmod 644 /app/www.projectkkk.pkcs12
 
 # 권한 설정
 #RUN chmod 600 /usr/share/elasticsearch/config/elastic-truststore.p12
-RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
-RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.com.pem
-RUN chmod 600 /usr/share/kibana/config/www.projectkkk.com.pem
-RUN chmod 600 /usr/share/logstash/config/www.projectkkk.pkcs12
-RUN chmod 600 /usr/share/kibana/config/www.projectkkk.pkcs12
-RUN chmod 600 /usr/share/kibana/config/kibana.yml
-#RUN chmod 600 /usr/share/kibana/config/r10.crt
-RUN chmod 600 /usr/share/kafka/config/www.projectkkk.pkcs12
-RUN chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12
-RUN chmod 600 /usr/share/logstash/pipeline/logstash.conf
-RUN chmod 600 /usr/share/logstash/config/logstash.yml
-
+RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12 && \
+    chmod 600 /usr/share/elasticsearch/config/www.projectkkk.com.pem && \
+    chmod 600 /usr/share/kibana/config/www.projectkkk.com.pem && \
+    chmod 600 /usr/share/logstash/config/www.projectkkk.pkcs12 && \
+    chmod 600 /usr/share/kibana/config/www.projectkkk.pkcs12 && \
+    chmod 600 /usr/share/kibana/config/kibana.yml && \
+    chmod 600 /usr/share/kafka/config/www.projectkkk.pkcs12 && \
+    chmod 600 /usr/share/springboot/config/www.projectkkk.pkcs12 && \
+    chmod 600 /usr/share/logstash/pipeline/logstash.conf && \
+    chmod 600 /usr/share/logstash/config/logstash.yml && \
+    chown root:root /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json && \
+    chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 # Expose port 443 for the application
 EXPOSE 443
