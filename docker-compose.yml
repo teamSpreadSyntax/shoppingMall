@@ -337,6 +337,7 @@ services:
       GOOGLE_AUTH_HTTP_TRUST_STORE_PATH: /usr/local/openjdk-17/lib/security/cacerts
       GOOGLE_AUTH_HTTP_TRUST_STORE_PASSWORD: changeit
       GOOGLE_AUTH_HTTP_TRUST_STORE_TYPE: JKS
+      GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
       JAVA_OPTS: >
         -Dserver.port=443
         -Dserver.ssl.key-store=/app/www.projectkkk.pkcs12
