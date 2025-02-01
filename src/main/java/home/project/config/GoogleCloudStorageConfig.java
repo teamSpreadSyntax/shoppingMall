@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
 @Configuration
@@ -14,14 +15,19 @@ public class GoogleCloudStorageConfig {
 
     @Bean
     public Storage storage() throws IOException {
-        // 서비스 계정 키 파일에서 인증 정보 로드
-        GoogleCredentials credentials = GoogleCredentials.fromStream(
-                new ClassPathResource("superb-analog-439512-g8-e7979f6854cd.json").getInputStream());
+        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
 
-        // Storage 객체 생성 및 반환
+        if (credentialsPath == null || credentialsPath.isEmpty()) {
+            throw new RuntimeException("GOOGLE_APPLICATION_CREDENTIALS 환경 변수가 설정되지 않았습니다.");
+        }
+
+        // 환경 변수에서 읽어서 인증
+        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(credentialsPath));
+
         return StorageOptions.newBuilder()
                 .setCredentials(credentials)
                 .build()
                 .getService();
     }
+
 }
