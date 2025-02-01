@@ -53,7 +53,9 @@ COPY --from=builder /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.j
 # SSL 인증서를 미리 복사
 COPY www.projectkkk.pkcs12 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 
-RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+RUN chown root:root /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json && \
+    chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
+
 RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12
 
 
@@ -117,7 +119,6 @@ RUN chmod 755 /usr/share/elasticsearch/config \
 
 RUN chmod +x /app/wait-for-it.sh
 RUN chmod 644 /app/www.projectkkk.pkcs12
-RUN chmod 644 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 # 권한 설정
 #RUN chmod 600 /usr/share/elasticsearch/config/elastic-truststore.p12
