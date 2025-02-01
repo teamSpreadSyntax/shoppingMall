@@ -80,7 +80,11 @@ google:
   cloud:
     storage:
       credentials:
-        json-key: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
+        ssl:
+          enabled: true
+          trust-store: /usr/local/openjdk-17/lib/security/cacerts  # 실제 Java 키스토어 경로
+          trust-store-password: changeit
+          trust-store-type: JKS
 
 server:
   port: 443
