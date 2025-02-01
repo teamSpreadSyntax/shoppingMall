@@ -84,7 +84,7 @@ google:
           enabled: true
           trust-store: /usr/local/share/ca-certificates/google.crt
           trust-store-password: changeit
-          trust-store-type: PEM
+          trust-store-type: JKS  # PEM에서 JKS로 변경
 
 server:
   port: 443

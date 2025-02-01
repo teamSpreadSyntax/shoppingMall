@@ -18,6 +18,10 @@ COPY src/main/resources/superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb2
 
 
 COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /usr/share/springboot/
+
+COPY src/main/resources/superb-analog-439512-g8-e7979f6854cd.json /app/src/main/resources/
+
+
 RUN chown root:root /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 RUN chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
