@@ -334,9 +334,6 @@ services:
       SERVER_HSTS_INCLUDE_SUBDDOMAINS: "false"
       SERVER_HSTS_PRELOAD: "false"
       KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
-      GOOGLE_AUTH_HTTP_TRUST_STORE_PATH: /usr/local/openjdk-17/lib/security/cacerts
-      GOOGLE_AUTH_HTTP_TRUST_STORE_PASSWORD: changeit
-      GOOGLE_AUTH_HTTP_TRUST_STORE_TYPE: JKS
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
       JAVA_OPTS: >
         -Dserver.port=443
