@@ -117,6 +117,7 @@ RUN chmod 755 /usr/share/elasticsearch/config \
 
 RUN chmod +x /app/wait-for-it.sh
 RUN chmod 644 /app/www.projectkkk.pkcs12
+RUN chmod 644 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
 # 권한 설정
 #RUN chmod 600 /usr/share/elasticsearch/config/elastic-truststore.p12
@@ -145,4 +146,5 @@ ENTRYPOINT ["/bin/bash", "-c", "/app/wait-for-it.sh kafka:9092 --timeout=200 -- 
     -Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12 \
     -Djavax.net.ssl.trustStorePassword=Ccenter123456! \
     -Djavax.net.ssl.trustStoreType=PKCS12 \
+    -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json \
     -jar app.jar"]
