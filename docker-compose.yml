@@ -337,6 +337,15 @@ services:
       GOOGLE_AUTH_HTTP_TRUST_STORE_PATH: /usr/local/openjdk-17/lib/security/cacerts
       GOOGLE_AUTH_HTTP_TRUST_STORE_PASSWORD: changeit
       GOOGLE_AUTH_HTTP_TRUST_STORE_TYPE: JKS
+      JAVA_OPTS: >
+        -Dserver.port=443
+        -Dserver.ssl.key-store=/app/www.projectkkk.pkcs12
+        -Dserver.ssl.key-store-password=${SPRINGBOOT_PASSWORD}
+        -Dserver.ssl.key-store-type=PKCS12
+        -Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12
+        -Djavax.net.ssl.trustStorePassword=Ccenter123456!
+        -Djavax.net.ssl.trustStoreType=PKCS12
+        -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     depends_on:
       elasticsearch:
         condition: service_healthy
