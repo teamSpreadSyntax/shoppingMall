@@ -343,6 +343,9 @@ services:
         -Djavax.net.ssl.trustStore=/usr/share/elasticsearch/config/www.projectkkk.pkcs12
         -Djavax.net.ssl.trustStorePassword=Ccenter123456!
         -Djavax.net.ssl.trustStoreType=PKCS12
+        -Dcom.google.api.client.googleapis.auth.http.trustStore=/etc/ssl/certs/java/cacerts
+        -Dcom.google.api.client.googleapis.auth.http.trustStorePassword=changeit
+        -Dcom.google.api.client.googleapis.auth.http.trustStoreType=JKS
         -DGOOGLE_APPLICATION_CREDENTIALS=/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
     depends_on:
       elasticsearch:
