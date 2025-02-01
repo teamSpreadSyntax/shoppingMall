@@ -336,7 +336,7 @@ services:
       KAKAO_API_KEY: "5ef47e46986e714e47d918266a647a01"
       GOOGLE_AUTH_HTTP_TRUST_STORE_PATH: /usr/local/share/ca-certificates/google.crt
       GOOGLE_AUTH_HTTP_TRUST_STORE_PASSWORD: changeit
-      GOOGLE_AUTH_HTTP_TRUST_STORE_TYPE: PEM
+      GOOGLE_AUTH_HTTP_TRUST_STORE_TYPE: JKS
       GOOGLE_APPLICATION_CREDENTIALS: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
       JAVA_OPTS: >
         -Dserver.port=443
