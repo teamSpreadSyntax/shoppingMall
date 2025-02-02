@@ -48,7 +48,7 @@ services:
       - xpack.security.http.ssl.truststore.type=PKCS12
       - xpack.security.http.ssl.truststore.path=/usr/share/elasticsearch/config/www.projectkkk.pkcs12    # 수정: 경로 변경
       - xpack.security.http.ssl.truststore.secure_password=${TRUSTSTORE_PASSWORD}
-      - xpack.security.http.ssl.verification_mode=full  # SSL 검증 활성화
+      - xpack.security.http.ssl.verification_mode=full  # SSL 검증활성화
       - ingest.geoip.downloader.enabled=true
       - KIBANA_SYSTEM_PASSWORD=Ccenter123456!
       - xpack.license.self_generated.type=basic
