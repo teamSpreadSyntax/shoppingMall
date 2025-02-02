@@ -330,6 +330,7 @@ volumes:
   token-volume:
     driver: local
   es-data:
+
 networks:
   project_default:
     external: true
