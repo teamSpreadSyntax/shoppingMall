@@ -1,8 +1,10 @@
 package home.project.service.product;
 
 
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import home.project.domain.common.QnA;
@@ -50,6 +52,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
+@CacheConfig(cacheNames = "product")
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
@@ -70,6 +73,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(allEntries = true)
     public void join(CreateProductRequestDTO createProductRequestDTO, MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -138,6 +142,7 @@ public class ProductServiceImpl implements ProductService {
         }
     }
     @Override
+    @Cacheable(key = "'product:detail:' + #productId", unless = "#result == null")
     public ProductWithQnAAndReviewResponse findByIdReturnProductResponse(Long productId) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -163,6 +168,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'product:manage:' + #productId", unless = "#result == null")
     public ProductWithQnAAndReviewResponseForManager findByIdReturnProductResponseForManager(Long productId) {
         Product product = findById(productId);
         Pageable pageable = pageUtil.pageable(PageRequest.of(1, 5));
@@ -172,6 +178,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'product:' + #productId", unless = "#result == null")
     public Product findById(Long productId) {
         if (productId == null) {
             throw new IllegalStateException("id가 입력되지 않았습니다.");
@@ -182,11 +189,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'productNum:' + #productNum", unless = "#result == null")
     public Product findByProductNum(String productNum){
         return productRepository.findByProductNum(productNum);
     }
 
     @Override
+    @Cacheable(key = "'products:page:' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductSimpleResponse> findAll(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
 
@@ -230,18 +239,21 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    @Cacheable(key = "'products:managing:all:' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductResponseForManager> findAllForManaging(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAll(pageable);
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
 
     @Override
+    @Cacheable(key = "'products:admin:new:' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductSimpleResponseForManager> adminFindNewProduct(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
         return converter.convertFromPagedProductToPagedProductSimpleResponseForManager(pagedProduct);
     }
 
     @Override
+    @Cacheable(key = "'products:new:' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductSimpleResponse> findNewProduct(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findTop20LatestProducts(pageable);
 
@@ -261,6 +273,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'products:new:' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductResponse> findProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -275,6 +288,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'products:elastic:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductSimpleResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable) {
 
 
@@ -299,6 +313,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'products:managing:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content,String color, String size,  Pageable pageable) {
         String categoryCode = null;
 
@@ -308,6 +323,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'products:elastic:managing:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable) {
         String categoryCode = null;
 
@@ -319,11 +335,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'products:managing:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable) {
         return null;
     }
 
     @Override
+    @Cacheable(key = "'products:sold:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductResponseForManager> findSoldProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable) {
         String categoryCode = null;
 
@@ -333,12 +351,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'products:bestsellers:' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductResponse> findAllBySoldQuantity(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAllBySoldQuantity(pageable);
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
     @Override
+    @Cacheable(key = "'brands:list:' + #pageable.pageNumber", unless = "#result == null")
     public Page<String> brandList(Pageable pageable) {
         Page<Product> pagedProduct = productRepository.findAllByOrderByBrandAsc(pageable);
         return converter.convertFromPagedProductToPagedBrand(pagedProduct);
@@ -346,6 +366,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CachePut(key = "'product:' + #updateProductRequestDTO.id")
     public ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
 
         boolean isCategoryModified = false;
@@ -550,6 +571,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'product:purchase:' + #productId", unless = "#result == null")
     public Product findByProductIdAndConfirmHasPurchase(Long productId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -575,6 +597,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'products:manager:' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductSimpleResponseForManager> findAllByIdReturnProductResponseForManager(Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -584,6 +607,7 @@ public class ProductServiceImpl implements ProductService {
 
 
     @Override
+    @Cacheable(key = "'products:elastic:admin:' + #brand + ':' + #category + ':' + #productName + ':' + #content + ':' + #pageable.pageNumber", unless = "#result == null")
     public Page<ProductResponseForManager> findProductsOnElasticForAdmin(String brand, String category, String productName, String content, Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -751,6 +775,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(key = "'product:order:' + #productOrderId", unless = "#result == null")
     public Product findByProductOrderNumForAdmin(Long productOrderId) {
         ProductOrder productOrder = productOrderRepository.findById(productOrderId)
                 .orElseThrow(() -> new IdNotFoundException(productOrderId + "(으)로 등록된 주문서가 없습니다."));
