@@ -157,15 +157,15 @@ services:
       
           echo '4. 사용자 비밀번호 설정 중...';
           # 수정: curl 명령어 구문 수정
-          curl -k -X POST -H 'Content-Type: application/json' \
-               -u \"elastic:${ELASTIC_PASSWORD}\" \
-               -d \"{\\\"password\\\":\\\"${ELASTIC_PASSWORD}\\\"}\" \
-               'https://localhost:9200/_security/user/elastic/_password'
-      
-          curl -k -X POST -H 'Content-Type: application/json' \
-               -u \"elastic:${ELASTIC_PASSWORD}\" \
-               -d \"{\\\"password\\\":\\\"${KIBANA_PASSWORD}\\\"}\" \
-               'https://localhost:9200/_security/user/kibana_system/_password'
+          curl -k -X POST -H "Content-Type: application/json" \
+               -u "elastic:${ELASTIC_PASSWORD}" \
+               -d "{\"password\":\"${ELASTIC_PASSWORD}\"}" \
+               "https://localhost:9200/_security/user/elastic/_password"
+
+          curl -k -X POST -H "Content-Type: application/json" \
+               -u "elastic:${ELASTIC_PASSWORD}" \
+               -d "{\"password\":\"${KIBANA_PASSWORD}\"}" \
+               "https://localhost:9200/_security/user/kibana_system/_password"
       
           echo '5. 서비스 토큰 생성 중...';
           if [ ! -s /usr/share/elasticsearch/config/token.env ]; then
