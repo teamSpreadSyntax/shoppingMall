@@ -1,9 +1,5 @@
 package home.project.service.product;
 
-
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import home.project.domain.common.QnA;
 import home.project.domain.common.Review;
@@ -65,8 +61,6 @@ public class ProductServiceImpl implements ProductService {
     private final QnARepository qnARepository;
     private final ReviewRepository reviewRepository;
     private final FileService fileService;
-    private final RedisTemplate<String, Object> redisTemplate;
-
 
     @Override
     @Transactional
