@@ -76,12 +76,6 @@ spring:
       org.springframework.data.elasticsearch: DEBUG
       org.elasticsearch: DEBUG
 
-google:
-  cloud:
-    storage:
-      credentials:
-        json-key: "/usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json"
-
 server:
   port: 443
   ssl:
