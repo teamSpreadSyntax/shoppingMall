@@ -121,7 +121,7 @@ RUN chmod 600 /usr/share/elasticsearch/config/www.projectkkk.pkcs12 && \
     chown root:root /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json && \
     chmod 600 /usr/share/springboot/superb-analog-439512-g8-e7979f6854cd.json
 
-# Expose port 443 for the application
+# Expose port 443 for the application.
 EXPOSE 443
 
 # Run the Spring Boot application after waiting for Kafka and Elasticsearch to be ready.
