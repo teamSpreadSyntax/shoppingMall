@@ -461,7 +461,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CacheEvict(key = "'product:' + #productId")
     public String deleteById(Long productId) {
         Product product =findById(productId);
         String name = product.getName();
@@ -472,7 +471,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CachePut(key = "'product:' + #productId")
     public ProductResponseForManager increaseStock(Long productId, Long stock) {
         if (stock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
@@ -489,7 +487,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CachePut(key = "'product:' + #productId")
     public ProductResponseForManager decreaseStock(Long productId, Long stock) {
         Product product = findById(productId);
         Long currentStock = product.getStock();
@@ -506,7 +503,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CachePut(key = "'product:' + #productId")
     public ProductResponseForManager increaseSoldQuantity(Long productId, Long quantity) {
         if (quantity < 0) {
             throw new IllegalArgumentException("증가시킬 판매 수량은 음수일 수 없습니다.");
@@ -523,7 +519,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CachePut(key = "'product:' + #productId")
     public ProductResponseForManager decreaseSoldQuantity(Long productId, Long quantity) {
         if (quantity < 0) {
             throw new IllegalArgumentException("감소시킬 판매 수량은 음수일 수 없습니다.");
@@ -623,7 +618,6 @@ public class ProductServiceImpl implements ProductService {
         );
     }
 
-    @CachePut(key = "'product:' + #updateProductRequestDTO.id")
     @Override
     @Transactional
     public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
@@ -650,7 +644,6 @@ public class ProductServiceImpl implements ProductService {
                 );
     }
 
-    @CacheEvict(key = "'product:' + #productId")
     @Override
     @Transactional
     public String deleteByIdForAdmin(Long productId) {
@@ -666,7 +659,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CachePut(key = "'product:' + #productId")
     public ProductResponseForManager increaseStockForAdmin(Long productId, Long stock) {
         if (stock < 0) {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
@@ -687,7 +679,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CachePut(key = "'product:' + #productId")
     public ProductResponseForManager decreaseStockForAdmin(Long productId, Long stock) {
         Product product = findById(productId);
         if (confirmProductOwnership(product.getName(), product.getBrand())) {
@@ -707,7 +698,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CachePut(key = "'product:' + #productId")
     public ProductResponseForManager increaseSoldQuantityForAdmin(Long productId, Long quantity) {
         if (quantity < 0) {
             throw new IllegalArgumentException("증가시킬 판매 수량은 음수일 수 없습니다.");
