@@ -164,7 +164,6 @@ public class AdminProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
     @GetMapping("/search")
-    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> searchProductsForManaging(
             @RequestParam(value = "brand", required = false) String brand,
             @RequestParam(value = "category", required = false) String category,
@@ -174,17 +173,21 @@ public class AdminProductController {
             @SortDefault.SortDefaults({
                     @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
             }) @ParameterObject Pageable pageable) {
+
         pageable = pageUtil.pageable(pageable);
 
         Page<ProductResponseForManager> productPage = productService.findProductsOnElasticForAdmin(brand, category, productName, content, pageable);
 
         String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
 
-        long totalCount = productPage.getTotalElements();
-        int page = productPage.getNumber();
-
-        return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
-
+        // CustomResponseEntity의 List 처리 생성자 사용
+        return new CustomResponseEntity<>(
+                productPage.getContent(),           // List<ProductResponseForManager>
+                successMessage,                     // 메시지
+                HttpStatus.OK,                      // 상태
+                productPage.getTotalElements(),     // 전체 개수
+                productPage.getNumber()             // 현재 페이지
+        );
     }
 
     @Operation(summary = "전체 브랜드 조회 메서드", description = "브랜드 조회(판매량기준 오름차순정렬) 메서드입니다.")
