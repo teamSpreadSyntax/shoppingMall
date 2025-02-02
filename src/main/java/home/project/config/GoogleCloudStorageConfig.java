@@ -15,19 +15,14 @@ public class GoogleCloudStorageConfig {
 
     @Bean
     public Storage storage() throws IOException {
-        String credentialsPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        // 서비스 계정 키 파일에서 인증 정보 로드
+        GoogleCredentials credentials = GoogleCredentials.fromStream(
+                new FileInputStream(System.getenv("GOOGLE_APPLICATION_CREDENTIALS")));
 
-        if (credentialsPath == null || credentialsPath.isEmpty()) {
-            throw new RuntimeException("GOOGLE_APPLICATION_CREDENTIALS 환경 변수가 설정되지 않았습니다.");
-        }
-
-        // 환경 변수에서 읽어서 인증
-        GoogleCredentials credentials = GoogleCredentials.fromStream(new FileInputStream(credentialsPath));
-
+        // Storage 객체 생성 및 반환
         return StorageOptions.newBuilder()
                 .setCredentials(credentials)
                 .build()
                 .getService();
     }
-
 }

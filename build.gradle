@@ -108,12 +108,11 @@ dependencies {
 
     implementation 'com.google.cloud:spring-cloud-gcp-starter-storage:3.3.0'
 
-    implementation 'com.google.cloud:google-cloud-storage:2.23.0'
-
-
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
 }
 
