@@ -60,6 +60,10 @@ public class ShippingServiceImpl implements ShippingService{
             shipping.setDepartureDate(LocalDateTime.now().toString());
         }
 
+        if (deliveryStatusType == DeliveryStatusType.DELIVERY_COMPLETED) {
+            shipping.setArrivedDate(LocalDateTime.now().toString());
+        }
+
         for (ProductOrder productOrder : order.getProductOrders()) {
             productOrder.setDeliveryStatus(deliveryStatusType);
         }
