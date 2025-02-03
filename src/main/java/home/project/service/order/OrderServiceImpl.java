@@ -15,6 +15,7 @@ import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.OrderResponse;
 import home.project.exceptions.exception.IdNotFoundException;
+import home.project.exceptions.exception.InsufficientPointsException;
 import home.project.exceptions.exception.InvalidCouponException;
 import home.project.repository.member.MemberRepository;
 import home.project.repository.order.OrderRepository;
@@ -139,6 +140,13 @@ public class OrderServiceImpl implements OrderService{
         orders.setMember(member);
 
         Long pointsUsed = createOrderRequestDTO.getPointsUsed();
+        Long availablePoints = member.getPoint();
+
+        if (pointsUsed > availablePoints) {
+            throw new InsufficientPointsException("보유 포인트가 부족합니다. 현재 포인트: " + availablePoints);
+        }
+
+        member.setPoint(availablePoints - pointsUsed);
         orders.setPointsUsed(pointsUsed);
 
         Long pointsEarned = (long) (orders.getAmount() * 0.05);

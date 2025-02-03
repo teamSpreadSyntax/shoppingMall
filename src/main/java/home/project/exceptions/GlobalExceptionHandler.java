@@ -1,5 +1,6 @@
 package home.project.exceptions;
 
+import home.project.exceptions.exception.InsufficientPointsException;
 import home.project.exceptions.exception.*;
 import home.project.response.CustomResponseBody;
 import home.project.response.CustomResponseEntity;
@@ -153,6 +154,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 HttpStatus.NOT_FOUND.value()
         );
         return new CustomResponseEntity<>(errorBody, HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler(InsufficientPointsException.class)
+    public ResponseEntity<?> handleInsufficientPointsException(InsufficientPointsException e) {
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("errorMessage", e.getMessage());
+
+        CustomResponseBody<?> errorBody = new CustomResponseBody<>(
+                Optional.of(responseBody),
+                "보유 포인트가 부족합니다.",
+                HttpStatus.BAD_REQUEST.value()
+        );
+
+        return new CustomResponseEntity<>(errorBody, HttpStatus.BAD_REQUEST);
     }
 }
 
