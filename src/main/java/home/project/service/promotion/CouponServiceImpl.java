@@ -183,22 +183,24 @@ public class CouponServiceImpl implements CouponService{
 
 
         return targetMembers.map(memberDoc -> {
+            // 🛑 Step 1: RDBMS에서 Member 확인
+            Member member = memberRepository.findById(memberDoc.getId())
+                    .orElseThrow(() -> new IllegalStateException(
+                            "Elasticsearch에는 존재하나 RDBMS에는 존재하지 않는 회원: ID " + memberDoc.getId()));
 
-            Member member = converter.convertFromMemberDocumentToMember(memberDoc);
-
+            // ✅ Step 2: MemberCoupon 생성 및 저장
             MemberCoupon memberCoupon = new MemberCoupon();
             memberCoupon.setMember(member);
             memberCoupon.setCoupon(coupon);
             memberCoupon.setIssuedAt(LocalDateTime.now());
-
             MemberCoupon savedMemberCoupon = memberCouponRepository.save(memberCoupon);
 
+            // 🛠️ Step 3: Elasticsearch에 쿠폰 인덱싱
             CouponDocument couponDocument = converter.convertFromCouponToCouponDocument(coupon);
             try {
                 indexToElasticsearch.indexDocumentToElasticsearch(couponDocument, CouponDocument.class);
             } catch (Exception e) {
-                System.out.println("에러 발생: " + e.getMessage());
-                e.printStackTrace();
+                System.err.println("에러 발생: " + e.getMessage());
             }
 
             String notificationMessage = String.format(
