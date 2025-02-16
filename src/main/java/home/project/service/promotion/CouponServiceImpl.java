@@ -25,20 +25,25 @@ import home.project.service.util.Converter;
 import home.project.service.integration.IndexToElasticsearch;
 import home.project.service.util.StringBuilderUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -179,40 +184,30 @@ public class CouponServiceImpl implements CouponService{
         coupon.setAssignBy(assignCondition);
         couponRepository.save(coupon);
 
+        // ✅ Elasticsearch에서 대상 회원 조회
         Page<MemberDocument> targetMembers = getTargetMembers(assignCouponToMemberRequestDTO, pageable);
 
+        List<MemberCouponResponse> responses = new ArrayList<>();
 
-        return targetMembers.map(memberDoc -> {
-            // 🛑 Step 1: RDBMS에서 Member 확인
+        // 🔍 `map()` → `forEach()`로 변경 (DB 저장 안정성 확보)
+        targetMembers.getContent().forEach(memberDoc -> {
             Member member = memberRepository.findById(memberDoc.getId())
                     .orElseThrow(() -> new IllegalStateException(
-                            "Elasticsearch에는 존재하나 RDBMS에는 존재하지 않는 회원: ID " + memberDoc.getId()));
+                            "⚠️ Elasticsearch에는 있으나 RDBMS에는 없는 회원: ID " + memberDoc.getId()));
 
-            // ✅ Step 2: MemberCoupon 생성 및 저장
+            // 🛠️ MemberCoupon 저장
             MemberCoupon memberCoupon = new MemberCoupon();
             memberCoupon.setMember(member);
             memberCoupon.setCoupon(coupon);
             memberCoupon.setIssuedAt(LocalDateTime.now());
             MemberCoupon savedMemberCoupon = memberCouponRepository.save(memberCoupon);
 
-            // 🛠️ Step 3: Elasticsearch에 쿠폰 인덱싱
-            CouponDocument couponDocument = converter.convertFromCouponToCouponDocument(coupon);
-            try {
-                indexToElasticsearch.indexDocumentToElasticsearch(couponDocument, CouponDocument.class);
-            } catch (Exception e) {
-                System.err.println("에러 발생: " + e.getMessage());
-            }
-
-            String notificationMessage = String.format(
-                    "새로운 쿠폰이 발급되었습니다: %s",
-                    coupon.getName()
-            );
-
+            // 📢 알림 전송
+            String notificationMessage = String.format("🎉 새 쿠폰 발급: %s", coupon.getName());
             NotificationResponse notificationResponse = notificationService.createCouponNotification(notificationMessage);
+            webSocketNotificationService.sendNotificationToUser(member.getEmail(), notificationResponse);
 
-            webSocketNotificationService.sendNotificationToUser(member.getEmail(),notificationResponse);
-
-            return new MemberCouponResponse(
+            responses.add(new MemberCouponResponse(
                     savedMemberCoupon.getId(),
                     member.getEmail(),
                     coupon.getId(),
@@ -220,8 +215,23 @@ public class CouponServiceImpl implements CouponService{
                     savedMemberCoupon.getIssuedAt(),
                     null,
                     false
-            );
+            ));
         });
+
+        // ✅ Elasticsearch 인덱싱 (트랜잭션 후 실행)
+        asyncIndexCouponInElasticsearch(coupon);
+
+        return new PageImpl<>(responses, pageable, targetMembers.getTotalElements());
+    }
+
+    @Async
+    public void asyncIndexCouponInElasticsearch(Coupon coupon) {
+        CouponDocument couponDocument = converter.convertFromCouponToCouponDocument(coupon);
+        try {
+            indexToElasticsearch.indexDocumentToElasticsearch(couponDocument, CouponDocument.class);
+        } catch (Exception e) {
+            log.error("🛑 Elasticsearch 인덱싱 실패: {}", e.getMessage());
+        }
     }
 
     @Override
