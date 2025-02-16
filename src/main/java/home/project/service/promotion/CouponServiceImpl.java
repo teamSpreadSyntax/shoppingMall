@@ -1,6 +1,7 @@
 package home.project.service.promotion;
 
 import home.project.domain.elasticsearch.CouponDocument;
+import home.project.domain.elasticsearch.MemberDocument;
 import home.project.domain.member.Member;
 import home.project.domain.product.*;
 import home.project.dto.requestDTO.AssignCouponToMemberRequestDTO;
@@ -16,6 +17,7 @@ import home.project.repository.product.ProductRepository;
 import home.project.repository.promotion.CouponRepository;
 import home.project.repository.promotion.MemberCouponRepository;
 import home.project.repository.promotion.ProductCouponRepository;
+import home.project.repositoryForElasticsearch.MemberElasticsearchRepository;
 import home.project.service.member.MemberService;
 import home.project.service.notification.NotificationService;
 import home.project.service.notification.WebSocketNotificationService;
@@ -46,6 +48,7 @@ public class CouponServiceImpl implements CouponService{
     private final ProductCouponRepository productCouponRepository;
     private final MemberRepository memberRepository;
     private final ProductRepository productRepository;
+    private final MemberElasticsearchRepository memberElasticsearchRepository;
     private final Converter converter;
     private final SimpMessagingTemplate messagingTemplate;
     private final MemberService memberService;
@@ -176,9 +179,13 @@ public class CouponServiceImpl implements CouponService{
         coupon.setAssignBy(assignCondition);
         couponRepository.save(coupon);
 
-        Page<Member> targetMembers = getTargetMembers(assignCouponToMemberRequestDTO, pageable);
+        Page<MemberDocument> targetMembers = getTargetMembers(assignCouponToMemberRequestDTO, pageable);
 
-        return targetMembers.map(member -> {
+
+        return targetMembers.map(memberDoc -> {
+
+            Member member = converter.convertFromMemberDocumentToMember(memberDoc);
+
             MemberCoupon memberCoupon = new MemberCoupon();
             memberCoupon.setMember(member);
             memberCoupon.setCoupon(coupon);
@@ -256,9 +263,9 @@ public class CouponServiceImpl implements CouponService{
         });
     }
 
-    private Page<Member> getTargetMembers(AssignCouponToMemberRequestDTO assignCouponToMemberRequestDTO, Pageable pageable) {
+    private Page<MemberDocument> getTargetMembers(AssignCouponToMemberRequestDTO assignCouponToMemberRequestDTO, Pageable pageable) {
         if (assignCouponToMemberRequestDTO.getAssignType() == AssignType.SPECIFIC_MEMBERS) {
-            return memberRepository.findMembers(
+            return memberElasticsearchRepository.findMembers(
                     assignCouponToMemberRequestDTO.getName(),
                     assignCouponToMemberRequestDTO.getEmail(),
                     assignCouponToMemberRequestDTO.getPhone(),
@@ -267,7 +274,14 @@ public class CouponServiceImpl implements CouponService{
                     pageable
                     );
         } else if (assignCouponToMemberRequestDTO.getAssignType() == AssignType.ALL) {
-            return memberRepository.findAll(pageable);
+            return memberElasticsearchRepository.findMembers(
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    pageable
+            );
         } else {
             throw new IllegalArgumentException("assign type을 확인해주세요. (SPECIFIC_MEMBERS : 특정 회원(들)에게 쿠폰 부여, ALL : 모든 회원에게 쿠폰 부여.)");
         }
