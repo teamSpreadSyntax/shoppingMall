@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -177,51 +178,61 @@ public class CouponServiceImpl implements CouponService{
 
     @Override
     @Transactional
-    public Page<MemberCouponResponse> assignCouponToMember(AssignCouponToMemberRequestDTO assignCouponToMemberRequestDTO, Pageable pageable){
+    public Page<MemberCouponResponse> assignCouponToMember(AssignCouponToMemberRequestDTO assignCouponToMemberRequestDTO, Pageable pageable) {
         Coupon coupon = findById(assignCouponToMemberRequestDTO.getCouponId());
 
         String assignCondition = StringBuilderUtil.buildAssignCondition(assignCouponToMemberRequestDTO);
         coupon.setAssignBy(assignCondition);
         couponRepository.save(coupon);
 
-        // ✅ Elasticsearch에서 대상 회원 조회
-        Page<MemberDocument> targetMembers = getTargetMembers(assignCouponToMemberRequestDTO, pageable);
+        List<MemberCouponResponse> allResponses = new ArrayList<>();
+        int currentPage = 0;
+        long totalElements = 0;
 
-        List<MemberCouponResponse> responses = new ArrayList<>();
+        // 🔄 페이지 순회하며 모든 회원 처리
+        while (true) {
+            Pageable dynamicPageable = PageRequest.of(currentPage, pageable.getPageSize());
+            Page<MemberDocument> targetMembers = getTargetMembers(assignCouponToMemberRequestDTO, dynamicPageable);
 
-        // 🔍 `map()` → `forEach()`로 변경 (DB 저장 안정성 확보)
-        targetMembers.getContent().forEach(memberDoc -> {
-            Member member = memberRepository.findById(memberDoc.getId())
-                    .orElseThrow(() -> new IllegalStateException(
-                            "⚠️ Elasticsearch에는 있으나 RDBMS에는 없는 회원: ID " + memberDoc.getId()));
+            if (targetMembers.isEmpty()) break; // 🚫 더 이상 가져올 페이지 없음
 
-            // 🛠️ MemberCoupon 저장
-            MemberCoupon memberCoupon = new MemberCoupon();
-            memberCoupon.setMember(member);
-            memberCoupon.setCoupon(coupon);
-            memberCoupon.setIssuedAt(LocalDateTime.now());
-            MemberCoupon savedMemberCoupon = memberCouponRepository.save(memberCoupon);
+            // 전체 요소 수 계산
+            totalElements = targetMembers.getTotalElements();
 
-            // 📢 알림 전송
-            String notificationMessage = String.format("🎉 새 쿠폰 발급: %s", coupon.getName());
-            NotificationResponse notificationResponse = notificationService.createCouponNotification(notificationMessage);
-            webSocketNotificationService.sendNotificationToUser(member.getEmail(), notificationResponse);
+            // 🔍 각 회원에 대해 쿠폰 부여
+            targetMembers.getContent().forEach(memberDoc -> {
+                Member member = memberRepository.findById(memberDoc.getId())
+                        .orElseThrow(() -> new IllegalStateException("Elasticsearch에는 있으나 RDBMS에 없는 회원: ID " + memberDoc.getId()));
 
-            responses.add(new MemberCouponResponse(
-                    savedMemberCoupon.getId(),
-                    member.getEmail(),
-                    coupon.getId(),
-                    coupon.getDiscountRate(),
-                    savedMemberCoupon.getIssuedAt(),
-                    null,
-                    false
-            ));
-        });
+                MemberCoupon memberCoupon = new MemberCoupon();
+                memberCoupon.setMember(member);
+                memberCoupon.setCoupon(coupon);
+                memberCoupon.setIssuedAt(LocalDateTime.now());
+                MemberCoupon savedMemberCoupon = memberCouponRepository.save(memberCoupon);
 
-        // ✅ Elasticsearch 인덱싱 (트랜잭션 후 실행)
+                String notificationMessage = String.format("🎉 새 쿠폰 발급: %s", coupon.getName());
+                NotificationResponse notificationResponse = notificationService.createCouponNotification(notificationMessage);
+                webSocketNotificationService.sendNotificationToUser(member.getEmail(), notificationResponse);
+
+                allResponses.add(new MemberCouponResponse(
+                        savedMemberCoupon.getId(),
+                        member.getEmail(),
+                        coupon.getId(),
+                        coupon.getDiscountRate(),
+                        savedMemberCoupon.getIssuedAt(),
+                        null,
+                        false
+                ));
+            });
+
+            currentPage++; // ➡️ 다음 페이지로 이동
+        }
+
+        // ✅ Elasticsearch 인덱싱 (비동기)
         asyncIndexCouponInElasticsearch(coupon);
 
-        return new PageImpl<>(responses, pageable, targetMembers.getTotalElements());
+        // 📦 `PageImpl`로 반환
+        return new PageImpl<>(allResponses, pageable, totalElements);
     }
 
     @Async
