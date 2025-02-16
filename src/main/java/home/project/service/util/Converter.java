@@ -11,8 +11,7 @@ import home.project.domain.elasticsearch.CouponDocument;
 import home.project.domain.elasticsearch.MemberDocument;
 import home.project.domain.elasticsearch.OrdersDocument;
 import home.project.domain.elasticsearch.ProductDocument;
-import home.project.domain.member.Member;
-import home.project.domain.member.MemberProduct;
+import home.project.domain.member.*;
 import home.project.domain.notification.Notification;
 import home.project.domain.order.Cart;
 import home.project.domain.order.Orders;
@@ -84,6 +83,25 @@ public class Converter {
                 convertFromListedMemberCouponMemberCouponResponse(member.getMemberCoupons())
         ));
     }
+
+    public Member convertFromMemberDocumentToMember(MemberDocument doc) {
+        Member member = new Member();
+        member.setId(doc.getId());
+        member.setEmail(doc.getEmail());
+        member.setName(doc.getName());
+        member.setPhone(doc.getPhone());
+        member.setGender(MemberGenderType.valueOf(doc.getGender()));
+        member.setBirthDate(doc.getBirthDate().toLocalDate());
+        member.setDefaultAddress(doc.getDefaultAddress());
+        member.setSecondAddress(doc.getSecondAddress());
+        member.setThirdAddress(doc.getThirdAddress());
+        member.setRole(RoleType.valueOf(doc.getRole()));
+        member.setAccumulatedPurchase(doc.getAccumulatedPurchase());
+        member.setGrade(MemberGradeType.valueOf(doc.getGrade()));
+        member.setPoint(doc.getPoint());
+        return member;
+    }
+
 
     public MemberResponse convertFromMemberToMemberResponse(Member member){
         return new MemberResponse(
