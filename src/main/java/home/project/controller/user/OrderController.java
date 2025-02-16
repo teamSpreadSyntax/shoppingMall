@@ -27,6 +27,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Tag(name = "주문", description = "주문관련 API입니다")
@@ -58,6 +59,24 @@ public class OrderController {
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequestDTO createOrderRequestDTO) {
 
         OrderResponse orderResponse = orderService.join(createOrderRequestDTO);
+
+        String successMessage = orderResponse.getOrderNum() + "(으)로 주문이 등록되었습니다.";
+
+        return new CustomResponseEntity<>(orderResponse, successMessage, HttpStatus.OK);
+    }
+
+    @Operation(summary = "장바구니 주문 생성 메서드", description = "장바구니 주문 생성 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order created successfully",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/OrderResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request: Invalid input",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+    })
+    @PostMapping("/CartJoin")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> createCartOrder(@RequestBody List<CreateOrderRequestDTO> cartItems) {
+
+        OrderResponse orderResponse = orderService.joinFromCart(cartItems);
 
         String successMessage = orderResponse.getOrderNum() + "(으)로 주문이 등록되었습니다.";
 
