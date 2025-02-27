@@ -44,3 +44,11 @@ DockerDesktopWSL/disk/docker_data.vhdx
 gradle/gradle-8.5-bin.zip
 superb-analog-439512-g8-e7979f6854cd.json
 superb-analog-439512-g8-firebase-adminsdk-l7nbt-2305deb251.json
+
+# SSL 인증서 관련 파일
+*.pkcs12
+*.pem
+*.crt
+*.der
+*.key
+*.jks
