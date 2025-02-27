@@ -15,6 +15,7 @@ import home.project.dto.requestDTO.CreateOrderRequestDTO;
 import home.project.dto.requestDTO.ProductDTOForOrder;
 import home.project.dto.responseDTO.OrderResponse;
 import home.project.exceptions.exception.IdNotFoundException;
+import home.project.exceptions.exception.InsufficientPointsException;
 import home.project.exceptions.exception.InvalidCouponException;
 import home.project.repository.member.MemberRepository;
 import home.project.repository.order.OrderRepository;
@@ -174,6 +175,13 @@ public class OrderServiceImpl implements OrderService{
 
     private void processPoints(CreateOrderRequestDTO createOrderRequestDTO, Orders orders, Member member) {
         Long pointsUsed = createOrderRequestDTO.getPointsUsed();
+        Long availablePoints = member.getPoint();
+
+        if (pointsUsed > availablePoints) {
+            throw new InsufficientPointsException("보유 포인트가 부족합니다. 현재 포인트: " + availablePoints);
+        }
+
+        member.setPoint(availablePoints - pointsUsed);
         orders.setPointsUsed(pointsUsed);
 
         Long pointsEarned = (long) (orders.getAmount() * 0.05);
@@ -206,6 +214,112 @@ public class OrderServiceImpl implements OrderService{
         kafkaEventProducerService.sendOrderEvent(new OrderEventDTO("orders-events", orders.getOrderDate(), orders.getMember().getId(), orders.getShipping().getId(), productOrderIds));
         */
     }
+
+    @Override
+    @Transactional
+    public OrderResponse joinFromCart(List<CreateOrderRequestDTO> cartItems) {
+        Orders orders = new Orders();
+        LocalDateTime orderDate = LocalDateTime.now();
+        orders.setOrderDate(orderDate);
+
+        long totalAmount = 0L;
+
+        for (CreateOrderRequestDTO createOrderRequestDTO : cartItems) {
+            Shipping shipping = converter.convertFromCreateOrderRequestDTOToShipping(createOrderRequestDTO);
+            shipping.setOrders(orders);
+
+            for (ProductDTOForOrder productDTO : createOrderRequestDTO.getProductOrders()) {
+                Product product = productService.findById(productDTO.getProductId());
+
+                productService.decreaseStock(productDTO.getProductId(), productDTO.getQuantity().longValue());
+                productService.increaseSoldQuantity(productDTO.getProductId(), productDTO.getQuantity().longValue());
+
+                ProductOrder productOrder = new ProductOrder();
+                productOrder.setProduct(product);
+                productOrder.setQuantity(productDTO.getQuantity());
+                productOrder.setPrice(productDTO.getPrice());
+                productOrder.setOrders(orders);
+                productOrder.setDeliveryStatus(DeliveryStatusType.ORDER_REQUESTED);
+                orders.getProductOrders().add(productOrder);
+
+                totalAmount += productDTO.getPrice() * productDTO.getQuantity();
+            }
+        }
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        // Apply coupon if available
+        for (CreateOrderRequestDTO createOrderRequestDTO : cartItems) {
+            if (createOrderRequestDTO.getCouponId() != null) {
+                Coupon coupon = couponService.findById(createOrderRequestDTO.getCouponId());
+                LocalDateTime now = LocalDateTime.now();
+
+                if (now.isBefore(coupon.getStartDate()) || now.isAfter(coupon.getEndDate())) {
+                    throw new InvalidCouponException("쿠폰이 유효하지 않습니다. 유효기간을 확인해 주세요.");
+                }
+
+                MemberCoupon memberCoupon = memberCouponRepository.findByMemberAndCoupon(member, coupon)
+                        .orElseThrow(() -> new InvalidCouponException("해당 회원에게 할당된 쿠폰이 아닙니다."));
+
+                if (memberCoupon.isUsed()) {
+                    throw new InvalidCouponException("이미 사용된 쿠폰입니다.");
+                }
+
+                Integer couponDiscountRate = coupon.getDiscountRate();
+                long discountAmount = totalAmount * couponDiscountRate / 100;
+                totalAmount -= discountAmount;
+
+                memberCoupon.setUsed(true);
+                memberCoupon.setUsedAt(now);
+                memberCouponRepository.save(memberCoupon);
+            }
+        }
+
+        orders.setAmount(totalAmount);
+        long newAccumulatePurchase = member.getAccumulatedPurchase() + totalAmount;
+        updateMemberGrade(member, newAccumulatePurchase);
+
+        Long pointsUsed = cartItems.stream().mapToLong(CreateOrderRequestDTO::getPointsUsed).sum();
+        Long availablePoints = member.getPoint();
+
+        if (pointsUsed > availablePoints) {
+            throw new InsufficientPointsException("보유 포인트가 부족합니다. 현재 포인트: " + availablePoints);
+        }
+
+        member.setPoint(availablePoints - pointsUsed);
+        orders.setPointsUsed(pointsUsed);
+
+        Long pointsEarned = (long) (orders.getAmount() * 0.05);
+        orders.setPointsEarned(pointsEarned);
+
+        memberRepository.save(member);
+        orderRepository.save(orders);
+
+        OrdersDocument ordersDocument = converter.convertFromOrderToOrdersDocument(orders);
+        indexToElasticsearch.indexDocumentToElasticsearch(ordersDocument, OrdersDocument.class);
+
+        MemberDocument memberDocument = converter.convertFromMemberToMemberDocument(member);
+        indexToElasticsearch.indexDocumentToElasticsearch(memberDocument, MemberDocument.class);
+
+        return converter.convertFromOrderToOrderResponse(orders);
+    }
+
+    private void updateMemberGrade(Member member, long newAccumulatePurchase) {
+        member.setAccumulatedPurchase(newAccumulatePurchase);
+
+        if (newAccumulatePurchase < 10000) {
+            member.setGrade(MemberGradeType.BRONZE);
+        } else if (newAccumulatePurchase < 200000) {
+            member.setGrade(MemberGradeType.SILVER);
+        } else if (newAccumulatePurchase < 300000) {
+            member.setGrade(MemberGradeType.GOLD);
+        } else {
+            member.setGrade(MemberGradeType.PLATINUM);
+        }
+    }
+
 
     private String generateOrderNumber(List<ProductDTOForOrder> orderItems, LocalDateTime orderDate) {
         String productPrefix = orderItems.stream()

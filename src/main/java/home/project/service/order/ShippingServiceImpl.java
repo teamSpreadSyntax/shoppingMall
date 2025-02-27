@@ -44,7 +44,7 @@ public class ShippingServiceImpl implements ShippingService{
 
     @Override
     @Transactional
-    public ShippingResponse update(Long id, DeliveryStatusType deliveryStatusType){
+    public ShippingResponse update(Long id, DeliveryStatusType deliveryStatusType) {
 
         Shipping shipping = findById(id);
         Orders order = shipping.getOrders();
@@ -57,7 +57,15 @@ public class ShippingServiceImpl implements ShippingService{
 
         if (deliveryStatusType == DeliveryStatusType.DELIVERY_STARTED) {
             shipping.setDeliveryNum(generateShippingNumber());
-            shipping.setDepartureDate(LocalDateTime.now().toString());
+            shipping.setDepartureDate(LocalDateTime.now().toString()); // 출발일 설정
+        }
+
+        if (deliveryStatusType == DeliveryStatusType.DELIVERY_COMPLETED) {
+            if (shipping.getDepartureDate() != null && !shipping.getDepartureDate().isEmpty()) {
+                shipping.setArrivedDate(LocalDateTime.now().toString());
+            } else {
+                throw new IllegalStateException("출발일이 설정되지 않아 도착일을 설정할 수 없습니다.");
+            }
         }
 
         for (ProductOrder productOrder : order.getProductOrders()) {
@@ -69,6 +77,7 @@ public class ShippingServiceImpl implements ShippingService{
         productOrderRepository.saveAll(order.getProductOrders());
         return converter.convertFromShippingToShippingResponse(shipping);
     }
+
 
     private String generateShippingNumber() {
         String timePart = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
