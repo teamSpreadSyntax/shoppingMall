@@ -11,8 +11,6 @@ import java.util.List;
 public interface OrderService {
     OrderResponse join(CreateOrderRequestDTO createOrderRequestDTO);
 
-    OrderResponse joinFromCart(List<CreateOrderRequestDTO> cartItems);
-
     Orders findById(Long orderId);
 
     Orders findByOrderNum(String OrderNum);
