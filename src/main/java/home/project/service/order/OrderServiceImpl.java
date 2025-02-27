@@ -61,7 +61,36 @@ public class OrderServiceImpl implements OrderService{
     @Override
     @Transactional
     public OrderResponse join(CreateOrderRequestDTO createOrderRequestDTO){
+        // 1. 주문 기본 정보 생성
+        Orders orders = createOrderBasicInfo(createOrderRequestDTO);
 
+        // 2. 상품 정보 처리 및 주문 금액 계산
+        long amount = processProductOrders(createOrderRequestDTO, orders);
+
+        // 3. 회원 정보 조회
+        Member member = getCurrentMember();
+
+        // 4. 쿠폰 적용
+        amount = applyCoupon(createOrderRequestDTO, member, amount);
+        orders.setAmount(amount);
+
+        // 5. 회원 등급 업데이트
+        updateMemberGrade(member, amount);
+        orders.setMember(member);
+
+        // 6. 포인트 처리
+        processPoints(createOrderRequestDTO, orders, member);
+
+        // 7. 데이터 저장
+        saveOrderData(member, orders);
+
+        // 8. 검색 인덱싱
+        indexOrderData(orders, member);
+
+        return converter.convertFromOrderToOrderResponse(orders);
+    }
+
+    private Orders createOrderBasicInfo(CreateOrderRequestDTO createOrderRequestDTO) {
         Shipping shipping = converter.convertFromCreateOrderRequestDTOToShipping(createOrderRequestDTO);
 
         Orders orders = new Orders();
@@ -71,14 +100,16 @@ public class OrderServiceImpl implements OrderService{
         orders.setShipping(shipping);
         shipping.setOrders(orders); // 양방향 관계 설정
 
+        return orders;
+    }
 
+    private long processProductOrders(CreateOrderRequestDTO createOrderRequestDTO, Orders orders) {
         long amount = 0L;
         for (ProductDTOForOrder productDTO : createOrderRequestDTO.getProductOrders()) {
             Product product = productService.findById(productDTO.getProductId());
 
             productService.decreaseStock(productDTO.getProductId(), productDTO.getQuantity().longValue());
             productService.increaseSoldQuantity(productDTO.getProductId(), productDTO.getQuantity().longValue());
-
 
             ProductOrder productOrder = new ProductOrder();
             productOrder.setProduct(product);
@@ -88,14 +119,18 @@ public class OrderServiceImpl implements OrderService{
             productOrder.setDeliveryStatus(DeliveryStatusType.ORDER_REQUESTED);
             orders.getProductOrders().add(productOrder);
 
-            amount += productDTO.getPrice()*productDTO.getQuantity();
+            amount += productDTO.getPrice() * productDTO.getQuantity();
         }
+        return amount;
+    }
 
+    private Member getCurrentMember() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        Member member = memberService.findByEmail(email);
+        return memberService.findByEmail(email);
+    }
 
-        // 3. 쿠폰 유효성 검사 및 할인 적용
+    private long applyCoupon(CreateOrderRequestDTO createOrderRequestDTO, Member member, long amount) {
         if (createOrderRequestDTO.getCouponId() != null) { // 쿠폰이 있을 경우
             Coupon coupon = couponService.findById(createOrderRequestDTO.getCouponId());
 
@@ -121,10 +156,11 @@ public class OrderServiceImpl implements OrderService{
             memberCoupon.setUsedAt(now);
             memberCouponRepository.save(memberCoupon);
         }
+        return amount;
+    }
 
-        orders.setAmount(amount);
-
-        long newAccumulatePurchase = member.getAccumulatedPurchase()+amount;
+    private void updateMemberGrade(Member member, long amount) {
+        long newAccumulatePurchase = member.getAccumulatedPurchase() + amount;
         if (newAccumulatePurchase < 0) {
             member.setGrade(MemberGradeType.BRONZE);
         } else if (newAccumulatePurchase >= 10000 && newAccumulatePurchase < 200000) {
@@ -135,8 +171,9 @@ public class OrderServiceImpl implements OrderService{
             member.setGrade(MemberGradeType.PLATINUM);
         }
         member.setAccumulatedPurchase(newAccumulatePurchase);
-        orders.setMember(member);
+    }
 
+    private void processPoints(CreateOrderRequestDTO createOrderRequestDTO, Orders orders, Member member) {
         Long pointsUsed = createOrderRequestDTO.getPointsUsed();
         Long availablePoints = member.getPoint();
 
@@ -150,11 +187,14 @@ public class OrderServiceImpl implements OrderService{
         Long pointsEarned = (long) (orders.getAmount() * 0.05);
         orders.setPointsEarned(pointsEarned);
         member.setPoint(member.getPoint() - pointsUsed);
+    }
 
-
+    private void saveOrderData(Member member, Orders orders) {
         memberRepository.save(member);
         orderRepository.save(orders);
+    }
 
+    private void indexOrderData(Orders orders, Member member) {
         OrdersDocument ordersDocument = converter.convertFromOrderToOrdersDocument(orders);
         try {
             indexToElasticsearch.indexDocumentToElasticsearch(ordersDocument, OrdersDocument.class);
@@ -170,11 +210,9 @@ public class OrderServiceImpl implements OrderService{
             System.out.println("에러 발생: " + e.getMessage());
             e.printStackTrace();
         }
-/*
+        /*
         kafkaEventProducerService.sendOrderEvent(new OrderEventDTO("orders-events", orders.getOrderDate(), orders.getMember().getId(), orders.getShipping().getId(), productOrderIds));
-*/
-
-        return converter.convertFromOrderToOrderResponse(orders);
+        */
     }
 
     @Override

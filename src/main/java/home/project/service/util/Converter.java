@@ -164,7 +164,7 @@ public class Converter {
 
     private ProductDTOForOrder convertFromProductOrderToProductDTOForOrder(ProductOrder orderProduct) {
         return new ProductDTOForOrder(
-                orderProduct.getId(),
+                orderProduct.getProduct().getId(),
                 orderProduct.getPrice(),
                 orderProduct.getQuantity()
         );
