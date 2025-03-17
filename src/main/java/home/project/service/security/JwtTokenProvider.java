@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 @Service
 public class JwtTokenProvider {
     private final Key key;
-    private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
-    private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
-    private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 60L * 60 * 24 * 14 * 1000;
-    private final Long RESET_TOKEN_VALIDATION_PERIOD = 60L * 60 * 1000;
-    // 2주 - 5분
+    private final Long ACCESS_TOKEN_VALIDATION_PERIOD = 30L * 60 * 1000;
+    private final Long REFRESH_TOKEN_VALIDATION_PERIOD = 14L * 24 * 60 * 60 * 1000;
+    private final Long VERIFICATION_TOKEN_VALIDATION_PERIOD = 24L * 60 * 60 * 1000;
+    private final Long RESET_TOKEN_VALIDATION_PERIOD = 10L * 60 * 1000;
+
     private final UserDetailsService userDetailsService;
 
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, UserDetailsService userDetailsService) {
