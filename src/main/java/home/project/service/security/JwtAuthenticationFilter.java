@@ -33,15 +33,14 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/ws") ||
                 path.startsWith("/api/password-request") ||
-                path.startsWith("/api/auth/login") ||    // 추가
-                path.startsWith("/api/admin/auth/login"); // 추가;
+                path.startsWith("/api/auth/login") ||
+                path.startsWith("/api/admin/auth/login");
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
 
-        // shouldNotFilter 체크 추가
         if (shouldNotFilter(httpServletRequest)) {
             chain.doFilter(request, response);
             return;
