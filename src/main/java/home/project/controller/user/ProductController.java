@@ -161,7 +161,7 @@ public class ProductController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @GetMapping("/search_db")
+    @GetMapping("/search-db")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> searchProductsForTest(
             @RequestParam(value = "brand", required = false) String brand,
