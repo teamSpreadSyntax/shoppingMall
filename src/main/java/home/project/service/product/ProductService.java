@@ -37,6 +37,7 @@ public interface ProductService {
     Page<ProductResponse> findProducts(String brand, String category, String productName, String content, String color, String size, Pageable pageable);
 
     Page<ProductSimpleResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable);
+    Page<ProductSimpleResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable);
 
     Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, String color, String size, Pageable pageable);
     Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable);

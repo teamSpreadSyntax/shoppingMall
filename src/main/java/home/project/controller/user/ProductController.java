@@ -152,6 +152,39 @@ public class ProductController {
 
     }
 
+    @Operation(summary = "이전 상품 통합 조회 메서드", description = "브랜드명, 카테고리명, 상품명 및 일반 검색어로 상품을 조회합니다. 모든 조건을 만족하는 상품을 조회합니다. 검색어가 없으면 전체 상품을 조회합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/PagedProductUserListResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema"))),
+            @ApiResponse(responseCode = "404", description = "Resource not found",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
+    })
+    @GetMapping("/search")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> searchProductsForTest(
+            @RequestParam(value = "brand", required = false) String brand,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "productName", required = false) String productName,
+            @RequestParam(value = "content", required = false) String content,
+            @PageableDefault(page = 1, size = 5)
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "brand", direction = Sort.Direction.ASC)
+            }) @ParameterObject Pageable pageable) {
+        pageable = pageUtil.pageable(pageable);
+
+        Page<ProductSimpleResponse> productPage = productService.findProducts(brand, category, productName, content, pageable);
+
+        String successMessage = StringBuilderUtil.buildProductSearchCriteria(brand, category, productName, content, productPage);
+
+        long totalCount = productPage.getTotalElements();
+        int page = productPage.getNumber();
+
+        return new CustomResponseEntity<>(productPage.getContent(), successMessage, HttpStatus.OK, totalCount, page);
+
+    }
+
     @Operation(summary = "전체 브랜드 조회 메서드", description = "브랜드 조회(판매량기준 오름차순정렬) 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",

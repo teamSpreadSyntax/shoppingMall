@@ -1,5 +1,6 @@
 package home.project.service.product;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.multipart.MultipartFile;
 import home.project.domain.common.QnA;
 import home.project.domain.common.Review;
@@ -43,6 +44,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
@@ -270,7 +272,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductSimpleResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable) {
-
+        // 시작 시간 기록
+        long startTime = System.currentTimeMillis();
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
 
@@ -279,17 +282,46 @@ public class ProductServiceImpl implements ProductService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         String email = authentication.getName();
+        Page<ProductSimpleResponse> result;
         if (email.equals("anonymousUser")){
-
-            return converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct);
+            result = converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct);
+        } else {
+            Member member = memberService.findByEmail(email);
+            List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
+            result = converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct,likedProductIds);
         }
 
-        Member member = memberService.findByEmail(email);
+        // 종료 시간 기록 및 로그 출력
+        long endTime = System.currentTimeMillis();
+        log.info("Elasticsearch 검색 소요시간: {}ms, 결과 건수: {}", (endTime - startTime), result.getTotalElements());
 
-        List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
+        return result;
+    }
 
-        return converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct,likedProductIds);
+    @Override
+    public Page<ProductSimpleResponse> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
+        // 시작 시간 기록
+        long startTime = System.currentTimeMillis();
 
+        Page<Product> pagedProduct = productRepository.findProducts(brand, category, productName, content, pageable);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName();
+        Page<ProductSimpleResponse> result;
+        if (email.equals("anonymousUser")){
+            result = converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct);
+        } else {
+            Member member = memberService.findByEmail(email);
+            List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
+            result = converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct,likedProductIds);
+        }
+
+        // 종료 시간 기록 및 로그 출력
+        long endTime = System.currentTimeMillis();
+        log.info("데이터베이스 검색 소요시간: {}ms, 결과 건수: {}", (endTime - startTime), result.getTotalElements());
+
+        return result;
     }
 
     @Override
@@ -311,6 +343,8 @@ public class ProductServiceImpl implements ProductService {
 
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
+
+
 
     @Override
     public Page<ProductResponseForManager> findProductsForManaging(String brand, String category, String productName, String content, Pageable pageable) {
