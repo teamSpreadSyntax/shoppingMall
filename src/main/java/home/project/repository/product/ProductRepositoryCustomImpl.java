@@ -68,6 +68,12 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
+    public Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
+        // 누락된 파라미터를 null로 전달하여 기존 메서드 호출
+        return findProducts(brand, category, productName, content, null, null, pageable);
+    }
+
+    @Override
     public Page<Product> findSoldProducts(String brand, String categoryCode, String productName, String content, String colors, String sizes, Pageable pageable) {
         BooleanBuilder builder = new BooleanBuilder();
 

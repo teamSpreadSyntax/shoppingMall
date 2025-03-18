@@ -12,7 +12,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, Product
 
     Product findByProductNum(String productNum);
 
-    default Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable) {
-        return findProducts(brand, category, productName, content, null, null, pageable);
-    }
+    Page<Product> findProducts(String brand, String category, String productName, String content, Pageable pageable);
+
 }
