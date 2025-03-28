@@ -1,4 +1,22 @@
 services:
+  kafka-loadtest:
+    image: openjdk:17-jdk-slim
+    container_name: kafka-loadtest
+    depends_on:
+      kafka:
+        condition: service_started
+    volumes:
+      - ./src/main/java:/app/src/main/java
+      - ./lib:/app/lib
+    working_dir: /app
+    networks:
+      - project_default
+    command: >
+      bash -c "
+        javac -cp '/app/lib/*' src/main/java/home/project/KafkaLoadTest.java &&
+        java -cp '/app/lib/*:src/main/java' home.project.KafkaLoadTest
+      "
+
   zookeeper:
     image: wurstmeister/zookeeper:latest
     container_name: zookeeper
@@ -326,25 +344,6 @@ services:
       project_default:
         aliases:
           - www.projectkkk.com
-
-kafka-loadtest:
-  image: openjdk:17-jdk-slim
-  container_name: kafka-loadtest
-  depends_on:
-    kafka:
-      condition: service_started
-  volumes:
-    - ./src/main/java:/app/src/main/java
-    - ./lib:/app/lib
-  working_dir: /app
-  networks:
-    - project_default
-  command: >
-    bash -c "
-      javac -cp '/app/lib/*' src/main/java/home/project/KafkaLoadTest.java &&
-      java -cp '/app/lib/*:src/main/java' home.project.KafkaLoadTest
-    "
-
 volumes:
   elasticsearch-data:
   kibana-data:
