@@ -1,3 +1,5 @@
+package home.project;
+
 import org.apache.kafka.clients.producer.*;
 import java.util.Properties;
 import java.util.concurrent.*;
