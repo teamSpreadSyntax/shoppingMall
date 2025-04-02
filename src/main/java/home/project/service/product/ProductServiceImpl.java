@@ -96,7 +96,7 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(createProductRequestDTO.getPrice());
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
         product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
-        product.setDescription(descriptionImages); // 이미지 URL 설정
+        product.setDescription(descriptionImages);
         product.setCreateAt(LocalDateTime.now());
         product.setMainImageFile(mainImageFile);
         product.setSize(createProductRequestDTO.getSize());

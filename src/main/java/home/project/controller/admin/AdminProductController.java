@@ -61,21 +61,19 @@ public class AdminProductController {
                     content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
 
     })
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> createProduct(
-            @RequestPart(value = "productData") @Valid CreateProductRequestDTO createProductRequestDTO,
-            @RequestParam(value = "mainImageFile", required = false) String mainImageFile,
-            @RequestParam(value = "descriptionImages", required = false) String[] descriptionImages,
+            @RequestBody @Valid CreateProductRequestDTO createProductRequestDTO,
             BindingResult bindingResult) {
 
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
-        List<String> imageList = descriptionImages != null ?
-                Arrays.asList(descriptionImages) : new ArrayList<>();
+        List<String> imageList = createProductRequestDTO.getDescriptionImageUrls() != null ?
+                createProductRequestDTO.getDescriptionImageUrls() : new ArrayList<>();
 
-        productService.join(createProductRequestDTO, mainImageFile, imageList);
+        productService.join(createProductRequestDTO, createProductRequestDTO.getMainImageUrl(), imageList);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", createProductRequestDTO.getName() + "(이)가 등록되었습니다.");
         return new CustomResponseEntity<>(responseMap, "상품 등록 성공", HttpStatus.OK);
@@ -92,7 +90,7 @@ public class AdminProductController {
     @PostMapping(value = "/create_image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> createImage(
-            @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
+            @RequestParam(value = "mainImageFile", required = false) MultipartFile mainImageFile,
             @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages) {
 
         List<MultipartFile> imageList = descriptionImages != null ?

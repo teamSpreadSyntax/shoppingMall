@@ -45,10 +45,10 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                     .or(product.name.lower().like("%" + content.toLowerCase() + "%"));
         }
         if (colors != null && !colors.isEmpty()) {
-            builder.and(product.color.equalsIgnoreCase(colors)); // 단일 color 조건
+            builder.and(product.color.equalsIgnoreCase(colors));
         }
         if (sizes != null && !sizes.isEmpty()) {
-            builder.and(product.size.equalsIgnoreCase(sizes)); // 단일 size 조건
+            builder.and(product.size.equalsIgnoreCase(sizes));
         }
 
         List<Product> results = queryFactory

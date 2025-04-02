@@ -1,5 +1,6 @@
 package home.project.dto.requestDTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +20,7 @@ public class CreateProductRequestDTO {
     @NotBlank(message = "상품의 브랜드를 입력해주세요.")
     private String brand;
 
-    @NotBlank(message = "상품의 카테고리를 입력해주세요.")
+    @NotBlank(message = "상품의 카테고리(카테고리 코드)를 입력해주세요.")
     private String category;
 
     @NotNull(message = "상품의 현재 재고를 입력해주세요.")
@@ -36,10 +37,16 @@ public class CreateProductRequestDTO {
     @NotNull(message = "상품의 불량 수량을 입력해주세요.")
     private Long defectiveStock = 0L;
 
-
     @NotBlank(message = "상품의 사이즈를 입력해주세요.")
     private String size;
 
     @NotBlank(message = "상품의 색깔을 입력해주세요.")
     private String color;
+
+    @NotBlank(message = "메인이미지 url을 입력해주세요.")
+    private String mainImageUrl;
+
+    @NotBlank(message = "상세이미지 url을 입력해주세요.")
+    private List<String> descriptionImageUrls;
+
 }
