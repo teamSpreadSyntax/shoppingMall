@@ -382,6 +382,63 @@ public class Converter {
         ));
     }
 
+    public ProductSimpleResponse convertFromProductDocumentToProductSimpleResponse(ProductDocument doc) {
+        if (doc == null) return null;
+
+        return new ProductSimpleResponse(
+                doc.getId(),
+                doc.getName(),
+                doc.getBrand(),
+                doc.getPrice(),
+                doc.getDiscountRate(),
+                doc.getMainImageFile(),
+                false, // 기본값으로 설정
+                doc.getColor()
+        );
+    }
+
+    public ProductResponseForManager convertFromProductDocumentToProductResponseForManager(ProductDocument doc) {
+        if (doc == null) return null;
+
+        // 쿠폰 정보 변환
+        List<ProductCouponResponse> couponResponses = new ArrayList<>();
+        if (doc.getProductCoupons() != null) {
+            for (ProductDocument.ProductCoupon productCoupon : doc.getProductCoupons()) {
+                // ProductCouponResponse 생성자 사용 (생성자 파라미터는 실제 클래스 정의에 맞게 조정 필요)
+                ProductCouponResponse couponResponse = new ProductCouponResponse(
+                        productCoupon.getId(),
+                        doc.getProductNum(),
+                        productCoupon.getCoupon() != null ? productCoupon.getCoupon().getId() : null,
+                        productCoupon.getIssuedAt(),
+                        productCoupon.getUsedAt(),
+                        productCoupon.isUsed()
+                );
+                couponResponses.add(couponResponse);
+            }
+        }
+
+        String categoryName = doc.getCategory() != null ? doc.getCategory().getName() : null;
+
+        return new ProductResponseForManager(
+                doc.getId(),
+                doc.getName(),
+                doc.getBrand(),
+                categoryName,
+                doc.getProductNum(),
+                doc.getStock(),
+                doc.getSoldQuantity(),
+                doc.getPrice(),
+                doc.getDiscountRate(),
+                doc.getDefectiveStock(),
+                doc.getDescription(),
+                doc.getCreateAt(),
+                doc.getMainImageFile(),
+                doc.getSize(),
+                doc.getColor(),
+                couponResponses
+        );
+    }
+
     public Page<ProductSimpleResponse> convertFromPagedProductToPagedProductSimpleResponse(Page<Product> pagedProduct){
         return pagedProduct.map(productSimpleResponse -> new ProductSimpleResponse(
                 productSimpleResponse.getId(),
