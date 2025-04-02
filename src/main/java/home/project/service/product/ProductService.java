@@ -13,7 +13,8 @@ import java.util.List;
 
 public interface ProductService {
 
-    void join(CreateProductRequestDTO createProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
+    void join(CreateProductRequestDTO createProductRequestDTO,String mainImageFile, List<String> descriptionImages);
+    ImageResponse joinImage(MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
 
     Product findById(Long id);
 

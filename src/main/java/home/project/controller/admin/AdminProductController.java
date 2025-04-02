@@ -53,7 +53,7 @@ public class AdminProductController {
     private final CategoryService categoryService;
 
 
-    @Operation(summary = "상품 등록 메서드", description = "상품과 상세 이미지를 등록하는 메서드입니다.")
+    @Operation(summary = "상품 등록 메서드", description = "상품을 등록하는 메서드입니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successful operation",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
@@ -65,20 +65,44 @@ public class AdminProductController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> createProduct(
             @RequestPart(value = "productData") @Valid CreateProductRequestDTO createProductRequestDTO,
-            @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
-            @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages,
+            @RequestPart(value = "mainImageFile", required = false) String mainImageFile,
+            @RequestPart(value = "descriptionImages", required = false) String[] descriptionImages,
             BindingResult bindingResult) {
 
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
-        List<MultipartFile> imageList = descriptionImages != null ?
+        List<String> imageList = descriptionImages != null ?
                 Arrays.asList(descriptionImages) : new ArrayList<>();
 
         productService.join(createProductRequestDTO, mainImageFile, imageList);
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("successMessage", createProductRequestDTO.getName() + "(이)가 등록되었습니다.");
         return new CustomResponseEntity<>(responseMap, "상품 등록 성공", HttpStatus.OK);
+    }
+
+    @Operation(summary = "이미지 등록 메서드", description = "대표, 상세 이미지를 등록하는 메서드입니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful operation",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/GeneralSuccessResponseSchema"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request",
+                    content = @Content(schema = @Schema(ref = "#/components/schemas/BadRequestResponseSchema")))
+
+    })
+    @PostMapping(value = "/create_image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<?> createImage(
+            @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
+            @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages) {
+
+        List<MultipartFile> imageList = descriptionImages != null ?
+                Arrays.asList(descriptionImages) : new ArrayList<>();
+
+        ImageResponse imageResponse = productService.joinImage(mainImageFile, imageList);
+
+        String successMessage = "이미지가 등록되었습니다.";
+        return new CustomResponseEntity<>(imageResponse, successMessage, HttpStatus.OK);
+
     }
 
     @Operation(summary = "id로 상품 조회 메서드", description = "id로 상품 조회 메서드입니다.")

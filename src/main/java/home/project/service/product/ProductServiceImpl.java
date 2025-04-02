@@ -66,7 +66,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void join(CreateProductRequestDTO createProductRequestDTO, MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
+    public void join(CreateProductRequestDTO createProductRequestDTO, String mainImageFile, List<String> descriptionImages) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
@@ -78,18 +78,6 @@ public class ProductServiceImpl implements ProductService {
         } else if (currentSoldQuantity < 0) {
             throw new IllegalStateException("판매량이 음수일 수 없습니다.");
         }
-
-        String mainImageUrl = null;
-        if (mainImageFile != null && !mainImageFile.isEmpty()) {
-            mainImageUrl = fileService.saveFile(mainImageFile, "product/main", String.valueOf(member.getId()));
-        } else {
-            throw new IllegalArgumentException("대표 이미지 파일은 반드시 포함되어야 합니다.");
-        }
-
-        // 이미지 파일들 저장
-        List<String> imageUrls = descriptionImages.stream()
-                .map(file -> fileService.saveFile(file, "product", String.valueOf(member.getId())))
-                .collect(Collectors.toList());
 
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -108,9 +96,9 @@ public class ProductServiceImpl implements ProductService {
         product.setPrice(createProductRequestDTO.getPrice());
         product.setDiscountRate(createProductRequestDTO.getDiscountRate());
         product.setDefectiveStock(createProductRequestDTO.getDefectiveStock());
-        product.setDescription(imageUrls); // 이미지 URL 설정
+        product.setDescription(descriptionImages); // 이미지 URL 설정
         product.setCreateAt(LocalDateTime.now());
-        product.setMainImageFile(mainImageUrl);
+        product.setMainImageFile(mainImageFile);
         product.setSize(createProductRequestDTO.getSize());
         product.setColor(createProductRequestDTO.getColor());
 
@@ -133,6 +121,30 @@ public class ProductServiceImpl implements ProductService {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public ImageResponse joinImage(MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        Member member = memberService.findByEmail(email);
+
+        String mainImageUrl = null;
+        if (mainImageFile != null && !mainImageFile.isEmpty()) {
+            mainImageUrl = fileService.saveFile(mainImageFile, "product/main", String.valueOf(member.getId()));
+        } else {
+            throw new IllegalArgumentException("대표 이미지 파일은 반드시 포함되어야 합니다.");
+        }
+
+        // 이미지 파일들 저장
+        List<String> descriptionImageUrls = descriptionImages.stream()
+                .map(file -> fileService.saveFile(file, "product", String.valueOf(member.getId())))
+                .collect(Collectors.toList());
+
+        return new ImageResponse(mainImageUrl, descriptionImageUrls);
+
+    }
+
     @Override
     public ProductWithQnAAndReviewResponse findByIdReturnProductResponse(Long productId) {
 
