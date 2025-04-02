@@ -46,7 +46,7 @@ public class CreateProductRequestDTO {
     @NotBlank(message = "메인이미지 url을 입력해주세요.")
     private String mainImageUrl;
 
-    @NotBlank(message = "상세이미지 url을 입력해주세요.")
-    private List<String> descriptionImageUrls;
+    @NotEmpty(message = "상세이미지 url을 입력해주세요.")
+    private List<@NotBlank(message = "상세이미지 url을 입력해주세요..")String> descriptionImageUrls;
 
 }
