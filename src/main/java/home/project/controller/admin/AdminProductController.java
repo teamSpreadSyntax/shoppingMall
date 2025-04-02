@@ -65,8 +65,8 @@ public class AdminProductController {
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> createProduct(
             @RequestPart(value = "productData") @Valid CreateProductRequestDTO createProductRequestDTO,
-            @RequestPart(value = "mainImageFile", required = false) String mainImageFile,
-            @RequestPart(value = "descriptionImages", required = false) String[] descriptionImages,
+            @RequestParam(value = "mainImageFile", required = false) String mainImageFile,
+            @RequestParam(value = "descriptionImages", required = false) String[] descriptionImages,
             BindingResult bindingResult) {
 
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
