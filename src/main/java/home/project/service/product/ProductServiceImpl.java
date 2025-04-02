@@ -270,26 +270,68 @@ public class ProductServiceImpl implements ProductService {
         return converter.convertFromPagedProductToPagedProductResponse(pagedProduct);
     }
 
+//    @Override
+//    public Page<ProductSimpleResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable) {
+//        // 시작 시간 기록
+//        long startTime = System.currentTimeMillis();
+//
+//        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
+//
+//        Page<Product> pagedProduct = pagedDocuments.map(doc -> findById(doc.getId()));
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//
+//        String email = authentication.getName();
+//        Page<ProductSimpleResponse> result;
+//        if (email.equals("anonymousUser")){
+//            result = converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct);
+//        } else {
+//            Member member = memberService.findByEmail(email);
+//            List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
+//            result = converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct,likedProductIds);
+//        }
+//
+//        // 종료 시간 기록 및 로그 출력
+//        long endTime = System.currentTimeMillis();
+//        log.info("Elasticsearch 검색 소요시간: {}ms, 결과 건수: {}", (endTime - startTime), result.getTotalElements());
+//
+//        return result;
+//    }
+
     @Override
     public Page<ProductSimpleResponse> findProductsOnElastic(String brand, String category, String productName, String content, Pageable pageable) {
         // 시작 시간 기록
         long startTime = System.currentTimeMillis();
 
+        // Elasticsearch에서 검색
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
 
-        Page<Product> pagedProduct = pagedDocuments.map(doc -> findById(doc.getId()));
-
+        // 인증 정보 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
         String email = authentication.getName();
-        Page<ProductSimpleResponse> result;
-        if (email.equals("anonymousUser")){
-            result = converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct);
+
+        // 결과 변환 (데이터베이스 조회 없이)
+        List<ProductSimpleResponse> responses;
+        if (email.equals("anonymousUser")) {
+            // 비로그인 사용자는 liked 정보 없이 변환
+            responses = pagedDocuments.getContent().stream()
+                    .map(converter::convertFromProductDocumentToProductSimpleResponse)
+                    .collect(Collectors.toList());
         } else {
+            // 로그인 사용자는 위시리스트 정보 포함하여 변환
             Member member = memberService.findByEmail(email);
             List<Long> likedProductIds = wishListRepository.findProductIdsByMemberId(member.getId());
-            result = converter.convertFromPagedProductToPagedProductSimpleResponse(pagedProduct,likedProductIds);
+
+            responses = pagedDocuments.getContent().stream()
+                    .map(doc -> {
+                        ProductSimpleResponse response = converter.convertFromProductDocumentToProductSimpleResponse(doc);
+                        response.setLiked(likedProductIds.contains(doc.getId()));
+                        return response;
+                    })
+                    .collect(Collectors.toList());
         }
+
+        Page<ProductSimpleResponse> result = new PageImpl<>(responses, pageable, pagedDocuments.getTotalElements());
 
         // 종료 시간 기록 및 로그 출력
         long endTime = System.currentTimeMillis();
@@ -333,15 +375,29 @@ public class ProductServiceImpl implements ProductService {
         return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
     }
 
+//    @Override
+//    public Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable) {
+//        String categoryCode = null;
+//
+//        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
+//
+//        Page<Product> pagedProduct = pagedDocuments.map(productDocument -> findById(productDocument.getId()));
+//
+//        return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
+//    }
+
     @Override
     public Page<ProductResponseForManager> findProductsOnElasticForManaging(String brand, String category, String productName, String content, Pageable pageable) {
         String categoryCode = null;
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, categoryCode, productName, content, pageable);
 
-        Page<Product> pagedProduct = pagedDocuments.map(productDocument -> findById(productDocument.getId()));
+        // 데이터베이스 조회 없이 바로 변환
+        List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
+                .map(converter::convertFromProductDocumentToProductResponseForManager)
+                .collect(Collectors.toList());
 
-        return converter.convertFromPagedProductToPagedProductResponseForManaging(pagedProduct);
+        return new PageImpl<>(responses, pageable, pagedDocuments.getTotalElements());
     }
 
 
@@ -606,6 +662,46 @@ public class ProductServiceImpl implements ProductService {
     }
 
 
+//    @Override
+//    public Page<ProductResponseForManager> findProductsOnElasticForAdmin(String brand, String category, String productName, String content, Pageable pageable) {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String email = authentication.getName();
+//        Member member = memberService.findByEmail(email);
+//
+//        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
+//
+//        // CENTER 권한인 경우 모든 제품 검색 가능
+//        if (authentication.getAuthorities().stream()
+//                .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER"))) {
+//            List<Product> allProducts = pagedDocuments
+//                    .map(productDocument -> findById(productDocument.getId()))
+//                    .getContent();
+//            return converter.convertFromPagedProductToPagedProductResponseForManaging(
+//                    new PageImpl<>(
+//                            allProducts,
+//                            pageable,
+//                            pagedDocuments.getTotalElements()
+//                    )
+//            );
+//        }
+//
+//        // ADMIN(판매자)인 경우 자신이 등록한 제품만 검색
+//        List<Product> filteredProducts = pagedDocuments
+//                .map(productDocument -> findById(productDocument.getId()))
+//                .getContent()
+//                .stream()
+//                .filter(product -> memberProductRepository.existsByMemberIdAndProductId(member.getId(), product.getId()))
+//                .collect(Collectors.toList());
+//
+//        return converter.convertFromPagedProductToPagedProductResponseForManaging(
+//                new PageImpl<>(
+//                        filteredProducts,
+//                        pageable,
+//                        filteredProducts.size()
+//                )
+//        );
+//    }
+
     @Override
     public Page<ProductResponseForManager> findProductsOnElasticForAdmin(String brand, String category, String productName, String content, Pageable pageable) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -617,33 +713,20 @@ public class ProductServiceImpl implements ProductService {
         // CENTER 권한인 경우 모든 제품 검색 가능
         if (authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER"))) {
-            List<Product> allProducts = pagedDocuments
-                    .map(productDocument -> findById(productDocument.getId()))
-                    .getContent();
-            return converter.convertFromPagedProductToPagedProductResponseForManaging(
-                    new PageImpl<>(
-                            allProducts,
-                            pageable,
-                            pagedDocuments.getTotalElements()
-                    )
-            );
+            List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
+                    .map(converter::convertFromProductDocumentToProductResponseForManager)
+                    .collect(Collectors.toList());
+
+            return new PageImpl<>(responses, pageable, pagedDocuments.getTotalElements());
         }
 
         // ADMIN(판매자)인 경우 자신이 등록한 제품만 검색
-        List<Product> filteredProducts = pagedDocuments
-                .map(productDocument -> findById(productDocument.getId()))
-                .getContent()
-                .stream()
-                .filter(product -> memberProductRepository.existsByMemberIdAndProductId(member.getId(), product.getId()))
+        List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
+                .filter(doc -> memberProductRepository.existsByMemberIdAndProductId(member.getId(), doc.getId()))
+                .map(converter::convertFromProductDocumentToProductResponseForManager)
                 .collect(Collectors.toList());
 
-        return converter.convertFromPagedProductToPagedProductResponseForManaging(
-                new PageImpl<>(
-                        filteredProducts,
-                        pageable,
-                        filteredProducts.size()
-                )
-        );
+        return new PageImpl<>(responses, pageable, responses.size());
     }
 
     @Override
