@@ -21,7 +21,7 @@ public class WishListDetailResponse {
     private String productName;
 
     @Schema(description = "상품 이미지 URL", example = "https://example.com/product-image.jpg")
-    private String mainImageFile;
+    private String mainImageUrl;
 
     @Schema(description = "상품 가격", example = "89000")
     private Long productPrice;
@@ -32,11 +32,11 @@ public class WishListDetailResponse {
     @Schema(description = "생성일")
     private LocalDateTime createAt;
 
-    public WishListDetailResponse(Long id, Long productId, String productName, String mainImageFile, Long productPrice, boolean liked, LocalDateTime createAt) {
+    public WishListDetailResponse(Long id, Long productId, String productName, String mainImageUrl, Long productPrice, boolean liked, LocalDateTime createAt) {
         this.id = id;
         this.productId = productId;
         this.productName = productName;
-        this.mainImageFile = mainImageFile;
+        this.mainImageUrl = mainImageUrl;
         this.productPrice = productPrice;
         this.liked = liked;
         this.createAt = createAt;
