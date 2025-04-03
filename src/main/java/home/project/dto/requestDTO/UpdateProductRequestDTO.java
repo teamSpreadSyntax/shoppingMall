@@ -1,6 +1,7 @@
 package home.project.dto.requestDTO;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -43,4 +44,10 @@ public class UpdateProductRequestDTO {
     private String size;
 
     private String color;
+
+    @NotBlank(message = "메인이미지 url을 입력해주세요.")
+    private String mainImageUrl;
+
+    @NotEmpty(message = "상세이미지 url을 입력해주세요.")
+    private List<@NotBlank(message = "상세이미지 url을 입력해주세요..")String> descriptionImageUrls;
 }

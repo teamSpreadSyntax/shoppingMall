@@ -51,7 +51,7 @@ public interface ProductService {
 
     Page<String> brandList(Pageable pageable);
 
-    ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
+    ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,String mainImageFile, List<String> descriptionImages);
 
     String deleteById(Long productId);
 
@@ -65,7 +65,7 @@ public interface ProductService {
 
     Product findByProductIdAndConfirmHasPurchase(Long productOrderId);
 
-    ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , MultipartFile mainImageFile, List<MultipartFile> descriptionImages);
+    ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , String mainImageFile, List<String> descriptionImages);
 
     String deleteByIdForAdmin(Long productId);
 
