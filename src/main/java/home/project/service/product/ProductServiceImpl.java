@@ -442,7 +442,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
+    public ProductResponse update(UpdateProductRequestDTO updateProductRequestDTO,String mainImageFile, List<String> descriptionImages) {
 
         boolean isCategoryModified = false;
         boolean isNameModified = false;
@@ -469,19 +469,12 @@ public class ProductServiceImpl implements ProductService {
         beforeUpdate.setSize(existingProduct.getSize());
         beforeUpdate.setColor(existingProduct.getColor());
 
-        String mainImageUrl = existingProduct.getMainImageFile();
         if (mainImageFile != null && !mainImageFile.isEmpty()) {
-            mainImageUrl = fileService.saveFile(mainImageFile, "product/main", String.valueOf(existingProduct.getId()));
+            existingProduct.setMainImageFile(mainImageFile);
         }
-        existingProduct.setMainImageFile(mainImageUrl);
 
-        // ✅ 상세 이미지 업데이트
         if (descriptionImages != null && !descriptionImages.isEmpty()) {
-            List<String> imageUrls = descriptionImages.stream()
-                    .filter(file -> !file.isEmpty())
-                    .map(file -> fileService.saveFile(file, "product/desc", String.valueOf(existingProduct.getId())))
-                    .collect(Collectors.toList());
-            existingProduct.setDescription(imageUrls);
+            existingProduct.setDescription(descriptionImages);
         }
 
         if (updateProductRequestDTO.getStock() != null) {
@@ -743,7 +736,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , MultipartFile mainImageFile, List<MultipartFile> descriptionImages) {
+    public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , String mainImageFile, List<String> descriptionImages) {
 
         if (confirmProductOwnership(updateProductRequestDTO.getName(), updateProductRequestDTO.getBrand())) {
             return update(updateProductRequestDTO , mainImageFile, descriptionImages);

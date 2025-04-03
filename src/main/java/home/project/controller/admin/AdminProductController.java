@@ -242,20 +242,18 @@ public class AdminProductController {
             @ApiResponse(responseCode = "404", description = "Resource not found",
                     content = @Content(schema = @Schema(ref = "#/components/schemas/NotFoundResponseSchema")))
     })
-    @PutMapping(value = "/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/update")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<?> updateProduct(
-            @RequestPart(value = "productData") @Valid UpdateProductRequestDTO updateProductRequestDTO,
-            @RequestPart(value = "mainImageFile", required = false) MultipartFile mainImageFile,
-            @RequestPart(value = "descriptionImages", required = false) MultipartFile[] descriptionImages,
+            @RequestBody @Valid UpdateProductRequestDTO updateProductRequestDTO,
             BindingResult bindingResult) {
         CustomResponseEntity<?> validationResponse = validationCheck.validationChecks(bindingResult);
         if (validationResponse != null) return validationResponse;
 
-        List<MultipartFile> imageList = descriptionImages != null ?
-                Arrays.asList(descriptionImages) : new ArrayList<>();
+        List<String> imageList = updateProductRequestDTO.getDescriptionImageUrls() != null ?
+                updateProductRequestDTO.getDescriptionImageUrls() : new ArrayList<>();
 
-        ProductResponse productResponse = productService.updateMyProduct(updateProductRequestDTO ,mainImageFile , imageList);
+        ProductResponse productResponse = productService.updateMyProduct(updateProductRequestDTO ,updateProductRequestDTO.getMainImageUrl() , imageList);
         String successMessage = "상품 정보가 수정되었습니다.";
         return new CustomResponseEntity<>(productResponse, successMessage, HttpStatus.OK);
     }
