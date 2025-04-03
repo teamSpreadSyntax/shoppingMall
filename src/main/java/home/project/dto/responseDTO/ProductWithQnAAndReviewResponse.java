@@ -36,7 +36,7 @@ public class ProductWithQnAAndReviewResponse {
     private List<String> description;
 
     @Schema(description = "이미지 URL")
-    private String mainImageFile;
+    private String mainImageUrl;
 
     @Schema(description = "좋아요 여부", example = "true")
     private boolean isLiked;
@@ -56,7 +56,7 @@ public class ProductWithQnAAndReviewResponse {
     @Schema(description = "리뷰 상세 목록")
     private List<ReviewDetailResponse> reviewDetailResponses;
 
-    public ProductWithQnAAndReviewResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, List<String> description, String mainImageFile, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponses, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses) {
+    public ProductWithQnAAndReviewResponse(Long id, String name, String brand, String category, String productNum, Long price, Integer discountRate, List<String> description, String mainImageUrl, boolean isLiked, String size, String color, List<ProductCouponResponse> productCouponResponses, List<QnADetailResponse> qnADetailResponses, List<ReviewDetailResponse> reviewDetailResponses) {
         this.id = id;
         this.name = name;
         this.brand = brand;
@@ -65,7 +65,7 @@ public class ProductWithQnAAndReviewResponse {
         this.price = price;
         this.discountRate = discountRate;
         this.description = description;
-        this.mainImageFile = mainImageFile;
+        this.mainImageUrl = mainImageUrl;
         this.isLiked = isLiked;
         this.size = size;
         this.color = color;

@@ -13,10 +13,10 @@ public class EventSimpleResponse {
     private Long id;
 
     @Schema(description = "이미지 URL", example = "https://example.com/image.jpg")
-    private String mainImageFile;
+    private String mainImageUrl;
 
-    public EventSimpleResponse(Long id, String mainImageFile) {
+    public EventSimpleResponse(Long id, String mainImageUrl) {
         this.id = id;
-        this.mainImageFile = mainImageFile;
+        this.mainImageUrl = mainImageUrl;
     }
 }
