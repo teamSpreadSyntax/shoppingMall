@@ -19,6 +19,9 @@ public class ProductDocument {
     private Long id;
 
     @Field(type = FieldType.Long)
+    private Long memberId;
+
+    @Field(type = FieldType.Long)
     private Long productId;
 
     @MultiField(

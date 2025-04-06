@@ -6,5 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface ProductElasticsearchRepositoryCustom {
     Page<ProductDocument> findProducts(String brand, String category, String productName, String content, Pageable pageable);
+    Page<ProductDocument> findProductsForAdmin(String brand, String category, String productName, String content, Long memberId, Pageable pageable);
+
 
 }

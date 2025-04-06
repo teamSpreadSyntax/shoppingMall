@@ -116,6 +116,7 @@ public class ProductServiceImpl implements ProductService {
         product.setId(findById(memberProduct.getId()).getId());
 
         ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
+        productDocument.setMemberId(member.getId());
         try {
             indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
         } catch (Exception e) {
@@ -715,58 +716,23 @@ public class ProductServiceImpl implements ProductService {
         String email = authentication.getName();
         Member member = memberService.findByEmail(email);
 
-        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
+        Long memberId = null;
+        boolean isCenter = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER"));
 
-        System.out.println(11);
-        System.out.println(pagedDocuments);
-        System.out.println(pagedDocuments.getContent());
-        System.out.println(pagedDocuments.getContent().size());
-        System.out.println(member.getId());
-
-
-        // CENTER 권한인 경우 모든 제품 검색 가능
-        if (authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER"))) {
-            List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
-                    .map(converter::convertFromProductDocumentToProductResponseForManager)
-                    .collect(Collectors.toList());
-
-            return new PageImpl<>(responses, pageable, pagedDocuments.getTotalElements());
+        if (!isCenter) {
+            memberId = member.getId(); // ADMIN일 때만 memberId 사용
         }
 
-        System.out.println(22);
-        System.out.println(pagedDocuments);
-        System.out.println(pagedDocuments.getContent());
-        System.out.println(pagedDocuments.getContent().size());
-        System.out.println(member.getId());
+        Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProductsForAdmin(
+                brand, category, productName, content, memberId, pageable
+        );
 
-        // ADMIN(판매자)인 경우 자신이 등록한 제품만 검색
         List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
-                .filter(doc -> memberProductRepository.existsByMemberIdAndProductId(
-                        member.getId(),
-                        doc.getProductId()
-                ))
                 .map(converter::convertFromProductDocumentToProductResponseForManager)
                 .collect(Collectors.toList());
 
-        for (ProductDocument doc : pagedDocuments.getContent()) {
-            System.out.println("상품 정보: ID=" + doc.getId() +
-                    ", 이름=" + doc.getName() +
-                    ", 브랜드=" + doc.getBrand() +
-                    ", 제품번호=" + doc.getProductNum());
-        }
-
-        for (ProductDocument doc : pagedDocuments.getContent()) {
-            boolean exists = memberProductRepository.existsByMemberIdAndProductId(member.getId(), doc.getProductId());
-            System.out.println("Product ID: " + doc.getId() + ", exists: " + exists);
-        }
-
-        System.out.println(33);
-        System.out.println(pagedDocuments.getContent());
-        System.out.println(pagedDocuments.getContent().size());
-        System.out.println(member.getId());
-
-        return new PageImpl<>(responses, pageable, responses.size());
+        return new PageImpl<>(responses, pageable, pagedDocuments.getTotalElements());
     }
 
     @Override
