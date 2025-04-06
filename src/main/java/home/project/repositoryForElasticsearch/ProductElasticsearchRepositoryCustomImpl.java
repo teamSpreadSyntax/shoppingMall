@@ -121,12 +121,10 @@ public class ProductElasticsearchRepositoryCustomImpl implements ProductElastics
     public Page<ProductDocument> findProductsForAdmin(String brand, String category, String productName, String content, Long memberId, Pageable pageable) {
         BoolQuery.Builder queryBuilder = new BoolQuery.Builder();
 
-        // ADMIN일 경우 본인의 상품만 보기
         if (memberId != null) {
             queryBuilder.must(QueryBuilders.term(t -> t.field("memberId").value(memberId)));
         }
 
-        // 개별 필드 필터 조건
         if (brand != null && !brand.isEmpty()) {
             queryBuilder.must(QueryBuilders.match(m -> m.field("brand").query(brand)));
         }
@@ -151,7 +149,6 @@ public class ProductElasticsearchRepositoryCustomImpl implements ProductElastics
             queryBuilder.must(QueryBuilders.match(m -> m.field("name").query(productName)));
         }
 
-        // content 검색: 텍스트 필드 전반에 대해 should 조건으로 매칭
         if (content != null && !content.isEmpty()) {
             Query contentQuery = new BoolQuery.Builder()
                     .should(QueryBuilders.match(m -> m.field("name").query(content)))
@@ -180,8 +177,14 @@ public class ProductElasticsearchRepositoryCustomImpl implements ProductElastics
             queryBuilder.must(contentQuery);
         }
 
-        // 검색 조건이 하나도 없으면 match_all
-        if (queryBuilder.build().must().isEmpty() && queryBuilder.build().should().isEmpty()) {
+        // ✅ 여기서 한 번만 build() 호출
+        Query finalBoolQuery = queryBuilder.build()._toQuery();
+
+        // match_all fallback
+        if (finalBoolQuery.bool() != null &&
+                finalBoolQuery.bool().must().isEmpty() &&
+                finalBoolQuery.bool().should().isEmpty()) {
+
             NativeQuery matchAllQuery = new NativeQueryBuilder()
                     .withQuery(q -> q.matchAll(m -> m))
                     .withPageable(pageable)
@@ -195,14 +198,12 @@ public class ProductElasticsearchRepositoryCustomImpl implements ProductElastics
             return new PageImpl<>(allDocs, pageable, matchAllHits.getTotalHits());
         }
 
-        // 실제 쿼리 실행
         NativeQuery finalQuery = new NativeQueryBuilder()
-                .withQuery(queryBuilder.build()._toQuery())
+                .withQuery(finalBoolQuery)
                 .withPageable(pageable)
                 .build();
 
         SearchHits<ProductDocument> searchHits = elasticsearchOperations.search(finalQuery, ProductDocument.class);
-
         List<ProductDocument> result = searchHits.getSearchHits().stream()
                 .map(SearchHit::getContent)
                 .toList();
