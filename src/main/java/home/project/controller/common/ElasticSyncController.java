@@ -1,5 +1,6 @@
 package home.project.controller.common;
 
+import home.project.service.product.ProductReindexService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.*;
@@ -23,6 +24,7 @@ public class ElasticSyncController {
     private final JobLauncher jobLauncher;
     private final Job elasticSyncJob;
     private final JobExplorer jobExplorer;
+    private final ProductReindexService productReindexService;
 
 
     @PostMapping("/sync")
@@ -59,6 +61,18 @@ public class ElasticSyncController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Failed to get status: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/reindex")
+    public ResponseEntity<String> reindexAll() {
+        try {
+            productReindexService.reindexAllProductsToES();
+            return ResponseEntity.ok("전체 상품 Elasticsearch 재색인 완료!");
+        } catch (Exception e) {
+            log.error("재색인 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("재색인 중 오류 발생: " + e.getMessage());
         }
     }
 }
