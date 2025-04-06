@@ -715,6 +715,8 @@ public class ProductServiceImpl implements ProductService {
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
 
+        System.out.println(pagedDocuments);
+
         // CENTER 권한인 경우 모든 제품 검색 가능
         if (authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_CENTER"))) {
