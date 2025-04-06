@@ -418,7 +418,7 @@ public class Converter {
         String categoryName = doc.getCategory() != null ? doc.getCategory().getName() : null;
 
         return new ProductResponseForManager(
-                doc.getId(),
+                doc.getProductId(),
                 doc.getName(),
                 doc.getBrand(),
                 categoryName,
