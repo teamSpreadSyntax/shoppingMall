@@ -386,7 +386,7 @@ public class Converter {
         if (doc == null) return null;
 
         return new ProductSimpleResponse(
-                doc.getId(),
+                doc.getProductId(),
                 doc.getName(),
                 doc.getBrand(),
                 doc.getPrice(),
