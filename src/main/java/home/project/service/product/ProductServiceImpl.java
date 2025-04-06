@@ -717,7 +717,7 @@ public class ProductServiceImpl implements ProductService {
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
 
-        System.out.println(1);
+        System.out.println(11);
         System.out.println(pagedDocuments);
         System.out.println(pagedDocuments.getContent());
         System.out.println(pagedDocuments.getContent().size());
@@ -734,7 +734,7 @@ public class ProductServiceImpl implements ProductService {
             return new PageImpl<>(responses, pageable, pagedDocuments.getTotalElements());
         }
 
-        System.out.println(2);
+        System.out.println(22);
         System.out.println(pagedDocuments);
         System.out.println(pagedDocuments.getContent());
         System.out.println(pagedDocuments.getContent().size());
@@ -744,7 +744,7 @@ public class ProductServiceImpl implements ProductService {
         List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
                 .filter(doc -> memberProductRepository.existsByMemberIdAndProductId(
                         member.getId(),
-                        Long.valueOf(doc.getId().toString())
+                        doc.getProductId() != null ? doc.getProductId() : doc.getId()
                 ))
                 .map(converter::convertFromProductDocumentToProductResponseForManager)
                 .collect(Collectors.toList());
@@ -761,7 +761,7 @@ public class ProductServiceImpl implements ProductService {
             System.out.println("Product ID: " + doc.getId() + ", exists: " + exists);
         }
 
-        System.out.println(3);
+        System.out.println(33);
         System.out.println(pagedDocuments.getContent());
         System.out.println(pagedDocuments.getContent().size());
         System.out.println(member.getId());
