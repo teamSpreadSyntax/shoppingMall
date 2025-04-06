@@ -75,4 +75,18 @@ public class ElasticSyncController {
                     .body("재색인 중 오류 발생: " + e.getMessage());
         }
     }
+
+    @PostMapping("/deleteindex")
+    public ResponseEntity<String> deleteProductIndex() {
+        try {
+            productReindexService.deleteAllProductDocuments();
+            return ResponseEntity.ok("전체 상품 Elasticsearch 삭제 완료!");
+        } catch (Exception e) {
+            log.error("삭제 실패", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("삭제 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+
 }
