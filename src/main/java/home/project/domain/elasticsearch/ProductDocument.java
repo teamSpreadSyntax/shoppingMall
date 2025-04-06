@@ -16,7 +16,7 @@ public class ProductDocument {
     public ProductDocument() {}
 
     @Id
-    private Long id;
+    private String id;
 
     @Field(type = FieldType.Long)
     private Long memberId;
