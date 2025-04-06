@@ -715,7 +715,12 @@ public class ProductServiceImpl implements ProductService {
 
         Page<ProductDocument> pagedDocuments = productElasticsearchRepository.findProducts(brand, category, productName, content, pageable);
 
+        System.out.println(1);
         System.out.println(pagedDocuments);
+        System.out.println(pagedDocuments.getContent());
+        System.out.println(pagedDocuments.getContent().size());
+        System.out.println(member.getId());
+
 
         // CENTER 권한인 경우 모든 제품 검색 가능
         if (authentication.getAuthorities().stream()
@@ -727,11 +732,22 @@ public class ProductServiceImpl implements ProductService {
             return new PageImpl<>(responses, pageable, pagedDocuments.getTotalElements());
         }
 
+        System.out.println(2);
+        System.out.println(pagedDocuments);
+        System.out.println(pagedDocuments.getContent());
+        System.out.println(pagedDocuments.getContent().size());
+        System.out.println(member.getId());
+
         // ADMIN(판매자)인 경우 자신이 등록한 제품만 검색
         List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
                 .filter(doc -> memberProductRepository.existsByMemberIdAndProductId(member.getId(), doc.getId()))
                 .map(converter::convertFromProductDocumentToProductResponseForManager)
                 .collect(Collectors.toList());
+
+        System.out.println(3);
+        System.out.println(pagedDocuments.getContent());
+        System.out.println(pagedDocuments.getContent().size());
+        System.out.println(member.getId());
 
         return new PageImpl<>(responses, pageable, responses.size());
     }
