@@ -113,6 +113,8 @@ public class ProductServiceImpl implements ProductService {
         memberProduct.setMember(member);
         memberProductRepository.save(memberProduct);
 
+        product.setId(findById(memberProduct.getId()).getId());
+
         ProductDocument productDocument = converter.convertFromProductToProductDocument(product);
         try {
             indexToElasticsearch.indexDocumentToElasticsearch(productDocument, ProductDocument.class);
