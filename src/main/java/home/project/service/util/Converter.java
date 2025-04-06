@@ -1038,7 +1038,7 @@ public class Converter {
 
     public ProductDocument convertFromProductToProductDocument(Product product) {
         ProductDocument doc = new ProductDocument();
-        doc.setId(product.getId());
+        doc.setProductId(product.getId());
         doc.setName(product.getName());
         doc.setBrand(product.getBrand());
         doc.setProductNum(product.getProductNum());
