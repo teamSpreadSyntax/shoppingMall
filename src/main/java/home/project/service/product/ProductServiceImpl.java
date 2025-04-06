@@ -340,7 +340,7 @@ public class ProductServiceImpl implements ProductService {
             responses = pagedDocuments.getContent().stream()
                     .map(doc -> {
                         ProductSimpleResponse response = converter.convertFromProductDocumentToProductSimpleResponse(doc);
-                        response.setLiked(likedProductIds.contains(doc.getId()));
+                        response.setLiked(likedProductIds.contains(doc.getProductId()));
                         return response;
                     })
                     .collect(Collectors.toList());

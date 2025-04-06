@@ -1,5 +1,6 @@
 package home.project.controller.common;
 
+import home.project.response.CustomResponseEntity;
 import home.project.service.product.ProductReindexService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,10 +9,7 @@ import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -26,67 +24,62 @@ public class ElasticSyncController {
     private final JobExplorer jobExplorer;
     private final ProductReindexService productReindexService;
 
-
     @PostMapping("/sync")
-    public ResponseEntity<String> syncToElastic() {
+    public ResponseEntity<?> syncToElastic() {
         try {
             JobParameters jobParameters = new JobParametersBuilder()
                     .addLong("time", System.currentTimeMillis())
                     .toJobParameters();
 
             JobExecution execution = jobLauncher.run(elasticSyncJob, jobParameters);
-            return ResponseEntity.ok("Sync started with status: " + execution.getStatus());
+            String message = "상품 Elasticsearch 동기화가 시작되었습니다. 상태: " + execution.getStatus();
+            return new CustomResponseEntity<>(null, message, HttpStatus.OK);
 
         } catch (Exception e) {
             log.error("Failed to start sync", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to start sync: " + e.getMessage());
+            return new CustomResponseEntity<>(null, "동기화 실패: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @GetMapping("/status")
-    public ResponseEntity<String> getLastJobStatus() {
+    public ResponseEntity<?> getLastJobStatus() {
         try {
-            // 마지막 실행 상태 조회
             List<JobInstance> jobInstances = jobExplorer.findJobInstancesByJobName("elasticSyncJob", 0, 1);
 
             if (!jobInstances.isEmpty()) {
                 List<JobExecution> executions = jobExplorer.getJobExecutions(jobInstances.get(0));
                 if (!executions.isEmpty()) {
                     JobExecution lastExecution = executions.get(0);
-                    return ResponseEntity.ok("Last sync status: " + lastExecution.getStatus());
+                    String message = "마지막 동기화 상태: " + lastExecution.getStatus();
+                    return new CustomResponseEntity<>(null, message, HttpStatus.OK);
                 }
             }
-            return ResponseEntity.ok("No previous sync found");
+
+            return new CustomResponseEntity<>(null, "이전 동기화 이력이 없습니다.", HttpStatus.OK);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to get status: " + e.getMessage());
+            return new CustomResponseEntity<>(null, "상태 조회 실패: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/reindex")
-    public ResponseEntity<String> reindexAll() {
+    public ResponseEntity<?> reindexAll() {
         try {
             productReindexService.reindexAllProductsToES();
-            return ResponseEntity.ok("전체 상품 Elasticsearch 재색인 완료!");
+            return new CustomResponseEntity<>(null, "전체 상품 Elasticsearch 재색인 완료!", HttpStatus.OK);
         } catch (Exception e) {
             log.error("재색인 실패", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("재색인 중 오류 발생: " + e.getMessage());
+            return new CustomResponseEntity<>(null, "재색인 중 오류 발생: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/deleteindex")
-    public ResponseEntity<String> deleteProductIndex() {
+    public ResponseEntity<?> deleteProductIndex() {
         try {
             productReindexService.deleteAllProductDocuments();
-            return ResponseEntity.ok("전체 상품 Elasticsearch 삭제 완료!");
+            return new CustomResponseEntity<>(null, "전체 상품 Elasticsearch 삭제 완료!", HttpStatus.OK);
         } catch (Exception e) {
             log.error("삭제 실패", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("삭제 중 오류 발생: " + e.getMessage());
+            return new CustomResponseEntity<>(null, "삭제 중 오류 발생: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 }
