@@ -748,6 +748,13 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
 
         for (ProductDocument doc : pagedDocuments.getContent()) {
+            System.out.println("상품 정보: ID=" + doc.getId() +
+                    ", 이름=" + doc.getName() +
+                    ", 브랜드=" + doc.getBrand() +
+                    ", 제품번호=" + doc.getProductNum());
+        }
+
+        for (ProductDocument doc : pagedDocuments.getContent()) {
             boolean exists = memberProductRepository.existsByMemberIdAndProductId(member.getId(), doc.getId());
             System.out.println("Product ID: " + doc.getId() + ", exists: " + exists);
         }
