@@ -747,6 +747,11 @@ public class ProductServiceImpl implements ProductService {
                 .map(converter::convertFromProductDocumentToProductResponseForManager)
                 .collect(Collectors.toList());
 
+        for (ProductDocument doc : pagedDocuments.getContent()) {
+            boolean exists = memberProductRepository.existsByMemberIdAndProductId(member.getId(), doc.getId());
+            System.out.println("Product ID: " + doc.getId() + ", exists: " + exists);
+        }
+
         System.out.println(3);
         System.out.println(pagedDocuments.getContent());
         System.out.println(pagedDocuments.getContent().size());
