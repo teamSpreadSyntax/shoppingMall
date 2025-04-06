@@ -740,7 +740,10 @@ public class ProductServiceImpl implements ProductService {
 
         // ADMIN(판매자)인 경우 자신이 등록한 제품만 검색
         List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
-                .filter(doc -> memberProductRepository.existsByMemberIdAndProductId(member.getId(), doc.getId()))
+                .filter(doc -> memberProductRepository.existsByMemberIdAndProductId(
+                        member.getId(),
+                        Long.valueOf(doc.getId().toString())
+                ))
                 .map(converter::convertFromProductDocumentToProductResponseForManager)
                 .collect(Collectors.toList());
 
