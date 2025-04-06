@@ -744,7 +744,7 @@ public class ProductServiceImpl implements ProductService {
         List<ProductResponseForManager> responses = pagedDocuments.getContent().stream()
                 .filter(doc -> memberProductRepository.existsByMemberIdAndProductId(
                         member.getId(),
-                        doc.getProductId() != null ? doc.getProductId() : doc.getId()
+                        doc.getProductId()
                 ))
                 .map(converter::convertFromProductDocumentToProductResponseForManager)
                 .collect(Collectors.toList());
@@ -757,7 +757,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         for (ProductDocument doc : pagedDocuments.getContent()) {
-            boolean exists = memberProductRepository.existsByMemberIdAndProductId(member.getId(), doc.getId());
+            boolean exists = memberProductRepository.existsByMemberIdAndProductId(member.getId(), doc.getProductId());
             System.out.println("Product ID: " + doc.getId() + ", exists: " + exists);
         }
 
