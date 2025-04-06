@@ -739,7 +739,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponse updateMyProduct(UpdateProductRequestDTO updateProductRequestDTO , String mainImageFile, List<String> descriptionImages) {
 
-        if (confirmProductOwnership(updateProductRequestDTO.getName(), updateProductRequestDTO.getBrand())) {
+        if (confirmProductOwnership(updateProductRequestDTO.getId())) {
             return update(updateProductRequestDTO , mainImageFile, descriptionImages);
         }
 
@@ -747,18 +747,12 @@ public class ProductServiceImpl implements ProductService {
 
     }
 
-    public boolean confirmProductOwnership(String productName, String brand) {
+    public boolean confirmProductOwnership(Long productId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
-        Pageable pageable = pageUtil.pageable(PageRequest.of(1, 5));
-        Page<MemberProduct> memberProducts = memberProductRepository
-                .findAllByMemberId(memberService.findByEmail(email).getId(), pageable);
+        Member member = memberService.findByEmail(email);
 
-        return memberProducts.stream()
-                .anyMatch(memberProduct ->
-                        memberProduct.getProduct().getName().equals(productName) &&
-                                memberProduct.getProduct().getBrand().equals(brand)
-                );
+        return memberProductRepository.existsByMemberIdAndProductId(member.getId(), productId);
     }
 
     @Override
@@ -766,7 +760,7 @@ public class ProductServiceImpl implements ProductService {
     public String deleteByIdForAdmin(Long productId) {
         Product product = findById(productId);
         String name = product.getName();
-        if (confirmProductOwnership(name, product.getBrand())) {
+        if (confirmProductOwnership(productId)) {
             productRepository.deleteById(productId);
             elasticsearchOperations.delete(String.valueOf(productId), ProductDocument.class);
             return name;
@@ -781,7 +775,7 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalStateException("재고가 음수일 수 없습니다.");
         }
         Product product = findById(productId);
-        if (confirmProductOwnership(product.getName(), product.getBrand())) {
+        if (confirmProductOwnership(productId)) {
             Long currentStock = product.getStock();
             Long newStock = currentStock + stock;
             product.setStock(newStock);
@@ -798,7 +792,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public ProductResponseForManager decreaseStockForAdmin(Long productId, Long stock) {
         Product product = findById(productId);
-        if (confirmProductOwnership(product.getName(), product.getBrand())) {
+        if (confirmProductOwnership(productId)) {
             Long currentStock = product.getStock();
             Long newStock = Math.max(currentStock - stock, 0);
             if (currentStock <= 0 || stock > currentStock) {
@@ -820,7 +814,7 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("증가시킬 판매 수량은 음수일 수 없습니다.");
         }
         Product product = findById(productId);
-        if (confirmProductOwnership(product.getName(), product.getBrand())) {
+        if (confirmProductOwnership(productId)) {
             Long currentSoldQuantity = product.getSoldQuantity();
             Long newSoldQuantity = currentSoldQuantity + quantity;
             product.setSoldQuantity(newSoldQuantity);
@@ -844,7 +838,7 @@ public class ProductServiceImpl implements ProductService {
         if (currentSoldQuantity < quantity) {
             throw new DataIntegrityViolationException("감소시킬 판매 수량이 현재 판매 수량보다 많습니다.");
         }
-        if (confirmProductOwnership(product.getName(), product.getBrand())) {
+        if (confirmProductOwnership(productId)) {
             Long newSoldQuantity = currentSoldQuantity - quantity;
             product.setSoldQuantity(newSoldQuantity);
             productRepository.save(product);
@@ -862,7 +856,7 @@ public class ProductServiceImpl implements ProductService {
         ProductOrder productOrder = productOrderRepository.findById(productOrderId)
                 .orElseThrow(() -> new IdNotFoundException(productOrderId + "(으)로 등록된 주문서가 없습니다."));
 
-        if (confirmProductOwnership(productOrder.getProduct().getName(), productOrder.getProduct().getBrand())) {
+        if (confirmProductOwnership(productOrder.getProduct().getId())) {
             return productOrder.getProduct();
         }
 
