@@ -1,6 +1,7 @@
 package home.project.repositoryForElasticsearch;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
 import home.project.domain.elasticsearch.ProductDocument;
 import org.springframework.data.domain.Page;
@@ -150,9 +151,9 @@ public class ProductElasticsearchRepositoryCustomImpl implements ProductElastics
             queryBuilder.must(QueryBuilders.match(m -> m.field("name").query(productName)));
         }
 
-        // content는 상품 전반 텍스트 필드에 걸림
+        // content 검색: 텍스트 필드 전반에 대해 should 조건으로 매칭
         if (content != null && !content.isEmpty()) {
-            BoolQuery.Builder contentQuery = new BoolQuery.Builder()
+            Query contentQuery = new BoolQuery.Builder()
                     .should(QueryBuilders.match(m -> m.field("name").query(content)))
                     .should(QueryBuilders.match(m -> m.field("brand").query(content)))
                     .should(QueryBuilders.match(m -> m.field("description").query(content)))
@@ -167,15 +168,16 @@ public class ProductElasticsearchRepositoryCustomImpl implements ProductElastics
                             .query(q -> q.match(m -> m.field("category.parentName").query(content)))))
                     .should(QueryBuilders.nested(n -> n
                             .path("productCoupons")
-                            .query(q -> q
-                                    .nested(nn -> nn
-                                            .path("productCoupons.coupon")
-                                            .query(qq -> qq.match(m -> m.field("productCoupons.coupon.name").query(content)))
-                                    )
-                            )
-                    ));
+                            .query(q -> q.nested(nn -> nn
+                                    .path("productCoupons.coupon")
+                                    .query(qq -> qq.match(m -> m.field("productCoupons.coupon.name").query(content)))
+                            ))
+                    ))
+                    .minimumShouldMatch("1")
+                    .build()
+                    ._toQuery();
 
-            queryBuilder.must(contentQuery.minimumShouldMatch("1").build()._toQuery());
+            queryBuilder.must(contentQuery);
         }
 
         // 검색 조건이 하나도 없으면 match_all
