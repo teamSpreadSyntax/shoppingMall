@@ -400,11 +400,9 @@ public class Converter {
     public ProductResponseForManager convertFromProductDocumentToProductResponseForManager(ProductDocument doc) {
         if (doc == null) return null;
 
-        // 쿠폰 정보 변환
         List<ProductCouponResponse> couponResponses = new ArrayList<>();
         if (doc.getProductCoupons() != null) {
             for (ProductDocument.ProductCoupon productCoupon : doc.getProductCoupons()) {
-                // ProductCouponResponse 생성자 사용 (생성자 파라미터는 실제 클래스 정의에 맞게 조정 필요)
                 ProductCouponResponse couponResponse = new ProductCouponResponse(
                         productCoupon.getId(),
                         doc.getProductNum(),

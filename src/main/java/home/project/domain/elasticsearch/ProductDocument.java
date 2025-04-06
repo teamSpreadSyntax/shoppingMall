@@ -18,6 +18,9 @@ public class ProductDocument {
     @Id
     private Long id;
 
+    @Field(type = FieldType.Long)
+    private Long productId;
+
     @MultiField(
             mainField = @Field(type = FieldType.Text, analyzer = "nori"),
             otherFields = {
